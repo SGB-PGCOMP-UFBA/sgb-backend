@@ -13,7 +13,7 @@ export class Article {
   title: string
 
   @Column({ nullable: false }) 
-  abstratc: string
+  abstract: string
 
   @Column({ nullable: false }) 
   publication_date: Date

@@ -5,7 +5,7 @@ export class ResponseArticleDto {
     this.id = article.id
     this.student_id = article.student_id
     this.title = article.title
-    this.abstract = article.abstratc
+    this.abstract = article.abstract
     this.publication_date = article.publication_date
     this.publication_place = article.publication_place
     this.doi_link = article.doi_link
