@@ -24,17 +24,20 @@ export class AdvisorController {
 
   @Get('/find/byid/:id')
   async findOneById(@Param('id') id: string): Promise<ResponseAdvisorDto> {
-    return await this.advisorService.findOneById(+id)
+    const advisor = await this.advisorService.findOneById(+id)
+    return toResponseAdvisorDTO(advisor)
   }
 
   @Get('/find/byemail/:email')
   async findOneByEmail(@Param('email') email: string): Promise<ResponseAdvisorDto> {
-    return await this.advisorService.findOneByEmail(email)
+    const advisor = await this.advisorService.findOneByEmail(email)
+    return toResponseAdvisorDTO(advisor)
   }
 
   @Get('/find/bytaxid/:taxid')
   async findOneByTaxId(@Param('taxid') tax_id: string): Promise<ResponseAdvisorDto> {
-    return await this.advisorService.findOneByTaxId(tax_id)
+    const advisor = await this.advisorService.findOneByTaxId(tax_id)
+    return toResponseAdvisorDTO(advisor)
   }
 
   @Delete(':id')
