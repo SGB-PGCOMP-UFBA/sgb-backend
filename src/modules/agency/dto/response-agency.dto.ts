@@ -10,7 +10,7 @@
 //   readonly description: string
 // }
 
-import { ResponseScholarshipDto } from '../../scholarship/dto/response-scholarship.dto'
+import { ResponseScholarshipDto } from '../../../scholarship/dto/response-scholarship.dto'
 
 export class ResponseAgencyDto {
   constructor(

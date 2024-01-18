@@ -1,4 +1,4 @@
-import { Scholarship } from '../../scholarship/entities/scholarship.entity'
+import { Scholarship } from '../../../scholarship/entities/scholarship.entity'
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import { ResponseAgencyDto } from '../dto/response-agency.dto'
 
