@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
-import { AgencyEntity } from '../entities/agency.entity'
+import { Agency } from '../entities/agency.entity'
 import { AgencyService } from '../service/agency.service'
 import { AgencyController } from './agency.controller'
 
@@ -12,7 +12,7 @@ describe('AgencyController', () => {
       controllers: [AgencyController],
       providers: [
         AgencyService,
-        { provide: getRepositoryToken(AgencyEntity), useValue: {} }
+        { provide: getRepositoryToken(Agency), useValue: {} }
       ]
     }).compile()
 

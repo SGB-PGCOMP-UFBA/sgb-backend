@@ -1,32 +1,17 @@
-// export class ResponseAgencyDto {
-//   constructor(id: number, name: string, description: string) {
-//     this.id = id
-//     this.name = name
-//     this.description = description
-//   }
-
-//   readonly id: number
-//   readonly name: string
-//   readonly description: string
-// }
-
-import { ResponseScholarshipDto } from '../../../scholarship/dto/response-scholarship.dto'
+import { Agency } from '../entities/agency.entity'
 
 export class ResponseAgencyDto {
-  constructor(
-    id: number,
-    name: string,
-    description: string,
-    scholarships?: any
-  ) {
-    this.id = id
-    this.name = name
-    this.description = description
-    this.scholarships = scholarships
+  constructor(agency: Agency) {
+    this.id = agency.id
+    this.name = agency.name
+    this.description = agency.description
+    this.created_at = agency.created_at
+    this.updated_at = agency.updated_at
   }
 
   readonly id: number
   readonly name: string
   readonly description: string
-  readonly scholarships: ResponseScholarshipDto[]
+  readonly created_at: Date
+  readonly updated_at: Date
 }

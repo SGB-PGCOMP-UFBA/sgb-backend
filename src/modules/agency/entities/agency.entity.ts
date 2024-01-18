@@ -1,18 +1,19 @@
-import { Scholarship } from '../../../scholarship/entities/scholarship.entity'
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
-import { ResponseAgencyDto } from '../dto/response-agency.dto'
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 
 @Entity('agency')
-export class AgencyEntity {
-  @PrimaryGeneratedColumn() id: number
+export class Agency {
+  @PrimaryGeneratedColumn() 
+  id: number
 
-  @Column({ nullable: false }) name: string
-  @Column({ nullable: false }) description: string
+  @Column({ nullable: false }) 
+  name: string
 
-  @OneToMany(() => Scholarship, (scholarship) => scholarship.agency)
-  scholarships: Scholarship[]
-}
+  @Column({ nullable: false }) 
+  description: string
 
-export function toAgencyResponseDto(agency: AgencyEntity): ResponseAgencyDto {
-  return new ResponseAgencyDto(agency.id, agency.name, agency.description)
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }

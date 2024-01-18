@@ -1,11 +1,11 @@
-import { IsString } from 'class-validator'
+import { IsString, MaxLength } from 'class-validator'
 
 export class CreateAgencyDto {
-  constructor(name: string, description: string) {
-    this.name = name
-    this.description = description
-  }
+  @IsString()
+  @MaxLength(80)
+  readonly name: string
 
-  @IsString() readonly name: string
-  @IsString() readonly description: string
+  @IsString() 
+  @MaxLength(255)
+  readonly description: string
 }
