@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 import { User } from '../../../user/interface/user.interface'
-import { Article } from '../../../modules/article/entities/article.entity'
+import { Article } from '../../article/entities/article.entity'
 import { Scholarship } from '../../../scholarship/entities/scholarship.entity'
 
 @Entity('student')

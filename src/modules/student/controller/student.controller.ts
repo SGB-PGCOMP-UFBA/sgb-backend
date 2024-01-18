@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, DefaultValuePipe, ParseIntPipe, Query } from '@nestjs/common'
 import { CreateStudentDto } from '../dto/create-student.dto'
-import { StudentService } from '../service/students.service'
+import { StudentService } from '../service/student.service'
 import { toStudentResponseDto } from '../mapper/student.mapper'
 import { ResponseStudentDto } from '../dto/response-student.dto'
 

@@ -1,6 +1,6 @@
 import { toArticleResponseDto } from '../../article/mapper/article.mapper'
 import { ResponseArticleDto } from '../../article/dto/response-article.dto'
-import { Student } from '../entities/students.entity'
+import { Student } from '../entities/student.entity'
 
 export class ResponseStudentDto {
   constructor(student: Student) {
