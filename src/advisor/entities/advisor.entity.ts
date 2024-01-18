@@ -1,7 +1,5 @@
 import { User } from '../../user/interface/user.interface'
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
-import { ResponseAdvisorDto } from '../dto/response-advisor.dto'
-import { StudentEntity } from '../../students/entities/students.entity'
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 
 @Entity('advisor')
 export class Advisor implements User {
@@ -26,17 +24,9 @@ export class Advisor implements User {
   @Column({ nullable: true, default: 'ADVISOR' })
   role: string
 
-  @OneToOne(() => StudentEntity, (student) => student.advisor)
-  student: StudentEntity
-}
+  @CreateDateColumn()
+  created_at: Date;
 
-export function toAdvisorDTO(advisor: Advisor): ResponseAdvisorDto {
-  return new ResponseAdvisorDto(
-    advisor.id,
-    advisor.tax_id,
-    advisor.name,
-    advisor.email,
-    advisor.phone_number,
-    advisor.role
-  )
+  @UpdateDateColumn()
+  updated_at: Date;
 }

@@ -1,37 +1,21 @@
-import { IsString, IsEmail } from 'class-validator'
+import { IsString, IsEmail, Length, Matches } from 'class-validator'
+import { constants } from '../../utils/constants'
 
 export class CreateAdvisorDto {
-  constructor(
-    tax_id: string,
-    name: string,
-    email: string,
-    phone_number: string,
-    password: string,
-    role: string
-  ) {
-    this.tax_id = tax_id
-    this.name = name
-    this.email = email
-    this.phone_number = phone_number
-    this.password = password
-    this.role = role
-  }
-
-  @IsString()
-  readonly tax_id: string
-
-  @IsString()
+  @IsString() 
   readonly name: string
 
-  @IsEmail()
+  @IsString({ message: constants.messages.TX_ID_FORMAT_ERROR })
+  @Length(14, 14)
+  @Matches(constants.expressions.REGEX_TAX_ID, { message: constants.messages.TX_ID_FORMAT_ERROR })
+  readonly tax_id: string
+
+  @IsEmail({}, { message: constants.messages.EMAIL_FORMAT_ERROR })
   readonly email: string
 
-  @IsString()
-  readonly phone_number: string
-
-  @IsString()
+  @IsString() 
   readonly password: string
 
   @IsString()
-  readonly role: string
+  readonly phone_number: string
 }

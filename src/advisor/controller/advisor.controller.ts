@@ -1,10 +1,10 @@
 import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common'
+import { HttpStatus } from '@nestjs/common/enums'
+import { HttpCode } from '@nestjs/common/decorators'
 import { AdvisorService } from '../service/advisor.service'
 import { CreateAdvisorDto } from '../dto/create-advisor.dto'
 import { ResponseAdvisorDto } from '../dto/response-advisor.dto'
-import { HttpStatus } from '@nestjs/common/enums'
-import { HttpCode } from '@nestjs/common/decorators'
-//import { UpdateAdvisorDto } from '../dto/update-advisor.dto'
+import { toResponseAdvisorDTO } from '../mapper/advisor.mapper'
 
 @Controller('v1/advisor')
 export class AdvisorController {
@@ -12,12 +12,14 @@ export class AdvisorController {
 
   @Post()
   async create(@Body() createAdvisorDto: CreateAdvisorDto) {
-    return await this.advisorService.create(createAdvisorDto)
+    const advisor = await this.advisorService.create(createAdvisorDto)
+    return toResponseAdvisorDTO(advisor)
   }
 
-  @Get('/list/all')
+  @Get()
   async findAll() {
-    return await this.advisorService.findAll()
+    const advisors = await this.advisorService.findAll()
+    return advisors.map((advisor) => toResponseAdvisorDTO(advisor))
   }
 
   @Get('/find/byid/:id')
@@ -26,23 +28,14 @@ export class AdvisorController {
   }
 
   @Get('/find/byemail/:email')
-  async findOneByEmail(
-    @Param('email') email: string
-  ): Promise<ResponseAdvisorDto> {
+  async findOneByEmail(@Param('email') email: string): Promise<ResponseAdvisorDto> {
     return await this.advisorService.findOneByEmail(email)
   }
 
   @Get('/find/bytaxid/:taxid')
-  async findOneByTaxId(
-    @Param('taxid') tax_id: string
-  ): Promise<ResponseAdvisorDto> {
+  async findOneByTaxId(@Param('taxid') tax_id: string): Promise<ResponseAdvisorDto> {
     return await this.advisorService.findOneByTaxId(tax_id)
   }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateAdvisorDto: UpdateAdvisorDto) {
-  //   return this.advisorService.update(+id, updateAdvisorDto)
-  // }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)

@@ -1,21 +1,14 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException
-} from '@nestjs/common'
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { CreateAdvisorDto } from '../dto/create-advisor.dto'
-import { Advisor, toAdvisorDTO } from '../entities/advisor.entity'
+import { Advisor } from '../entities/advisor.entity'
 import { hashPassword } from '../../utils/bcrypt'
-import { ResponseAdvisorDto } from '../dto/response-advisor.dto'
+import { toResponseAdvisorDTO } from '../mapper/advisor.mapper'
 
 @Injectable()
 export class AdvisorService {
-  constructor(
-    @InjectRepository(Advisor)
-    private advisorRepository: Repository<Advisor>
-  ) {}
+  constructor(@InjectRepository(Advisor) private advisorRepository: Repository<Advisor>) {}
 
   async create(createAdvisorDto: CreateAdvisorDto) {
     try {
@@ -24,38 +17,36 @@ export class AdvisorService {
         ...createAdvisorDto,
         password: passwordHash
       })
+
       await this.advisorRepository.save(advisor)
+
+      return advisor
     } catch (error) {
-      throw new BadRequestException("Can't create advisor")
+      throw new BadRequestException("Can't create advisor.")
     }
   }
 
-  async findAll(): Promise<ResponseAdvisorDto[]> {
-    const advisors = await this.advisorRepository.find()
-    return advisors.map((advisor) => toAdvisorDTO(advisor))
+  async findAll(): Promise<Advisor[]> {
+    return await this.advisorRepository.find()
   }
 
   async findOneById(id: number) {
     const advisor = await this.advisorRepository.findOneBy({ id })
-    if (!advisor) throw new NotFoundException('Advisor not found')
-    return toAdvisorDTO(advisor)
+    if (!advisor) throw new NotFoundException('Advisor not found.')
+    return toResponseAdvisorDTO(advisor)
   }
 
   async findOneByEmail(email: string) {
     const advisor = await this.advisorRepository.findOneBy({ email })
-    if (!advisor) throw new NotFoundException('Advisor not found')
-    return toAdvisorDTO(advisor)
+    if (!advisor) throw new NotFoundException('Advisor not found.')
+    return toResponseAdvisorDTO(advisor)
   }
 
   async findOneByTaxId(tax_id: string) {
     const advisor = await this.advisorRepository.findOneBy({ tax_id })
-    if (!advisor) throw new NotFoundException('Advisor not found')
-    return toAdvisorDTO(advisor)
+    if (!advisor) throw new NotFoundException('Advisor not found.')
+    return toResponseAdvisorDTO(advisor)
   }
-
-  // update(id: number, updateAdvisorDto: UpdateAdvisorDto) {
-  //   return `This action updates a #${id} advisor`
-  // }
 
   async updatePassword(email: string, password: string) {
     const passwordHash = await hashPassword(password)

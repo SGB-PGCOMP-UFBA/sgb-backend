@@ -1,18 +1,15 @@
+import { Advisor } from "../entities/advisor.entity"
+
 export class ResponseAdvisorDto {
-  constructor(
-    id: number,
-    tax_id: string,
-    name: string,
-    email: string,
-    phone_number: string,
-    role: string
-  ) {
-    this.id = id
-    this.tax_id = tax_id
-    this.name = name
-    this.email = email
-    this.phone_number = phone_number
-    this.role = role
+  constructor(advisor: Advisor) {
+    this.id = advisor.id
+    this.tax_id = advisor.tax_id
+    this.name = advisor.name
+    this.email = advisor.email
+    this.phone_number = advisor.phone_number
+    this.role = advisor.role
+    this.created_at = advisor.created_at
+    this.updated_at = advisor.updated_at
   }
 
   readonly id: number
@@ -21,4 +18,6 @@ export class ResponseAdvisorDto {
   readonly email: string
   readonly phone_number: string
   readonly role: string
+  readonly created_at: Date
+  readonly updated_at: Date
 }
