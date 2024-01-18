@@ -3,6 +3,7 @@ import { Query } from '@nestjs/common/decorators'
 import { AdminService } from '../service/admin.service'
 import { CreateAdminDto } from '../dto/create-admin.dto'
 import { UpdateAdminDto } from '../dto/update-admin.dto'
+import { toAdminResponseDto } from '../mapper/admin.mapper'
 
 @Controller('v1/admin')
 export class AdminController {
@@ -10,17 +11,20 @@ export class AdminController {
 
   @Post()
   async create(@Body() createAdminDto: CreateAdminDto) {
-    return await this.adminService.create(createAdminDto)
+    const admin = await this.adminService.create(createAdminDto)
+    return toAdminResponseDto(admin)
   }
 
   @Get()
   async findAll() {
-    return await this.adminService.findAll()
+    const admins = await this.adminService.findAll()
+    return admins.map((admin) => toAdminResponseDto(admin))
   }
 
   @Get(':tax_id')
   async findOneByTaxId(@Query('tax_id') tax_id: string) {
-    return await this.adminService.findOneByTaxId(tax_id)
+    const admin = await this.adminService.findOneByTaxId(tax_id)
+    return toAdminResponseDto(admin)
   }
 
   @Patch(':id')

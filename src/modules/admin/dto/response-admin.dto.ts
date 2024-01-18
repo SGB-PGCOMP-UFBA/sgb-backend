@@ -20,7 +20,3 @@ export class ResponseAdminDto {
   readonly created_at: Date
   readonly updated_at: Date
 }
-
-export function toAdminResponseDto(admin: Admin): ResponseAdminDto {
-  return new ResponseAdminDto(admin)
-}
