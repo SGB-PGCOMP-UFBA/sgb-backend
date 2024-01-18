@@ -18,12 +18,12 @@ export class CreateStudentDto {
 
   @IsUrl({}, { message: constants.bodyValidationMessages.LATTES_LINK_FORMAT_ERROR })
   @MaxLength(80)
-  readonly link_lattes: string
+  readonly link_to_lattes: string
 
   @IsString()
   @Length(11, 11, { message: constants.bodyValidationMessages.PHONE_FORMAT_ERROR })
   readonly phone_number: string
 
   @IsString()
-  password: string
+  readonly password: string
 }

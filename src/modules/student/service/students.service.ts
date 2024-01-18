@@ -9,7 +9,7 @@ import { PageDto } from '../../../pageable/page.dto'
 import { PageMetaDto } from '../../../pageable/page-meta.dto'
 import { constants } from '../../../utils/constants'
 import { toStudentResponseDto } from '../mapper/student.mapper'
-import { ResponseStudentDto } from '../dto/student.response.dto'
+import { ResponseStudentDto } from '../dto/response-student.dto'
 
 @Injectable()
 export class StudentService {
@@ -22,6 +22,7 @@ export class StudentService {
         ...student,
         password: passwordHash
       })
+
       await this.studentRepository.save(newStudent)
       
       return newStudent

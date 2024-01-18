@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, DefaultValuePipe, ParseIntPipe, Query } fr
 import { CreateStudentDto } from '../dto/create-student.dto'
 import { StudentService } from '../service/students.service'
 import { toStudentResponseDto } from '../mapper/student.mapper'
-import { ResponseStudentDto } from '../dto/student.response.dto'
+import { ResponseStudentDto } from '../dto/response-student.dto'
 
 @Controller('v1/student')
 export class StudentController {
@@ -15,7 +15,7 @@ export class StudentController {
   }
 
   @Get()
-  async find() {
+  async findAll() {
     const students = await this.studentsService.findAll()
     return students.map((student) => toStudentResponseDto(student))
   }

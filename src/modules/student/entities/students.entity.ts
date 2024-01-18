@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 import { User } from '../../../user/interface/user.interface'
-import { Article } from 'src/modules/article/entities/article.entity'
+import { Article } from '../../../modules/article/entities/article.entity'
+import { Scholarship } from '../../../scholarship/entities/scholarship.entity'
 
 @Entity('student')
 export class Student implements User {
@@ -17,7 +18,7 @@ export class Student implements User {
   email: string
 
   @Column({ length: 80, nullable: false })
-  link_lattes: string
+  link_to_lattes: string
 
   @Column({ length: 11, nullable: false })
   phone_number: string
@@ -33,6 +34,9 @@ export class Student implements User {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @OneToMany(() => Scholarship, (scholarship) => scholarship.student)
+  scolarships: Scholarship[]
 
   @OneToMany(() => Article, (article) => article.student)
   articles: Article[]
