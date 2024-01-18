@@ -1,3 +1,5 @@
+import { toArticleResponseDto } from '../../../modules/article/mapper/article.mapper'
+import { ResponseArticleDto } from '../../../modules/article/dto/response-article.dto'
 import { Student } from '../entities/students.entity'
 
 export class ResponseStudentDto {
@@ -11,6 +13,7 @@ export class ResponseStudentDto {
     this.role = student.role
     this.created_at = student.created_at
     this.updated_at = student.updated_at
+    this.article = student.articles.map((article) => toArticleResponseDto(article))
   }
 
   readonly id: number
@@ -22,4 +25,5 @@ export class ResponseStudentDto {
   readonly role: string
   readonly created_at: Date
   readonly updated_at: Date
+  readonly article: ResponseArticleDto[]
 }

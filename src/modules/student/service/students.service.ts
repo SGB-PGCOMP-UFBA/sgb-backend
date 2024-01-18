@@ -31,11 +31,15 @@ export class StudentService {
   }
 
   async findAll(): Promise<Student[]> {
-    return await this.studentRepository.find()
+    return await this.studentRepository.find({
+      relations: {
+        articles: true,
+      }
+    })
   }
 
   async findAllPaginated(options: IPaginationOptions): Promise<PageDto<ResponseStudentDto>> {
-    const studentsPaginate = paginate<Student>(this.studentRepository, options)
+    const studentsPaginate = paginate<Student>(this.studentRepository, options, { relations: ['articles'] })
     const items = (await studentsPaginate).items
     const meta = (await studentsPaginate).meta
     
