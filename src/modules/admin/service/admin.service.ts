@@ -1,10 +1,6 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException
-} from '@nestjs/common'
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { hashPassword } from '../../utils/bcrypt'
+import { hashPassword } from '../../../utils/bcrypt'
 import { Repository } from 'typeorm'
 import { CreateAdminDto } from '../dto/create-admin.dto'
 import { ResponseAdminDto, toAdminResponseDto } from '../dto/response-admin.dto'
@@ -20,10 +16,11 @@ export class AdminService {
 
   async create(createAdminDto: CreateAdminDto) {
     const passwordHash = await hashPassword(createAdminDto.password)
-    const newAdmin = await this.adminRepository.create({
+    const newAdmin = this.adminRepository.create({
       ...createAdminDto,
       password: passwordHash
     })
+    
     await this.adminRepository.save(newAdmin)
     return toAdminResponseDto(newAdmin)
   }
