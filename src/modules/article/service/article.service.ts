@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { CreateArticleDto } from '../dto/create-article.dto'
 import { Article } from '../entities/article.entity'
-import { StudentService } from '../../student/service/students.service'
+import { StudentService } from '../../student/service/student.service'
 import { constants } from '../../../utils/constants'
 
 @Injectable()

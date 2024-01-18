@@ -1,4 +1,4 @@
-import { Student } from '../../student/entities/students.entity'
+import { Student } from '../../student/entities/student.entity'
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 
 @Entity('article')
