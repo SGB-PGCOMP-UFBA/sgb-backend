@@ -19,6 +19,10 @@ const constants = {
         student: {
             CREATION_FAILED: 'Cant\'t create student.',
             STUDENT_NOT_FOUND: 'Student not found.'
+        },
+        article: {
+            CREATION_FAILED: 'Cant\'t create article.',
+            ARTICLE_NOT_FOUND: 'Article not found.'
         }
     }
 }
