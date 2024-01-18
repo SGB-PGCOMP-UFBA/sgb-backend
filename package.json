@@ -17,7 +17,7 @@
     "test": "jest",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
     "migration:generate": "npm run typeorm -- migration:generate -d src/config/ormconfig.ts",
-    "migration:create": "npx typeorm-ts-node-esm migration:generate ./src/migrations/createAgencyAndRelationship -d src/config/ormconfig.ts",
+    "migration:create": "npm run typeorm migration:create -n ./src/migrations/<NAME>",
     "migration:run": "npm run typeorm -- migration:run --d src/config/ormconfig.ts",
     "migration:revert": "npm run typeorm -- migration:revert --d src/config/ormconfig.ts",
     "test:watch": "jest --watch",
