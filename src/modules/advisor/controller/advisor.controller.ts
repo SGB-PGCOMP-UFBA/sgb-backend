@@ -4,7 +4,7 @@ import { HttpCode } from '@nestjs/common/decorators'
 import { AdvisorService } from '../service/advisor.service'
 import { CreateAdvisorDto } from '../dto/create-advisor.dto'
 import { ResponseAdvisorDto } from '../dto/response-advisor.dto'
-import { toResponseAdvisorDTO } from '../mapper/advisor.mapper'
+import { toResponseAdvisorDto } from '../mapper/advisor.mapper'
 
 @Controller('v1/advisor')
 export class AdvisorController {
@@ -13,31 +13,31 @@ export class AdvisorController {
   @Post()
   async create(@Body() createAdvisorDto: CreateAdvisorDto) {
     const advisor = await this.advisorService.create(createAdvisorDto)
-    return toResponseAdvisorDTO(advisor)
+    return toResponseAdvisorDto(advisor)
   }
 
   @Get()
   async findAll() {
     const advisors = await this.advisorService.findAll()
-    return advisors.map((advisor) => toResponseAdvisorDTO(advisor))
+    return advisors.map((advisor) => toResponseAdvisorDto(advisor))
   }
 
   @Get('/find/byid/:id')
   async findOneById(@Param('id') id: string): Promise<ResponseAdvisorDto> {
     const advisor = await this.advisorService.findOneById(+id)
-    return toResponseAdvisorDTO(advisor)
+    return toResponseAdvisorDto(advisor)
   }
 
   @Get('/find/byemail/:email')
   async findOneByEmail(@Param('email') email: string): Promise<ResponseAdvisorDto> {
     const advisor = await this.advisorService.findOneByEmail(email)
-    return toResponseAdvisorDTO(advisor)
+    return toResponseAdvisorDto(advisor)
   }
 
   @Get('/find/bytaxid/:taxid')
   async findOneByTaxId(@Param('taxid') tax_id: string): Promise<ResponseAdvisorDto> {
     const advisor = await this.advisorService.findOneByTaxId(tax_id)
-    return toResponseAdvisorDTO(advisor)
+    return toResponseAdvisorDto(advisor)
   }
 
   @Delete(':id')

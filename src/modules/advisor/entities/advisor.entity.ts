@@ -1,5 +1,6 @@
+import { Scholarship } from '../../../modules/scholarship/entities/scholarship.entity'
 import { User } from '../../../user/interface/user.interface'
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 
 @Entity('advisor')
 export class Advisor implements User {
@@ -29,4 +30,7 @@ export class Advisor implements User {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @OneToMany(() => Scholarship, (scholarship) => scholarship.student)
+  scholarships: Scholarship[]
 }
