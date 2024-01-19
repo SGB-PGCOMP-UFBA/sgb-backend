@@ -1,4 +1,4 @@
-export class ResponseUserDTO {
+export class ResponseUserDto {
   constructor(id: number, tax_id: string, name: string, role: string) {
     this.id = id
     this.tax_id = tax_id
@@ -7,10 +7,7 @@ export class ResponseUserDTO {
   }
 
   readonly id: number
-
   readonly tax_id: string
-
   readonly name: string
-
   readonly role: string
 }

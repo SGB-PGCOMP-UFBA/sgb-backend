@@ -4,14 +4,14 @@ import { AdminService } from '../admin/service/admin.service'
 import { Admin } from '../admin/entities/admin.entity'
 import { AdvisorModule } from '../advisor/advisor.module'
 import { Advisor } from '../advisor/entities/advisor.entity'
-import { StudentEntity } from '../students/entities/students.entity'
-import { StudentsModule } from '../students/students.module'
-import { UserService } from './service/user.service'
+import { Student } from '../student/entities/student.entity'
+import { StudentModule } from '../student/student.module'
+import { UserService } from './services/user.service'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([StudentEntity, Advisor, Admin]),
-    StudentsModule,
+    TypeOrmModule.forFeature([Student, Advisor, Admin]),
+    StudentModule,
     AdvisorModule
   ],
   providers: [UserService, AdminService],

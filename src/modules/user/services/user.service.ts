@@ -1,15 +1,15 @@
 import { InjectRepository } from '@nestjs/typeorm'
-import { StudentEntity } from '../../students/entities/students.entity'
+import { Student } from '../../student/entities/student.entity'
 import { Repository } from 'typeorm'
-import { CreateUserDTO } from '../model/user.dto.input'
+import { CreateUserDTO } from '../dtos/create-user.dto'
 import { NotFoundException } from '@nestjs/common'
-import { errorMessages } from '../../auth/constants'
+import { errorMessages } from '../../../auth/constants'
 import { Advisor } from '../../advisor/entities/advisor.entity'
 import { Admin } from '../../admin/entities/admin.entity'
 export class UserService {
   constructor(
-    @InjectRepository(StudentEntity)
-    private studentRepository: Repository<StudentEntity>,
+    @InjectRepository(Student)
+    private studentRepository: Repository<Student>,
     @InjectRepository(Advisor)
     private advisorRepository: Repository<Advisor>,
     @InjectRepository(Admin)
