@@ -1,5 +1,5 @@
 import { Scholarship } from '../../../modules/scholarship/entities/scholarship.entity'
-import { User } from '../../../user/interface/user.interface'
+import { User } from '../../user/interfaces/user.interface'
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 
 @Entity('advisor')

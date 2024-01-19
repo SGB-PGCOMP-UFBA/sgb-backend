@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
-import { User } from '../../../user/interface/user.interface'
+import { User } from '../../user/interfaces/user.interface'
 import { Article } from '../../article/entities/article.entity'
 import { Scholarship } from '../../scholarship/entities/scholarship.entity'
 

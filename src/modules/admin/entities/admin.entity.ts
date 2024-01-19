@@ -1,4 +1,4 @@
-import { User } from '../../../user/interface/user.interface'
+import { User } from '../../user/interfaces/user.interface'
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 
 @Entity('admin')
