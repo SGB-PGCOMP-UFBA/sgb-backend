@@ -33,6 +33,6 @@ export class ArticleService {
       return true
     }
 
-    throw new NotFoundException(constants.exceptionMessages.article.ARTICLE_NOT_FOUND)
+    throw new NotFoundException(constants.exceptionMessages.article.NOT_FOUND)
   }
 }

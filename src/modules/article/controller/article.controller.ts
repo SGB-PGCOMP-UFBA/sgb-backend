@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common'
 import { ArticleService } from '../service/article.service'
 import { CreateArticleDto } from '../dto/create-article.dto'
-import { toArticleResponseDto } from '../mapper/article.mapper'
+import { toResponseArticleDto } from '../mapper/article.mapper'
 
 @Controller('v1/article')
 export class ArticleController {
@@ -15,7 +15,7 @@ export class ArticleController {
   @Get()
   async findAll() {
     const articles = await this.articleService.findAll()
-    return articles.map((article) => toArticleResponseDto(article))
+    return articles.map((article) => toResponseArticleDto(article))
   }
 
   @Delete(':id')
