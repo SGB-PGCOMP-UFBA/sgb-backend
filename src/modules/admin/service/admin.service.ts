@@ -5,7 +5,7 @@ import { hashPassword } from '../../../utils/bcrypt'
 import { CreateAdminDto } from '../dto/create-admin.dto'
 import { UpdateAdminDto } from '../dto/update-admin.dto'
 import { Admin } from '../entities/admin.entity'
-import { toAdminResponseDto } from '../mapper/admin.mapper'
+import { toResponseAdminDto } from '../mapper/admin.mapper'
 
 @Injectable()
 export class AdminService {
@@ -54,7 +54,7 @@ export class AdminService {
         : admin.password
     })
 
-    return toAdminResponseDto(updated)
+    return toResponseAdminDto(updated)
   }
 
   async remove(id: number) {
