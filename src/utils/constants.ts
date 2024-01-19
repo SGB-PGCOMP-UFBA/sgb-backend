@@ -16,13 +16,25 @@ const constants = {
         TAX_ID_ALREADY_REGISTERED: 'Parece que já existe um usuário cadastrado com este CPF.'
     },
     exceptionMessages: {
-        student: {
-            CREATION_FAILED: 'Cant\'t create student.',
-            STUDENT_NOT_FOUND: 'Student not found.'
+        admin: {
+            CREATION_FAILED: 'Cant\'t create admin.',
+            NOT_FOUND: 'Admin not found.'
+        },
+        advisor: {
+            CREATION_FAILED: 'Cant\'t create advisor.',
+            NOT_FOUND: 'Advisor not found.'
         },
         article: {
             CREATION_FAILED: 'Cant\'t create article.',
-            ARTICLE_NOT_FOUND: 'Article not found.'
+            NOT_FOUND: 'Article not found.'
+        },
+        student: {
+            CREATION_FAILED: 'Cant\'t create student.',
+            NOT_FOUND: 'Student not found.'
+        },
+        scholarship: {
+            CREATION_FAILED: 'Cant\'t create scholarship.',
+            NOT_FOUND: 'Scholarship not found.'
         }
     }
 }
