@@ -8,7 +8,7 @@ import { hashPassword } from '../../../utils/bcrypt'
 import { PageDto } from '../../../pageable/page.dto'
 import { PageMetaDto } from '../../../pageable/page-meta.dto'
 import { constants } from '../../../utils/constants'
-import { toStudentResponseDto } from '../mapper/student.mapper'
+import { toResponseStudentDto } from '../mapper/student.mapper'
 import { ResponseStudentDto } from '../dto/response-student.dto'
 
 @Injectable()
@@ -33,9 +33,7 @@ export class StudentService {
 
   async findAll(): Promise<Student[]> {
     return await this.studentRepository.find({
-      relations: {
-        articles: true,
-      }
+      relations: ['articles', 'scholarships', 'scholarships.advisor', 'scholarships.agency']
     })
   }
 
@@ -45,7 +43,7 @@ export class StudentService {
     const meta = (await studentsPaginate).meta
     
     const itemsDto = items.map(
-      (student) => toStudentResponseDto(student)
+      (student) => toResponseStudentDto(student)
     )
 
     const metaDto = new PageMetaDto(
