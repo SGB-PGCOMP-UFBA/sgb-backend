@@ -5,7 +5,7 @@ import { PasswordRecoveryController } from './controller/password-recovery.contr
 import { PasswordRecoveryService } from './service/password-recovery.service'
 import { constants } from '../../core/utils/constants'
 import { EmailModule } from '../email-sending/email.module'
-import { StudentModule } from 'src/modules/student/student.module'
+import { StudentModule } from '../../modules/student/student.module'
 
 @Module({
   imports: [
