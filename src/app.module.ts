@@ -11,23 +11,27 @@ import { AdminModule } from './modules/admin/admin.module'
 import { AgencyModule } from './modules/agency/agency.module'
 import { ScheduleModule } from '@nestjs/schedule'
 import { NotificationModule } from './services/ending-scholarship-notification/notification.module'
+import { ReportModule } from './services/reports/reports.module'
+import { PasswordRecoveryModule } from './services/password-recovery/password-recovery.module'
 
 require('dotenv')
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
-    NotificationModule,
-    DatabaseModule,
     ConfigModule.forRoot(),
+    DatabaseModule,
     EmailModule,
+    NotificationModule,
+    ReportModule,
+    AuthModule,
     AgencyModule,
     ArticleModule,
-    AuthModule,
     ScholarshipModule,
     AdminModule,
     StudentModule,
     AdvisorModule,
+    PasswordRecoveryModule
   ],
   controllers: [],
   providers: []
