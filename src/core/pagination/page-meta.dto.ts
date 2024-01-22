@@ -1,10 +1,4 @@
 export class PageMetaDto {
-  readonly totalItems: number
-  readonly itemCount: number
-  readonly itemsPerPage: number
-  readonly totalPages: number
-  readonly currentPage: number
-
   constructor(
     totalItems: number,
     itemCount: number,
@@ -18,4 +12,10 @@ export class PageMetaDto {
     this.totalPages = totalPages
     this.currentPage = currentPage
   }
+
+  readonly totalItems: number
+  readonly itemCount: number
+  readonly itemsPerPage: number
+  readonly totalPages: number
+  readonly currentPage: number
 }
