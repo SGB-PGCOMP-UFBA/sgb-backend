@@ -13,6 +13,6 @@ export const connectionSource = new DataSource({
   synchronize: false,
   name: 'default',
   entities: ['src/**/**.entity{.ts,.js}'],
-  migrations: ['src/migrations/**/*{.ts,.js}'],
-  subscribers: ['src/migrations/**/*{.ts,.js}']
+  migrations: ['src/database/migrations/**/*{.ts,.js}'],
+  subscribers: ['src/database/migrations/**/*{.ts,.js}']
 })
