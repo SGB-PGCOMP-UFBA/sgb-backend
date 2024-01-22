@@ -1,19 +1,16 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { DatabaseModule } from './database/database.module'
-import { StudentsModule } from './students/students.module'
+import { StudentModule } from './modules/student/student.module'
 import { EmailModule } from './email/email.module'
-import { ArticleModule } from './article/article.module'
-import { AuthModule } from './auth/auth.module'
-import { ProfileModule } from './profile/profile.module'
-import { AdvisorModule } from './advisor/advisor.module'
-import { ScholarshipModule } from './scholarship/scholarship.module'
-import { PasswordRecoveryModule } from './password-recovery/password-recovery.module'
-import { AdminModule } from './admin/admin.module'
-import { AgencyModule } from './agency/agency.module'
+import { ArticleModule } from './modules/article/article.module'
+import { AuthModule } from './modules/auth/auth.module'
+import { AdvisorModule } from './modules/advisor/advisor.module'
+import { ScholarshipModule } from './modules/scholarship/scholarship.module'
+import { AdminModule } from './modules/admin/admin.module'
+import { AgencyModule } from './modules/agency/agency.module'
 import { ScheduleModule } from '@nestjs/schedule'
 import { NotificationModule } from './notification/notification.module'
-import { ReportModule } from './report/report.module'
 
 require('dotenv')
 
@@ -23,17 +20,14 @@ require('dotenv')
     NotificationModule,
     DatabaseModule,
     ConfigModule.forRoot(),
-    StudentsModule,
     EmailModule,
     AgencyModule,
     ArticleModule,
     AuthModule,
-    ProfileModule,
-    PasswordRecoveryModule,
-    AdvisorModule,
     ScholarshipModule,
     AdminModule,
-    ReportModule
+    StudentModule,
+    AdvisorModule,
   ],
   controllers: [],
   providers: []

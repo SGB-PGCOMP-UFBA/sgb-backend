@@ -1,9 +1,9 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
-import { comparePassword } from '../../core/utils/bcrypt'
-import { UserService } from '../../modules/user/services/user.service'
-import { ResponseUserDto } from '../../modules/user/dtos/response-user.dto'
-import { constants } from '../../core/utils/constants'
+import { comparePassword } from '../../../core/utils/bcrypt'
+import { UserService } from '../../user/services/user.service'
+import { ResponseUserDto } from '../../user/dtos/response-user.dto'
+import { constants } from '../../../core/utils/constants'
 
 @Injectable()
 export class AuthService {
