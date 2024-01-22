@@ -2,7 +2,7 @@ import { Strategy } from 'passport-local'
 import { PassportStrategy } from '@nestjs/passport'
 import { Injectable } from '@nestjs/common'
 import { AuthService } from '../service/auth.service'
-import { ResponseUserDTO } from '../../user/model/user.response.dto'
+import { ResponseUserDto } from '../../modules/user/dtos/response-user.dto'
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -10,7 +10,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     super({ usernameField: 'tax_id' })
   }
 
-  async validate(tax_id: string, password: string): Promise<ResponseUserDTO> {
+  async validate(tax_id: string, password: string): Promise<ResponseUserDto> {
     const user = await this.authService.validateUser(tax_id, password)
     return user
   }

@@ -1,11 +1,12 @@
+import { Repository } from 'typeorm'
+import { NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Student } from '../../student/entities/student.entity'
-import { Repository } from 'typeorm'
-import { CreateUserDTO } from '../dtos/create-user.dto'
-import { NotFoundException } from '@nestjs/common'
-import { errorMessages } from '../../../auth/constants'
+import { CreateUserDto } from '../dtos/create-user.dto'
 import { Advisor } from '../../advisor/entities/advisor.entity'
 import { Admin } from '../../admin/entities/admin.entity'
+import { constants } from '../../../core/utils/constants'
+
 export class UserService {
   constructor(
     @InjectRepository(Student)
@@ -16,9 +17,8 @@ export class UserService {
     private adminRepository: Repository<Admin>
   ) {}
 
-  async findUserByTaxId(tax_id: string): Promise<CreateUserDTO> {
+  async findUserByTaxId(tax_id: string): Promise<CreateUserDto> {
     try {
-      let user = null
       const studentUser = await this.studentRepository.findOne({
         where: { tax_id }
       })
@@ -29,6 +29,7 @@ export class UserService {
         where: { tax_id }
       })
 
+      let user = null
       if (advisorUser) {
         user = advisorUser
       } else if (studentUser) {
@@ -37,10 +38,13 @@ export class UserService {
         user = adminUser
       }
 
-      if (user) return new CreateUserDTO(user)
-      throw new NotFoundException(errorMessages.userNotFoundMessage)
+      if (!user) {
+        throw new NotFoundException(constants.exceptionMessages.user.NOT_FOUND)
+      }
+
+      return new CreateUserDto(user)
     } catch (error) {
-      throw new NotFoundException(errorMessages.userNotFoundMessage)
+      throw new NotFoundException(constants.exceptionMessages.user.SOMETHING_WRONG)
     }
   }
 }

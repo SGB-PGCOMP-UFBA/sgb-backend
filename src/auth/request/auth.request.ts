@@ -1,6 +1,6 @@
 import { Request } from 'express'
-import { ResponseUserDTO } from '../../user/model/user.response.dto'
+import { ResponseUserDto } from '../../modules/user/dtos/response-user.dto'
 
 export interface AuthRequest extends Request {
-  user: ResponseUserDTO
+  user: ResponseUserDto
 }

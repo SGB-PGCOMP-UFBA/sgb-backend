@@ -1,4 +1,11 @@
+import * as dotenv from 'dotenv'
+dotenv.config()
+
 const constants = {
+    jwt: {
+        secretKey: process.env.SECRET_KEY,
+        expirationTime: process.env.EXPIRES_IN
+    },
     expressions: {
         REGEX_TAX_ID: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
         REGEX_EMAIL: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
@@ -35,6 +42,11 @@ const constants = {
         scholarship: {
             CREATION_FAILED: 'Cant\'t create scholarship.',
             NOT_FOUND: 'Scholarship not found.'
+        },
+        user: {
+            SOMETHING_WRONG: 'Something went wrong.',
+            NOT_FOUND: 'User not found.',
+            WRONG_PASSWORD: 'Invalid password.'
         }
     }
 }
