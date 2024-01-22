@@ -2,6 +2,9 @@ import * as dotenv from 'dotenv'
 dotenv.config()
 
 const constants = {
+    errors: {
+        TOKEN_EXPIRED_ERROR: 'TokenExpiredError'
+    },
     jwt: {
         secretKey: process.env.SECRET_KEY,
         expirationTime: process.env.EXPIRES_IN
@@ -48,6 +51,9 @@ const constants = {
             SOMETHING_WRONG: 'Something went wrong.',
             NOT_FOUND: 'User not found.',
             WRONG_PASSWORD: 'Invalid password.'
+        },
+        token: {
+            EXPIRED_ERROR: 'This token has expired, please try again!'
         }
     }
 }

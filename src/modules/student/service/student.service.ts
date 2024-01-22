@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { paginate, IPaginationOptions } from 'nestjs-typeorm-paginate'
@@ -55,5 +55,22 @@ export class StudentService {
     )
 
     return new PageDto(itemsDto, metaDto)
+  }
+
+  async resetPassword(email: string, password: string): Promise<void> {
+    const findStudent = await this.studentRepository.findOne({
+      where: { email }
+    })
+
+    if (!findStudent) {
+      throw new NotFoundException(constants.exceptionMessages.student.NOT_FOUND)
+    }
+
+    this.updatePassword(email, password)
+  }
+
+  async updatePassword(email: string, password: string): Promise<void> {
+    const passwordHash = await hashPassword(password)
+    await this.studentRepository.update({ email }, { password: passwordHash })
   }
 }

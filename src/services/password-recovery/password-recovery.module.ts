@@ -1,22 +1,20 @@
 import { Module } from '@nestjs/common'
 import { JwtModule } from '@nestjs/jwt'
-import { jwtConstants } from '../auth/constants'
-import { AdvisorModule } from '../advisor/advisor.module'
-import { EmailModule } from '../email/email.module'
-import { StudentsModule } from '../students/students.module'
+import { ConfigModule } from '@nestjs/config'
 import { PasswordRecoveryController } from './controller/password-recovery.controller'
 import { PasswordRecoveryService } from './service/password-recovery.service'
-import { ConfigModule } from '@nestjs/config'
+import { constants } from '../../core/utils/constants'
+import { EmailModule } from '../email-sending/email.module'
+import { StudentModule } from 'src/modules/student/student.module'
 
 @Module({
   imports: [
-    StudentsModule,
-    AdvisorModule,
+    StudentModule,
     EmailModule,
     ConfigModule,
     JwtModule.register({
-      secret: jwtConstants.secretKey,
-      signOptions: { expiresIn: jwtConstants.expirationTime }
+      secret: constants.jwt.secretKey,
+      signOptions: { expiresIn: constants.jwt.expirationTime }
     })
   ],
   controllers: [PasswordRecoveryController],
