@@ -1,46 +1,34 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { StudentsService } from '../../students/service/students.service'
-import { EmailService } from '../../email/service/email.service'
-import { ScholarshipService } from '../../scholarship/service/scholarship.service'
+import { EmailService } from '../../email-sending/service/email.service'
+import { ScholarshipService } from '../../../modules/scholarship/service/scholarship.service'
+import { getDatePlusDays } from '../../../core/utils/date-utils'
 
 @Injectable()
 export class NotificationService {
-  constructor(
-    private studentsSerivce: StudentsService,
-    private emailService: EmailService,
-    private scholarshipService: ScholarshipService
-  ) {}
+  constructor(private emailService: EmailService, private scholarshipService: ScholarshipService) {}
+
   private readonly logger = new Logger(NotificationService.name)
 
-  getDatePlustDays(days: number): Date {
-    const actualDate = new Date()
-    actualDate.setHours(21, 0, 0, 0)
-    actualDate.setDate(actualDate.getDate() + days - 1)
-    return actualDate
-  }
-
-  @Cron(CronExpression.EVERY_DAY_AT_10AM)
+  @Cron(CronExpression.EVERY_DAY_AT_6AM)
   async notifyAlmostEndedScholarships() {
     this.logger.debug('Starting notifying almost ended scholarships')
     const scholarships = await this.scholarshipService.findAll()
+
     const dates = [
-      this.getDatePlustDays(365),
-      this.getDatePlustDays(180),
-      this.getDatePlustDays(90)
+      getDatePlusDays(365),
+      getDatePlusDays(180),
+      getDatePlusDays(90)
     ]
 
-    for (const {
-      scholarship_ends_at,
-      student: studentId,
-      id: scholarshipId
-    } of scholarships) {
-      const student = await this.studentsSerivce.findById(studentId)
+    for (const { id, student, scholarship_ends_at } of scholarships) {
       this.logger.debug(`notifying for student: ${student.email}`)
+
       const today = new Date()
       if (scholarship_ends_at < today) {
-        await this.scholarshipService.deactivateScholarship(scholarshipId)
+        await this.scholarshipService.deactivateScholarship(id)
       }
+
       for (let i = 0; i < 3; i++) {
         if (scholarship_ends_at.toISOString() === dates[i].toISOString()) {
           let months: number
@@ -55,11 +43,12 @@ export class NotificationService {
             to: student.email,
             context: { months, name: student.name },
             template: 'notify-end',
-            subject: 'Notificação sobre bolsa'
+            subject: 'Notificação sobre Bolsa PGCOMP'
           })
         }
       }
     }
+
     this.logger.debug(`finish notifying almost ended scholarships`)
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { BadRequestException, NotFoundException } from '@nestjs/common/exceptions'
+import { BadRequestException, NotFoundException, InternalServerErrorException } from '@nestjs/common/exceptions'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { CreateScholarshipDto } from '../dto/create-scholarship.dto'
@@ -40,5 +40,14 @@ export class ScholarshipService {
     }
 
     throw new NotFoundException(constants.exceptionMessages.scholarship.NOT_FOUND)
+  }
+
+  async deactivateScholarship(id: number): Promise<void> {
+    try{
+      await this.scholarshipRepository.update(id, { active: false })
+    }
+    catch(error) {
+      throw new InternalServerErrorException(constants.exceptionMessages.scholarship.DEACTIVATE_FAILED)
+    }
   }
 }
