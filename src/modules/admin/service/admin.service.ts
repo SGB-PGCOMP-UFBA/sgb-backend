@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm'
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { hashPassword } from '../../../utils/bcrypt'
+import { hashPassword } from '../../../core/utils/bcrypt'
 import { CreateAdminDto } from '../dto/create-admin.dto'
 import { UpdateAdminDto } from '../dto/update-admin.dto'
 import { Admin } from '../entities/admin.entity'

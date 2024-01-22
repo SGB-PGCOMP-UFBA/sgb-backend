@@ -1,5 +1,5 @@
 import { IsString, IsEmail, Length, Matches } from 'class-validator'
-import { constants } from '../../../utils/constants'
+import { constants } from '../../../core/utils/constants'
 
 export class CreateAdvisorDto {
   @IsString() 

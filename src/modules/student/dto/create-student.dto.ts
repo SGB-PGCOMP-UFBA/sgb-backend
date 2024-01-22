@@ -1,5 +1,5 @@
 import { IsString, IsEmail, IsUrl, Length, Matches, MaxLength } from 'class-validator'
-import { constants } from '../../../utils/constants'
+import { constants } from '../../../core/utils/constants'
 
 export class CreateStudentDto {
   @IsString({ message: constants.bodyValidationMessages.TAX_ID_FORMAT_ERROR })

@@ -4,7 +4,7 @@ import { Repository } from 'typeorm'
 import { CreateArticleDto } from '../dto/create-article.dto'
 import { Article } from '../entities/article.entity'
 import { StudentService } from '../../student/service/student.service'
-import { constants } from '../../../utils/constants'
+import { constants } from '../../../core/utils/constants'
 
 @Injectable()
 export class ArticleService {

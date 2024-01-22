@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { CreateAdvisorDto } from '../dto/create-advisor.dto'
 import { Advisor } from '../entities/advisor.entity'
-import { hashPassword } from '../../../utils/bcrypt'
+import { hashPassword } from '../../../core/utils/bcrypt'
 
 @Injectable()
 export class AdvisorService {

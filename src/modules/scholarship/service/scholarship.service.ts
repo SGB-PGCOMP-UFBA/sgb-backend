@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { CreateScholarshipDto } from '../dto/create-scholarship.dto'
 import { Scholarship } from '../entities/scholarship.entity'
-import { constants } from '../../../utils/constants'
+import { constants } from '../../../core/utils/constants'
 
 @Injectable()
 export class ScholarshipService {
