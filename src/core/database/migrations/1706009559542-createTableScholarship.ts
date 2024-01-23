@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner, Table } from "typeorm"
 
-export class createTableScholarship1705662770668 implements MigrationInterface {
+export class createTableScholarship1706009559542 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(new Table({
@@ -18,39 +18,12 @@ export class createTableScholarship1705662770668 implements MigrationInterface {
                     isNullable: false,
                 },
                 {
-                    name: 'advisor_id',
+                    name: 'enrollment_id',
                     type: 'serial',
                     isNullable: false,
                 },
                 {
-                    name: 'student_id',
-                    type: 'serial',
-                    isNullable: false,
-                },
-                {
-                    name: 'enrollment_date',
-                    type: 'timestamp',
-                    isNullable: false,
-                },
-                {
-                    name: 'enrollment_number',
-                    type: 'char',
-                    length: '9',
-                    isNullable: false,
-                },
-                {
-                    name: 'enrollment_program',
-                    type: 'varchar',
-                    length: '20',
-                    isNullable: false,
-                },
-                {
-                    name: 'defense_prediction_date',
-                    type: 'timestamp',
-                    isNullable: false,
-                },
-                {
-                    name: 'scholarship_started_at',
+                    name: 'scholarship_starts_at',
                     type: 'timestamp',
                     isNullable: false,
                 },
@@ -62,12 +35,12 @@ export class createTableScholarship1705662770668 implements MigrationInterface {
                 {
                     name: 'extension_ends_at',
                     type: 'timestamp',
-                    isNullable: false,
+                    isNullable: true,
                 },
                 {
                     name: 'active',
                     type: 'boolean',
-                    default: true
+                    default: true,
                 },
                 {
                     name: 'salary',
@@ -97,18 +70,10 @@ export class createTableScholarship1705662770668 implements MigrationInterface {
                     onUpdate: "CASCADE",
                 },
                 {
-                    name: "fk_scholarship_advisor",
-                    referencedTableName: "advisor",
+                    name: "fk_scholarship_enrollment",
+                    referencedTableName: "enrollment",
                     referencedColumnNames: ["id"],
-                    columnNames: ["advisor_id"],
-                    onDelete: "CASCADE",
-                    onUpdate: "CASCADE",
-                },
-                {
-                    name: "fk_scholarship_student",
-                    referencedTableName: "student",
-                    referencedColumnNames: ["id"],
-                    columnNames: ["student_id"],
+                    columnNames: ["enrollment_id"],
                     onDelete: "CASCADE",
                     onUpdate: "CASCADE",
                 },
@@ -119,4 +84,5 @@ export class createTableScholarship1705662770668 implements MigrationInterface {
     public async down(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.dropTable('scholarship');
     }
+
 }

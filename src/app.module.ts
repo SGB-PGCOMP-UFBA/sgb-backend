@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
-import { DatabaseModule } from './database/database.module'
+import { DatabaseModule } from './core/database/database.module'
 import { StudentModule } from './modules/student/student.module'
 import { EmailModule } from './services/email-sending/email.module'
 import { ArticleModule } from './modules/article/article.module'

@@ -23,7 +23,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
               : null
         },
         entities: [`${__dirname}/../**/*.entity{.ts,.js}`],
-        synchronize: !(configService.get('MODE') === 'prod' || 'dev')
+        synchronize: configService.get('MODE') ===  'dev'
       })
     })
   ]
