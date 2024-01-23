@@ -12,11 +12,10 @@ export class AdvisorMapper {
     }
 
     static detailed(advisor: Advisor) {
+        const simplified = this.simplified(advisor)
+
         return {
-            id: advisor.id,
-            role: advisor.role,
-            created_at: advisor.created_at,
-            updated_at: advisor.updated_at,
+            ...simplified,
             tax_id: advisor.tax_id,
             name: advisor.name,
             email: advisor.email,
