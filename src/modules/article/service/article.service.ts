@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { CreateArticleDto } from '../dto/create-article.dto'
@@ -8,18 +12,22 @@ import { constants } from '../../../core/utils/constants'
 
 @Injectable()
 export class ArticleService {
-  constructor(@InjectRepository(Article) private articleRepository: Repository<Article>, private studentService: StudentService) {}
+  constructor(
+    @InjectRepository(Article) private articleRepository: Repository<Article>,
+    private studentService: StudentService
+  ) {}
 
   async create(createArticleDto: CreateArticleDto) {
-    try{
+    try {
       const newArticle = this.articleRepository.create({ ...createArticleDto })
-      
+
       await this.articleRepository.save(newArticle)
-      
+
       return newArticle
-    }
-    catch(error) {
-      throw new BadRequestException(constants.exceptionMessages.article.CREATION_FAILED)
+    } catch (error) {
+      throw new BadRequestException(
+        constants.exceptionMessages.article.CREATION_FAILED
+      )
     }
   }
 

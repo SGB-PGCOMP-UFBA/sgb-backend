@@ -16,7 +16,9 @@ export class EnrollmentController {
   @Get()
   async findAll() {
     const enrollments = await this.enrollmentService.findAll()
-    return enrollments.map((enrollment) => EnrollmentMapper.detailed(enrollment))
+    return enrollments.map((enrollment) =>
+      EnrollmentMapper.detailed(enrollment)
+    )
   }
 
   @Delete(':id')

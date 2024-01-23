@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Delete, Param, HttpStatus, HttpCode } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Delete,
+  Param,
+  HttpStatus,
+  HttpCode
+} from '@nestjs/common'
 import { ScholarshipService } from '../service/scholarship.service'
 import { CreateScholarshipDto } from '../dto/create-scholarship.dto'
 import { ScholarshipMapper } from '../mapper/scholarship.mapper'
@@ -10,7 +19,7 @@ export class ScholarshipController {
   @Post()
   async create(@Body() dto: CreateScholarshipDto) {
     const scholarship = await this.scholarshipService.create(dto)
-    
+
     return ScholarshipMapper.simplified(scholarship)
   }
 
@@ -18,7 +27,9 @@ export class ScholarshipController {
   async findAll() {
     const scholarships = await this.scholarshipService.findAll()
 
-    return scholarships.map((scholarship) => ScholarshipMapper.detailed(scholarship))
+    return scholarships.map((scholarship) =>
+      ScholarshipMapper.detailed(scholarship)
+    )
   }
 
   @Delete(':id')

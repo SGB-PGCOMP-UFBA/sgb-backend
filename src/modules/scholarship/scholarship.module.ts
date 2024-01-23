@@ -6,12 +6,9 @@ import { ScholarshipController } from './controller/scholarship.controller'
 import { Scholarship } from './entities/scholarship.entity'
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Scholarship]),
-    EnrollmentModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Scholarship]), EnrollmentModule],
   controllers: [ScholarshipController],
   providers: [ScholarshipService],
-  exports: [ScholarshipService],
+  exports: [ScholarshipService]
 })
 export class ScholarshipModule {}

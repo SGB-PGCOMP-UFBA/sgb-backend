@@ -3,11 +3,13 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { EmailService } from '../../email-sending/service/email.service'
 import { ScholarshipService } from '../../../modules/scholarship/service/scholarship.service'
 import { getDatePlusDays } from '../../../core/utils/date-utils'
-import { Student } from '../../../modules/student/entities/student.entity'
 
 @Injectable()
 export class NotificationService {
-  constructor(private emailService: EmailService, private scholarshipService: ScholarshipService) {}
+  constructor(
+    private emailService: EmailService,
+    private scholarshipService: ScholarshipService
+  ) {}
 
   private readonly logger = new Logger(NotificationService.name)
 

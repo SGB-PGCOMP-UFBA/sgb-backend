@@ -4,7 +4,9 @@ import { PasswordRecoveryService } from '../service/password-recovery.service'
 
 @Controller('v1/password-recovery')
 export class PasswordRecoveryController {
-  constructor(private readonly passwordRecoveryService: PasswordRecoveryService) {}
+  constructor(
+    private readonly passwordRecoveryService: PasswordRecoveryService
+  ) {}
 
   @Post('/reset')
   async resetPassword(@Body() dto: ResetPasswordRequestDto) {

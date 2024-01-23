@@ -1,12 +1,18 @@
 import { User } from '../../user/interfaces/user.interface'
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn
+} from 'typeorm'
 
 @Entity('admin')
 export class Admin implements User {
   @PrimaryGeneratedColumn()
   id: number
 
-  @Column({ nullable: false }) 
+  @Column({ nullable: false })
   name: string
 
   @Column({ length: 14, nullable: false, unique: true })
@@ -22,8 +28,8 @@ export class Admin implements User {
   role: string
 
   @CreateDateColumn()
-  created_at: Date;
+  created_at: Date
 
   @UpdateDateColumn()
-  updated_at: Date;
+  updated_at: Date
 }

@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common'
-import { BadRequestException, NotFoundException, InternalServerErrorException } from '@nestjs/common/exceptions'
+import {
+  BadRequestException,
+  NotFoundException,
+  InternalServerErrorException
+} from '@nestjs/common/exceptions'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { CreateScholarshipDto } from '../dto/create-scholarship.dto'
@@ -8,7 +12,10 @@ import { constants } from '../../../core/utils/constants'
 
 @Injectable()
 export class ScholarshipService {
-  constructor(@InjectRepository(Scholarship) private scholarshipRepository: Repository<Scholarship>) {}
+  constructor(
+    @InjectRepository(Scholarship)
+    private scholarshipRepository: Repository<Scholarship>
+  ) {}
 
   async findAll(): Promise<Scholarship[]> {
     return await this.scholarshipRepository.find()
@@ -16,21 +23,31 @@ export class ScholarshipService {
 
   async findAllForNotification(): Promise<Scholarship[]> {
     return await this.scholarshipRepository.find({
-      relations: ['agency', 'enrollment', 'enrollment.student', 'enrollment.advisor'],
+      relations: [
+        'agency',
+        'enrollment',
+        'enrollment.student',
+        'enrollment.advisor'
+      ],
       where: { active: true }
     })
   }
 
-  async create(createScholarshipDto: CreateScholarshipDto): Promise<Scholarship> {
-    try{
-      const newScholarship = this.scholarshipRepository.create({ ...createScholarshipDto })
-      
+  async create(
+    createScholarshipDto: CreateScholarshipDto
+  ): Promise<Scholarship> {
+    try {
+      const newScholarship = this.scholarshipRepository.create({
+        ...createScholarshipDto
+      })
+
       await this.scholarshipRepository.save(newScholarship)
 
       return newScholarship
-    }
-    catch(error) {
-      throw new BadRequestException(constants.exceptionMessages.scholarship.CREATION_FAILED)
+    } catch (error) {
+      throw new BadRequestException(
+        constants.exceptionMessages.scholarship.CREATION_FAILED
+      )
     }
   }
 
@@ -40,15 +57,18 @@ export class ScholarshipService {
       return true
     }
 
-    throw new NotFoundException(constants.exceptionMessages.scholarship.NOT_FOUND)
+    throw new NotFoundException(
+      constants.exceptionMessages.scholarship.NOT_FOUND
+    )
   }
 
   async deactivate(id: number): Promise<void> {
-    try{
+    try {
       await this.scholarshipRepository.update(id, { active: false })
-    }
-    catch(error) {
-      throw new InternalServerErrorException(constants.exceptionMessages.scholarship.DEACTIVATE_FAILED)
+    } catch (error) {
+      throw new InternalServerErrorException(
+        constants.exceptionMessages.scholarship.DEACTIVATE_FAILED
+      )
     }
   }
 }

@@ -31,7 +31,7 @@ export class AnalyticReportService {
       return scholarships
     } 
     */
-   return null
+    return null
   }
 
   async formatterDate(date: string) {

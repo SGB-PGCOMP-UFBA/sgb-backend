@@ -6,12 +6,9 @@ import { ArticleController } from './controller/article.controller'
 import { Article } from './entities/article.entity'
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Article]),
-    StudentModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Article]), StudentModule],
   controllers: [ArticleController],
   providers: [ArticleService],
-  exports: [ArticleService],
+  exports: [ArticleService]
 })
 export class ArticleModule {}

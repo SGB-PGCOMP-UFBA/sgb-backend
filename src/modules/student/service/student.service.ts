@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException
+} from '@nestjs/common'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { paginate, IPaginationOptions } from 'nestjs-typeorm-paginate'
@@ -12,7 +16,9 @@ import { StudentMapper } from '../mapper/student.mapper'
 
 @Injectable()
 export class StudentService {
-  constructor(@InjectRepository(Student) private studentRepository: Repository<Student>) {}
+  constructor(
+    @InjectRepository(Student) private studentRepository: Repository<Student>
+  ) {}
 
   async createStudent(student: CreateStudentDto): Promise<Student> {
     try {
@@ -23,27 +29,36 @@ export class StudentService {
       })
 
       await this.studentRepository.save(newStudent)
-      
+
       return newStudent
     } catch (error) {
-      throw new BadRequestException(constants.exceptionMessages.student.CREATION_FAILED)
+      throw new BadRequestException(
+        constants.exceptionMessages.student.CREATION_FAILED
+      )
     }
   }
 
   async findAll(): Promise<Student[]> {
     return await this.studentRepository.find({
-      relations: ['articles', 'enrollments', 'enrollments.advisor', 'enrollments.scholarships']
+      relations: [
+        'articles',
+        'enrollments',
+        'enrollments.advisor',
+        'enrollments.scholarships'
+      ]
     })
   }
 
-  async findAllPaginated(options: IPaginationOptions): Promise<PageDto<Object>> {
-    const studentsPaginate = paginate<Student>(this.studentRepository, options, { relations: ['articles'] })
+  async findAllPaginated(options: IPaginationOptions): Promise<PageDto<any>> {
+    const studentsPaginate = paginate<Student>(
+      this.studentRepository,
+      options,
+      { relations: ['articles'] }
+    )
     const items = (await studentsPaginate).items
     const meta = (await studentsPaginate).meta
-    
-    const itemsDto = items.map(
-      (student) => StudentMapper.detailed(student)
-    )
+
+    const itemsDto = items.map((student) => StudentMapper.detailed(student))
 
     const metaDto = new PageMetaDto(
       meta.totalItems,

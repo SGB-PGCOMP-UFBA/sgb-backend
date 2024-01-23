@@ -11,7 +11,7 @@ export class CreateUserDto {
     this.created_at = user.created_at
     this.updated_at = user.updated_at
   }
-  
+
   @IsNumber()
   readonly id: number
 

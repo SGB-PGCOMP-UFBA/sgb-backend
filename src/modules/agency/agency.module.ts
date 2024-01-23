@@ -5,11 +5,9 @@ import { AgencyService } from './service/agency.service'
 import { Agency } from './entities/agency.entity'
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Agency]),
-  ],
+  imports: [TypeOrmModule.forFeature([Agency])],
   controllers: [AgencyController],
   providers: [AgencyService],
-  exports: [AgencyService],
+  exports: [AgencyService]
 })
 export class AgencyModule {}

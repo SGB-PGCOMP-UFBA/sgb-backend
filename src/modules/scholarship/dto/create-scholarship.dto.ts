@@ -22,5 +22,5 @@ export class CreateScholarshipDto {
   readonly extension_ends_at: Date
 
   @IsNumber()
-  readonly salary: number 
+  readonly salary: number
 }

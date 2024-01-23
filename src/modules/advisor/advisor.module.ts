@@ -5,11 +5,9 @@ import { AdvisorController } from './controller/advisor.controller'
 import { Advisor } from './entities/advisor.entity'
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Advisor]),
-  ],
+  imports: [TypeOrmModule.forFeature([Advisor])],
   controllers: [AdvisorController],
   providers: [AdvisorService],
-  exports: [AdvisorService],
+  exports: [AdvisorService]
 })
 export class AdvisorModule {}

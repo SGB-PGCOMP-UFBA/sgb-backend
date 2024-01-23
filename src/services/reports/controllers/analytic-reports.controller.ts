@@ -6,13 +6,22 @@ export class AnalyticReportController {
   constructor(private readonly analyticReportService: AnalyticReportService) {}
 
   @Get('/byagency/:id/model/:model')
-  async reportByAgencyAndModel(@Param('id') agency_id: number, @Param('model') model: string) {
-    return this.analyticReportService.generateReportByAgencyAndModel(agency_id, model)
+  async reportByAgencyAndModel(
+    @Param('id') agency_id: number,
+    @Param('model') model: string
+  ) {
+    return this.analyticReportService.generateReportByAgencyAndModel(
+      agency_id,
+      model
+    )
   }
 
   @Get('/byagency/:id/')
   async reportByAgency(@Param('id') agency_id: number) {
-    return this.analyticReportService.generateReportByAgencyAndModel(agency_id, '')
+    return this.analyticReportService.generateReportByAgencyAndModel(
+      agency_id,
+      ''
+    )
   }
 
   @Get('/byallagencies')

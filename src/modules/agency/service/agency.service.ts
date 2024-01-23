@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { CreateAgencyDto } from '../dto/create-agency.dto'
@@ -6,20 +10,21 @@ import { Agency } from '../entities/agency.entity'
 
 @Injectable()
 export class AgencyService {
-  constructor(@InjectRepository(Agency) private agencyRepository: Repository<Agency>) {}
+  constructor(
+    @InjectRepository(Agency) private agencyRepository: Repository<Agency>
+  ) {}
 
   async findAll(): Promise<Agency[]> {
     return await this.agencyRepository.find()
   }
 
   async create(dto: CreateAgencyDto): Promise<Agency> {
-    try{
-      const newAgency= this.agencyRepository.create({ ...dto })
+    try {
+      const newAgency = this.agencyRepository.create({ ...dto })
       await this.agencyRepository.save(dto)
 
       return newAgency
-    }
-    catch (error) {
+    } catch (error) {
       throw new BadRequestException("Can't create agency.")
     }
   }

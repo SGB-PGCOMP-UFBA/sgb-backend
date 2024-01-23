@@ -44,7 +44,9 @@ export class UserService {
 
       return new CreateUserDto(user)
     } catch (error) {
-      throw new NotFoundException(constants.exceptionMessages.user.SOMETHING_WRONG)
+      throw new NotFoundException(
+        constants.exceptionMessages.user.SOMETHING_WRONG
+      )
     }
   }
 }

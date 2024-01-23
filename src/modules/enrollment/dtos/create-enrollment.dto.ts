@@ -16,7 +16,7 @@ export class CreateEnrollmentDto {
   readonly enrollment_number: string
 
   @Transform(({ value }) => value.toUpperCase())
-  @IsIn(["MESTRADO", "DOUTORADO"])
+  @IsIn(['MESTRADO', 'DOUTORADO'])
   readonly enrollment_program: string
 
   @Type(() => Date)

@@ -21,12 +21,7 @@ import { constants } from '../../core/utils/constants'
       signOptions: { expiresIn: constants.jwt.expirationTime }
     })
   ],
-  providers: [
-    AuthService,
-    UserService,
-    LocalStrategy,
-    JwtStrategy
-  ],
+  providers: [AuthService, UserService, LocalStrategy, JwtStrategy],
   controllers: [AuthController],
   exports: [AuthService]
 })

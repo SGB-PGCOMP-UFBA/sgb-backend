@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { CreateAdvisorDto } from '../dto/create-advisor.dto'
@@ -7,7 +11,9 @@ import { hashPassword } from '../../../core/utils/bcrypt'
 
 @Injectable()
 export class AdvisorService {
-  constructor(@InjectRepository(Advisor) private advisorRepository: Repository<Advisor>) {}
+  constructor(
+    @InjectRepository(Advisor) private advisorRepository: Repository<Advisor>
+  ) {}
 
   async findAll(): Promise<Advisor[]> {
     return await this.advisorRepository.find()
@@ -43,7 +49,7 @@ export class AdvisorService {
     if (!advisor) {
       throw new NotFoundException('Advisor not found.')
     }
-    
+
     return advisor
   }
 
@@ -52,7 +58,7 @@ export class AdvisorService {
     if (!advisor) {
       throw new NotFoundException('Advisor not found.')
     }
-    
+
     return advisor
   }
 

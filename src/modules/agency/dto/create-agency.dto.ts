@@ -5,7 +5,7 @@ export class CreateAgencyDto {
   @MaxLength(80)
   readonly name: string
 
-  @IsString() 
+  @IsString()
   @MaxLength(255)
   readonly description: string
 }

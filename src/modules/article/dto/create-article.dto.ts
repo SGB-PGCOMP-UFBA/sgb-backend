@@ -2,10 +2,10 @@ import { Type } from 'class-transformer'
 import { IsString, IsUrl, IsDate, IsNumber, MaxLength } from 'class-validator'
 
 export class CreateArticleDto {
-  @IsNumber() 
+  @IsNumber()
   readonly student_id: number
 
-  @IsString() 
+  @IsString()
   @MaxLength(100)
   readonly title: string
 
@@ -14,7 +14,7 @@ export class CreateArticleDto {
   readonly abstract: string
 
   @IsDate()
-  @Type(() => Date) 
+  @Type(() => Date)
   readonly publication_date: Date
 
   @IsString()

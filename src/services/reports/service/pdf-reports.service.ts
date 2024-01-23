@@ -16,7 +16,7 @@ export class PdfReportService {
         .text('Relatório de Bolsas Alocadas', { align: 'center' })
       doc.lineWidth(15)
       doc.lineCap('butt').moveTo(50, 120).lineTo(550, 120).stroke()
-      
+
       const students = await this.studentService.findAll()
 
       for (const student of students) {
@@ -24,11 +24,17 @@ export class PdfReportService {
         doc.fontSize(12)
         doc.font('Times-Roman').text('Nome: ' + student.name)
         doc.text('Matrícula: ' + student.enrollments[0].enrollment_number)
-        doc.text('Curso: ' + student.enrollments[0].enrollment_program).fontSize(12)
+        doc
+          .text('Curso: ' + student.enrollments[0].enrollment_program)
+          .fontSize(12)
         doc.text('Email: ' + student.email)
         doc.text('Telefone: ' + student.phone_number).fontSize(12)
-        const enrollment_date = formatterDate(student.enrollments[0].enrollment_date.toString())
-        const defense_date = formatDate(student.enrollments[0].defense_prediction_date)
+        const enrollment_date = formatterDate(
+          student.enrollments[0].enrollment_date.toString()
+        )
+        const defense_date = formatDate(
+          student.enrollments[0].defense_prediction_date
+        )
         doc
           .text(
             'Data de início no PGCOMP: ' +
@@ -43,7 +49,10 @@ export class PdfReportService {
             .text('Estudante sem bolsa de pesquisa', { align: 'center' })
         } else {
           doc.fontSize(12)
-          doc.text('Agência da bolsa de pesquisa: ' + student.enrollments[0].scholarships[0].agency.name)
+          doc.text(
+            'Agência da bolsa de pesquisa: ' +
+              student.enrollments[0].scholarships[0].agency.name
+          )
           const scholarship_start = formatDate(
             student.enrollments[0].scholarships[0].scholarship_starts_at
           )
@@ -71,17 +80,24 @@ export class PdfReportService {
               .font('Times-Bold')
               .text(
                 'Bolsa extendida até: ' +
-                  (formatDate(
+                  formatDate(
                     student.enrollments[0].scholarships[0].extension_ends_at
-                  )),
+                  ),
                 { align: 'center' }
               )
           }
         }
         doc.fontSize(12)
         if (student.enrollments[0].advisor != null) {
-          doc.font('Times-Roman').text('Orientador(a): ' + student.enrollments[0].advisor.name)
-          doc.text('Email do(a) orientador(a): ' + student.enrollments[0].advisor.email).fontSize(12)
+          doc
+            .font('Times-Roman')
+            .text('Orientador(a): ' + student.enrollments[0].advisor.name)
+          doc
+            .text(
+              'Email do(a) orientador(a): ' +
+                student.enrollments[0].advisor.email
+            )
+            .fontSize(12)
         } else {
           doc.text('Estudante sem orientador(a)')
         }
@@ -97,14 +113,9 @@ export class PdfReportService {
             doc.fontSize(10)
             doc.text('    Título: ' + article.title)
             const publication_date = formatDate(article.publication_date)
-            doc.text(
-              '    Local de publicação: ' +
-                article.publication_place
-            )
+            doc.text('    Local de publicação: ' + article.publication_place)
             doc.text('    Data de publicação: ' + publication_date).fontSize(10)
-            doc
-              .text('    DOI Link: ' + article.doi_link)
-              .fontSize(10)
+            doc.text('    DOI Link: ' + article.doi_link).fontSize(10)
             doc.moveDown()
           }
         } else {

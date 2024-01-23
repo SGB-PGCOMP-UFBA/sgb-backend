@@ -10,10 +10,10 @@ import { EnrollmentService } from './services/enrollment.service'
   imports: [
     TypeOrmModule.forFeature([Enrollment]),
     AdvisorModule,
-    StudentModule,
+    StudentModule
   ],
   controllers: [EnrollmentController],
   providers: [EnrollmentService],
-  exports: [EnrollmentService],
+  exports: [EnrollmentService]
 })
 export class EnrollmentModule {}

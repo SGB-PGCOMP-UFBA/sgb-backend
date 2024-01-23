@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, DefaultValuePipe, ParseIntPipe, Query } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  DefaultValuePipe,
+  ParseIntPipe,
+  Query
+} from '@nestjs/common'
 import { CreateStudentDto } from '../dto/create-student.dto'
 import { StudentService } from '../service/student.service'
 import { StudentMapper } from '../mapper/student.mapper'

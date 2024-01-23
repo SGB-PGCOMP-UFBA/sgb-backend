@@ -1,4 +1,11 @@
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn
+} from 'typeorm'
 import { User } from '../../user/interfaces/user.interface'
 import { Enrollment } from '../../enrollment/entities/enrollment.entity'
 
@@ -26,10 +33,10 @@ export class Advisor implements User {
   role: string
 
   @CreateDateColumn()
-  created_at: Date;
+  created_at: Date
 
   @UpdateDateColumn()
-  updated_at: Date;
+  updated_at: Date
 
   @OneToMany(() => Enrollment, (enrollment) => enrollment.advisor)
   enrollments: Enrollment[]

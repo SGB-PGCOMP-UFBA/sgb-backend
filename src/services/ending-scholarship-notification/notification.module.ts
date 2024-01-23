@@ -4,10 +4,7 @@ import { EmailModule } from '../email-sending/email.module'
 import { NotificationService } from './service/notification.service'
 
 @Module({
-  imports: [
-    EmailModule, 
-    ScholarshipModule,
-  ],
-  providers: [NotificationService],
+  imports: [EmailModule, ScholarshipModule],
+  providers: [NotificationService]
 })
 export class NotificationModule {}

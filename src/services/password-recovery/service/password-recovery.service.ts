@@ -10,7 +10,7 @@ export class PasswordRecoveryService {
     private studentService: StudentService,
     private emailService: EmailService
   ) {}
-  
+
   async resetPassword(dto: ResetPasswordRequestDto): Promise<void> {
     const newPassword = generateRandomString(8)
 

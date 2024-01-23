@@ -1,27 +1,35 @@
 import { Student } from '../../student/entities/student.entity'
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn
+} from 'typeorm'
 
 @Entity('article')
 export class Article {
-  @PrimaryGeneratedColumn() 
+  @PrimaryGeneratedColumn()
   id: number
 
   @Column({ nullable: false })
   student_id: number
 
-  @Column({ nullable: false }) 
+  @Column({ nullable: false })
   title: string
 
-  @Column({ nullable: false }) 
+  @Column({ nullable: false })
   abstract: string
 
-  @Column({ nullable: false }) 
+  @Column({ nullable: false })
   publication_date: Date
 
-  @Column({ nullable: false }) 
+  @Column({ nullable: false })
   publication_place: string
 
-  @Column({ nullable: false }) 
+  @Column({ nullable: false })
   doi_link: string
 
   @ManyToOne(() => Student, (student) => student.articles)
@@ -29,8 +37,8 @@ export class Article {
   student: Student
 
   @CreateDateColumn()
-  created_at: Date;
+  created_at: Date
 
   @UpdateDateColumn()
-  updated_at: Date;
+  updated_at: Date
 }
