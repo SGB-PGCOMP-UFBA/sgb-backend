@@ -11,10 +11,10 @@ export class AgencyMapper {
     }
   
     static detailed(agency: Agency) {
+        const simplified = this.simplified(agency)
+
         return {
-            id: agency.id,
-            created_at: agency.created_at,
-            updated_at: agency.updated_at,
+            ...simplified,
             name: agency.name,
             description: agency.description,
         }
