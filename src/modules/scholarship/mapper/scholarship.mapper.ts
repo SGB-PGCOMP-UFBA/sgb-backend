@@ -1,7 +1,49 @@
-import { ResponseScholarshipDto } from "../dto/response-scholarship.dto"
 import { Scholarship } from "../entities/scholarship.entity"
+import { toResponseAgencyDto } from "../../agency/mapper/agency.mapper"
+import { toResponseEnrollmentDto } from "../../enrollment/mappers/enrollment.mapper"
 
-export function toResponseScholarshipDto(scholarship: Scholarship): ResponseScholarshipDto {
-    return new ResponseScholarshipDto(scholarship)
+export class ScholarshipMapper {
+    static simplified(scholarship: Scholarship) {
+        return {
+            id: scholarship.id,
+            agency_id: scholarship.agency_id,
+            enrollment_id: scholarship.enrollment_id,
+            active: scholarship.active,
+            created_at: scholarship.created_at,
+            updated_at: scholarship.updated_at,
+        }
+    }
+
+    static detailed(scholarship: Scholarship) {
+        return {
+            id: scholarship.id,
+            agency_id: scholarship.agency_id,
+            enrollment_id: scholarship.enrollment_id,
+            active: scholarship.active,
+            created_at: scholarship.created_at,
+            updated_at: scholarship.updated_at,
+            scholarship_starts_at: scholarship.scholarship_starts_at,
+            scholarship_ends_at: scholarship.scholarship_ends_at,
+            extension_ends_at: scholarship.extension_ends_at,
+            salary: scholarship.salary,
+        }
+    }
+
+    static detailedWithRelations(scholarship: Scholarship) {
+        const agency = scholarship.agency ? toResponseAgencyDto(scholarship.agency) : null
+        const enrollment = scholarship.enrollment ? toResponseEnrollmentDto(scholarship.enrollment) : null
+
+        return {
+            id: scholarship.id,
+            active: scholarship.active,
+            created_at: scholarship.created_at,
+            updated_at: scholarship.updated_at,
+            scholarship_starts_at: scholarship.scholarship_starts_at,
+            scholarship_ends_at: scholarship.scholarship_ends_at,
+            extension_ends_at: scholarship.extension_ends_at,
+            salary: scholarship.salary,
+            agency,
+            enrollment
+        }
+    }
 }
-  
