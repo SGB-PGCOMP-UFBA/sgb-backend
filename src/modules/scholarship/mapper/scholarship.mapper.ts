@@ -1,6 +1,8 @@
 import { Scholarship } from "../entities/scholarship.entity"
 import { AgencyMapper } from "../../agency/mapper/agency.mapper"
 import { EnrollmentMapper } from "../../enrollment/mappers/enrollment.mapper"
+import { StudentMapper } from "../../student/mapper/student.mapper"
+import { AdvisorMapper } from "../../advisor/mapper/advisor.mapper"
 
 export class ScholarshipMapper {
     static simplified(scholarship: Scholarship) {
@@ -27,14 +29,20 @@ export class ScholarshipMapper {
     }
 
     static detailedWithRelations(scholarship: Scholarship) {
-        const detailed = this.detailed(scholarship)
         const agency = scholarship.agency ? AgencyMapper.detailed(scholarship.agency) : null
         const enrollment = scholarship.enrollment ? EnrollmentMapper.detailed(scholarship.enrollment) : null
+        const student = scholarship.enrollment ? StudentMapper.detailed(scholarship.enrollment.student) : null
+        const advisor = scholarship.enrollment ? AdvisorMapper.detailed(scholarship.enrollment.advisor) : null
 
         return {
-            ...detailed,
+            id: scholarship.id,
+            active: scholarship.active,
+            created_at: scholarship.created_at,
+            updated_at: scholarship.updated_at,
             agency,
-            enrollment
+            enrollment,
+            student,
+            advisor
         }
     }
 }

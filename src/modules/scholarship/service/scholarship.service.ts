@@ -14,6 +14,13 @@ export class ScholarshipService {
     return await this.scholarshipRepository.find()
   }
 
+  async findAllForNotification(): Promise<Scholarship[]> {
+    return await this.scholarshipRepository.find({
+      relations: ['agency', 'enrollment', 'enrollment.student', 'enrollment.advisor'],
+      where: { active: true }
+    })
+  }
+
   async create(createScholarshipDto: CreateScholarshipDto): Promise<Scholarship> {
     try{
       const newScholarship = this.scholarshipRepository.create({ ...createScholarshipDto })

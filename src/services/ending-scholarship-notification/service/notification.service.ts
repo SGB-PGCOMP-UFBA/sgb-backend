@@ -14,7 +14,7 @@ export class NotificationService {
   @Cron(CronExpression.EVERY_DAY_AT_6AM)
   async notifyAlmostEndedScholarships() {
     this.logger.debug('Starting notifying almost ended scholarships')
-    const scholarships = await this.scholarshipService.findAll()
+    const scholarships = await this.scholarshipService.findAllForNotification()
 
     const dates = [
       getDatePlusDays(365),
@@ -22,9 +22,8 @@ export class NotificationService {
       getDatePlusDays(90)
     ]
 
-    const student = new Student
-    for (const { id, scholarship_ends_at } of scholarships) {
-      this.logger.debug(`notifying for student: ${student.email}`)
+    for (const { id, enrollment, scholarship_ends_at } of scholarships) {
+      this.logger.debug(`notifying for student: ${enrollment.student.email}`)
 
       const today = new Date()
       if (scholarship_ends_at < today) {
@@ -42,8 +41,8 @@ export class NotificationService {
             months = 3
           }
           this.emailService.sendEmail({
-            to: student.email,
-            context: { months, name: student.name },
+            to: enrollment.student.email,
+            context: { months, name: enrollment.student.name },
             template: 'notify-end',
             subject: 'Notificação sobre Bolsa PGCOMP'
           })
