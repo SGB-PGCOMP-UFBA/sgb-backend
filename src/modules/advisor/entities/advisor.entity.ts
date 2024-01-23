@@ -1,6 +1,6 @@
-import { Scholarship } from '../../../modules/scholarship/entities/scholarship.entity'
-import { User } from '../../user/interfaces/user.interface'
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import { User } from '../../user/interfaces/user.interface'
+import { Enrollment } from '../../enrollment/entities/enrollment.entity'
 
 @Entity('advisor')
 export class Advisor implements User {
@@ -10,10 +10,10 @@ export class Advisor implements User {
   @Column({ length: 14, nullable: false, unique: true })
   tax_id: string
 
-  @Column({ nullable: false })
+  @Column({ length: 80, nullable: false })
   name: string
 
-  @Column({ nullable: false, unique: true })
+  @Column({ length: 80, nullable: false, unique: true })
   email: string
 
   @Column({ length: 11, nullable: false })
@@ -31,6 +31,6 @@ export class Advisor implements User {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @OneToMany(() => Scholarship, (scholarship) => scholarship.student)
-  scholarships: Scholarship[]
+  @OneToMany(() => Enrollment, (enrollment) => enrollment.advisor)
+  enrollments: Enrollment[]
 }

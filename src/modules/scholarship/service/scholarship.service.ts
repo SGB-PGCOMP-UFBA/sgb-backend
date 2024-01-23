@@ -10,6 +10,10 @@ import { constants } from '../../../core/utils/constants'
 export class ScholarshipService {
   constructor(@InjectRepository(Scholarship) private scholarshipRepository: Repository<Scholarship>) {}
 
+  async findAll(): Promise<Scholarship[]> {
+    return await this.scholarshipRepository.find()
+  }
+
   async create(createScholarshipDto: CreateScholarshipDto): Promise<Scholarship> {
     try{
       const newScholarship = this.scholarshipRepository.create({ ...createScholarshipDto })
@@ -23,17 +27,7 @@ export class ScholarshipService {
     }
   }
 
-  async findAll(): Promise<Scholarship[]> {
-    return await this.scholarshipRepository.find({
-      relations: {
-        student: true,
-        agency: true,
-        advisor: true,
-      }
-    })
-  }
-
-  async remove(id: number): Promise<boolean> {
+  async delete(id: number): Promise<boolean> {
     const removed = await this.scholarshipRepository.delete(id)
     if (removed.affected === 1) {
       return true
@@ -42,7 +36,7 @@ export class ScholarshipService {
     throw new NotFoundException(constants.exceptionMessages.scholarship.NOT_FOUND)
   }
 
-  async deactivateScholarship(id: number): Promise<void> {
+  async deactivate(id: number): Promise<void> {
     try{
       await this.scholarshipRepository.update(id, { active: false })
     }

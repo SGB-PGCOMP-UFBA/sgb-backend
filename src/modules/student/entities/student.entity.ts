@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 import { User } from '../../user/interfaces/user.interface'
 import { Article } from '../../article/entities/article.entity'
-import { Scholarship } from '../../scholarship/entities/scholarship.entity'
+import { Enrollment } from '../../enrollment/entities/enrollment.entity'
 
 @Entity('student')
 export class Student implements User {
@@ -35,8 +35,8 @@ export class Student implements User {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @OneToMany(() => Scholarship, (scholarship) => scholarship.student)
-  scholarships: Scholarship[]
+  @OneToMany(() => Enrollment, (enrollment) => enrollment.student)
+  enrollments: Enrollment[]
 
   @OneToMany(() => Article, (article) => article.student)
   articles: Article[]

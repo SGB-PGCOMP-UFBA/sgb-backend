@@ -9,6 +9,10 @@ import { hashPassword } from '../../../core/utils/bcrypt'
 export class AdvisorService {
   constructor(@InjectRepository(Advisor) private advisorRepository: Repository<Advisor>) {}
 
+  async findAll(): Promise<Advisor[]> {
+    return await this.advisorRepository.find()
+  }
+
   async create(createAdvisorDto: CreateAdvisorDto) {
     try {
       const passwordHash = await hashPassword(createAdvisorDto.password)
@@ -23,10 +27,6 @@ export class AdvisorService {
     } catch (error) {
       throw new BadRequestException("Can't create advisor.")
     }
-  }
-
-  async findAll(): Promise<Advisor[]> {
-      return await this.advisorRepository.find()
   }
 
   async findOneById(id: number): Promise<Advisor> {

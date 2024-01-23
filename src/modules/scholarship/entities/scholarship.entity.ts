@@ -1,7 +1,6 @@
 import { Column, Entity, JoinColumn, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm'
-import { Student } from '../../student/entities/student.entity'
 import { Agency } from '../../agency/entities/agency.entity'
-import { Advisor } from '../../../modules/advisor/entities/advisor.entity'
+import { Enrollment } from '../../enrollment/entities/enrollment.entity'
 
 @Entity('scholarship')
 export class Scholarship {
@@ -9,56 +8,37 @@ export class Scholarship {
   id: number
 
   @Column({ nullable: false })
-  student_id: number
+  enrollment_id: number
 
   @Column({ nullable: false })
   agency_id: number
 
   @Column({ nullable: false })
-  advisor_id: number
-
-  @Column({ nullable: false })
-  enrollment_date: Date
-
-  @Column({ nullable: false })
-  enrollment_number: string
-
-  @Column({ nullable: false })
-  enrollment_program: string
-
-  @Column({ nullable: false })
-  defense_prediction_date: Date
-
-  @Column({ nullable: false })
-  scholarship_started_at: Date
+  scholarship_starts_at: Date
 
   @Column({ nullable: false })
   scholarship_ends_at: Date
 
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   extension_ends_at: Date
 
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   salary: number
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, default: true })
   active: boolean
 
   @CreateDateColumn()
-  created_at: Date;
+  created_at: Date
 
   @UpdateDateColumn()
-  updated_at: Date;
+  updated_at: Date
 
-  @ManyToOne(() => Student, (student) => student.scholarships)
-  @JoinColumn({ name: 'student_id' })
-  student: Student
+  @ManyToOne(() => Enrollment, (enrollment) => enrollment.scholarships)
+  @JoinColumn({ name: 'enrollment_id' })
+  enrollment: Enrollment
 
   @ManyToOne(() => Agency, (agency) => agency.scholarships)
   @JoinColumn({ name: 'agency_id' })
   agency: Agency
-
-  @ManyToOne(() => Advisor, (advisor) => advisor.scholarships)
-  @JoinColumn({ name: 'advisor_id' })
-  advisor: Advisor
 }

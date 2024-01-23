@@ -42,6 +42,11 @@ const constants = {
             CREATION_FAILED: 'Cant\'t create student.',
             NOT_FOUND: 'Student not found.'
         },
+        enrollment: {
+            CREATION_FAILED: 'Cant\'t create enrollment.',
+            DEACTIVATE_FAILED: 'Can\'t deactivate this enrollment.',
+            NOT_FOUND: 'Enrollment not found.'
+        },
         scholarship: {
             CREATION_FAILED: 'Cant\'t create scholarship.',
             DEACTIVATE_FAILED: 'Can\'t deactivate this scholarship.',

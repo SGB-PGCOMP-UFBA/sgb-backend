@@ -23,12 +23,12 @@ export class PdfReportService {
         doc.moveDown(2)
         doc.fontSize(12)
         doc.font('Times-Roman').text('Nome: ' + student.name)
-        doc.text('Matrícula: ' + student.scholarships[0].enrollment_number)
-        doc.text('Curso: ' + student.scholarships[0].enrollment_program).fontSize(12)
+        doc.text('Matrícula: ' + student.enrollments[0].enrollment_number)
+        doc.text('Curso: ' + student.enrollments[0].enrollment_program).fontSize(12)
         doc.text('Email: ' + student.email)
         doc.text('Telefone: ' + student.phone_number).fontSize(12)
-        const enrollment_date = formatterDate(student.scholarships[0].enrollment_date.toString())
-        const defense_date = formatDate(student.scholarships[0].defense_prediction_date)
+        const enrollment_date = formatterDate(student.enrollments[0].enrollment_date.toString())
+        const defense_date = formatDate(student.enrollments[0].defense_prediction_date)
         doc
           .text(
             'Data de início no PGCOMP: ' +
@@ -37,18 +37,18 @@ export class PdfReportService {
               defense_date
           )
           .fontSize(12)
-        if (student.scholarships == null) {
+        if (student.enrollments == null) {
           doc
             .font('Times-Bold')
             .text('Estudante sem bolsa de pesquisa', { align: 'center' })
         } else {
           doc.fontSize(12)
-          doc.text('Agência da bolsa de pesquisa: ' + student.scholarships[0].agency.name)
+          doc.text('Agência da bolsa de pesquisa: ' + student.enrollments[0].scholarships[0].agency.name)
           const scholarship_start = formatDate(
-            student.scholarships[0].scholarship_started_at
+            student.enrollments[0].scholarships[0].scholarship_starts_at
           )
           const scholarship_end = formatDate(
-            student.scholarships[0].scholarship_ends_at
+            student.enrollments[0].scholarships[0].scholarship_ends_at
           )
           doc
             .text(
@@ -59,9 +59,9 @@ export class PdfReportService {
             )
             .fontSize(12)
           if (
-            student.scholarships[0].extension_ends_at == null ||
-            student.scholarships[0].extension_ends_at.getTime() ==
-              student.scholarships[0].scholarship_ends_at.getTime()
+            student.enrollments[0].scholarships[0].extension_ends_at == null ||
+            student.enrollments[0].scholarships[0].extension_ends_at.getTime() ==
+              student.enrollments[0].scholarships[0].scholarship_ends_at.getTime()
           ) {
             doc
               .font('Times-Bold')
@@ -72,16 +72,16 @@ export class PdfReportService {
               .text(
                 'Bolsa extendida até: ' +
                   (formatDate(
-                    student.scholarships[0].extension_ends_at
+                    student.enrollments[0].scholarships[0].extension_ends_at
                   )),
                 { align: 'center' }
               )
           }
         }
         doc.fontSize(12)
-        if (student.scholarships[0].advisor != null) {
-          doc.font('Times-Roman').text('Orientador(a): ' + student.scholarships[0].advisor.name)
-          doc.text('Email do(a) orientador(a): ' + student.scholarships[0].advisor.email).fontSize(12)
+        if (student.enrollments[0].advisor != null) {
+          doc.font('Times-Roman').text('Orientador(a): ' + student.enrollments[0].advisor.name)
+          doc.text('Email do(a) orientador(a): ' + student.enrollments[0].advisor.email).fontSize(12)
         } else {
           doc.text('Estudante sem orientador(a)')
         }

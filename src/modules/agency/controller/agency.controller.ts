@@ -8,8 +8,8 @@ export class AgencyController {
   constructor(private readonly agencyService: AgencyService) {}
 
   @Post()
-  async create(@Body() createAgencyDto: CreateAgencyDto) {
-    const agency = await this.agencyService.create(createAgencyDto)
+  async create(@Body() dto: CreateAgencyDto) {
+    const agency = await this.agencyService.create(dto)
     return toResponseAgencyDto(agency)
   }
 
@@ -20,7 +20,7 @@ export class AgencyController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
-    return await this.agencyService.remove(+id)
+  async delete(@Param('id') id: string) {
+    return await this.agencyService.delete(+id)
   }
 }

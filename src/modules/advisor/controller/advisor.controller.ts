@@ -11,8 +11,8 @@ export class AdvisorController {
   constructor(private readonly advisorService: AdvisorService) {}
 
   @Post()
-  async create(@Body() createAdvisorDto: CreateAdvisorDto) {
-    const advisor = await this.advisorService.create(createAdvisorDto)
+  async create(@Body() dto: CreateAdvisorDto) {
+    const advisor = await this.advisorService.create(dto)
     return toResponseAdvisorDto(advisor)
   }
 

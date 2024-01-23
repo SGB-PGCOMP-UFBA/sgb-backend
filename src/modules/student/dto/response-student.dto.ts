@@ -1,8 +1,8 @@
-import { toResponseArticleDto } from '../../article/mapper/article.mapper'
-import { ResponseArticleDto } from '../../article/dto/response-article.dto'
 import { Student } from '../entities/student.entity'
-import { toResponseScholarshipDto } from '../../../modules/scholarship/mapper/scholarship.mapper'
-import { ResponseScholarshipDto } from '../../../modules/scholarship/dto/response-scholarship.dto'
+import { ResponseArticleDto } from '../../article/dto/response-article.dto'
+import { ResponseEnrollmentDto } from '../../enrollment/dtos/response-enrollment.dto'
+import { toResponseArticleDto } from '../../article/mapper/article.mapper'
+import { toResponseEnrollmentDto } from '../../enrollment/mappers/enrollment.mapper'
 
 export class ResponseStudentDto {
   constructor(student: Student) {
@@ -16,7 +16,7 @@ export class ResponseStudentDto {
     this.created_at = student.created_at
     this.updated_at = student.updated_at
     this.articles = student.articles?.map((article) => toResponseArticleDto(article))
-    this.scholarships = student.scholarships?.map((scholarship) => toResponseScholarshipDto(scholarship))
+    this.enrollments = student.enrollments?.map((enrollment) => toResponseEnrollmentDto(enrollment))
   }
 
   readonly id: number
@@ -29,5 +29,5 @@ export class ResponseStudentDto {
   readonly created_at: Date
   readonly updated_at: Date
   readonly articles: ResponseArticleDto[]
-  readonly scholarships: ResponseScholarshipDto[]
+  readonly enrollments: ResponseEnrollmentDto[]
 }

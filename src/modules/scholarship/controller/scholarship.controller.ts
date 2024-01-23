@@ -21,7 +21,7 @@ export class ScholarshipController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: string) {
-    return await this.scholarshipService.remove(+id)
+  async delete(@Param('id') id: string) {
+    return await this.scholarshipService.delete(+id)
   }
 }

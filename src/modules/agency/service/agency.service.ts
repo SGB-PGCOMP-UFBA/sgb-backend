@@ -8,10 +8,14 @@ import { Agency } from '../entities/agency.entity'
 export class AgencyService {
   constructor(@InjectRepository(Agency) private agencyRepository: Repository<Agency>) {}
 
-  async create(createAgencyDto: CreateAgencyDto): Promise<Agency> {
+  async findAll(): Promise<Agency[]> {
+    return await this.agencyRepository.find()
+  }
+
+  async create(dto: CreateAgencyDto): Promise<Agency> {
     try{
-      const newAgency= this.agencyRepository.create({ ...createAgencyDto })
-      await this.agencyRepository.save(createAgencyDto)
+      const newAgency= this.agencyRepository.create({ ...dto })
+      await this.agencyRepository.save(dto)
 
       return newAgency
     }
@@ -20,12 +24,7 @@ export class AgencyService {
     }
   }
 
-  async findAll(): Promise<Agency[]> {
-    const agencys = await this.agencyRepository.find()
-    return agencys
-  }
-
-  async remove(id: number) {
+  async delete(id: number): Promise<boolean> {
     const removed = await this.agencyRepository.delete(id)
     if (removed.affected === 1) {
       return true

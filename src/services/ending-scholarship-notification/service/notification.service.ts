@@ -3,6 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { EmailService } from '../../email-sending/service/email.service'
 import { ScholarshipService } from '../../../modules/scholarship/service/scholarship.service'
 import { getDatePlusDays } from '../../../core/utils/date-utils'
+import { Student } from '../../../modules/student/entities/student.entity'
 
 @Injectable()
 export class NotificationService {
@@ -21,12 +22,13 @@ export class NotificationService {
       getDatePlusDays(90)
     ]
 
-    for (const { id, student, scholarship_ends_at } of scholarships) {
+    const student = new Student
+    for (const { id, scholarship_ends_at } of scholarships) {
       this.logger.debug(`notifying for student: ${student.email}`)
 
       const today = new Date()
       if (scholarship_ends_at < today) {
-        await this.scholarshipService.deactivateScholarship(id)
+        await this.scholarshipService.deactivate(id)
       }
 
       for (let i = 0; i < 3; i++) {
