@@ -1,5 +1,5 @@
 import { Scholarship } from "../entities/scholarship.entity"
-import { toResponseAgencyDto } from "../../agency/mapper/agency.mapper"
+import { AgencyMapper } from "../../agency/mapper/agency.mapper"
 import { EnrollmentMapper } from "../../enrollment/mappers/enrollment.mapper"
 
 export class ScholarshipMapper {
@@ -31,7 +31,7 @@ export class ScholarshipMapper {
 
     static detailedWithRelations(scholarship: Scholarship) {
         const detailed = this.detailed(scholarship)
-        const agency = scholarship.agency ? toResponseAgencyDto(scholarship.agency) : null
+        const agency = AgencyMapper.detailed(scholarship.agency)
         const enrollment = EnrollmentMapper.detailed(scholarship.enrollment)
 
         return {

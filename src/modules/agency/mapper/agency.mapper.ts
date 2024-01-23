@@ -1,6 +1,32 @@
-import { ResponseAgencyDto } from "../dto/response-agency.dto";
+import { ScholarshipMapper } from "../../scholarship/mapper/scholarship.mapper";
 import { Agency } from "../entities/agency.entity";
 
-export function toResponseAgencyDto(agency: Agency): ResponseAgencyDto {
-    return new ResponseAgencyDto(agency)
-}
+export class AgencyMapper {
+    static simplified(agency: Agency) {
+        return {
+            id: agency.id,
+            created_at: agency.created_at,
+            updated_at: agency.updated_at,
+        }
+    }
+  
+    static detailed(agency: Agency) {
+        return {
+            id: agency.id,
+            created_at: agency.created_at,
+            updated_at: agency.updated_at,
+            name: agency.name,
+            description: agency.description,
+        }
+    }
+
+    static detailedWithRelations(agency: Agency) {
+        const detailed = this.detailed(agency)
+        const scholarships = agency.scholarships?.map((scholarship) => ScholarshipMapper.detailed(scholarship))
+
+        return {
+            ...detailed,
+            scholarships,
+        }
+    }
+  }
