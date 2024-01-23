@@ -15,13 +15,10 @@ export class ScholarshipMapper {
     }
 
     static detailed(scholarship: Scholarship) {
+        const simplified = this.simplified(scholarship)
+
         return {
-            id: scholarship.id,
-            agency_id: scholarship.agency_id,
-            enrollment_id: scholarship.enrollment_id,
-            active: scholarship.active,
-            created_at: scholarship.created_at,
-            updated_at: scholarship.updated_at,
+            ...simplified,
             scholarship_starts_at: scholarship.scholarship_starts_at,
             scholarship_ends_at: scholarship.scholarship_ends_at,
             extension_ends_at: scholarship.extension_ends_at,
@@ -31,8 +28,8 @@ export class ScholarshipMapper {
 
     static detailedWithRelations(scholarship: Scholarship) {
         const detailed = this.detailed(scholarship)
-        const agency = AgencyMapper.detailed(scholarship.agency)
-        const enrollment = EnrollmentMapper.detailed(scholarship.enrollment)
+        const agency = scholarship.agency ? AgencyMapper.detailed(scholarship.agency) : null
+        const enrollment = scholarship.enrollment ? EnrollmentMapper.detailed(scholarship.enrollment) : null
 
         return {
             ...detailed,
