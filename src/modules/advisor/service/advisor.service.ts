@@ -61,7 +61,7 @@ export class AdvisorService {
     await this.advisorRepository.update({ email }, { password: passwordHash })
   }
 
-  async remove(id: number) {
+  async delete(id: number) {
     const removed = await this.advisorRepository.delete(id)
     if (removed.affected === 1) {
       return true
