@@ -1,23 +1,22 @@
 import { Body, Controller, Get, Post, DefaultValuePipe, ParseIntPipe, Query } from '@nestjs/common'
 import { CreateStudentDto } from '../dto/create-student.dto'
 import { StudentService } from '../service/student.service'
-import { toResponseStudentDto } from '../mapper/student.mapper'
-import { ResponseStudentDto } from '../dto/response-student.dto'
+import { StudentMapper } from '../mapper/student.mapper'
 
 @Controller('v1/student')
 export class StudentController {
   constructor(private readonly studentsService: StudentService) {}
 
   @Post()
-  async create(@Body() createStudentDTO: CreateStudentDto): Promise<ResponseStudentDto> {
-    const student = await this.studentsService.createStudent(createStudentDTO)
-    return toResponseStudentDto(student)
+  async create(@Body() dto: CreateStudentDto) {
+    const student = await this.studentsService.createStudent(dto)
+    return StudentMapper.simplified(student)
   }
 
   @Get()
   async findAll() {
     const students = await this.studentsService.findAll()
-    return students.map((student) => toResponseStudentDto(student))
+    return students.map((student) => StudentMapper.detailed(student))
   }
 
   @Get('/list')

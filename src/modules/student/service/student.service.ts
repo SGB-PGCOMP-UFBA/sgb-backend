@@ -8,8 +8,7 @@ import { hashPassword } from '../../../core/utils/bcrypt'
 import { PageDto } from '../../../core/pagination/page.dto'
 import { PageMetaDto } from '../../../core/pagination/page-meta.dto'
 import { constants } from '../../../core/utils/constants'
-import { toResponseStudentDto } from '../mapper/student.mapper'
-import { ResponseStudentDto } from '../dto/response-student.dto'
+import { StudentMapper } from '../mapper/student.mapper'
 
 @Injectable()
 export class StudentService {
@@ -37,13 +36,13 @@ export class StudentService {
     })
   }
 
-  async findAllPaginated(options: IPaginationOptions): Promise<PageDto<ResponseStudentDto>> {
+  async findAllPaginated(options: IPaginationOptions): Promise<PageDto<Object>> {
     const studentsPaginate = paginate<Student>(this.studentRepository, options, { relations: ['articles'] })
     const items = (await studentsPaginate).items
     const meta = (await studentsPaginate).meta
     
     const itemsDto = items.map(
-      (student) => toResponseStudentDto(student)
+      (student) => StudentMapper.detailed(student)
     )
 
     const metaDto = new PageMetaDto(
