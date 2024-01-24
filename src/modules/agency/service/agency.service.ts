@@ -21,7 +21,7 @@ export class AgencyService {
   async create(dto: CreateAgencyDto): Promise<Agency> {
     try {
       const newAgency = this.agencyRepository.create({ ...dto })
-      await this.agencyRepository.save(dto)
+      await this.agencyRepository.save(newAgency)
 
       return newAgency
     } catch (error) {
