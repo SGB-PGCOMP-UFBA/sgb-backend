@@ -21,7 +21,7 @@ export class AdvisorService {
 
   async create(createAdvisorDto: CreateAdvisorDto) {
     try {
-      const passwordHash = await hashPassword(createAdvisorDto.password)
+      const passwordHash = await hashPassword(createAdvisorDto.password ?? createAdvisorDto.tax_id.replace(/[-.]/g,''))
       const newAdvisor = this.advisorRepository.create({
         ...createAdvisorDto,
         password: passwordHash
