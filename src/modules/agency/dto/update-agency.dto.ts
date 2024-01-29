@@ -1,13 +1,4 @@
-import { IsString, IsOptional, MaxLength } from 'class-validator'
+import { PartialType } from '@nestjs/mapped-types'
+import { CreateAgencyDto } from './create-agency.dto'
 
-export class UpdateAgencyDto {
-  @IsString()
-  @MaxLength(80)
-  @IsOptional()
-  readonly name: string
-
-  @IsString()
-  @MaxLength(255)
-  @IsOptional()
-  readonly description: string
-}
+export class UpdateAgencyDto extends PartialType(CreateAgencyDto) {}
