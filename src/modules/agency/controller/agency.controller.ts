@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common'
+import { Controller, Get, Post, Body, Param, Delete, Patch } from '@nestjs/common'
 import { CreateAgencyDto } from '../dto/create-agency.dto'
 import { AgencyService } from '../service/agency.service'
 import { AgencyMapper } from '../mapper/agency.mapper'
+import { UpdateAgencyDto } from '../dto/update-agency.dto'
 
 @Controller('v1/agency')
 export class AgencyController {
@@ -21,8 +22,15 @@ export class AgencyController {
     return agencys.map((agency) => AgencyMapper.detailed(agency))
   }
 
+  @Patch(':id')
+  async update(@Param('id') id: number, @Body() dto: UpdateAgencyDto) {
+    const updatedAgency = await this.agencyService.update(id, dto)
+    
+    return AgencyMapper.detailed(updatedAgency)
+  }
+
   @Delete(':id')
-  async delete(@Param('id') id: string) {
+  async delete(@Param('id') id: number) {
     return await this.agencyService.delete(+id)
   }
 }

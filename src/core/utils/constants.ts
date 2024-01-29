@@ -43,6 +43,10 @@ const constants = {
       CREATION_FAILED: "Cant't create article.",
       NOT_FOUND: 'Article not found.'
     },
+    agency: {
+      CREATION_FAILED: "Cant't create agency.",
+      NOT_FOUND: 'Agency not found.'
+    },
     student: {
       CREATION_FAILED: "Cant't create student.",
       NOT_FOUND: 'Student not found.'
