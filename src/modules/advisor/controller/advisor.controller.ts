@@ -1,9 +1,10 @@
 import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common'
 import { HttpStatus } from '@nestjs/common/enums'
-import { HttpCode } from '@nestjs/common/decorators'
+import { HttpCode, Patch } from '@nestjs/common/decorators'
 import { AdvisorService } from '../service/advisor.service'
-import { CreateAdvisorDto } from '../dto/create-advisor.dto'
 import { AdvisorMapper } from '../mapper/advisor.mapper'
+import { CreateAdvisorDto } from '../dto/create-advisor.dto'
+import { UpdateAdvisorDto } from '../dto/update-advisor.dto'
 
 @Controller('v1/advisor')
 export class AdvisorController {
@@ -19,6 +20,13 @@ export class AdvisorController {
   async findAll() {
     const advisors = await this.advisorService.findAll()
     return advisors.map((advisor) => AdvisorMapper.detailed(advisor))
+  }
+
+  @Patch(':id')
+  async update(@Param('id') id: number, @Body() dto: UpdateAdvisorDto) {
+    const updatedAdvisor = await this.advisorService.update(id, dto)
+    
+    return AdvisorMapper.detailed(updatedAdvisor)
   }
 
   @Delete(':id')

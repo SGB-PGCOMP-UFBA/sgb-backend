@@ -5,9 +5,11 @@ import {
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
-import { CreateAdvisorDto } from '../dto/create-advisor.dto'
 import { Advisor } from '../entities/advisor.entity'
 import { hashPassword } from '../../../core/utils/bcrypt'
+import { CreateAdvisorDto } from '../dto/create-advisor.dto'
+import { UpdateAdvisorDto } from '../dto/update-advisor.dto'
+import { constants } from '../../../core/utils/constants'
 
 @Injectable()
 export class AdvisorService {
@@ -33,6 +35,23 @@ export class AdvisorService {
     } catch (error) {
       throw new BadRequestException("Can't create advisor.")
     }
+  }
+
+  async update(id: number, dto: UpdateAdvisorDto) {
+    const advisor = await this.advisorRepository.findOneBy({ id: id })
+    if (!advisor) {
+      throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
+    }
+
+    const updatedAdvisor = await this.advisorRepository.save({
+      id: advisor.id,
+      name: dto.name || advisor.name,
+      email: dto.email || advisor.email,
+      tax_id: dto.tax_id || advisor.tax_id,
+      phone_number: dto.phone_number || advisor.phone_number,
+    })
+
+    return updatedAdvisor
   }
 
   async findOneById(id: number): Promise<Advisor> {

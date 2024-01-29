@@ -1,8 +1,9 @@
-import { IsString, IsEmail, Length, Matches, IsOptional } from 'class-validator'
+import { IsString, IsEmail, Length, Matches, IsOptional, MaxLength } from 'class-validator'
 import { constants } from '../../../core/utils/constants'
 
 export class CreateAdvisorDto {
   @IsString()
+  @MaxLength(80)
   readonly name: string
 
   @IsString({ message: constants.bodyValidationMessages.TAX_ID_FORMAT_ERROR })
