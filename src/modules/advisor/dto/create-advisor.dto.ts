@@ -20,5 +20,9 @@ export class CreateAdvisorDto {
   readonly password: string
 
   @IsString()
+  @IsOptional()
+  @Length(16, 16, {
+    message: constants.bodyValidationMessages.PHONE_FORMAT_ERROR
+  })
   readonly phone_number: string
 }

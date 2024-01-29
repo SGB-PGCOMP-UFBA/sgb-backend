@@ -16,7 +16,15 @@ export class createTableAdmin1705576682746 implements MigrationInterface {
             name: 'tax_id',
             type: 'char',
             length: '14',
-            isUnique: true
+            isUnique: true,
+            isNullable: true,
+          },
+          {
+            name: 'phone_number',
+            type: 'char',
+            length: '16',
+            isUnique: true,
+            isNullable: true,
           },
           {
             name: 'name',

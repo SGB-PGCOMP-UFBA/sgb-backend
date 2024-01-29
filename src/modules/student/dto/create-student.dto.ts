@@ -35,7 +35,7 @@ export class CreateStudentDto {
   readonly link_to_lattes: string
 
   @IsString()
-  @Length(11, 11, {
+  @Length(16, 16, {
     message: constants.bodyValidationMessages.PHONE_FORMAT_ERROR
   })
   readonly phone_number: string

@@ -16,10 +16,10 @@ export class AdvisorMapper {
 
     return {
       ...simplified,
-      tax_id: advisor.tax_id,
+      tax_id: advisor.tax_id ? advisor.tax_id : null,
+      phone_number: advisor.phone_number ? advisor.phone_number : null,
       name: advisor.name,
-      email: advisor.email,
-      phone_number: advisor.phone_number
+      email: advisor.email
     }
   }
 

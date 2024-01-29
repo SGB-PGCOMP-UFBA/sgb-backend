@@ -1,4 +1,4 @@
-import { IsEmail, IsString, Length, Matches } from 'class-validator'
+import { IsEmail, IsOptional, IsString, Length, Matches } from 'class-validator'
 import { constants } from '../../../core/utils/constants'
 
 export class CreateAdminDto {
@@ -17,4 +17,11 @@ export class CreateAdminDto {
 
   @IsString()
   readonly password: string
+
+  @IsString()
+  @IsOptional()
+  @Length(16, 16, {
+    message: constants.bodyValidationMessages.PHONE_FORMAT_ERROR
+  })
+  readonly phone_number: string
 }

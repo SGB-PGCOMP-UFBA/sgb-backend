@@ -30,7 +30,9 @@ export class createTableStudent1705578693404 implements MigrationInterface {
           {
             name: 'phone_number',
             type: 'char',
-            length: '11'
+            length: '16',
+            isUnique: true,
+            isNullable: true,
           },
           {
             name: 'link_to_lattes',
@@ -42,7 +44,8 @@ export class createTableStudent1705578693404 implements MigrationInterface {
             name: 'tax_id',
             type: 'char',
             length: '14',
-            isUnique: true
+            isUnique: true,
+            isNullable: false,
           },
           {
             name: 'role',

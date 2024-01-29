@@ -15,7 +15,8 @@ export class AdminMapper {
 
     return {
       ...simplified,
-      tax_id: admin.tax_id,
+      tax_id: admin.tax_id ? admin.tax_id : null,
+      phone_number: admin.phone_number ? admin.phone_number : null,
       name: admin.name,
       email: admin.email
     }
