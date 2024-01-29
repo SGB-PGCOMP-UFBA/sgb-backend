@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Patch } from '@nestjs/common'
+import { Controller, Get, Post, Body, Param, Delete, Patch, HttpCode, HttpStatus } from '@nestjs/common'
 import { CreateAgencyDto } from '../dto/create-agency.dto'
 import { AgencyService } from '../service/agency.service'
 import { AgencyMapper } from '../mapper/agency.mapper'
@@ -30,6 +30,7 @@ export class AgencyController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id') id: number) {
     return await this.agencyService.delete(+id)
   }

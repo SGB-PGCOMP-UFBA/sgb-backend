@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common'
+import { Controller, Get, Post, Body, Param, Delete, HttpCode, HttpStatus } from '@nestjs/common'
 import { AdminService } from '../service/admin.service'
 import { CreateAdminDto } from '../dto/create-admin.dto'
 import { AdminMapper } from '../mapper/admin.mapper'
@@ -20,6 +20,7 @@ export class AdminController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id') id: string) {
     return await this.adminService.remove(+id)
   }
