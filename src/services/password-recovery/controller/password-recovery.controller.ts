@@ -12,4 +12,9 @@ export class PasswordRecoveryController {
   async resetPassword(@Body() dto: ResetPasswordRequestDto) {
     return this.passwordRecoveryService.resetPassword(dto)
   }
+
+  @Post('/request')
+  async requestRevoceyPassword(@Body() dto: any) {
+    return 
+  }
 }
