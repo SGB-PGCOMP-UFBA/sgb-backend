@@ -13,6 +13,7 @@ import { PageDto } from '../../../core/pagination/page.dto'
 import { PageMetaDto } from '../../../core/pagination/page-meta.dto'
 import { constants } from '../../../core/utils/constants'
 import { StudentMapper } from '../mapper/student.mapper'
+import { UpdateStudentDto } from '../dto/update-student.dto'
 
 @Injectable()
 export class StudentService {
@@ -20,11 +21,11 @@ export class StudentService {
     @InjectRepository(Student) private studentRepository: Repository<Student>
   ) {}
 
-  async createStudent(student: CreateStudentDto): Promise<Student> {
+  async createStudent(dto: CreateStudentDto): Promise<Student> {
     try {
-      const passwordHash = await hashPassword(student.password)
+      const passwordHash = await hashPassword(dto.password ?? dto.tax_id.replace(/[-.]/g,''))
       const newStudent = this.studentRepository.create({
-        ...student,
+        ...dto,
         password: passwordHash
       })
 
@@ -86,5 +87,31 @@ export class StudentService {
   async updatePassword(email: string, password: string): Promise<void> {
     const passwordHash = await hashPassword(password)
     await this.studentRepository.update({ email }, { password: passwordHash })
+  }
+
+  async update(id: number, dto: UpdateStudentDto) {
+    const student = await this.studentRepository.findOneBy({ id: id })
+    if (!student) {
+      throw new NotFoundException(constants.exceptionMessages.student.NOT_FOUND)
+    }
+
+    const updatedStudent = await this.studentRepository.save({
+      id: student.id,
+      name: dto.name || student.name,
+      email: dto.email || student.email,
+      tax_id: dto.tax_id || student.tax_id,
+      phone_number: dto.phone_number || student.phone_number,
+    })
+
+    return updatedStudent
+  }
+
+  async delete(id: number) {
+    const removed = await this.studentRepository.delete(id)
+    if (removed.affected === 1) {
+      return true
+    }
+
+    throw new NotFoundException(constants.exceptionMessages.student.NOT_FOUND)
   }
 }

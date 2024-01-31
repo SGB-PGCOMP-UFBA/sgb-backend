@@ -5,21 +5,21 @@ import {
   Post,
   DefaultValuePipe,
   ParseIntPipe,
-  Query
+  Query,
+  Patch,
+  Delete,
+  HttpCode,
+  Param,
+  HttpStatus
 } from '@nestjs/common'
 import { CreateStudentDto } from '../dto/create-student.dto'
 import { StudentService } from '../service/student.service'
 import { StudentMapper } from '../mapper/student.mapper'
+import { UpdateStudentDto } from '../dto/update-student.dto'
 
 @Controller('v1/student')
 export class StudentController {
   constructor(private readonly studentsService: StudentService) {}
-
-  @Post()
-  async create(@Body() dto: CreateStudentDto) {
-    const student = await this.studentsService.createStudent(dto)
-    return StudentMapper.simplified(student)
-  }
 
   @Get()
   async findAll() {
@@ -34,5 +34,24 @@ export class StudentController {
   ) {
     limit = limit > 100 ? 100 : limit
     return await this.studentsService.findAllPaginated({ page, limit })
+  }
+
+  @Post()
+  async create(@Body() dto: CreateStudentDto) {
+    const student = await this.studentsService.createStudent(dto)
+    return StudentMapper.simplified(student)
+  }
+
+  @Patch(':id')
+  async update(@Param('id') id: number, @Body() dto: UpdateStudentDto) {
+    const updatedStudent = await this.studentsService.update(id, dto)
+    
+    return StudentMapper.detailed(updatedStudent)
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async delete(@Param('id') id: string) {
+    return await this.studentsService.delete(+id)
   }
 }
