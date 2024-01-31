@@ -33,7 +33,7 @@ export class AdvisorService {
 
       return newAdvisor
     } catch (error) {
-      throw new BadRequestException("Can't create advisor.")
+      throw new BadRequestException(constants.exceptionMessages.advisor.CREATION_FAILED)
     }
   }
 
@@ -57,7 +57,7 @@ export class AdvisorService {
   async findOneById(id: number): Promise<Advisor> {
     const advisor = await this.advisorRepository.findOneBy({ id })
     if (!advisor) {
-      throw new NotFoundException('Advisor not found.')
+      throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
     }
 
     return advisor
@@ -66,7 +66,7 @@ export class AdvisorService {
   async findOneByEmail(email: string): Promise<Advisor> {
     const advisor = await this.advisorRepository.findOneBy({ email })
     if (!advisor) {
-      throw new NotFoundException('Advisor not found.')
+      throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
     }
 
     return advisor
@@ -75,7 +75,7 @@ export class AdvisorService {
   async findOneByTaxId(tax_id: string): Promise<Advisor> {
     const advisor = await this.advisorRepository.findOneBy({ tax_id })
     if (!advisor) {
-      throw new NotFoundException('Advisor not found.')
+      throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
     }
 
     return advisor
@@ -92,7 +92,7 @@ export class AdvisorService {
       return true
     }
 
-    throw new NotFoundException('Advisor not found.')
+    throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
   }
 
   async validateAdvisor(tax_id: string, email: string) {
