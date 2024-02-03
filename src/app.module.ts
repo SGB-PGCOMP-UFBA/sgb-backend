@@ -11,8 +11,9 @@ import { AdminModule } from './modules/admin/admin.module'
 import { AgencyModule } from './modules/agency/agency.module'
 import { ScheduleModule } from '@nestjs/schedule'
 import { NotificationModule } from './services/ending-scholarship-notification/notification.module'
-import { ReportModule } from './services/reports/reports.module'
+import { ReportModule } from './services/pdf-reports/reports.module'
 import { PasswordRecoveryModule } from './services/password-recovery/password-recovery.module'
+import { AnalyticReportsModule } from './modules/analytics/analyic-reports.module'
 
 require('dotenv')
 
@@ -24,6 +25,7 @@ require('dotenv')
     EmailModule,
     NotificationModule,
     ReportModule,
+    AnalyticReportsModule,
     AuthModule,
     AgencyModule,
     ArticleModule,

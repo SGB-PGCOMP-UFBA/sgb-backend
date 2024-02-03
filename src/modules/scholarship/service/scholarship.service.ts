@@ -71,4 +71,25 @@ export class ScholarshipService {
       )
     }
   }
+
+  async countGroupingByAgencyAndYear() {
+    try {
+      const result = await this.scholarshipRepository.createQueryBuilder('scholarship')
+        .select([
+          'EXTRACT(YEAR FROM scholarship.scholarship_starts_at) AS scholarship_year',
+          'agency.name AS agency_name',
+          'COUNT(scholarship.id) AS count'
+        ])
+        .innerJoin('scholarship.agency', 'agency')
+        .where('scholarship.active = :active', { active: true })
+        .groupBy('scholarship_year, agency_name')
+        .orderBy('scholarship_year', 'ASC')
+        .addOrderBy('agency_name', 'ASC')
+        .getRawMany();  
+
+      return result
+    } catch (error) {
+      throw new InternalServerErrorException(constants.exceptionMessages.scholarship.COUNT_BY_AGENCY_FAILED);
+    }
+  }
 }

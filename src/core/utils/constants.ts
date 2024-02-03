@@ -59,7 +59,8 @@ const constants = {
     scholarship: {
       CREATION_FAILED: "Cant't create scholarship.",
       DEACTIVATE_FAILED: "Can't deactivate this scholarship.",
-      NOT_FOUND: 'Scholarship not found.'
+      NOT_FOUND: 'Scholarship not found.',
+      COUNT_BY_AGENCY_FAILED: 'Failed to count scholarships by agency.'
     },
     user: {
       SOMETHING_WRONG: 'Something went wrong.',
