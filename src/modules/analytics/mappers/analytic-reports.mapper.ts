@@ -1,69 +1,62 @@
 export class AnalyticReportsMapper {
-  static simplified(data) {
-    let total = 0
-    let result = {}
-
-    data.forEach(({ agency_name, count }) => {
-      const agency = agency_name.toLowerCase()
-
-      if (!result[agency]) {
-        result[agency] = 0
-      }
-
-      total += parseInt(count)
-      result[agency] += parseInt(count);
-    })
-
-    result['total'] = total
-
-    return result
-  }
-
-  static detailed(data) {
-    let total = 0
-    let result = {}
+  static groupByAgencyAndYear({ agencies, scholarshipGroupedByAgencyAndYear }) {
+    const result = {}
     const currentYear = new Date().getFullYear()
 
-    data.forEach(({ scholarship_year, agency_name, count }) => {
-      const agency = agency_name.toLowerCase()
-
-      if (!result[agency]) {
-        result[agency] = {
-          count: 0,
-          growthOverLastYear: 0
-        }
+    agencies.forEach(({ name }) => {
+      result[name] = {
+        count: 0,
+        growthOverLastYear: 0,
+        lastYearAmount: 0,
+        currentYearAmount: 0
       }
-
-      if (scholarship_year == currentYear) {
-        result[agency]['currentYearAmount'] = count
-      }
-      else if (scholarship_year == (currentYear - 1)) {
-        result[agency]['lastYearAmount'] = count
-      }
-
-      total += parseInt(count)
-      result[agency].count += parseInt(count)
     })
 
-    for (const chave in result) {
-      if (result.hasOwnProperty(chave)) {
-        const item = result[chave]
-    
-        const current = parseInt(item.currentYearAmount) || 0
-        const last = parseInt(item.lastYearAmount) || 0
-    
-        if (current && last) {
-          const aumento = current - last
-          const porcentagemDeAumento = (aumento / last) * 100
-    
-          item.growthOverLastYear = porcentagemDeAumento
-        }
+    scholarshipGroupedByAgencyAndYear.forEach(({ scholarship_year, agency_name, count }) => {
+      result[agency_name].count += parseInt(count);
+  
+      if (scholarship_year == currentYear) {
+          result[agency_name]['currentYearAmount'] = parseInt(count);
+      } else if (scholarship_year == (currentYear - 1)) {
+          result[agency_name]['lastYearAmount'] = parseInt(count);
       }
-    }
-
-    result['total'] = total
+  
+      const item = result[agency_name];
+      const current = parseInt(item.currentYearAmount) || 0;
+      const last = parseInt(item.lastYearAmount) || 0;
+  
+      if (current && last) {
+          const aumento = current - last;
+          const porcentagemDeAumento = (aumento / last) * 100;
+  
+          item.growthOverLastYear = porcentagemDeAumento;
+      }
+    });
 
     return result
   }
 
+  static groupByAgencyAndCourse({ agencies, scholarshipGroupedByAgencyAndCourse }) {
+    const result = {}
+
+    agencies.forEach(({ name }) => {
+      result[name] = {
+        MESTRADO: 0,
+        DOUTORADO: 0
+      }
+    })
+
+    scholarshipGroupedByAgencyAndCourse.forEach(({ agency_name, course_name, count }) => {
+      result[agency_name][course_name] += parseInt(count);
+    });
+
+    const categories = Object.keys(result);
+    const courses = Object.values(result)[0];
+    const series = Object.keys(courses).map(course => ({
+        name: course,
+        data: categories.map(category => result[category][course])
+    }));
+
+    return { categories, series }
+  }
 }

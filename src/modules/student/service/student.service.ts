@@ -1,6 +1,8 @@
 import {
+  Logger,
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException
 } from '@nestjs/common'
 import { Repository } from 'typeorm'
@@ -17,11 +19,14 @@ import { UpdateStudentDto } from '../dto/update-student.dto'
 
 @Injectable()
 export class StudentService {
+  private readonly logger = new Logger(StudentService.name);
+
   constructor(
     @InjectRepository(Student) private studentRepository: Repository<Student>
   ) {}
 
   async createStudent(dto: CreateStudentDto): Promise<Student> {
+    this.logger.log(constants.exceptionMessages.student.CREATION_STARTED)
     try {
       const passwordHash = await hashPassword(dto.password ?? dto.tax_id.replace(/[-.]/g,''))
       const newStudent = this.studentRepository.create({
@@ -30,9 +35,11 @@ export class StudentService {
       })
 
       await this.studentRepository.save(newStudent)
+      this.logger.log(constants.exceptionMessages.student.CREATION_COMPLETED)
 
       return newStudent
     } catch (error) {
+      this.logger.error(error.detail)
       throw new BadRequestException(
         constants.exceptionMessages.student.CREATION_FAILED
       )
@@ -113,5 +120,23 @@ export class StudentService {
     }
 
     throw new NotFoundException(constants.exceptionMessages.student.NOT_FOUND)
+  }
+
+  async countStudentsWithAndWithoutScholarships() {
+    try {
+      const result = await this.studentRepository.createQueryBuilder('student')
+        .leftJoin('student.enrollments', 'enrollment')
+        .leftJoin('enrollment.scholarships', 'scholarship')
+        .select([
+            'COUNT(DISTINCT student.id) as totalStudents',
+            'COUNT(DISTINCT CASE WHEN scholarship.id IS NOT NULL THEN student.id END) as studentsWithScholarship',
+            'COUNT(DISTINCT CASE WHEN scholarship.id IS NULL THEN student.id END) as studentsWithoutScholarship'
+        ])
+        .getRawOne();
+
+      return result
+    } catch (error) {
+      throw new InternalServerErrorException(constants.exceptionMessages.student.COUNT_BY_SCHOLARSHIP_FAILED);
+    }
   }
 }

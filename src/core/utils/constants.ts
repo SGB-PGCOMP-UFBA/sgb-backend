@@ -48,8 +48,11 @@ const constants = {
       NOT_FOUND: 'Agency not found.'
     },
     student: {
+      CREATION_STARTED: "The process of inserting a new student has started.",
+      CREATION_COMPLETED: "The process of inserting a new student has been completed.",
       CREATION_FAILED: "Cant't create student.",
-      NOT_FOUND: 'Student not found.'
+      NOT_FOUND: 'Student not found.',
+      COUNT_BY_SCHOLARSHIP_FAILED: 'Failed to count students by scholarship.'
     },
     enrollment: {
       CREATION_FAILED: "Cant't create enrollment.",

@@ -92,4 +92,24 @@ export class ScholarshipService {
       throw new InternalServerErrorException(constants.exceptionMessages.scholarship.COUNT_BY_AGENCY_FAILED);
     }
   }
+
+  async countGroupingByAgencyAndCourse() {
+    try {
+      const result = await this.scholarshipRepository.createQueryBuilder('scholarship')
+        .innerJoin('scholarship.agency', 'agency')
+        .innerJoin('scholarship.enrollment', 'enrollment')
+        .where('scholarship.active = :active', { active: true })
+        .select([
+          'agency.name as agency_name',
+          'enrollment.enrollment_program as course_name',
+          'COUNT(scholarship.id) as count'
+        ])
+        .groupBy('agency.name, enrollment.enrollment_program')
+        .getRawMany();  
+
+      return result
+    } catch (error) {
+      throw new InternalServerErrorException(constants.exceptionMessages.scholarship.COUNT_BY_AGENCY_FAILED);
+    }
+  }
 }

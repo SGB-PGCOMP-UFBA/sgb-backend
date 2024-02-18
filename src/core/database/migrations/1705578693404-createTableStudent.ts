@@ -38,7 +38,8 @@ export class createTableStudent1705578693404 implements MigrationInterface {
             name: 'link_to_lattes',
             type: 'varchar',
             length: '80',
-            isUnique: true
+            isUnique: true,
+            isNullable: true,
           },
           {
             name: 'tax_id',
