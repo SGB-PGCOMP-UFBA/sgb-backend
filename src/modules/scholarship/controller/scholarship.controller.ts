@@ -32,6 +32,15 @@ export class ScholarshipController {
     )
   }
 
+  @Get('/detailed')
+  async findAllFullDetailed() {
+    const scholarships = await this.scholarshipService.findAllWithRelations()
+
+    return scholarships.map((scholarship) =>
+      ScholarshipMapper.detailedWithRelations(scholarship)
+    )
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id') id: string) {

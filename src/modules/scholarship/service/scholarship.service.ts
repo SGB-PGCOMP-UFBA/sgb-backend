@@ -21,6 +21,17 @@ export class ScholarshipService {
     return await this.scholarshipRepository.find()
   }
 
+  async findAllWithRelations(): Promise<Scholarship[]> {
+    return await this.scholarshipRepository.find({
+      relations: [
+        'agency',
+        'enrollment',
+        'enrollment.student',
+        'enrollment.advisor'
+      ]
+    })
+  }
+
   async findAllForNotification(): Promise<Scholarship[]> {
     return await this.scholarshipRepository.find({
       relations: [
