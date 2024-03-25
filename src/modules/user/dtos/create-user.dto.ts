@@ -7,6 +7,7 @@ export class CreateUserDto {
     this.tax_id = user.tax_id
     this.name = user.name
     this.role = user.role
+    this.email = user.email
     this.password = user.password
     this.created_at = user.created_at
     this.updated_at = user.updated_at
@@ -26,6 +27,9 @@ export class CreateUserDto {
 
   @IsString()
   readonly role: string
+
+  @IsString()
+  readonly email: string
 
   @IsDate()
   readonly created_at: Date

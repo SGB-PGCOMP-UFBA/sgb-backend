@@ -6,9 +6,11 @@ import { PasswordRecoveryService } from './service/password-recovery.service'
 import { constants } from '../../core/utils/constants'
 import { EmailModule } from '../email-sending/email.module'
 import { StudentModule } from '../../modules/student/student.module'
+import { AdvisorModule } from '../../modules/advisor/advisor.module'
 
 @Module({
   imports: [
+    AdvisorModule,
     StudentModule,
     EmailModule,
     ConfigModule,

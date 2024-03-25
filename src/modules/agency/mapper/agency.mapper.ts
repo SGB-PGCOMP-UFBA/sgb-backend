@@ -16,7 +16,8 @@ export class AgencyMapper {
     return {
       ...simplified,
       name: agency.name,
-      description: agency.description
+      description: agency.description,
+      scholarshipsCount: agency.scholarships ? agency.scholarships.length : 0
     }
   }
 

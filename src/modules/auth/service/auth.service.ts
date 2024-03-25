@@ -14,9 +14,10 @@ export class AuthService {
 
   async validateUser(
     tax_id: string,
-    passwordInserted: string
+    passwordInserted: string,
+    role: string
   ): Promise<ResponseUserDto> {
-    const user = await this.userService.findUserByTaxId(tax_id)
+    const user = await this.userService.findUserByTaxIdAndRole(tax_id, role)
     if (!user) {
       throw new HttpException(
         constants.exceptionMessages.user.NOT_FOUND,
@@ -32,7 +33,7 @@ export class AuthService {
       )
     }
 
-    return new ResponseUserDto(user.id, user.tax_id, user.name, user.role)
+    return new ResponseUserDto(user.id, user.tax_id, user.name, user.role, user.email)
   }
 
   async login(loggedUser: ResponseUserDto) {
@@ -46,7 +47,8 @@ export class AuthService {
       id: loggedUser.id,
       role: loggedUser.role,
       tax_id: loggedUser.tax_id,
-      name: loggedUser.name
+      name: loggedUser.name,
+      email: loggedUser.email
     }
   }
 }

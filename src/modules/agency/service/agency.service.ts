@@ -17,7 +17,7 @@ export class AgencyService {
   ) {}
 
   async findAll(): Promise<Agency[]> {
-    return await this.agencyRepository.find()
+    return await this.agencyRepository.find({ relations: [ 'scholarships' ] })
   }
 
   async create(dto: CreateAgencyDto): Promise<Agency> {

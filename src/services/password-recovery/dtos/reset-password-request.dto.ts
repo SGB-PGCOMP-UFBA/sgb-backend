@@ -1,4 +1,4 @@
-import { IsEmail } from 'class-validator'
+import { IsEmail, IsString } from 'class-validator'
 
 export class ResetPasswordRequestDto
   implements Readonly<ResetPasswordRequestDto>
@@ -9,4 +9,7 @@ export class ResetPasswordRequestDto
 
   @IsEmail()
   email: string
+
+  @IsString()
+  role: string
 }

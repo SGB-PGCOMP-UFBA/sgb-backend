@@ -86,6 +86,18 @@ export class AdvisorService {
     await this.advisorRepository.update({ email }, { password: passwordHash })
   }
 
+  async resetPassword(email: string, password: string): Promise<void> {
+    const findAdvisor = await this.advisorRepository.findOne({
+      where: { email }
+    })
+
+    if (!findAdvisor) {
+      throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
+    }
+
+    this.updatePassword(email, password)
+  }
+
   async delete(id: number) {
     const removed = await this.advisorRepository.delete(id)
     if (removed.affected === 1) {
