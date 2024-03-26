@@ -57,6 +57,22 @@ export class StudentService {
     })
   }
 
+  async findAllByAdvisorId(advisorId: number): Promise<Student[]> {
+    return await this.studentRepository.find({
+      relations: [
+        'articles',
+        'enrollments',
+        'enrollments.advisor',
+        'enrollments.scholarships'
+      ],
+      where: {
+        enrollments: {
+          advisor: { id: advisorId }
+        }
+      }
+    })
+  }
+
   async findAllPaginated(options: IPaginationOptions): Promise<PageDto<any>> {
     const studentsPaginate = paginate<Student>(
       this.studentRepository,

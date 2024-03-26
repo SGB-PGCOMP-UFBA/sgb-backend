@@ -27,6 +27,12 @@ export class StudentController {
     return students.map((student) => StudentMapper.detailed(student))
   }
 
+  @Get('/by-advisor/:advisorId')
+  async findAllByAdvisorId(@Param('advisorId') advisorId: number) {
+    const students = await this.studentsService.findAllByAdvisorId(advisorId)
+    return students.map((student) => StudentMapper.detailed(student))
+  }
+
   @Get('/list')
   async finPaginated(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,

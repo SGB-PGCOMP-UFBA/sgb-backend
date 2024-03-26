@@ -23,7 +23,7 @@ export class UserService {
       ADVISOR: this.advisorRepository,
       STUDENT: this.studentRepository
     }
-    
+
     const userRepository = repositoryMap[role]
 
     if (!userRepository) {
