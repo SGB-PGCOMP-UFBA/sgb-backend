@@ -24,12 +24,12 @@ export class AnalyticReportsMapper {
       const item = result[agency_name];
       const current = parseInt(item.currentYearAmount) || 0;
       const last = parseInt(item.lastYearAmount) || 0;
-  
+
       if (current && last) {
           const aumento = current - last;
           const porcentagemDeAumento = (aumento / last) * 100;
   
-          item.growthOverLastYear = porcentagemDeAumento;
+          item.growthOverLastYear = porcentagemDeAumento.toFixed(2);
       }
     });
 
