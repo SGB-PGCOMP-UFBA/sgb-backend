@@ -18,7 +18,7 @@ export class AdvisorService {
   ) {}
 
   async findAll(): Promise<Advisor[]> {
-    return await this.advisorRepository.find()
+    return await this.advisorRepository.find({ relations: [ 'enrollments' ] })
   }
 
   async create(createAdvisorDto: CreateAdvisorDto) {

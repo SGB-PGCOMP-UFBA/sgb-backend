@@ -19,7 +19,8 @@ export class AdvisorMapper {
       tax_id: advisor.tax_id ? advisor.tax_id : null,
       phone_number: advisor.phone_number ? advisor.phone_number : null,
       name: advisor.name,
-      email: advisor.email
+      email: advisor.email,
+      enrollmentsCount: advisor.enrollments ? advisor.enrollments.length : 0
     }
   }
 
