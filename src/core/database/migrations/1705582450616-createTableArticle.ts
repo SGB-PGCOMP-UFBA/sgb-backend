@@ -20,12 +20,12 @@ export class createTableArticle1705582450616 implements MigrationInterface {
           {
             name: 'title',
             type: 'varchar',
-            length: '100'
+            length: '300'
           },
           {
             name: 'abstract',
             type: 'varchar',
-            length: '255'
+            length: '3000'
           },
           {
             name: 'publication_date',
@@ -39,7 +39,7 @@ export class createTableArticle1705582450616 implements MigrationInterface {
           {
             name: 'doi_link',
             type: 'varchar',
-            length: '100'
+            length: '255'
           },
           {
             name: 'created_at',

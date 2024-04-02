@@ -19,7 +19,7 @@ import { UpdateStudentDto } from '../dto/update-student.dto'
 
 @Injectable()
 export class StudentService {
-  private readonly logger = new Logger(StudentService.name);
+  private readonly logger = new Logger(StudentService.name)
 
   constructor(
     @InjectRepository(Student) private studentRepository: Repository<Student>
@@ -28,7 +28,9 @@ export class StudentService {
   async createStudent(dto: CreateStudentDto): Promise<Student> {
     this.logger.log(constants.exceptionMessages.student.CREATION_STARTED)
     try {
-      const passwordHash = await hashPassword(dto.password ?? dto.tax_id.replace(/[-.]/g,''))
+      const passwordHash = await hashPassword(
+        dto.password ?? dto.tax_id.replace(/[-.]/g, '')
+      )
       const newStudent = this.studentRepository.create({
         ...dto,
         password: passwordHash
@@ -123,7 +125,7 @@ export class StudentService {
       name: dto.name || student.name,
       email: dto.email || student.email,
       tax_id: dto.tax_id || student.tax_id,
-      phone_number: dto.phone_number || student.phone_number,
+      phone_number: dto.phone_number || student.phone_number
     })
 
     return updatedStudent
@@ -140,19 +142,22 @@ export class StudentService {
 
   async countStudentsWithAndWithoutScholarships() {
     try {
-      const result = await this.studentRepository.createQueryBuilder('student')
+      const result = await this.studentRepository
+        .createQueryBuilder('student')
         .leftJoin('student.enrollments', 'enrollment')
         .leftJoin('enrollment.scholarships', 'scholarship')
         .select([
-            'COUNT(DISTINCT student.id) as totalStudents',
-            'COUNT(DISTINCT CASE WHEN scholarship.id IS NOT NULL THEN student.id END) as studentsWithScholarship',
-            'COUNT(DISTINCT CASE WHEN scholarship.id IS NULL THEN student.id END) as studentsWithoutScholarship'
+          'COUNT(DISTINCT student.id) as totalStudents',
+          'COUNT(DISTINCT CASE WHEN scholarship.id IS NOT NULL THEN student.id END) as studentsWithScholarship',
+          'COUNT(DISTINCT CASE WHEN scholarship.id IS NULL THEN student.id END) as studentsWithoutScholarship'
         ])
-        .getRawOne();
+        .getRawOne()
 
       return result
     } catch (error) {
-      throw new InternalServerErrorException(constants.exceptionMessages.student.COUNT_BY_SCHOLARSHIP_FAILED);
+      throw new InternalServerErrorException(
+        constants.exceptionMessages.student.COUNT_BY_SCHOLARSHIP_FAILED
+      )
     }
   }
 }

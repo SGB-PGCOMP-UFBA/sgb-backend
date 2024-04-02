@@ -51,7 +51,6 @@ export class StudentController {
   @Patch(':id')
   async update(@Param('id') id: number, @Body() dto: UpdateStudentDto) {
     const updatedStudent = await this.studentsService.update(id, dto)
-    
     return StudentMapper.detailed(updatedStudent)
   }
 

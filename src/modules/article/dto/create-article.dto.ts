@@ -6,11 +6,11 @@ export class CreateArticleDto {
   readonly student_id: number
 
   @IsString()
-  @MaxLength(100)
+  @MaxLength(300)
   readonly title: string
 
   @IsString()
-  @MaxLength(255)
+  @MaxLength(3000)
   readonly abstract: string
 
   @IsDate()
@@ -22,6 +22,6 @@ export class CreateArticleDto {
   readonly publication_place: string
 
   @IsUrl()
-  @MaxLength(100)
+  @MaxLength(255)
   readonly doi_link: string
 }
