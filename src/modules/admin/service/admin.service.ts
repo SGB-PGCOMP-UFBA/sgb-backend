@@ -5,9 +5,10 @@ import {
   NotFoundException
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { hashPassword } from '../../../core/utils/bcrypt'
 import { CreateAdminDto } from '../dto/create-admin.dto'
 import { Admin } from '../entities/admin.entity'
+import { hashPassword } from '../../../core/utils/bcrypt'
+import { decidePassword } from '../../../core/utils/password'
 
 @Injectable()
 export class AdminService {
@@ -17,7 +18,7 @@ export class AdminService {
 
   async create(createAdminDto: CreateAdminDto) {
     try {
-      const passwordHash = await hashPassword(createAdminDto.password)
+      const passwordHash = await hashPassword(decidePassword(createAdminDto))
       const newAdmin = this.adminRepository.create({
         ...createAdminDto,
         password: passwordHash

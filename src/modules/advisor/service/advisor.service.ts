@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Advisor } from '../entities/advisor.entity'
 import { hashPassword } from '../../../core/utils/bcrypt'
+import { decidePassword } from '../../../core/utils/password'
 import { CreateAdvisorDto } from '../dto/create-advisor.dto'
 import { UpdateAdvisorDto } from '../dto/update-advisor.dto'
 import { constants } from '../../../core/utils/constants'
@@ -18,12 +19,12 @@ export class AdvisorService {
   ) {}
 
   async findAll(): Promise<Advisor[]> {
-    return await this.advisorRepository.find({ relations: [ 'enrollments' ] })
+    return await this.advisorRepository.find({ relations: ['enrollments'] })
   }
 
   async create(createAdvisorDto: CreateAdvisorDto) {
     try {
-      const passwordHash = await hashPassword(createAdvisorDto.password ?? createAdvisorDto.tax_id.replace(/[-.]/g,''))
+      const passwordHash = await hashPassword(decidePassword(createAdvisorDto))
       const newAdvisor = this.advisorRepository.create({
         ...createAdvisorDto,
         password: passwordHash
@@ -33,7 +34,9 @@ export class AdvisorService {
 
       return newAdvisor
     } catch (error) {
-      throw new BadRequestException(constants.exceptionMessages.advisor.CREATION_FAILED)
+      throw new BadRequestException(
+        constants.exceptionMessages.advisor.CREATION_FAILED
+      )
     }
   }
 
@@ -48,7 +51,7 @@ export class AdvisorService {
       name: dto.name || advisor.name,
       email: dto.email || advisor.email,
       tax_id: dto.tax_id || advisor.tax_id,
-      phone_number: dto.phone_number || advisor.phone_number,
+      phone_number: dto.phone_number || advisor.phone_number
     })
 
     return updatedAdvisor

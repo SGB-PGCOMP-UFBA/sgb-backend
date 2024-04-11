@@ -13,33 +13,35 @@ export class createTableAdmin1705576682746 implements MigrationInterface {
             isNullable: false
           },
           {
+            name: 'name',
+            type: 'varchar',
+            length: '80'
+          },
+          {
             name: 'tax_id',
             type: 'char',
             length: '14',
             isUnique: true,
-            isNullable: true,
+            isNullable: true
           },
           {
             name: 'phone_number',
             type: 'char',
             length: '16',
             isUnique: true,
-            isNullable: true,
-          },
-          {
-            name: 'name',
-            type: 'varchar',
-            length: '80'
+            isNullable: true
           },
           {
             name: 'email',
             type: 'varchar',
             length: '50',
-            isUnique: true
+            isUnique: true,
+            isNullable: false
           },
           {
             name: 'password',
-            type: 'varchar'
+            type: 'varchar',
+            isNullable: false
           },
           {
             name: 'role',

@@ -7,7 +7,6 @@ import {
   UpdateDateColumn
 } from 'typeorm'
 import { User } from '../../user/interfaces/user.interface'
-import { Article } from '../../article/entities/article.entity'
 import { Enrollment } from '../../enrollment/entities/enrollment.entity'
 
 @Entity('student')
@@ -44,7 +43,4 @@ export class Student implements User {
 
   @OneToMany(() => Enrollment, (enrollment) => enrollment.student)
   enrollments: Enrollment[]
-
-  @OneToMany(() => Article, (article) => article.student)
-  articles: Article[]
 }

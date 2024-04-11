@@ -21,32 +21,34 @@ export class createTableStudent1705578693404 implements MigrationInterface {
             name: 'email',
             type: 'varchar',
             length: '80',
-            isUnique: true
+            isUnique: true,
+            isNullable: false
           },
           {
             name: 'password',
-            type: 'varchar'
+            type: 'varchar',
+            isNullable: false
           },
           {
             name: 'phone_number',
             type: 'char',
             length: '16',
             isUnique: true,
-            isNullable: true,
+            isNullable: true
           },
           {
             name: 'link_to_lattes',
             type: 'varchar',
             length: '80',
             isUnique: true,
-            isNullable: true,
+            isNullable: true
           },
           {
             name: 'tax_id',
             type: 'char',
             length: '14',
             isUnique: true,
-            isNullable: false,
+            isNullable: true
           },
           {
             name: 'role',

@@ -21,25 +21,27 @@ export class createTableAdvisor1705576682747 implements MigrationInterface {
             name: 'email',
             type: 'varchar',
             length: '50',
-            isUnique: true
+            isUnique: true,
+            isNullable: true
           },
           {
             name: 'password',
-            type: 'varchar'
+            type: 'varchar',
+            isNullable: false
           },
           {
             name: 'phone_number',
             type: 'char',
             length: '16',
             isUnique: true,
-            isNullable: true,
+            isNullable: true
           },
           {
             name: 'tax_id',
             type: 'char',
             length: '14',
             isUnique: true,
-            isNullable: true,
+            isNullable: true
           },
           {
             name: 'role',

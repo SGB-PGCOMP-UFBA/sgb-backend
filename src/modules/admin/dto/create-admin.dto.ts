@@ -5,18 +5,19 @@ export class CreateAdminDto {
   @IsString()
   readonly name: string
 
+  @IsEmail({}, { message: constants.bodyValidationMessages.EMAIL_FORMAT_ERROR })
+  readonly email: string
+
+  @IsString()
+  readonly password: string
+
+  @IsOptional()
   @IsString({ message: constants.bodyValidationMessages.TAX_ID_FORMAT_ERROR })
   @Length(14, 14)
   @Matches(constants.expressions.REGEX_TAX_ID, {
     message: constants.bodyValidationMessages.TAX_ID_FORMAT_ERROR
   })
   readonly tax_id: string
-
-  @IsEmail({}, { message: constants.bodyValidationMessages.EMAIL_FORMAT_ERROR })
-  readonly email: string
-
-  @IsString()
-  readonly password: string
 
   @IsString()
   @IsOptional()

@@ -11,6 +11,7 @@ import { paginate, IPaginationOptions } from 'nestjs-typeorm-paginate'
 import { Student } from '../entities/student.entity'
 import { CreateStudentDto } from '../dto/create-student.dto'
 import { hashPassword } from '../../../core/utils/bcrypt'
+import { decidePassword } from '../../../core/utils/password'
 import { PageDto } from '../../../core/pagination/page.dto'
 import { PageMetaDto } from '../../../core/pagination/page-meta.dto'
 import { constants } from '../../../core/utils/constants'
@@ -28,9 +29,7 @@ export class StudentService {
   async createStudent(dto: CreateStudentDto): Promise<Student> {
     this.logger.log(constants.exceptionMessages.student.CREATION_STARTED)
     try {
-      const passwordHash = await hashPassword(
-        dto.password ?? dto.tax_id.replace(/[-.]/g, '')
-      )
+      const passwordHash = await hashPassword(decidePassword(dto))
       const newStudent = this.studentRepository.create({
         ...dto,
         password: passwordHash
