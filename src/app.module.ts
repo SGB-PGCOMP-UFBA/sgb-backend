@@ -3,7 +3,6 @@ import { ConfigModule } from '@nestjs/config'
 import { DatabaseModule } from './core/database/database.module'
 import { StudentModule } from './modules/student/student.module'
 import { EmailModule } from './services/email-sending/email.module'
-import { ArticleModule } from './modules/article/article.module'
 import { AuthModule } from './modules/auth/auth.module'
 import { AdvisorModule } from './modules/advisor/advisor.module'
 import { ScholarshipModule } from './modules/scholarship/scholarship.module'
@@ -28,7 +27,6 @@ require('dotenv')
     AnalyticReportsModule,
     AuthModule,
     AgencyModule,
-    ArticleModule,
     ScholarshipModule,
     AdminModule,
     StudentModule,

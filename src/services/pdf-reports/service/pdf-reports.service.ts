@@ -102,26 +102,6 @@ export class PdfReportService {
           doc.text('Estudante sem orientador(a)')
         }
         doc.moveDown(2)
-        if (student.articles.length > 0) {
-          if (student.articles.length == 1) {
-            doc.text('Artigo publicado: ').fontSize(12)
-          } else {
-            doc.text('Artigos publicados: ').fontSize(12)
-          }
-          doc.moveDown()
-          for (const article of student.articles) {
-            doc.fontSize(10)
-            doc.text('    Título: ' + article.title)
-            const publication_date = formatDate(article.publication_date)
-            doc.text('    Local de publicação: ' + article.publication_place)
-            doc.text('    Data de publicação: ' + publication_date).fontSize(10)
-            doc.text('    DOI Link: ' + article.doi_link).fontSize(10)
-            doc.moveDown()
-          }
-        } else {
-          doc.text('Sem artigos publicados.').fontSize(12)
-        }
-        doc.moveDown(2)
         doc.lineWidth(5)
         doc
           .lineCap('butt')

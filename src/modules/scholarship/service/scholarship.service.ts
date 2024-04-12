@@ -85,7 +85,8 @@ export class ScholarshipService {
 
   async countGroupingByAgencyAndYear() {
     try {
-      const result = await this.scholarshipRepository.createQueryBuilder('scholarship')
+      const result = await this.scholarshipRepository
+        .createQueryBuilder('scholarship')
         .select([
           'EXTRACT(YEAR FROM scholarship.scholarship_starts_at) AS scholarship_year',
           'agency.name AS agency_name',
@@ -96,17 +97,20 @@ export class ScholarshipService {
         .groupBy('scholarship_year, agency_name')
         .orderBy('scholarship_year', 'ASC')
         .addOrderBy('agency_name', 'ASC')
-        .getRawMany();  
+        .getRawMany()
 
       return result
     } catch (error) {
-      throw new InternalServerErrorException(constants.exceptionMessages.scholarship.COUNT_BY_AGENCY_FAILED);
+      throw new InternalServerErrorException(
+        constants.exceptionMessages.scholarship.COUNT_BY_AGENCY_FAILED
+      )
     }
   }
 
   async countGroupingByAgencyAndCourse() {
     try {
-      const result = await this.scholarshipRepository.createQueryBuilder('scholarship')
+      const result = await this.scholarshipRepository
+        .createQueryBuilder('scholarship')
         .innerJoin('scholarship.agency', 'agency')
         .innerJoin('scholarship.enrollment', 'enrollment')
         .where('scholarship.active = :active', { active: true })
@@ -116,11 +120,13 @@ export class ScholarshipService {
           'COUNT(scholarship.id) as count'
         ])
         .groupBy('agency.name, enrollment.enrollment_program')
-        .getRawMany();  
+        .getRawMany()
 
       return result
     } catch (error) {
-      throw new InternalServerErrorException(constants.exceptionMessages.scholarship.COUNT_BY_AGENCY_FAILED);
+      throw new InternalServerErrorException(
+        constants.exceptionMessages.scholarship.COUNT_BY_AGENCY_FAILED
+      )
     }
   }
 }

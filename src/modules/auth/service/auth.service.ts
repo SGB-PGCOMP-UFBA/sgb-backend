@@ -13,11 +13,11 @@ export class AuthService {
   ) {}
 
   async validateUser(
-    tax_id: string,
+    email: string,
     passwordInserted: string,
     role: string
   ): Promise<ResponseUserDto> {
-    const user = await this.userService.findUserByTaxIdAndRole(tax_id, role)
+    const user = await this.userService.findUserByEmailAndRole(email, role)
     if (!user) {
       throw new HttpException(
         constants.exceptionMessages.user.NOT_FOUND,
@@ -33,7 +33,13 @@ export class AuthService {
       )
     }
 
-    return new ResponseUserDto(user.id, user.tax_id, user.name, user.role, user.email)
+    return new ResponseUserDto(
+      user.id,
+      user.tax_id,
+      user.name,
+      user.role,
+      user.email
+    )
   }
 
   async login(loggedUser: ResponseUserDto) {

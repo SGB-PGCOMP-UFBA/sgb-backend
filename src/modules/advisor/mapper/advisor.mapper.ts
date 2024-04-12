@@ -6,6 +6,7 @@ export class AdvisorMapper {
     return {
       id: advisor.id,
       role: advisor.role,
+      status: advisor.status,
       created_at: advisor.created_at,
       updated_at: advisor.updated_at
     }

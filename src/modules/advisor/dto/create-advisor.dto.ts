@@ -20,6 +20,11 @@ export class CreateAdvisorDto {
   readonly password: string
 
   @IsOptional()
+  @IsString()
+  @Matches('^(ACTIVE|INACTIVE)$')
+  readonly status: string
+
+  @IsOptional()
   @IsString({ message: constants.bodyValidationMessages.TAX_ID_FORMAT_ERROR })
   @Length(14, 14)
   @Matches(constants.expressions.REGEX_TAX_ID, {

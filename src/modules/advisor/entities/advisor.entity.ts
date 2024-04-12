@@ -29,8 +29,11 @@ export class Advisor implements User {
   @Column({ nullable: false })
   password: string
 
-  @Column({ nullable: true, default: 'ADVISOR' })
+  @Column({ nullable: false, default: 'ADVISOR' })
   role: string
+
+  @Column({ nullable: false, default: 'ACTIVE' })
+  status: string
 
   @CreateDateColumn()
   created_at: Date

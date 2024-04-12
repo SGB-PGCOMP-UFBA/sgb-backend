@@ -46,7 +46,14 @@ export class createTableAdvisor1705576682747 implements MigrationInterface {
           {
             name: 'role',
             type: 'varchar',
-            default: "'ADVISOR'"
+            default: "'ADVISOR'",
+            isNullable: false
+          },
+          {
+            name: 'status',
+            type: 'varchar',
+            default: "'ACTIVE'",
+            isNullable: false
           },
           {
             name: 'created_at',

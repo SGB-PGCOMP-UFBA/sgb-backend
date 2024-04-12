@@ -25,7 +25,6 @@ export class AdvisorController {
   @Patch(':id')
   async update(@Param('id') id: number, @Body() dto: UpdateAdvisorDto) {
     const updatedAdvisor = await this.advisorService.update(id, dto)
-    
     return AdvisorMapper.detailed(updatedAdvisor)
   }
 

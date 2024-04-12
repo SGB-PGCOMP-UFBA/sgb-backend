@@ -1,5 +1,4 @@
 import { Student } from '../entities/student.entity'
-import { ArticleMapper } from '../../article/mapper/article.mapper'
 import { EnrollmentMapper } from '../../enrollment/mappers/enrollment.mapper'
 
 export class StudentMapper {
@@ -27,16 +26,12 @@ export class StudentMapper {
 
   static detailedWithRelations(student: Student) {
     const detailed = this.detailed(student)
-    const articles = student.articles?.map((article) =>
-      ArticleMapper.detailed(article)
-    )
     const enrollments = student.enrollments?.map((enrollment) =>
       EnrollmentMapper.detailed(enrollment)
     )
 
     return {
       ...detailed,
-      articles,
       enrollments
     }
   }

@@ -17,8 +17,8 @@ export class UserService {
     private adminRepository: Repository<Admin>
   ) {}
 
-  async findUserByTaxIdAndRole(
-    tax_id: string,
+  async findUserByEmailAndRole(
+    email: string,
     role: string
   ): Promise<CreateUserDto> {
     const repositoryMap = {
@@ -33,7 +33,7 @@ export class UserService {
       throw new Error(constants.exceptionMessages.user.SOMETHING_WRONG)
     }
 
-    const user = await userRepository.findOne({ where: { tax_id } })
+    const user = await userRepository.findOne({ where: { email } })
 
     if (!user) {
       throw new NotFoundException(constants.exceptionMessages.user.NOT_FOUND)
