@@ -38,9 +38,10 @@ export class createTableScholarship1706009559542 implements MigrationInterface {
             isNullable: true
           },
           {
-            name: 'active',
-            type: 'boolean',
-            default: true
+            name: 'status',
+            type: 'varchar',
+            default: "'ON_GOING'",
+            isNullable: false
           },
           {
             name: 'salary',

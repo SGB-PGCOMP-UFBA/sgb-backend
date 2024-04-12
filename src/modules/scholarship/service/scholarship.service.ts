@@ -5,10 +5,15 @@ import {
   InternalServerErrorException
 } from '@nestjs/common/exceptions'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { FindManyOptions, Like, Repository } from 'typeorm'
+import { paginate, IPaginationOptions } from 'nestjs-typeorm-paginate'
+import { PageDto } from '../../../core/pagination/page.dto'
+import { PageMetaDto } from '../../../core/pagination/page-meta.dto'
 import { CreateScholarshipDto } from '../dto/create-scholarship.dto'
 import { Scholarship } from '../entities/scholarship.entity'
 import { constants } from '../../../core/utils/constants'
+import { ScholarshipMapper } from '../mapper/scholarship.mapper'
+import { ScholarshipFilters } from '../filters/IScholarshipFilters'
 
 @Injectable()
 export class ScholarshipService {
@@ -21,15 +26,54 @@ export class ScholarshipService {
     return await this.scholarshipRepository.find()
   }
 
-  async findAllWithRelations(): Promise<Scholarship[]> {
-    return await this.scholarshipRepository.find({
+  async findAllPaginated(
+    paginateOptions: IPaginationOptions,
+    filters: ScholarshipFilters
+  ) {
+    const findOptions: FindManyOptions<Scholarship> = {
       relations: [
         'agency',
         'enrollment',
         'enrollment.student',
         'enrollment.advisor'
-      ]
-    })
+      ],
+      where: {}
+    }
+
+    if (filters?.scholarshipStatus) {
+      findOptions.where['status'] = Like(`%${filters.scholarshipStatus}%`)
+    }
+    if (filters?.agencyName) {
+      findOptions.where['agency.name'] = Like(`%${filters.agencyName}%`)
+    }
+    if (filters?.advisorName) {
+      findOptions.where['enrollment.advisor.name'] = Like(
+        `%${filters.advisorName}%`
+      )
+    }
+
+    const scholarshipsPaginate = paginate<Scholarship>(
+      this.scholarshipRepository,
+      paginateOptions,
+      findOptions
+    )
+
+    const items = (await scholarshipsPaginate).items
+    const meta = (await scholarshipsPaginate).meta
+
+    const itemsDto = items.map((scholarship) =>
+      ScholarshipMapper.detailedWithRelations(scholarship)
+    )
+
+    const metaDto = new PageMetaDto(
+      meta.totalItems,
+      meta.itemCount,
+      meta.itemsPerPage,
+      meta.totalPages,
+      meta.currentPage
+    )
+
+    return new PageDto(itemsDto, metaDto)
   }
 
   async findAllForNotification(): Promise<Scholarship[]> {
@@ -40,7 +84,7 @@ export class ScholarshipService {
         'enrollment.student',
         'enrollment.advisor'
       ],
-      where: { active: true }
+      where: { status: 'ON_GOING' }
     })
   }
 
@@ -75,7 +119,7 @@ export class ScholarshipService {
 
   async deactivate(id: number): Promise<void> {
     try {
-      await this.scholarshipRepository.update(id, { active: false })
+      await this.scholarshipRepository.update(id, { status: 'FINALIZED' })
     } catch (error) {
       throw new InternalServerErrorException(
         constants.exceptionMessages.scholarship.DEACTIVATE_FAILED

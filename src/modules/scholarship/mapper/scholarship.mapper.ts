@@ -10,7 +10,7 @@ export class ScholarshipMapper {
       id: scholarship.id,
       agency_id: scholarship.agency_id,
       enrollment_id: scholarship.enrollment_id,
-      active: scholarship.active,
+      status: scholarship.status,
       created_at: scholarship.created_at,
       updated_at: scholarship.updated_at
     }
@@ -44,7 +44,7 @@ export class ScholarshipMapper {
 
     return {
       id: scholarship.id,
-      active: scholarship.active,
+      status: scholarship.status,
       scholarship_starts_at: scholarship.scholarship_starts_at,
       scholarship_ends_at: scholarship.scholarship_ends_at,
       extension_ends_at: scholarship.extension_ends_at,

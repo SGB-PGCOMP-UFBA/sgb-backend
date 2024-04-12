@@ -6,39 +6,40 @@ import {
   Delete,
   Param,
   HttpStatus,
-  HttpCode
+  HttpCode,
+  Query,
+  DefaultValuePipe,
+  ParseIntPipe
 } from '@nestjs/common'
 import { ScholarshipService } from '../service/scholarship.service'
 import { CreateScholarshipDto } from '../dto/create-scholarship.dto'
 import { ScholarshipMapper } from '../mapper/scholarship.mapper'
+import { ScholarshipFilters } from '../filters/IScholarshipFilters'
 
 @Controller('v1/scholarship')
 export class ScholarshipController {
   constructor(private readonly scholarshipService: ScholarshipService) {}
+
+  @Get('/paginated')
+  async findAllPaginated(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
+    @Query() filters?: ScholarshipFilters
+  ) {
+    page = page < 1 ? 1 : page
+    limit = limit > 100 ? 100 : limit
+
+    return await this.scholarshipService.findAllPaginated(
+      { page, limit },
+      filters
+    )
+  }
 
   @Post()
   async create(@Body() dto: CreateScholarshipDto) {
     const scholarship = await this.scholarshipService.create(dto)
 
     return ScholarshipMapper.simplified(scholarship)
-  }
-
-  @Get()
-  async findAll() {
-    const scholarships = await this.scholarshipService.findAll()
-
-    return scholarships.map((scholarship) =>
-      ScholarshipMapper.detailed(scholarship)
-    )
-  }
-
-  @Get('/detailed')
-  async findAllFullDetailed() {
-    const scholarships = await this.scholarshipService.findAllWithRelations()
-
-    return scholarships.map((scholarship) =>
-      ScholarshipMapper.detailedWithRelations(scholarship)
-    )
   }
 
   @Delete(':id')
