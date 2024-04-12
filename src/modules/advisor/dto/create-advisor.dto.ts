@@ -7,6 +7,7 @@ import {
   MaxLength
 } from 'class-validator'
 import { constants } from '../../../core/utils/constants'
+import { Transform } from 'class-transformer'
 
 export class CreateAdvisorDto {
   @IsString()
@@ -25,17 +26,19 @@ export class CreateAdvisorDto {
   readonly status: string
 
   @IsOptional()
-  @IsString({ message: constants.bodyValidationMessages.TAX_ID_FORMAT_ERROR })
+  @IsString()
+  @Transform((params) => (params.value?.length > 0 ? params.value : null))
   @Length(14, 14)
   @Matches(constants.expressions.REGEX_TAX_ID, {
     message: constants.bodyValidationMessages.TAX_ID_FORMAT_ERROR
   })
-  readonly tax_id: string
+  readonly tax_id: string | null
 
-  @IsString()
   @IsOptional()
+  @IsString()
+  @Transform((params) => (params.value?.length > 0 ? params.value : null))
   @Length(16, 16, {
     message: constants.bodyValidationMessages.PHONE_FORMAT_ERROR
   })
-  readonly phone_number: string
+  readonly phone_number: string | null
 }
