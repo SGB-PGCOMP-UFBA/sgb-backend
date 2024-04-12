@@ -17,6 +17,7 @@ export class CreateAdvisorDto {
   @IsEmail({}, { message: constants.bodyValidationMessages.EMAIL_FORMAT_ERROR })
   readonly email: string
 
+  @IsOptional()
   @IsString()
   readonly password: string
 
