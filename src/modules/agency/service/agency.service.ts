@@ -17,7 +17,10 @@ export class AgencyService {
   ) {}
 
   async findAll(): Promise<Agency[]> {
-    return await this.agencyRepository.find({ relations: [ 'scholarships' ] })
+    return await this.agencyRepository.find({
+      relations: ['scholarships'],
+      order: { name: 'ASC' }
+    })
   }
 
   async create(dto: CreateAgencyDto): Promise<Agency> {
@@ -27,7 +30,9 @@ export class AgencyService {
 
       return newAgency
     } catch (error) {
-      throw new BadRequestException(constants.exceptionMessages.agency.CREATION_FAILED)
+      throw new BadRequestException(
+        constants.exceptionMessages.agency.CREATION_FAILED
+      )
     }
   }
 
@@ -40,7 +45,7 @@ export class AgencyService {
     const updatedAgency = await this.agencyRepository.save({
       id: agency.id,
       name: dto.name || agency.name,
-      description: dto.description || agency.description,
+      description: dto.description || agency.description
     })
 
     return updatedAgency

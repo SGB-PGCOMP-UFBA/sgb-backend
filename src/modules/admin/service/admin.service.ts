@@ -32,7 +32,9 @@ export class AdminService {
   }
 
   async findAll(): Promise<Admin[]> {
-    return await this.adminRepository.find()
+    return await this.adminRepository.find({
+      order: { name: 'ASC' }
+    })
   }
 
   async remove(id: number) {
