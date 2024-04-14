@@ -96,6 +96,15 @@ export class StudentService {
     return new PageDto(itemsDto, metaDto)
   }
 
+  async findOneByEmail(email: string): Promise<Student> {
+    const student = await this.studentRepository.findOneBy({ email })
+    if (!student) {
+      throw new NotFoundException(constants.exceptionMessages.student.NOT_FOUND)
+    }
+
+    return student
+  }
+
   async resetPassword(email: string, password: string): Promise<void> {
     const findStudent = await this.studentRepository.findOne({
       where: { email }

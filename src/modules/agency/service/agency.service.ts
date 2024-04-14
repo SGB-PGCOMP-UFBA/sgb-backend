@@ -23,6 +23,15 @@ export class AgencyService {
     })
   }
 
+  async findOneByName(name: string): Promise<Agency> {
+    const agency = await this.agencyRepository.findOneBy({ name })
+    if (!agency) {
+      throw new NotFoundException(constants.exceptionMessages.agency.NOT_FOUND)
+    }
+
+    return agency
+  }
+
   async create(dto: CreateAgencyDto): Promise<Agency> {
     try {
       const newAgency = this.agencyRepository.create({ ...dto })

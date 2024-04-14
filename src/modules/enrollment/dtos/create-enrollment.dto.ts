@@ -1,18 +1,29 @@
 import { Transform, Type } from 'class-transformer'
-import { IsDate, IsIn, IsNumber, IsOptional, IsString } from 'class-validator'
+import {
+  IsDate,
+  IsEmail,
+  IsIn,
+  IsOptional,
+  IsString,
+  Length
+} from 'class-validator'
+import { constants } from '../../../core/utils/constants'
 
 export class CreateEnrollmentDto {
-  @IsNumber()
-  readonly student_id: number
+  @IsString()
+  @IsEmail({}, { message: constants.bodyValidationMessages.EMAIL_FORMAT_ERROR })
+  readonly student_email: string
 
-  @IsNumber()
-  readonly advisor_id: number
+  @IsString()
+  @IsEmail({}, { message: constants.bodyValidationMessages.EMAIL_FORMAT_ERROR })
+  readonly advisor_email: string
 
   @Type(() => Date)
   @IsDate()
   readonly enrollment_date: Date
 
   @IsString()
+  @Length(9, 10)
   readonly enrollment_number: string
 
   @Transform(({ value }) => value.toUpperCase())

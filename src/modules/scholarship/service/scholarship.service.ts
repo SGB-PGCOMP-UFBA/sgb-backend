@@ -14,12 +14,16 @@ import { Scholarship } from '../entities/scholarship.entity'
 import { constants } from '../../../core/utils/constants'
 import { ScholarshipMapper } from '../mapper/scholarship.mapper'
 import { ScholarshipFilters } from '../filters/IScholarshipFilters'
+import { AgencyService } from '../../../modules/agency/service/agency.service'
+import { EnrollmentService } from '../../../modules/enrollment/services/enrollment.service'
 
 @Injectable()
 export class ScholarshipService {
   constructor(
     @InjectRepository(Scholarship)
-    private scholarshipRepository: Repository<Scholarship>
+    private scholarshipRepository: Repository<Scholarship>,
+    private agencyService: AgencyService,
+    private enrollmentService: EnrollmentService
   ) {}
 
   async findAll(): Promise<Scholarship[]> {
@@ -88,12 +92,22 @@ export class ScholarshipService {
     })
   }
 
-  async create(
-    createScholarshipDto: CreateScholarshipDto
-  ): Promise<Scholarship> {
+  async create(dto: CreateScholarshipDto): Promise<Scholarship> {
     try {
+      const agency = await this.agencyService.findOneByName(dto.agency_name)
+      const enrollment =
+        await this.enrollmentService.findOneByStudentEmailAndEnrollmentProgram(
+          dto.student_email,
+          dto.enrollment_program
+        )
+
       const newScholarship = this.scholarshipRepository.create({
-        ...createScholarshipDto
+        agency_id: agency.id,
+        enrollment_id: enrollment.id,
+        scholarship_starts_at: dto.scholarship_starts_at,
+        scholarship_ends_at: dto.scholarship_ends_at,
+        extension_ends_at: dto.extension_ends_at,
+        salary: dto.salary
       })
 
       await this.scholarshipRepository.save(newScholarship)

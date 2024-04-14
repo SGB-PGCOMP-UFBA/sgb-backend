@@ -6,8 +6,8 @@ import {
   IsOptional,
   MaxLength
 } from 'class-validator'
-import { constants } from '../../../core/utils/constants'
 import { Transform } from 'class-transformer'
+import { constants } from '../../../core/utils/constants'
 
 export class CreateAdvisorDto {
   @IsString()

@@ -20,7 +20,7 @@ export class PasswordRecoveryService {
       ADVISOR: this.advisorService,
       STUDENT: this.studentService
     }
-    
+
     const service = serviceMap[dto.role]
 
     await service.resetPassword(dto.email, newPassword)

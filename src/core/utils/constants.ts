@@ -16,7 +16,8 @@ const constants = {
   },
   bodyValidationMessages: {
     NAME_FORMAT_ERROR: 'Insira um nome válido.',
-    PHONE_FORMAT_ERROR: 'Insira um número de telefone válido! Formato: (00) 0 0000-0000',
+    PHONE_FORMAT_ERROR:
+      'Insira um número de telefone válido! Formato: (00) 0 0000-0000',
     LATTES_LINK_FORMAT_ERROR:
       'Insira um link lattes válido no formato: http://lattes.cnpq.br/999999999999',
     TAX_ID_FORMAT_ERROR: 'Insira um CPF válido! Formato: 000.000.000-00',
@@ -48,8 +49,9 @@ const constants = {
       NOT_FOUND: 'Agency not found.'
     },
     student: {
-      CREATION_STARTED: "The process of inserting a new student has started.",
-      CREATION_COMPLETED: "The process of inserting a new student has been completed.",
+      CREATION_STARTED: 'The process of inserting a new student has started.',
+      CREATION_COMPLETED:
+        'The process of inserting a new student has been completed.',
       CREATION_FAILED: "Cant't create student.",
       NOT_FOUND: 'Student not found.',
       COUNT_BY_SCHOLARSHIP_FAILED: 'Failed to count students by scholarship.'

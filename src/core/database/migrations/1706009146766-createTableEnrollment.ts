@@ -30,7 +30,7 @@ export class createTableEnrollment1706009146766 implements MigrationInterface {
           {
             name: 'enrollment_number',
             type: 'char',
-            length: '9',
+            length: '10',
             isNullable: false
           },
           {
