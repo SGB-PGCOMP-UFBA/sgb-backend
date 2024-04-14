@@ -4,7 +4,8 @@ import {
   Length,
   Matches,
   IsOptional,
-  MaxLength
+  MaxLength,
+  IsIn
 } from 'class-validator'
 import { Transform } from 'class-transformer'
 import { constants } from '../../../core/utils/constants'
@@ -28,7 +29,8 @@ export class CreateAdvisorDto {
 
   @IsOptional()
   @IsString()
-  @Matches('^(ACTIVE|INACTIVE)$')
+  @Transform(({ value }) => value.toUpperCase())
+  @IsIn(['ACTIVE', 'INACTIVE'])
   readonly status: string
 
   @IsOptional()
