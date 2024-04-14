@@ -14,7 +14,7 @@ export class Advisor implements User {
   @PrimaryGeneratedColumn()
   id: number
 
-  @Column({ length: 14, nullable: true, unique: true })
+  @Column({ length: 11, nullable: true, unique: true })
   tax_id: string
 
   @Column({ length: 11, nullable: true, unique: true })

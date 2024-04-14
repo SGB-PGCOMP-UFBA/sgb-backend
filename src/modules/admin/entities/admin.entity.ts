@@ -15,13 +15,13 @@ export class Admin implements User {
   @Column({ nullable: false })
   name: string
 
-  @Column({ length: 14, nullable: true, unique: true })
+  @Column({ length: 11, nullable: true, unique: true })
   tax_id: string
 
-  @Column({ length: 16, nullable: true, unique: true })
+  @Column({ length: 11, nullable: true, unique: true })
   phone_number: string
 
-  @Column({ nullable: false, unique: true })
+  @Column({ length: 80, nullable: false, unique: true })
   email: string
 
   @Column({ nullable: false })

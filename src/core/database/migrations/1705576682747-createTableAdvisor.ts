@@ -32,14 +32,14 @@ export class createTableAdvisor1705576682747 implements MigrationInterface {
           {
             name: 'phone_number',
             type: 'char',
-            length: '16',
+            length: '11',
             isUnique: true,
             isNullable: true
           },
           {
             name: 'tax_id',
             type: 'char',
-            length: '14',
+            length: '11',
             isUnique: true,
             isNullable: true
           },

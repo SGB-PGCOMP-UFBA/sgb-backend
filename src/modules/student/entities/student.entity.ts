@@ -14,8 +14,11 @@ export class Student implements User {
   @PrimaryGeneratedColumn()
   id: number
 
-  @Column({ length: 14, nullable: false, unique: true })
+  @Column({ length: 11, nullable: true, unique: true })
   tax_id: string
+
+  @Column({ length: 11, nullable: true, unique: true })
+  phone_number: string
 
   @Column({ length: 80, nullable: false })
   name: string
@@ -25,9 +28,6 @@ export class Student implements User {
 
   @Column({ length: 80, nullable: false })
   link_to_lattes: string
-
-  @Column({ length: 11, nullable: false })
-  phone_number: string
 
   @Column({ nullable: false })
   password: string

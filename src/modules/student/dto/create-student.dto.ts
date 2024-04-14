@@ -14,6 +14,7 @@ export class CreateStudentDto {
   @MaxLength(80)
   readonly name: string
 
+  @IsString()
   @MaxLength(80)
   @IsEmail({}, { message: constants.bodyValidationMessages.EMAIL_FORMAT_ERROR })
   @Matches(constants.expressions.REGEX_EMAIL, {
@@ -25,14 +26,6 @@ export class CreateStudentDto {
   readonly password: string
 
   @IsOptional()
-  @IsString({ message: constants.bodyValidationMessages.TAX_ID_FORMAT_ERROR })
-  @Length(14, 14)
-  @Matches(constants.expressions.REGEX_TAX_ID, {
-    message: constants.bodyValidationMessages.TAX_ID_FORMAT_ERROR
-  })
-  readonly tax_id: string
-
-  @IsOptional()
   @IsUrl(
     {},
     { message: constants.bodyValidationMessages.LATTES_LINK_FORMAT_ERROR }
@@ -41,8 +34,16 @@ export class CreateStudentDto {
   readonly link_to_lattes: string
 
   @IsOptional()
+  @IsString({ message: constants.bodyValidationMessages.TAX_ID_FORMAT_ERROR })
+  @Length(11, 11)
+  @Matches(constants.expressions.REGEX_TAX_ID, {
+    message: constants.bodyValidationMessages.TAX_ID_FORMAT_ERROR
+  })
+  readonly tax_id: string
+
+  @IsOptional()
   @IsString()
-  @Length(16, 16, {
+  @Length(11, 11, {
     message: constants.bodyValidationMessages.PHONE_FORMAT_ERROR
   })
   readonly phone_number: string
