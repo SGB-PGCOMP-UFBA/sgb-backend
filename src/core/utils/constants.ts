@@ -19,7 +19,7 @@ const constants = {
     PHONE_FORMAT_ERROR: 'Insira um número de telefone válido!',
     LATTES_LINK_FORMAT_ERROR:
       'Insira um link lattes válido no formato: http://lattes.cnpq.br/999999999999',
-    TAX_ID_FORMAT_ERROR: 'Insira um CPF válido! Formato: 000.000.000-00',
+    TAX_ID_FORMAT_ERROR: 'Insira um CPF válido!',
     EMAIL_FORMAT_ERROR:
       'Insira um E-mail válido! Formato: alguem@exemplo.com.br',
     ENROLLMENT_NUMBER_FORMAT_ERROR:

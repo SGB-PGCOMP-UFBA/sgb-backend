@@ -34,8 +34,7 @@ export class CreateAdvisorDto {
   @IsOptional()
   @IsString()
   @Transform((params) => (params.value?.length > 0 ? params.value : null))
-  @Length(11, 11)
-  @Matches(constants.expressions.REGEX_TAX_ID, {
+  @Length(11, 11, {
     message: constants.bodyValidationMessages.TAX_ID_FORMAT_ERROR
   })
   readonly tax_id: string | null

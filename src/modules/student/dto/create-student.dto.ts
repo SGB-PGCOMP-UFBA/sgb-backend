@@ -35,8 +35,7 @@ export class CreateStudentDto {
 
   @IsOptional()
   @IsString({ message: constants.bodyValidationMessages.TAX_ID_FORMAT_ERROR })
-  @Length(11, 11)
-  @Matches(constants.expressions.REGEX_TAX_ID, {
+  @Length(11, 11, {
     message: constants.bodyValidationMessages.TAX_ID_FORMAT_ERROR
   })
   readonly tax_id: string
