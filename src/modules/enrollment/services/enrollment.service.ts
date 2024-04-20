@@ -21,8 +21,15 @@ export class EnrollmentService {
     private studentService: StudentService
   ) {}
 
-  async findAll(): Promise<Enrollment[]> {
-    return await this.enrollmentRepository.find()
+  async findAllForFilter(): Promise<Enrollment[]> {
+    const distinctEnrollmentPrograms = await this.enrollmentRepository
+      .createQueryBuilder('enrollment')
+      .select('enrollment.enrollment_program', 'enrollment_program')
+      .distinct(true)
+      .orderBy('enrollment.enrollment_program', 'ASC')
+      .getRawMany()
+
+    return distinctEnrollmentPrograms
   }
 
   async findOneByStudentEmailAndEnrollmentProgram(

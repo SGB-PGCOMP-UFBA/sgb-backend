@@ -25,6 +25,12 @@ export class AdvisorService {
     })
   }
 
+  async findAllForFilter(): Promise<Advisor[]> {
+    return await this.advisorRepository.find({
+      order: { name: 'ASC' }
+    })
+  }
+
   async create(createAdvisorDto: CreateAdvisorDto) {
     try {
       const passwordHash = await hashPassword(decidePassword(createAdvisorDto))

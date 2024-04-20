@@ -2,6 +2,14 @@ import { Advisor } from '../entities/advisor.entity'
 import { EnrollmentMapper } from '../../enrollment/mappers/enrollment.mapper'
 
 export class AdvisorMapper {
+  static forFilter(advisor: Advisor) {
+    return {
+      id: advisor.id,
+      key: advisor.name,
+      value: advisor.name
+    }
+  }
+
   static simplified(advisor: Advisor) {
     return {
       id: advisor.id,

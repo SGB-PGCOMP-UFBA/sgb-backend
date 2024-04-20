@@ -35,6 +35,14 @@ export class ScholarshipController {
     )
   }
 
+  @Get('/filter-list')
+  async findAllForFilter() {
+    const scholarships = await this.scholarshipService.findAllForFilter()
+    return scholarships.map((scholarship) =>
+      ScholarshipMapper.forFilter(scholarship)
+    )
+  }
+
   @Post()
   async create(@Body() dto: CreateScholarshipDto) {
     const scholarship = await this.scholarshipService.create(dto)

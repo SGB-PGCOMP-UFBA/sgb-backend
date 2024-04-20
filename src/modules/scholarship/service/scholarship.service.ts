@@ -30,6 +30,17 @@ export class ScholarshipService {
     return await this.scholarshipRepository.find()
   }
 
+  async findAllForFilter(): Promise<Scholarship[]> {
+    const distinctScholarshipsStatus = await this.scholarshipRepository
+      .createQueryBuilder('scholarship')
+      .select('scholarship.status', 'status')
+      .distinct(true)
+      .orderBy('scholarship.status', 'ASC')
+      .getRawMany()
+
+    return distinctScholarshipsStatus
+  }
+
   async findAllPaginated(
     paginateOptions: IPaginationOptions,
     filters: ScholarshipFilters

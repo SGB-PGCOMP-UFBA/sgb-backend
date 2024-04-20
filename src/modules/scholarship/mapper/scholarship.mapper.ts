@@ -3,8 +3,16 @@ import { AgencyMapper } from '../../agency/mapper/agency.mapper'
 import { EnrollmentMapper } from '../../enrollment/mappers/enrollment.mapper'
 import { StudentMapper } from '../../student/mapper/student.mapper'
 import { AdvisorMapper } from '../../advisor/mapper/advisor.mapper'
+import { StatusEnum } from '../../../core/enums/StatusEnum'
 
 export class ScholarshipMapper {
+  static forFilter(scholarship: Scholarship) {
+    return {
+      key: scholarship.status,
+      value: StatusEnum[scholarship.status]
+    }
+  }
+
   static simplified(scholarship: Scholarship) {
     return {
       id: scholarship.id,

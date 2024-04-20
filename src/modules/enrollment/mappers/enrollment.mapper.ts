@@ -2,8 +2,16 @@ import { Enrollment } from '../entities/enrollment.entity'
 import { AdvisorMapper } from '../../advisor/mapper/advisor.mapper'
 import { StudentMapper } from '../../student/mapper/student.mapper'
 import { ScholarshipMapper } from '../../scholarship/mapper/scholarship.mapper'
+import { ProgramEnum } from '../../../core/enums/ProgramEnum'
 
 export class EnrollmentMapper {
+  static forFilter(enrollment: Enrollment) {
+    return {
+      key: enrollment.enrollment_program,
+      value: ProgramEnum[enrollment.enrollment_program]
+    }
+  }
+
   static simplified(enrollment: Enrollment) {
     return {
       id: enrollment.id,

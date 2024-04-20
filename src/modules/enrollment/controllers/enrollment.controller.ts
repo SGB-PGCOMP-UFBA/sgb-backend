@@ -13,11 +13,11 @@ export class EnrollmentController {
     return EnrollmentMapper.simplified(enrollment)
   }
 
-  @Get()
-  async findAll() {
-    const enrollments = await this.enrollmentService.findAll()
+  @Get('/filter-list')
+  async findAllForFilter() {
+    const enrollments = await this.enrollmentService.findAllForFilter()
     return enrollments.map((enrollment) =>
-      EnrollmentMapper.detailed(enrollment)
+      EnrollmentMapper.forFilter(enrollment)
     )
   }
 

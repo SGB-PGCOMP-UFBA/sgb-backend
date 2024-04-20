@@ -2,6 +2,14 @@ import { ScholarshipMapper } from '../../scholarship/mapper/scholarship.mapper'
 import { Agency } from '../entities/agency.entity'
 
 export class AgencyMapper {
+  static forFilter(agency: Agency) {
+    return {
+      id: agency.id,
+      key: agency.name,
+      value: agency.name
+    }
+  }
+
   static simplified(agency: Agency) {
     return {
       id: agency.id,
