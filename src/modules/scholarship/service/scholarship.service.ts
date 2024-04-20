@@ -55,16 +55,27 @@ export class ScholarshipService {
       where: {}
     }
 
-    if (filters?.scholarshipStatus) {
+    if (filters?.scholarshipStatus && filters?.scholarshipStatus !== 'ALL') {
       findOptions.where['status'] = Like(`%${filters.scholarshipStatus}%`)
     }
-    if (filters?.agencyName) {
-      findOptions.where['agency.name'] = Like(`%${filters.agencyName}%`)
+    if (filters?.agencyName && filters?.agencyName !== 'ALL') {
+      findOptions.where['agency'] = {
+        name: Like(`%${filters.agencyName}%`)
+      }
     }
-    if (filters?.advisorName) {
-      findOptions.where['enrollment.advisor.name'] = Like(
-        `%${filters.advisorName}%`
-      )
+    if (filters?.programName && filters?.programName !== 'ALL') {
+      findOptions.where['enrollment'] = {
+        enrollment_program: Like(`%${filters.programName}%`)
+      }
+    }
+    if (filters?.advisorName && filters?.advisorName !== 'ALL') {
+      if (!findOptions.where['enrollment']) {
+        findOptions.where['enrollment'] = {}
+      }
+
+      findOptions.where['enrollment']['advisor'] = {
+        name: Like(`%${filters.advisorName}%`)
+      }
     }
 
     const scholarshipsPaginate = paginate<Scholarship>(

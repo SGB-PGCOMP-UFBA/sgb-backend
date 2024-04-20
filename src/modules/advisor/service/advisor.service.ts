@@ -26,9 +26,11 @@ export class AdvisorService {
   }
 
   async findAllForFilter(): Promise<Advisor[]> {
-    return await this.advisorRepository.find({
+    const advisors = await this.advisorRepository.find({
       order: { name: 'ASC' }
     })
+
+    return advisors
   }
 
   async create(createAdvisorDto: CreateAdvisorDto) {

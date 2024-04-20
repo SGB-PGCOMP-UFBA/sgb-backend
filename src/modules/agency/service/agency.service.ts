@@ -24,9 +24,11 @@ export class AgencyService {
   }
 
   async findAllForFilter(): Promise<Agency[]> {
-    return await this.agencyRepository.find({
+    const agencys = await this.agencyRepository.find({
       order: { name: 'ASC' }
     })
+
+    return agencys
   }
 
   async findOneByName(name: string): Promise<Agency> {
