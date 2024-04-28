@@ -65,4 +65,20 @@ export class ScholarshipMapper {
       advisor
     }
   }
+
+  static countOnGoingScholarshipsGroupingByAgencyForCourse(counts) {
+    const result = {}
+
+    counts.forEach(({ course_name, agency_name, count }) => {
+      if (!result[course_name]) {
+        result[course_name] = {}
+      }
+
+      result[course_name][agency_name] = {
+        count: count
+      }
+    })
+
+    return result
+  }
 }

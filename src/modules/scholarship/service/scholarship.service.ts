@@ -173,7 +173,7 @@ export class ScholarshipService {
           'COUNT(scholarship.id) AS count'
         ])
         .innerJoin('scholarship.agency', 'agency')
-        .where('scholarship.active = :active', { active: true })
+        .where('scholarship.status = :status', { status: 'ON_GOING' })
         .groupBy('scholarship_year, agency_name')
         .orderBy('scholarship_year', 'ASC')
         .addOrderBy('agency_name', 'ASC')
@@ -193,7 +193,33 @@ export class ScholarshipService {
         .createQueryBuilder('scholarship')
         .innerJoin('scholarship.agency', 'agency')
         .innerJoin('scholarship.enrollment', 'enrollment')
-        .where('scholarship.active = :active', { active: true })
+        .where('scholarship.status = :status', { status: 'ON_GOING' })
+        .select([
+          'agency.name as agency_name',
+          'enrollment.enrollment_program as course_name',
+          'COUNT(scholarship.id) as count'
+        ])
+        .groupBy('agency.name, enrollment.enrollment_program')
+        .getRawMany()
+
+      return result
+    } catch (error) {
+      throw new InternalServerErrorException(
+        constants.exceptionMessages.scholarship.COUNT_BY_AGENCY_FAILED
+      )
+    }
+  }
+
+  async countOnGoingScholarshipsGroupingByAgencyForCourse(programName: string) {
+    try {
+      const result = await this.scholarshipRepository
+        .createQueryBuilder('scholarship')
+        .innerJoin('scholarship.agency', 'agency')
+        .innerJoin('scholarship.enrollment', 'enrollment')
+        .where('scholarship.status = :status', { status: 'ON_GOING' })
+        .andWhere('enrollment.enrollment_program = :course', {
+          course: programName
+        })
         .select([
           'agency.name as agency_name',
           'enrollment.enrollment_program as course_name',

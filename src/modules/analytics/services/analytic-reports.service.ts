@@ -15,17 +15,24 @@ export class AnalyticReportsService {
   async generateAnalyticReport() {
     const agencies = await this.agencyService.findAll()
 
-    const scholarshipGroupedByAgencyAndYear = await this.scholarshipService.countGroupingByAgencyAndYear()
-    const scholarshipGroupedByAgencyAndCourse = await this.scholarshipService.countGroupingByAgencyAndCourse()
-    const studentsWithAndWithoutScholarships = await this.studentService.countStudentsWithAndWithoutScholarships()
+    const scholarshipGroupedByAgencyAndYear =
+      await this.scholarshipService.countGroupingByAgencyAndYear()
+    const scholarshipGroupedByAgencyAndCourse =
+      await this.scholarshipService.countGroupingByAgencyAndCourse()
+    const studentsWithAndWithoutScholarships =
+      await this.studentService.countStudentsWithAndWithoutScholarships()
 
-    return { 
-      scholarshipGroupedByAgencyAndYear: AnalyticReportsMapper.groupByAgencyAndYear({
-        agencies, scholarshipGroupedByAgencyAndYear
-      }),
-      scholarshipGroupedByAgencyAndCourse: AnalyticReportsMapper.groupByAgencyAndCourse({
-        agencies, scholarshipGroupedByAgencyAndCourse
-      }),
+    return {
+      scholarshipGroupedByAgencyAndYear:
+        AnalyticReportsMapper.groupByAgencyAndYear({
+          agencies,
+          scholarshipGroupedByAgencyAndYear
+        }),
+      scholarshipGroupedByAgencyAndCourse:
+        AnalyticReportsMapper.groupByAgencyAndCourse({
+          agencies,
+          scholarshipGroupedByAgencyAndCourse
+        }),
       studentsHavingScholarship: studentsWithAndWithoutScholarships
     }
   }
