@@ -97,4 +97,19 @@ export class ScholarshipMapper {
 
     return result
   }
+
+  static countScholarshipsGroupingByCourseAndYear(counts) {
+    const result = {}
+
+    counts.forEach(({ year, masters_count, phd_count }) => {
+      if (!result[year]) {
+        result[year] = {}
+      }
+
+      result[year]['MESTRADO'] = masters_count ? masters_count : 0
+      result[year]['DOUTORADO'] = phd_count ? phd_count : 0
+    })
+
+    return result
+  }
 }

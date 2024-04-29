@@ -163,6 +163,28 @@ export class ScholarshipService {
     }
   }
 
+  async countScholarshipsGroupingByCourseAndYear() {
+    try {
+      const result = await this.scholarshipRepository
+        .createQueryBuilder('scholarship')
+        .innerJoin('scholarship.enrollment', 'enrollment')
+        .select([
+          `TO_CHAR(scholarship.scholarship_starts_at, 'YYYY') AS year`,
+          `SUM(CASE WHEN enrollment.enrollment_program = 'MESTRADO' THEN 1 ELSE 0 END) AS masters_count`,
+          `SUM(CASE WHEN enrollment.enrollment_program = 'DOUTORADO' THEN 1 ELSE 0 END) AS phd_count`
+        ])
+        .groupBy(`TO_CHAR(scholarship.scholarship_starts_at, 'YYYY')`)
+        .orderBy(`TO_CHAR(scholarship.scholarship_starts_at, 'YYYY')`, 'ASC')
+        .getRawMany()
+
+      return result
+    } catch (error) {
+      throw new InternalServerErrorException(
+        constants.exceptionMessages.scholarship.COUNT_FAILED
+      )
+    }
+  }
+
   async countOnGoingScholarshipsGroupingByAgencyForCourse(programName: string) {
     try {
       const result = await this.scholarshipRepository

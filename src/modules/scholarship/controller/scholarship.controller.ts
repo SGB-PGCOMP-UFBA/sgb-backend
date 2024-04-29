@@ -57,6 +57,16 @@ export class ScholarshipController {
     )
   }
 
+  @Get('/count/by-course-and-year')
+  async countScholarshipsGroupingByCourseAndYear() {
+    const resultCount =
+      await this.scholarshipService.countScholarshipsGroupingByCourseAndYear()
+
+    return ScholarshipMapper.countScholarshipsGroupingByCourseAndYear(
+      resultCount
+    )
+  }
+
   @Get('/count/by-agency-and-status')
   async countScholarshipsGroupingByStatusForAgency(
     @Query('agencyName') agencyName?: string
