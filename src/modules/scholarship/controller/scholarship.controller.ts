@@ -57,6 +57,21 @@ export class ScholarshipController {
     )
   }
 
+  @Get('/count/by-agency-and-status')
+  async countScholarshipsGroupingByStatusForAgency(
+    @Query('agencyName') agencyName?: string
+  ) {
+    const resultCount =
+      await this.scholarshipService.countScholarshipsGroupingByStatusForAgency(
+        agencyName
+      )
+
+    return ScholarshipMapper.countScholarshipsGroupingByStatusForAgency(
+      resultCount,
+      agencyName
+    )
+  }
+
   @Post()
   async create(@Body() dto: CreateScholarshipDto) {
     const scholarship = await this.scholarshipService.create(dto)

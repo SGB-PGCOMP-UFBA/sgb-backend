@@ -81,4 +81,20 @@ export class ScholarshipMapper {
 
     return result
   }
+
+  static countScholarshipsGroupingByStatusForAgency(counts, agencyName) {
+    const result = {}
+
+    counts.forEach(({ status, count }) => {
+      if (!result[agencyName]) {
+        result[agencyName] = {}
+      }
+
+      result[agencyName][status] = {
+        count: count
+      }
+    })
+
+    return result
+  }
 }

@@ -2,7 +2,6 @@ import {
   Logger,
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException
 } from '@nestjs/common'
 import { Repository } from 'typeorm'
@@ -146,26 +145,5 @@ export class StudentService {
     }
 
     throw new NotFoundException(constants.exceptionMessages.student.NOT_FOUND)
-  }
-
-  async countStudentsWithAndWithoutScholarships() {
-    try {
-      const result = await this.studentRepository
-        .createQueryBuilder('student')
-        .leftJoin('student.enrollments', 'enrollment')
-        .leftJoin('enrollment.scholarships', 'scholarship')
-        .select([
-          'COUNT(DISTINCT student.id) as totalStudents',
-          'COUNT(DISTINCT CASE WHEN scholarship.id IS NOT NULL THEN student.id END) as studentsWithScholarship',
-          'COUNT(DISTINCT CASE WHEN scholarship.id IS NULL THEN student.id END) as studentsWithoutScholarship'
-        ])
-        .getRawOne()
-
-      return result
-    } catch (error) {
-      throw new InternalServerErrorException(
-        constants.exceptionMessages.student.COUNT_BY_SCHOLARSHIP_FAILED
-      )
-    }
   }
 }

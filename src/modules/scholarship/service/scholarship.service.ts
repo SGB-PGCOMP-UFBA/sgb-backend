@@ -163,53 +163,6 @@ export class ScholarshipService {
     }
   }
 
-  async countGroupingByAgencyAndYear() {
-    try {
-      const result = await this.scholarshipRepository
-        .createQueryBuilder('scholarship')
-        .select([
-          'EXTRACT(YEAR FROM scholarship.scholarship_starts_at) AS scholarship_year',
-          'agency.name AS agency_name',
-          'COUNT(scholarship.id) AS count'
-        ])
-        .innerJoin('scholarship.agency', 'agency')
-        .where('scholarship.status = :status', { status: 'ON_GOING' })
-        .groupBy('scholarship_year, agency_name')
-        .orderBy('scholarship_year', 'ASC')
-        .addOrderBy('agency_name', 'ASC')
-        .getRawMany()
-
-      return result
-    } catch (error) {
-      throw new InternalServerErrorException(
-        constants.exceptionMessages.scholarship.COUNT_BY_AGENCY_FAILED
-      )
-    }
-  }
-
-  async countGroupingByAgencyAndCourse() {
-    try {
-      const result = await this.scholarshipRepository
-        .createQueryBuilder('scholarship')
-        .innerJoin('scholarship.agency', 'agency')
-        .innerJoin('scholarship.enrollment', 'enrollment')
-        .where('scholarship.status = :status', { status: 'ON_GOING' })
-        .select([
-          'agency.name as agency_name',
-          'enrollment.enrollment_program as course_name',
-          'COUNT(scholarship.id) as count'
-        ])
-        .groupBy('agency.name, enrollment.enrollment_program')
-        .getRawMany()
-
-      return result
-    } catch (error) {
-      throw new InternalServerErrorException(
-        constants.exceptionMessages.scholarship.COUNT_BY_AGENCY_FAILED
-      )
-    }
-  }
-
   async countOnGoingScholarshipsGroupingByAgencyForCourse(programName: string) {
     try {
       const result = await this.scholarshipRepository
@@ -231,7 +184,28 @@ export class ScholarshipService {
       return result
     } catch (error) {
       throw new InternalServerErrorException(
-        constants.exceptionMessages.scholarship.COUNT_BY_AGENCY_FAILED
+        constants.exceptionMessages.scholarship.COUNT_FAILED
+      )
+    }
+  }
+
+  async countScholarshipsGroupingByStatusForAgency(agencyName: string) {
+    try {
+      const result = await this.scholarshipRepository
+        .createQueryBuilder('scholarship')
+        .innerJoin('scholarship.agency', 'agency')
+        .where('agency.name = :name', { name: agencyName })
+        .select([
+          'scholarship.status as status',
+          'COUNT(scholarship.id) as count'
+        ])
+        .groupBy('scholarship.status')
+        .getRawMany()
+
+      return result
+    } catch (error) {
+      throw new InternalServerErrorException(
+        constants.exceptionMessages.scholarship.COUNT_FAILED
       )
     }
   }
