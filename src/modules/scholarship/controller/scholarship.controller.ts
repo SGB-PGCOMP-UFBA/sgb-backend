@@ -29,11 +29,19 @@ export class ScholarshipController {
 
   @Post('/create-for-list')
   async createForList(@Body() listDto: CreateScholarshipDto[]) {
-    listDto.forEach(async (dto) => {
-      await this.scholarshipService.create(dto)
+    let count = 0
+    const promises = []
+
+    listDto.forEach((dto) => {
+      const promise = this.scholarshipService.create(dto).then(() => {
+        count++
+      })
+      promises.push(promise)
     })
 
-    return 'Created scholarships successfully!'
+    await Promise.all(promises)
+
+    return `${count} - scholarships created successfully!`
   }
 
   @Get('/paginated')

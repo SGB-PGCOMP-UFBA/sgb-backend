@@ -18,11 +18,22 @@ export class AdvisorController {
 
   @Post('/create-for-list')
   async createForList(@Body() listDto: CreateAdvisorDto[]) {
-    listDto.forEach(async (dto) => {
-      await this.advisorService.create(dto)
+    let count = 0
+    const promises = []
+
+    listDto.forEach((dto) => {
+      const promise = this.advisorService.create(dto).then((advisor) => {
+        if (advisor.created_at) {
+          count++
+        }
+      })
+
+      promises.push(promise)
     })
 
-    return 'Created advisors successfully!'
+    await Promise.all(promises)
+
+    return `${count} - advisors created successfully!`
   }
 
   @Get()

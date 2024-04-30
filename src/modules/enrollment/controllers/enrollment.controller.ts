@@ -15,11 +15,19 @@ export class EnrollmentController {
 
   @Post('/create-for-list')
   async createForList(@Body() listDto: CreateEnrollmentDto[]) {
-    listDto.forEach(async (dto) => {
-      await this.enrollmentService.create(dto)
+    let count = 0
+    const promises = []
+
+    listDto.forEach((dto) => {
+      const promise = this.enrollmentService.create(dto).then(() => {
+        count++
+      })
+      promises.push(promise)
     })
 
-    return 'Created enrollments successfully!'
+    await Promise.all(promises)
+
+    return `${count} - enrollments created successfully!`
   }
 
   @Get('/filter-list')

@@ -50,11 +50,24 @@ export class StudentController {
 
   @Post('/create-for-list')
   async createForList(@Body() listDto: CreateStudentDto[]) {
-    listDto.forEach(async (dto) => {
-      await this.studentsService.createStudent(dto)
+    let count = 0
+    const promises = []
+
+    listDto.forEach((dto) => {
+      const promise = this.studentsService
+        .createStudent(dto)
+        .then((student) => {
+          if (student.created_at) {
+            count++
+          }
+        })
+
+      promises.push(promise)
     })
 
-    return 'Created students successfully!'
+    await Promise.all(promises)
+
+    return `${count} - students created successfully!`
   }
 
   @Patch(':id')
