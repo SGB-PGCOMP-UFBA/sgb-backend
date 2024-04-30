@@ -5,6 +5,7 @@ export class AdminMapper {
     return {
       id: admin.id,
       role: admin.role,
+      status: admin.status,
       created_at: admin.created_at,
       updated_at: admin.updated_at
     }

@@ -30,6 +30,9 @@ export class Admin implements User {
   @Column({ nullable: false, default: 'ADMIN' })
   role: string
 
+  @Column({ nullable: false, default: 'ACTIVE' })
+  status: string
+
   @CreateDateColumn()
   created_at: Date
 

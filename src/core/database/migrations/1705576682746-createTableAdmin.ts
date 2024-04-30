@@ -49,6 +49,12 @@ export class createTableAdmin1705576682746 implements MigrationInterface {
             default: "'ADMIN'"
           },
           {
+            name: 'status',
+            type: 'varchar',
+            default: "'ACTIVE'",
+            isNullable: false
+          },
+          {
             name: 'created_at',
             type: 'timestamp',
             default: 'now()'
