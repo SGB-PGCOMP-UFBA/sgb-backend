@@ -13,6 +13,10 @@ export class populateTableAgency1714478731822 implements MigrationInterface {
     await queryRunner.query(
       `INSERT INTO agency (name, description) VALUES ('FAPESB', 'Fundação de Amparo à Pesquisa do Estado da Bahia')`
     )
+
+    await queryRunner.query(
+      `INSERT INTO agency (name, description) VALUES ('OUTRAS', 'Outras Agências de Fomento')`
+    )
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

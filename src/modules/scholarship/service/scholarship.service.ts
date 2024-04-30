@@ -12,6 +12,7 @@ import { PageMetaDto } from '../../../core/pagination/page-meta.dto'
 import { CreateScholarshipDto } from '../dto/create-scholarship.dto'
 import { Scholarship } from '../entities/scholarship.entity'
 import { constants } from '../../../core/utils/constants'
+import { StatusEnum } from '../../../core/enums/StatusEnum'
 import { ScholarshipMapper } from '../mapper/scholarship.mapper'
 import { ScholarshipFilters } from '../filters/IScholarshipFilters'
 import { AgencyService } from '../../../modules/agency/service/agency.service'
@@ -129,6 +130,7 @@ export class ScholarshipService {
         scholarship_starts_at: dto.scholarship_starts_at,
         scholarship_ends_at: dto.scholarship_ends_at,
         extension_ends_at: dto.extension_ends_at,
+        status: dto.status || StatusEnum.ON_GOING,
         salary: dto.salary
       })
 
@@ -136,6 +138,7 @@ export class ScholarshipService {
 
       return newScholarship
     } catch (error) {
+      console.log(error)
       throw new BadRequestException(
         constants.exceptionMessages.scholarship.CREATION_FAILED
       )
@@ -155,7 +158,7 @@ export class ScholarshipService {
 
   async deactivate(id: number): Promise<void> {
     try {
-      await this.scholarshipRepository.update(id, { status: 'FINALIZED' })
+      await this.scholarshipRepository.update(id, { status: 'FINISHED' })
     } catch (error) {
       throw new InternalServerErrorException(
         constants.exceptionMessages.scholarship.DEACTIVATE_FAILED

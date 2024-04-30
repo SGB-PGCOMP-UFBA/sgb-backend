@@ -1,0 +1,1114 @@
+[
+    {
+        "student_email": "eliveltonrangel@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2020-03-05",
+        "scholarship_ends_at": "2024-03-05",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "ricardoepvieira@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2023-09-01",
+        "scholarship_ends_at": "2027-08-31",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "gisellyareis@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2023-08-01",
+        "scholarship_ends_at": "2025-07-31",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "raoni_si@hotmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2022-09-06",
+        "scholarship_ends_at": "2024-08-06",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "giulyana.santos@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2022-09-06",
+        "scholarship_ends_at": "2024-09-06",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "adrianobarbosa95@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2023-02-01",
+        "scholarship_ends_at": "2025-02-01",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "cldjunior@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CNPQ",
+        "scholarship_starts_at": "2021-10-01",
+        "scholarship_ends_at": "2025-09-30",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "moarabritto@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2021-07-01",
+        "scholarship_ends_at": "2025-05-31",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "maykioliveira@ufba.br",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2022-08-01",
+        "scholarship_ends_at": "2024-07-31",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "diego.correa@ufba.br",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2022-04-01",
+        "scholarship_ends_at": "2025-05-31",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "eduardoferreira@ufba.br",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2023-02-01",
+        "scholarship_ends_at": "2027-01-31",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "bonfim.gabriel@ufba.br",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2022-05-01",
+        "scholarship_ends_at": "2024-02-29",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "franklinsouza@ufba.br",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CNPQ",
+        "scholarship_starts_at": "2023-10-01",
+        "scholarship_ends_at": "2025-09-30",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "diegozabot@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CNPQ",
+        "scholarship_starts_at": "2021-10-01",
+        "scholarship_ends_at": "2025-09-30",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "julyms.85@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2023-02-01",
+        "scholarship_ends_at": "2025-01-31",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "railanassantana@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2021-04-01",
+        "scholarship_ends_at": "2024-09-30",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "martins.luana@ufba.br",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2020-04-01",
+        "scholarship_ends_at": "2024-02-29",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "motajoselito@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2022-04-01",
+        "scholarship_ends_at": "2025-12-31",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "andreluizromanomadureira@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2021-05-01",
+        "scholarship_ends_at": "2025-01-31",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "talitapinheiro@ufba.br",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2023-06-01",
+        "scholarship_ends_at": "2027-05-31",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "jamilevasconcelos@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2023-08-01",
+        "scholarship_ends_at": "2027-07-31",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "dhyegocruz@ufba.br",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2023-03-03",
+        "scholarship_ends_at": "2025-03-03",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "erlon.alm@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2023-09-05",
+        "scholarship_ends_at": "2025-04-20",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "enio.garcia@ufba.br",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2023-08-01",
+        "scholarship_ends_at": "2025-07-31",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "lucas.lm@ufba.br",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2022-06-01",
+        "scholarship_ends_at": "2024-04-30",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "clarapestana91@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2020-04-01",
+        "scholarship_ends_at": "2024-06-30",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "cruzleandro@ufba.br",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2022-09-01",
+        "scholarship_ends_at": "2026-07-31",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "bpmsilva@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2020-06-30",
+        "scholarship_ends_at": "2024-05-31",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "vitor.barbosa@ufba.br",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2023-08-01",
+        "scholarship_ends_at": "2025-07-31",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "mateuscsilva.1@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2023-02-01",
+        "scholarship_ends_at": "2025-02-01",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "santanab@ufba.br",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2022-03-01",
+        "scholarship_ends_at": "2025-06-30",
+        "status": "ON_GOING"
+    },
+    {
+        "student_email": "cliciasp1@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CNPQ",
+        "scholarship_starts_at": "2015-09-01",
+        "scholarship_ends_at": "2017-09-01",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "leouneb@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2015-06-01",
+        "scholarship_ends_at": "2018-02-28",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "witasrocha@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2016-09-05",
+        "scholarship_ends_at": "2018-03-05",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "antoniobatistast1@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2016-04-01",
+        "scholarship_ends_at": "2018-03-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "juracyjuracy@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "OUTRAS",
+        "scholarship_starts_at": "2017-06-09",
+        "scholarship_ends_at": "2018-04-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "matheus.beep@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2018-09-01",
+        "scholarship_ends_at": "2018-04-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "filipe.garrido@ufba.br",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2016-08-01",
+        "scholarship_ends_at": "2018-07-01",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "silvioboss@yahoo.com.br",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "OUTRAS",
+        "scholarship_starts_at": "2016-08-01",
+        "scholarship_ends_at": "2018-09-01",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "leandrompsanches@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2018-03-01",
+        "scholarship_ends_at": "2018-10-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "moarabritto@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2017-03-01",
+        "scholarship_ends_at": "2018-11-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "rrosy.silva@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2017-03-15",
+        "scholarship_ends_at": "2018-11-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "luciane.meconi@yahoo.com.br",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2017-05-01",
+        "scholarship_ends_at": "2018-11-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "sirox84@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2017-12-01",
+        "scholarship_ends_at": "2018-11-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "gabrielbiurrum@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2017-03-14",
+        "scholarship_ends_at": "2018-12-14",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "leojsandrade@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2015-01-07",
+        "scholarship_ends_at": "2019-01-04",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "magnoluan@hotmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2015-03-01",
+        "scholarship_ends_at": "2019-02-01",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "ctamp2000@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2016-08-31",
+        "scholarship_ends_at": "2019-02-28",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "glaucyacboechat@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2016-10-01",
+        "scholarship_ends_at": "2019-02-28",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "djan.info@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2017-09-01",
+        "scholarship_ends_at": "2019-02-28",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "alissodelf@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2017-01-09",
+        "scholarship_ends_at": "2019-03-01",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "victorhugocarvalhoalves@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2018-03-01",
+        "scholarship_ends_at": "2019-04-01",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "gdahia@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2019-04-02",
+        "scholarship_ends_at": "2019-04-02",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "mateus.aluufc@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CNPQ",
+        "scholarship_starts_at": "2017-09-01",
+        "scholarship_ends_at": "2019-04-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "samia.capistrano@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2017-10-01",
+        "scholarship_ends_at": "2019-04-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "iurryy@yahoo.com.br",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2018-01-01",
+        "scholarship_ends_at": "2019-04-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "tiagocompuesc@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "OUTRAS",
+        "scholarship_starts_at": "2017-05-07",
+        "scholarship_ends_at": "2019-05-06",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "brennodemello.bm@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "OUTRAS",
+        "scholarship_starts_at": "2017-07-05",
+        "scholarship_ends_at": "2019-06-05",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "pierre.pita@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CNPQ",
+        "scholarship_starts_at": "2018-07-01",
+        "scholarship_ends_at": "2019-06-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "leonan.teixeira@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "OUTRAS",
+        "scholarship_starts_at": "2017-07-01",
+        "scholarship_ends_at": "2019-06-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "italo95teixeira@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CNPQ",
+        "scholarship_starts_at": "2019-06-01",
+        "scholarship_ends_at": "2019-07-10",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "michellellcarvalho@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2015-09-01",
+        "scholarship_ends_at": "2019-08-01",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "rafael.lima.costa@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2015-09-01",
+        "scholarship_ends_at": "2019-08-01",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "erasmoleitemonteiro@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2015-08-05",
+        "scholarship_ends_at": "2019-08-05",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "nandaeustaquio7@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2018-05-01",
+        "scholarship_ends_at": "2019-10-01",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "michellfelippe@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2018-05-05",
+        "scholarship_ends_at": "2019-10-05",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "igosa09@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CNPQ",
+        "scholarship_starts_at": "2018-01-07",
+        "scholarship_ends_at": "2019-10-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "kastelojoao@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2018-07-11",
+        "scholarship_ends_at": "2019-10-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "matheus_thiago_mb@hotmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2019-01-01",
+        "scholarship_ends_at": "2019-10-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "kazuohorota@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2018-09-13",
+        "scholarship_ends_at": "2019-11-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "willianmartinho@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2018-04-01",
+        "scholarship_ends_at": "2019-12-01",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "rafaelglauber@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2016-01-01",
+        "scholarship_ends_at": "2019-12-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "valeria.rosa@ufba.br",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2016-04-01",
+        "scholarship_ends_at": "2020-03-01",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "tiagodasnascimento@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2018-04-01",
+        "scholarship_ends_at": "2020-03-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "tiagoms88@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2018-04-01",
+        "scholarship_ends_at": "2020-03-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "junotfneto@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2018-09-05",
+        "scholarship_ends_at": "2020-03-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "juniorleles80@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CNPQ",
+        "scholarship_starts_at": "2019-07-10",
+        "scholarship_ends_at": "2020-03-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "cintiacosta5@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2019-11-01",
+        "scholarship_ends_at": "2020-03-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "ferreiraviniciussdi@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2018-12-01",
+        "scholarship_ends_at": "2020-04-01",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "railanassantana@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2018-12-05",
+        "scholarship_ends_at": "2020-04-05",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "nicollirioss@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2016-04-01",
+        "scholarship_ends_at": "2020-04-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "renata.rmss@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2020-05-01",
+        "scholarship_ends_at": "2020-06-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "jwertherf@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2018-09-13",
+        "scholarship_ends_at": "2020-07-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "gbrlamota@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2016-09-01",
+        "scholarship_ends_at": "2020-08-01",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "amandachagasufba@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2019-05-01",
+        "scholarship_ends_at": "2020-08-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "nildocsjr@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2019-07-03",
+        "scholarship_ends_at": "2020-09-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "rafa.alcantara23@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2017-03-01",
+        "scholarship_ends_at": "2020-11-20",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "kalyfabdalla@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2016-05-05",
+        "scholarship_ends_at": "2020-11-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "cleberlira@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2017-09-01",
+        "scholarship_ends_at": "2020-11-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "joao.dias@ufba.br",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2017-03-01",
+        "scholarship_ends_at": "2020-11-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "skybus.luis@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2020-03-01",
+        "scholarship_ends_at": "2021-01-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "jean.rosa@ufba.br",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2017-02-01",
+        "scholarship_ends_at": "2021-03-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "elviobg@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2019-07-01",
+        "scholarship_ends_at": "2021-01-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "phdiamantinoo@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CNPQ",
+        "scholarship_starts_at": "2020-02-12",
+        "scholarship_ends_at": "2021-02-28",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "nillsantana25@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2019-11-05",
+        "scholarship_ends_at": "2021-02-28",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "dellamycow@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2019-04-01",
+        "scholarship_ends_at": "2021-03-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "icarobsi@hotmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2019-04-04",
+        "scholarship_ends_at": "2021-04-04",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "motajoselito@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2020-03-01",
+        "scholarship_ends_at": "2021-06-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "anderson.sacramento93@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2019-11-01",
+        "scholarship_ends_at": "2021-06-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "jopacanario@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2017-05-12",
+        "scholarship_ends_at": "2021-09-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "evertonmj@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CNPQ",
+        "scholarship_starts_at": "2017-11-01",
+        "scholarship_ends_at": "2021-09-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "abvwmc@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CNPQ",
+        "scholarship_starts_at": "2017-11-01",
+        "scholarship_ends_at": "2021-09-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "diego.correa@ufba.br",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2020-04-01",
+        "scholarship_ends_at": "2022-02-28",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "josuejunior23@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2020-10-01",
+        "scholarship_ends_at": "2021-02-28",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "murilo.arouca@ucsal.edu.br",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2020-05-01",
+        "scholarship_ends_at": "2022-02-28",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "jadna.ac@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2020-05-01",
+        "scholarship_ends_at": "2021-10-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "arleyprates@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2020-04-13",
+        "scholarship_ends_at": "2022-02-28",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "george.dantas.c@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2019-12-05",
+        "scholarship_ends_at": "2021-10-05",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "dandavidf@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CNPQ",
+        "scholarship_starts_at": "2020-04-01",
+        "scholarship_ends_at": "2021-07-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "jalissonhenrique10@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2020-04-01",
+        "scholarship_ends_at": "2022-02-28",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "levyssantiago@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2020-04-01",
+        "scholarship_ends_at": "2022-02-28",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "paulo.robertojr100@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2018-04-01",
+        "scholarship_ends_at": "2022-03-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "ellydiani@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2018-07-16",
+        "scholarship_ends_at": "2022-03-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "edsonmottac@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2018-07-01",
+        "scholarship_ends_at": "2022-03-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "alexsisantos@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2018-04-01",
+        "scholarship_ends_at": "2022-06-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "nfsseixas@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2019-11-01",
+        "scholarship_ends_at": "2022-05-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "nillsantana25@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CNPQ",
+        "scholarship_starts_at": "2021-11-01",
+        "scholarship_ends_at": "2023-10-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "renato.frca@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2018-09-13",
+        "scholarship_ends_at": "2022-07-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "filipe.garrido@ufba.br",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2019-10-01",
+        "scholarship_ends_at": "2022-08-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "jessicadesouza@ufba.br",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2021-09-01",
+        "scholarship_ends_at": "2023-09-01",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "paulo.prsdesouza@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2019-10-17",
+        "scholarship_ends_at": "2023-02-17",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "biiabriito02@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2018-11-01",
+        "scholarship_ends_at": "2022-08-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "otavio.neto@ufba.br",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2021-03-01",
+        "scholarship_ends_at": "2022-12-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "cruz.paulo@ufba.br",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2022-03-01",
+        "scholarship_ends_at": "2022-12-30",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "jamilevasconcelos@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2021-03-01",
+        "scholarship_ends_at": "2022-12-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "dhennya@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2019-05-01",
+        "scholarship_ends_at": "2022-12-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "saulo.matos@ufba.br",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2019-05-01",
+        "scholarship_ends_at": "2023-01-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "taniahfeitosa@hotmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "FAPESB",
+        "scholarship_starts_at": "2021-06-01",
+        "scholarship_ends_at": "2023-01-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "arielalmeida@ufba.br",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2021-03-01",
+        "scholarship_ends_at": "2023-05-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "mirleims@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2020-12-11",
+        "scholarship_ends_at": "2023-07-11",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "biancasantana.ls@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2020-07-01",
+        "scholarship_ends_at": "2023-07-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "sirox84@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2020-03-01",
+        "scholarship_ends_at": "2023-07-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "andressamirella21@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CNPQ",
+        "scholarship_starts_at": "2022-08-01",
+        "scholarship_ends_at": "2023-10-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "larissa.barbosa11@gmail.com",
+        "enrollment_program": "DOUTORADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2019-10-01",
+        "scholarship_ends_at": "2023-10-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "andreanivaldo@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2022-02-01",
+        "scholarship_ends_at": "2024-01-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "lailapmota@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CNPQ",
+        "scholarship_starts_at": "2022-02-01",
+        "scholarship_ends_at": "2024-01-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "alvezsjv@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2023-04-05",
+        "scholarship_ends_at": "2024-01-31",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "denis.boaventura@ufba.br",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2022-05-01",
+        "scholarship_ends_at": "2024-02-29",
+        "status": "FINISHED"
+    },
+    {
+        "student_email": "filipelyrio@gmail.com",
+        "enrollment_program": "MESTRADO",
+        "agency_name": "CAPES",
+        "scholarship_starts_at": "2023-03-01",
+        "scholarship_ends_at": "2025-02-28",
+        "status": "FINISHED"
+    }
+]

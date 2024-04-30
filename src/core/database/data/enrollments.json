@@ -288,14 +288,6 @@
         "defense_prediction_date": "2019-01-31"
     },
     {
-        "student_email": "mateus.aluufc@gmail.com",
-        "advisor_email": "leobino@ufba.com",
-        "enrollment_number": "217123293",
-        "enrollment_program": "MESTRADO",
-        "enrollment_date": "2018-04-06",
-        "defense_prediction_date": "2018-02-28"
-    },
-    {
         "student_email": "matheus.beep@gmail.com",
         "advisor_email": "mauriciops@ufba.com",
         "enrollment_number": "217122980",
@@ -928,14 +920,6 @@
         "defense_prediction_date": "2022-06-30"
     },
     {
-        "student_email": "nfsseixas@gmail.com",
-        "advisor_email": "gustavobf@ufba.com",
-        "enrollment_number": "2019129906",
-        "enrollment_program": "DOUTORADO",
-        "enrollment_date": "2019-11-01",
-        "defense_prediction_date": "2022-05-31"
-    },
-    {
         "student_email": "nillsantana25@gmail.com",
         "advisor_email": "gustavobf@ufba.com",
         "enrollment_number": "2019106115",
@@ -1008,36 +992,12 @@
         "defense_prediction_date": "2023-03-31"
     },
     {
-        "student_email": "jessicadesouza@ufba.br",
-        "advisor_email": "laisns@ufba.com",
-        "enrollment_number": "2020128062",
-        "enrollment_program": "MESTRADO",
-        "enrollment_date": "2021-09-01",
-        "defense_prediction_date": "2022-10-05"
-    },
-    {
-        "student_email": "dhennya@gmail.com",
-        "advisor_email": "ivan.machado@ufba.com",
-        "enrollment_number": "2019110780",
-        "enrollment_program": "DOUTORADO",
-        "enrollment_date": "2019-05-01",
-        "defense_prediction_date": "2023-03-31"
-    },
-    {
         "student_email": "saulo.matos@ufba.br",
         "advisor_email": "januario@ufba.com",
         "enrollment_number": "2019101754",
         "enrollment_program": "DOUTORADO",
         "enrollment_date": "2019-05-01",
         "defense_prediction_date": "2023-01-31"
-    },
-    {
-        "student_email": "arielalmeida@ufba.br",
-        "advisor_email": "ricardoar@ufba.com",
-        "enrollment_number": "2021109052",
-        "enrollment_program": "MESTRADO",
-        "enrollment_date": "2021-03-01",
-        "defense_prediction_date": "2023-02-28"
     },
     {
         "student_email": "taniahfeitosa@hotmail.com",

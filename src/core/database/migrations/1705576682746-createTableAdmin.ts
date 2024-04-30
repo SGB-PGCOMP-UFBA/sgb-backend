@@ -46,7 +46,8 @@ export class createTableAdmin1705576682746 implements MigrationInterface {
           {
             name: 'role',
             type: 'varchar',
-            default: "'ADMIN'"
+            default: "'ADMIN'",
+            isNullable: false
           },
           {
             name: 'status',

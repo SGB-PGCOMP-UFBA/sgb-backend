@@ -27,6 +27,7 @@ export class AdminService {
       await this.adminRepository.save(newAdmin)
       return newAdmin
     } catch (error) {
+      console.log(error)
       throw new BadRequestException("Can't create admin.")
     }
   }

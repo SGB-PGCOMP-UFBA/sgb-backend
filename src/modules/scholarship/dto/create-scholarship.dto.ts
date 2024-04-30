@@ -1,7 +1,8 @@
-import { Type } from 'class-transformer'
+import { Transform, Type } from 'class-transformer'
 import {
   IsDate,
   IsEmail,
+  IsIn,
   IsNumber,
   IsOptional,
   IsString
@@ -26,6 +27,12 @@ export class CreateScholarshipDto {
   @Type(() => Date)
   @IsDate()
   readonly scholarship_ends_at: Date
+
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }) => value.toUpperCase())
+  @IsIn(['ON_GOING', 'EXTENDED', 'FINISHED'])
+  readonly status: string
 
   @IsOptional()
   @Type(() => Date)
