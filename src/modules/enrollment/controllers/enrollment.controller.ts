@@ -13,6 +13,15 @@ export class EnrollmentController {
     return EnrollmentMapper.simplified(enrollment)
   }
 
+  @Post('/create-for-list')
+  async createForList(@Body() listDto: CreateEnrollmentDto[]) {
+    listDto.forEach(async (dto) => {
+      await this.enrollmentService.create(dto)
+    })
+
+    return 'Created enrollments successfully!'
+  }
+
   @Get('/filter-list')
   async findAllForFilter() {
     const enrollments = await this.enrollmentService.findAllForFilter()

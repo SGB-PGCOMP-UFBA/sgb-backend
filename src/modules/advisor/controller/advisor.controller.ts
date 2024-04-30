@@ -16,6 +16,15 @@ export class AdvisorController {
     return AdvisorMapper.simplified(advisor)
   }
 
+  @Post('/create-for-list')
+  async createForList(@Body() listDto: CreateAdvisorDto[]) {
+    listDto.forEach(async (dto) => {
+      await this.advisorService.create(dto)
+    })
+
+    return 'Created advisors successfully!'
+  }
+
   @Get()
   async findAll() {
     const advisors = await this.advisorService.findAll()

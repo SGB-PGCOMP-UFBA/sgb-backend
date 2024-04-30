@@ -48,6 +48,15 @@ export class StudentController {
     return StudentMapper.simplified(student)
   }
 
+  @Post('/create-for-list')
+  async createForList(@Body() listDto: CreateStudentDto[]) {
+    listDto.forEach(async (dto) => {
+      await this.studentsService.createStudent(dto)
+    })
+
+    return 'Created students successfully!'
+  }
+
   @Patch(':id')
   async update(@Param('id') id: number, @Body() dto: UpdateStudentDto) {
     const updatedStudent = await this.studentsService.update(id, dto)

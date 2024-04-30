@@ -20,6 +20,22 @@ import { ScholarshipFilters } from '../filters/IScholarshipFilters'
 export class ScholarshipController {
   constructor(private readonly scholarshipService: ScholarshipService) {}
 
+  @Post()
+  async create(@Body() dto: CreateScholarshipDto) {
+    const scholarship = await this.scholarshipService.create(dto)
+
+    return ScholarshipMapper.simplified(scholarship)
+  }
+
+  @Post('/create-for-list')
+  async createForList(@Body() listDto: CreateScholarshipDto[]) {
+    listDto.forEach(async (dto) => {
+      await this.scholarshipService.create(dto)
+    })
+
+    return 'Created scholarships successfully!'
+  }
+
   @Get('/paginated')
   async findAllPaginated(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
@@ -80,13 +96,6 @@ export class ScholarshipController {
       resultCount,
       agencyName
     )
-  }
-
-  @Post()
-  async create(@Body() dto: CreateScholarshipDto) {
-    const scholarship = await this.scholarshipService.create(dto)
-
-    return ScholarshipMapper.simplified(scholarship)
   }
 
   @Delete(':id')
