@@ -98,6 +98,7 @@ export class StudentService {
   async findOneByEmail(email: string): Promise<Student> {
     const student = await this.studentRepository.findOneBy({ email })
     if (!student) {
+      this.logger.error(`'${email}' não foi encontrado na base de estudantes.`)
       throw new NotFoundException(constants.exceptionMessages.student.NOT_FOUND)
     }
 

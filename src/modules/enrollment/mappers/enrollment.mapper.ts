@@ -17,7 +17,6 @@ export class EnrollmentMapper {
       id: enrollment.id,
       student_id: enrollment.student_id,
       advisor_id: enrollment.advisor_id,
-      active: enrollment.active,
       created_at: enrollment.created_at,
       updated_at: enrollment.updated_at
     }

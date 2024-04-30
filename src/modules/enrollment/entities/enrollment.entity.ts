@@ -35,9 +35,6 @@ export class Enrollment {
   @Column({ nullable: true })
   defense_prediction_date: Date
 
-  @Column({ nullable: false, default: true })
-  active: boolean
-
   @CreateDateColumn()
   created_at: Date
 

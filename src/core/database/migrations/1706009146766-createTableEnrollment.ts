@@ -24,8 +24,13 @@ export class createTableEnrollment1706009146766 implements MigrationInterface {
           },
           {
             name: 'enrollment_date',
-            type: 'timestamp',
+            type: 'date',
             isNullable: false
+          },
+          {
+            name: 'defense_prediction_date',
+            type: 'date',
+            isNullable: true
           },
           {
             name: 'enrollment_number',
@@ -38,16 +43,6 @@ export class createTableEnrollment1706009146766 implements MigrationInterface {
             type: 'varchar',
             length: '20',
             isNullable: false
-          },
-          {
-            name: 'defense_prediction_date',
-            type: 'timestamp',
-            isNullable: true
-          },
-          {
-            name: 'active',
-            type: 'boolean',
-            default: true
           },
           {
             name: 'created_at',

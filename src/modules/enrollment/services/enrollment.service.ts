@@ -3,8 +3,7 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import {
   BadRequestException,
-  NotFoundException,
-  InternalServerErrorException
+  NotFoundException
 } from '@nestjs/common/exceptions'
 import { AdvisorService } from '../../../modules/advisor/service/advisor.service'
 import { StudentService } from '../../../modules/student/service/student.service'
@@ -57,6 +56,7 @@ export class EnrollmentService {
       const advisor = await this.advisorService.findOneByEmail(
         dto.advisor_email
       )
+
       const student = await this.studentService.findOneByEmail(
         dto.student_email
       )
@@ -89,15 +89,5 @@ export class EnrollmentService {
     throw new NotFoundException(
       constants.exceptionMessages.enrollment.NOT_FOUND
     )
-  }
-
-  async deactivate(id: number): Promise<void> {
-    try {
-      await this.enrollmentRepository.update(id, { active: false })
-    } catch (error) {
-      throw new InternalServerErrorException(
-        constants.exceptionMessages.enrollment.DEACTIVATE_FAILED
-      )
-    }
   }
 }

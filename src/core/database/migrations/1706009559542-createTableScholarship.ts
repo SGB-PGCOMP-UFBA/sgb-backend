@@ -24,17 +24,17 @@ export class createTableScholarship1706009559542 implements MigrationInterface {
           },
           {
             name: 'scholarship_starts_at',
-            type: 'timestamp',
+            type: 'date',
             isNullable: false
           },
           {
             name: 'scholarship_ends_at',
-            type: 'timestamp',
+            type: 'date',
             isNullable: false
           },
           {
             name: 'extension_ends_at',
-            type: 'timestamp',
+            type: 'date',
             isNullable: true
           },
           {

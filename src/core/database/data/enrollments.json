@@ -1,0 +1,1154 @@
+[
+    {
+        "student_email": "eliveltonrangel@gmail.com",
+        "advisor_email": "maycon.leone@ufba.com",
+        "enrollment_date": "2020-01-23",
+        "enrollment_number": "2020104454",
+        "enrollment_program": "DOUTORADO",
+        "defense_prediction_date": "2023-11-30"
+    },
+    {
+        "student_email": "gisellyareis@gmail.com",
+        "advisor_email": "maycon.leone@ufba.com",
+        "enrollment_date": "2023-08-01",
+        "enrollment_number": "2023120175",
+        "enrollment_program": "MESTRADO",
+        "defense_prediction_date": "2025-07-31"
+    },
+    {
+        "student_email": "raoni_si@hotmail.com",
+        "advisor_email": "rita.suzana@ufba.com",
+        "enrollment_date": "2022-08-03",
+        "enrollment_number": "2022122700",
+        "enrollment_program": "DOUTORADO",
+        "defense_prediction_date": "2024-08-20"
+    },
+    {
+        "student_email": "giulyana.santos@gmail.com",
+        "advisor_email": "rita.suzana@ufba.com",
+        "enrollment_number": "2022118510",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2022-07-31",
+        "defense_prediction_date": "2023-09-28"
+    },
+    {
+        "student_email": "adrianobarbosa95@gmail.com",
+        "advisor_email": "rita.suzana@ufba.com",
+        "enrollment_number": "2023102480",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2023-02-08",
+        "defense_prediction_date": "2025-12-01"
+    },
+    {
+        "student_email": "cldjunior@gmail.com",
+        "advisor_email": "prazeres@ufba.com",
+        "enrollment_number": "2021124854",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2021-07-22",
+        "defense_prediction_date": "2025-09-30"
+    },
+    {
+        "student_email": "moarabritto@gmail.com",
+        "advisor_email": "flach@ufba.com",
+        "enrollment_number": "2021111284",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2021-02-18",
+        "defense_prediction_date": "2025-05-31"
+    },
+    {
+        "student_email": "maykioliveira@ufba.br",
+        "advisor_email": "fdurao@ufba.com",
+        "enrollment_number": "2022118010",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2022-08-15",
+        "defense_prediction_date": "2023-08-01"
+    },
+    {
+        "student_email": "diego.correa@ufba.br",
+        "advisor_email": "fdurao@ufba.com",
+        "enrollment_number": "2021124863",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2021-07-20",
+        "defense_prediction_date": "2025-05-31"
+    },
+    {
+        "student_email": "eduardoferreira@ufba.br",
+        "advisor_email": "fdurao@ufba.com",
+        "enrollment_number": "2023102631",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2023-02-13",
+        "defense_prediction_date": "2026-10-03"
+    },
+    {
+        "student_email": "bonfim.gabriel@ufba.br",
+        "advisor_email": "gecynaldassg@ufba.com",
+        "enrollment_number": "2022101934",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2024-02-29",
+        "defense_prediction_date": "2026-10-03"
+    },
+    {
+        "student_email": "franklinsouza@ufba.br",
+        "advisor_email": "ecivaldo@ufba.com",
+        "enrollment_number": "2023119370",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2023-08-04",
+        "defense_prediction_date": "2025-08-04"
+    },
+    {
+        "student_email": "diegozabot@gmail.com",
+        "advisor_email": "ecivaldo@ufba.com",
+        "enrollment_number": "2021125145",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2021-07-01",
+        "defense_prediction_date": "2025-07-30"
+    },
+    {
+        "student_email": "julyms.85@gmail.com",
+        "advisor_email": "ecivaldo@ufba.com",
+        "enrollment_number": "2023103719",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2023-02-08",
+        "defense_prediction_date": "2025-01-31"
+    },
+    {
+        "student_email": "railanassantana@gmail.com",
+        "advisor_email": "ivan.machado@ufba.com",
+        "enrollment_number": "2020128124",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2020-10-03",
+        "defense_prediction_date": "2024-10-03"
+    },
+    {
+        "student_email": "martins.luana@ufba.br",
+        "advisor_email": "ivan.machado@ufba.com",
+        "enrollment_number": "2020104525",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2020-03-01",
+        "defense_prediction_date": "2024-04-01"
+    },
+    {
+        "student_email": "motajoselito@gmail.com",
+        "advisor_email": "ivan.machado@ufba.com",
+        "enrollment_number": "2021136499",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2022-02-21",
+        "defense_prediction_date": "2025-12-31"
+    },
+    {
+        "student_email": "andreluizromanomadureira@gmail.com",
+        "advisor_email": "leobino@ufba.com",
+        "enrollment_number": "2021111257",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2021-02-19",
+        "defense_prediction_date": "2024-12-21"
+    },
+    {
+        "student_email": "talitapinheiro@ufba.br",
+        "advisor_email": "leobino@ufba.com",
+        "enrollment_number": "2023102678",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2023-03-06",
+        "defense_prediction_date": "2027-03-06"
+    },
+    {
+        "student_email": "jamilevasconcelos@gmail.com",
+        "advisor_email": "gmlima@ufba.com",
+        "enrollment_number": "2023119746",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2023-08-01",
+        "defense_prediction_date": "2027-08-31"
+    },
+    {
+        "student_email": "dhyegocruz@ufba.br",
+        "advisor_email": "eduardo.almeida@ufba.com",
+        "enrollment_number": "2023102650",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2023-02-14",
+        "defense_prediction_date": "2024-12-16"
+    },
+    {
+        "student_email": "erlon.alm@gmail.com",
+        "advisor_email": "eduardo.almeida@ufba.com",
+        "enrollment_number": "2023119915",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2023-07-18",
+        "defense_prediction_date": "2024-12-20"
+    },
+    {
+        "student_email": "enio.garcia@ufba.br",
+        "advisor_email": "eduardo.almeida@ufba.com",
+        "enrollment_number": "2023121477",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2023-07-01",
+        "defense_prediction_date": "2025-07-01"
+    },
+    {
+        "student_email": "lucas.lm@ufba.br",
+        "advisor_email": "gustavobf@ufba.com",
+        "enrollment_number": "2022102539",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2022-03-01",
+        "defense_prediction_date": "2024-04-15"
+    },
+    {
+        "student_email": "clarapestana91@gmail.com",
+        "advisor_email": "vaninha@ufba.com",
+        "enrollment_number": "2020104552",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2020-09-08",
+        "defense_prediction_date": "2024-07-01"
+    },
+    {
+        "student_email": "cruzleandro@ufba.br",
+        "advisor_email": "laisns@ufba.com",
+        "enrollment_number": "2022123305",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2022-08-15",
+        "defense_prediction_date": "2026-06-15"
+    },
+    {
+        "student_email": "bpmsilva@gmail.com",
+        "advisor_email": "lrebouca@ufba.com",
+        "enrollment_number": "2020104427",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2020-03-01",
+        "defense_prediction_date": "2024-02-29"
+    },
+    {
+        "student_email": "vitor.barbosa@ufba.br",
+        "advisor_email": "rafael.melo@ufba.com",
+        "enrollment_number": "2023120291",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2023-08-08",
+        "defense_prediction_date": "2024-08-01"
+    },
+    {
+        "student_email": "mateuscsilva.1@gmail.com",
+        "advisor_email": "rafael.melo@ufba.com",
+        "enrollment_number": "2023102373",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2023-03-01",
+        "defense_prediction_date": "2023-12-01"
+    },
+    {
+        "student_email": "santanab@ufba.br",
+        "advisor_email": "manoel.mendonca@ufba.com",
+        "enrollment_number": "2021124522",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2021-07-31",
+        "defense_prediction_date": "2025-06-30"
+    },
+    {
+        "student_email": "ricardoepvieira@gmail.com",
+        "advisor_email": "manoel.mendonca@ufba.com",
+        "enrollment_number": "2023119755",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2023-08-16",
+        "defense_prediction_date": "2027-08-01"
+    },
+    {
+        "student_email": "cliciasp1@gmail.com",
+        "advisor_email": "marcosb@ufba.com",
+        "enrollment_number": "215216437",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2015-09-01",
+        "defense_prediction_date": "2019-09-01"
+    },
+    {
+        "student_email": "leouneb@gmail.com",
+        "advisor_email": "eduardo.almeida@ufba.com",
+        "enrollment_number": "215115725",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2015-04-05",
+        "defense_prediction_date": "2018-06-01"
+    },
+    {
+        "student_email": "witasrocha@gmail.com",
+        "advisor_email": "dclaro@ufba.com",
+        "enrollment_number": "216124012",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2016-07-24",
+        "defense_prediction_date": "2018-02-24"
+    },
+    {
+        "student_email": "antoniobatistast1@gmail.com",
+        "advisor_email": "marcosb@ufba.com",
+        "enrollment_number": "216121736",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2016-01-01",
+        "defense_prediction_date": "2018-12-21"
+    },
+    {
+        "student_email": "juracyjuracy@gmail.com",
+        "advisor_email": "marcosb@ufba.com",
+        "enrollment_number": "216219755",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2016-11-21",
+        "defense_prediction_date": "2019-01-31"
+    },
+    {
+        "student_email": "mateus.aluufc@gmail.com",
+        "advisor_email": "leobino@ufba.com",
+        "enrollment_number": "217123293",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2018-04-06",
+        "defense_prediction_date": "2018-02-28"
+    },
+    {
+        "student_email": "matheus.beep@gmail.com",
+        "advisor_email": "mauriciops@ufba.com",
+        "enrollment_number": "217122980",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2017-05-01",
+        "defense_prediction_date": "2018-12-10"
+    },
+    {
+        "student_email": "filipe.garrido@ufba.br",
+        "advisor_email": "ecivaldo@ufba.com",
+        "enrollment_number": "216121712",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2016-07-01",
+        "defense_prediction_date": "2018-09-25"
+    },
+    {
+        "student_email": "silvioboss@yahoo.com.br",
+        "advisor_email": "aline@ufba.com",
+        "enrollment_number": "216121805",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2016-06-01",
+        "defense_prediction_date": "2020-07-31"
+    },
+    {
+        "student_email": "leandrompsanches@gmail.com",
+        "advisor_email": "laisns@ufba.com",
+        "enrollment_number": "216121715",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2016-04-07",
+        "defense_prediction_date": "2018-11-01"
+    },
+    {
+        "student_email": "moarabritto@gmail.com",
+        "advisor_email": "flach@ufba.com",
+        "enrollment_number": "216219761",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2016-11-24",
+        "defense_prediction_date": "2018-12-21"
+    },
+    {
+        "student_email": "rrosy.silva@gmail.com",
+        "advisor_email": "eduardo.almeida@ufba.com",
+        "enrollment_number": "216220951",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2016-11-26",
+        "defense_prediction_date": "2018-12-26"
+    },
+    {
+        "student_email": "luciane.meconi@yahoo.com.br",
+        "advisor_email": "rita.suzana@ufba.com",
+        "enrollment_number": "216219758",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2016-11-23",
+        "defense_prediction_date": "2018-12-28"
+    },
+    {
+        "student_email": "sirox84@gmail.com",
+        "advisor_email": "marcosb@ufba.com",
+        "enrollment_number": "216221521",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2016-11-27",
+        "defense_prediction_date": "2018-12-21"
+    },
+    {
+        "student_email": "gabrielbiurrum@gmail.com",
+        "advisor_email": "antonio.apolinario@ufba.com",
+        "enrollment_number": "216219752",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2016-11-21",
+        "defense_prediction_date": "2019-01-21"
+    },
+    {
+        "student_email": "leojsandrade@gmail.com",
+        "advisor_email": "prazeres@ufba.com",
+        "enrollment_number": "215115724",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2015-01-03",
+        "defense_prediction_date": "2019-01-07"
+    },
+    {
+        "student_email": "magnoluan@hotmail.com",
+        "advisor_email": "eduardo.almeida@ufba.com",
+        "enrollment_number": "215115728",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2015-02-23",
+        "defense_prediction_date": "2019-09-30"
+    },
+    {
+        "student_email": "ctamp2000@gmail.com",
+        "advisor_email": "vaninha@ufba.com",
+        "enrollment_number": "215115714",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2015-03-01",
+        "defense_prediction_date": "2019-06-30"
+    },
+    {
+        "student_email": "glaucyacboechat@gmail.com",
+        "advisor_email": "manoel.mendonca@ufba.com",
+        "enrollment_number": "215115718",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2015-02-26",
+        "defense_prediction_date": "2019-08-01"
+    },
+    {
+        "student_email": "djan.info@gmail.com",
+        "advisor_email": "claudionsa@ufba.com",
+        "enrollment_number": "215216440",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2016-01-04",
+        "defense_prediction_date": "2020-03-02"
+    },
+    {
+        "student_email": "alissodelf@gmail.com",
+        "advisor_email": "macedo@ufba.com",
+        "enrollment_number": "217123292",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2017-08-05",
+        "defense_prediction_date": "2019-12-04"
+    },
+    {
+        "student_email": "victorhugocarvalhoalves@gmail.com",
+        "advisor_email": "flach@ufba.com",
+        "enrollment_number": "217122984",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2017-05-08",
+        "defense_prediction_date": "2019-05-08"
+    },
+    {
+        "student_email": "gdahia@gmail.com",
+        "advisor_email": "mauriciops@ufba.com",
+        "enrollment_number": "2019107050",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2019-04-02",
+        "defense_prediction_date": "2020-06-30"
+    },
+    {
+        "student_email": "mateus.aluufc@gmail.com",
+        "advisor_email": "leobino@ufba.com",
+        "enrollment_number": "217123293",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2017-09-06",
+        "defense_prediction_date": "2019-04-12"
+    },
+    {
+        "student_email": "samia.capistrano@gmail.com",
+        "advisor_email": "eduardo.almeida@ufba.com",
+        "enrollment_number": "217122983",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2017-05-08",
+        "defense_prediction_date": "2019-05-03"
+    },
+    {
+        "student_email": "iurryy@yahoo.com.br",
+        "advisor_email": "rodrigorgs@ufba.com",
+        "enrollment_number": "217122116",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2018-01-01",
+        "defense_prediction_date": "2019-05-08"
+    },
+    {
+        "student_email": "tiagocompuesc@gmail.com",
+        "advisor_email": "rafael.melo@ufba.com",
+        "enrollment_number": "217123300",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2017-05-07",
+        "defense_prediction_date": "2019-08-06"
+    },
+    {
+        "student_email": "brennodemello.bm@gmail.com",
+        "advisor_email": "prazeres@ufba.com",
+        "enrollment_number": "217123294",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2017-06-05",
+        "defense_prediction_date": "2019-05-08"
+    },
+    {
+        "student_email": "pierre.pita@gmail.com",
+        "advisor_email": "marcosb@ufba.com",
+        "enrollment_number": "215216439",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2018-06-01",
+        "defense_prediction_date": "2019-09-30"
+    },
+    {
+        "student_email": "leonan.teixeira@gmail.com",
+        "advisor_email": "maycon.leone@ufba.com",
+        "enrollment_number": "217122979",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2017-05-05",
+        "defense_prediction_date": "2019-05-05"
+    },
+    {
+        "student_email": "italo95teixeira@gmail.com",
+        "advisor_email": "januario@ufba.com",
+        "enrollment_number": "217219145",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2019-07-01",
+        "defense_prediction_date": "2019-10-02"
+    },
+    {
+        "student_email": "michellellcarvalho@gmail.com",
+        "advisor_email": "eduardo.almeida@ufba.com",
+        "enrollment_number": "215216442",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2015-08-17",
+        "defense_prediction_date": "2020-04-30"
+    },
+    {
+        "student_email": "rafael.lima.costa@gmail.com",
+        "advisor_email": "leobino@ufba.com",
+        "enrollment_number": "215216438",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2015-09-01",
+        "defense_prediction_date": "2019-10-10"
+    },
+    {
+        "student_email": "erasmoleitemonteiro@gmail.com",
+        "advisor_email": "rita.suzana@ufba.com",
+        "enrollment_number": "215216441",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2015-08-01",
+        "defense_prediction_date": "2019-08-01"
+    },
+    {
+        "student_email": "nandaeustaquio7@gmail.com",
+        "advisor_email": "tatiane.nogueira@ufba.com",
+        "enrollment_number": "217219883",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2018-10-01",
+        "defense_prediction_date": "2019-10-02"
+    },
+    {
+        "student_email": "michellfelippe@gmail.com",
+        "advisor_email": "rafael.melo@ufba.com",
+        "enrollment_number": "217221498",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2018-10-05",
+        "defense_prediction_date": "2019-10-05"
+    },
+    {
+        "student_email": "igosa09@gmail.com",
+        "advisor_email": "maycon.leone@ufba.com",
+        "enrollment_number": "217220201",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2018-01-07",
+        "defense_prediction_date": "2019-10-20"
+    },
+    {
+        "student_email": "kastelojoao@gmail.com",
+        "advisor_email": "ricardoar@ufba.com",
+        "enrollment_number": "217219146",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2018-11-02",
+        "defense_prediction_date": "2019-11-02"
+    },
+    {
+        "student_email": "matheus_thiago_mb@hotmail.com",
+        "advisor_email": "maycon.leone@ufba.com",
+        "enrollment_number": "217219150",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2019-10-31",
+        "defense_prediction_date": "2019-10-31"
+    },
+    {
+        "student_email": "kazuohorota@gmail.com",
+        "advisor_email": "gustavobf@ufba.com",
+        "enrollment_number": "3941635590",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2018-09-13",
+        "defense_prediction_date": "2020-06-30"
+    },
+    {
+        "student_email": "willianmartinho@gmail.com",
+        "advisor_email": "rafael.melo@ufba.com",
+        "enrollment_number": "218126470",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2018-04-01",
+        "defense_prediction_date": "2019-12-01"
+    },
+    {
+        "student_email": "rafaelglauber@gmail.com",
+        "advisor_email": "dclaro@ufba.com",
+        "enrollment_number": "215216443",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2016-01-01",
+        "defense_prediction_date": "2019-12-01"
+    },
+    {
+        "student_email": "valeria.rosa@ufba.br",
+        "advisor_email": "ecivaldo@ufba.com",
+        "enrollment_number": "216121806",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2016-04-01",
+        "defense_prediction_date": "2020-03-01"
+    },
+    {
+        "student_email": "tiagodasnascimento@gmail.com",
+        "advisor_email": "maycon.leone@ufba.com",
+        "enrollment_number": "218122491",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2018-04-01",
+        "defense_prediction_date": "2020-03-31"
+    },
+    {
+        "student_email": "tiagoms88@gmail.com",
+        "advisor_email": "vpetrucci@ufba.com",
+        "enrollment_number": "218122492",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2018-04-01",
+        "defense_prediction_date": "2019-07-05"
+    },
+    {
+        "student_email": "junotfneto@gmail.com",
+        "advisor_email": "rafael.melo@ufba.com",
+        "enrollment_number": "218126588",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2018-09-05",
+        "defense_prediction_date": "2020-03-31"
+    },
+    {
+        "student_email": "juniorleles80@gmail.com",
+        "advisor_email": "prazeres@ufba.com",
+        "enrollment_number": "218122482",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2019-07-10",
+        "defense_prediction_date": "2020-03-31"
+    },
+    {
+        "student_email": "cintiacosta5@gmail.com",
+        "advisor_email": "prazeres@ufba.com",
+        "enrollment_number": "218122455",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2019-11-01",
+        "defense_prediction_date": "2020-03-31"
+    },
+    {
+        "student_email": "ferreiraviniciussdi@gmail.com",
+        "advisor_email": "ricardoar@ufba.com",
+        "enrollment_number": "218122680",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2018-12-01",
+        "defense_prediction_date": "2020-04-02"
+    },
+    {
+        "student_email": "railanassantana@gmail.com",
+        "advisor_email": "ivan.machado@ufba.com",
+        "enrollment_number": "218122486",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2018-12-05",
+        "defense_prediction_date": "2020-04-02"
+    },
+    {
+        "student_email": "nicollirioss@gmail.com",
+        "advisor_email": "manoel.mendonca@ufba.com",
+        "enrollment_number": "216121463",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2016-04-01",
+        "defense_prediction_date": "2020-03-15"
+    },
+    {
+        "student_email": "renata.rmss@gmail.com",
+        "advisor_email": "ivan.machado@ufba.com",
+        "enrollment_number": "216121800",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2020-05-01",
+        "defense_prediction_date": "2020-06-30"
+    },
+    {
+        "student_email": "jwertherf@gmail.com",
+        "advisor_email": "fdurao@ufba.com",
+        "enrollment_number": "216121799",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2017-03-01",
+        "defense_prediction_date": "2020-07-31"
+    },
+    {
+        "student_email": "gbrlamota@gmail.com",
+        "advisor_email": "fdurao@ufba.com",
+        "enrollment_number": "216121798",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2016-09-01",
+        "defense_prediction_date": "2020-06-30"
+    },
+    {
+        "student_email": "amandachagasufba@gmail.com",
+        "advisor_email": "fdurao@ufba.com",
+        "enrollment_number": "218220346",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2019-05-01",
+        "defense_prediction_date": "2020-08-31"
+    },
+    {
+        "student_email": "nildocsjr@gmail.com",
+        "advisor_email": "ivan.machado@ufba.com",
+        "enrollment_number": "218219183",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2019-07-03",
+        "defense_prediction_date": "2020-09-30"
+    },
+    {
+        "student_email": "rafa.alcantara23@gmail.com",
+        "advisor_email": "antonio.apolinario@ufba.com",
+        "enrollment_number": "216219622",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2017-03-01",
+        "defense_prediction_date": "2020-11-20"
+    },
+    {
+        "student_email": "kalyfabdalla@gmail.com",
+        "advisor_email": "lrebouca@ufba.com",
+        "enrollment_number": "216121804",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2016-05-05",
+        "defense_prediction_date": "2020-11-10"
+    },
+    {
+        "student_email": "cleberlira@gmail.com",
+        "advisor_email": "prazeres@ufba.com",
+        "enrollment_number": "216219617",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2017-09-01",
+        "defense_prediction_date": "2020-10-30"
+    },
+    {
+        "student_email": "joao.dias@ufba.br",
+        "advisor_email": "fdurao@ufba.com",
+        "enrollment_number": "216219620",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2017-03-01",
+        "defense_prediction_date": "2019-12-06"
+    },
+    {
+        "student_email": "skybus.luis@gmail.com",
+        "advisor_email": "rafael.melo@ufba.com",
+        "enrollment_number": "2019106222",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2020-03-01",
+        "defense_prediction_date": "2021-01-31"
+    },
+    {
+        "student_email": "jean.rosa@ufba.br",
+        "advisor_email": "ecivaldo@ufba.com",
+        "enrollment_number": "216219618",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2017-02-01",
+        "defense_prediction_date": "2021-03-31"
+    },
+    {
+        "student_email": "elviobg@gmail.com",
+        "advisor_email": "msouza1@ufba.com",
+        "enrollment_number": "2019103070",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2019-07-01",
+        "defense_prediction_date": "2020-12-31"
+    },
+    {
+        "student_email": "phdiamantinoo@gmail.com",
+        "advisor_email": "coimbra.danilo@ufba.com",
+        "enrollment_number": "2019106240",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2020-02-12",
+        "defense_prediction_date": "2021-02-28"
+    },
+    {
+        "student_email": "nillsantana25@gmail.com",
+        "advisor_email": "gustavobf@ufba.com",
+        "enrollment_number": "2019106115",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2019-11-05",
+        "defense_prediction_date": "2021-02-28"
+    },
+    {
+        "student_email": "dellamycow@gmail.com",
+        "advisor_email": "fabiola@ufba.com",
+        "enrollment_number": "2019105673",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2019-04-01",
+        "defense_prediction_date": "2021-03-31"
+    },
+    {
+        "student_email": "icarobsi@hotmail.com",
+        "advisor_email": "maycon.leone@ufba.com",
+        "enrollment_number": "2019124113",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2019-04-04",
+        "defense_prediction_date": "2021-04-04"
+    },
+    {
+        "student_email": "motajoselito@gmail.com",
+        "advisor_email": "ivan.machado@ufba.com",
+        "enrollment_number": "2019133346",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2020-03-01",
+        "defense_prediction_date": "2021-06-30"
+    },
+    {
+        "student_email": "anderson.sacramento93@gmail.com",
+        "advisor_email": "msouza1@ufba.com",
+        "enrollment_number": "2019129764",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2019-11-01",
+        "defense_prediction_date": "2021-06-30"
+    },
+    {
+        "student_email": "jopacanario@gmail.com",
+        "advisor_email": "ricardoar@ufba.com",
+        "enrollment_number": "217219138",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2017-05-12",
+        "defense_prediction_date": "2021-09-30"
+    },
+    {
+        "student_email": "evertonmj@gmail.com",
+        "advisor_email": "marcosb@ufba.com",
+        "enrollment_number": "217219133",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2017-11-01",
+        "defense_prediction_date": "2021-09-30"
+    },
+    {
+        "student_email": "abvwmc@gmail.com",
+        "advisor_email": "mauriciops@ufba.com",
+        "enrollment_number": "217219130",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2017-11-01",
+        "defense_prediction_date": "2021-09-30"
+    },
+    {
+        "student_email": "diego.correa@ufba.br",
+        "advisor_email": "fdurao@ufba.com",
+        "enrollment_number": "2020104347",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2020-04-01",
+        "defense_prediction_date": "2022-02-28"
+    },
+    {
+        "student_email": "josuejunior23@gmail.com",
+        "advisor_email": "fabiola@ufba.com",
+        "enrollment_number": "2019129773",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2020-10-01",
+        "defense_prediction_date": "2021-02-28"
+    },
+    {
+        "student_email": "murilo.arouca@ucsal.edu.br",
+        "advisor_email": "marcosb@ufba.com",
+        "enrollment_number": "2020104300",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2020-05-01",
+        "defense_prediction_date": "2022-02-28"
+    },
+    {
+        "student_email": "jadna.ac@gmail.com",
+        "advisor_email": "fdurao@ufba.com",
+        "enrollment_number": "2019129791",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2020-05-01",
+        "defense_prediction_date": "2021-10-31"
+    },
+    {
+        "student_email": "arleyprates@gmail.com",
+        "advisor_email": "dclaro@ufba.com",
+        "enrollment_number": "2020103976",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2020-04-13",
+        "defense_prediction_date": "2022-02-28"
+    },
+    {
+        "student_email": "george.dantas.c@gmail.com",
+        "advisor_email": "coimbra.danilo@ufba.com",
+        "enrollment_number": "2019129817",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2019-12-05",
+        "defense_prediction_date": "2021-10-05"
+    },
+    {
+        "student_email": "dandavidf@gmail.com",
+        "advisor_email": "rita.suzana@ufba.com",
+        "enrollment_number": "2019133678",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2020-04-01",
+        "defense_prediction_date": "2021-07-31"
+    },
+    {
+        "student_email": "jalissonhenrique10@gmail.com",
+        "advisor_email": "claudionsa@ufba.com",
+        "enrollment_number": "2020104688",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2020-04-01",
+        "defense_prediction_date": "2022-02-28"
+    },
+    {
+        "student_email": "levyssantiago@gmail.com",
+        "advisor_email": "fabiola@ufba.com",
+        "enrollment_number": "2020104795",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2020-04-01",
+        "defense_prediction_date": "2022-02-28"
+    },
+    {
+        "student_email": "paulo.robertojr100@gmail.com",
+        "advisor_email": "lrebouca@ufba.com",
+        "enrollment_number": "218122448",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2018-04-01",
+        "defense_prediction_date": "2022-03-31"
+    },
+    {
+        "student_email": "ellydiani@gmail.com",
+        "advisor_email": "tatiane.nogueira@ufba.com",
+        "enrollment_number": "217219132",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2018-07-16",
+        "defense_prediction_date": "2022-03-31"
+    },
+    {
+        "student_email": "edsonmottac@gmail.com",
+        "advisor_email": "maycon.leone@ufba.com",
+        "enrollment_number": "218122447",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2018-07-01",
+        "defense_prediction_date": "2022-03-31"
+    },
+    {
+        "student_email": "alexsisantos@gmail.com",
+        "advisor_email": "gustavobf@ufba.com",
+        "enrollment_number": "218122446",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2018-04-01",
+        "defense_prediction_date": "2022-06-30"
+    },
+    {
+        "student_email": "nfsseixas@gmail.com",
+        "advisor_email": "gustavobf@ufba.com",
+        "enrollment_number": "2019129906",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2019-11-01",
+        "defense_prediction_date": "2022-05-31"
+    },
+    {
+        "student_email": "nillsantana25@gmail.com",
+        "advisor_email": "gustavobf@ufba.com",
+        "enrollment_number": "2019106115",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2021-11-01",
+        "defense_prediction_date": "2023-10-30"
+    },
+    {
+        "student_email": "renato.frca@gmail.com",
+        "advisor_email": "leobino@ufba.com",
+        "enrollment_number": "218219949",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2018-09-13",
+        "defense_prediction_date": "2022-07-31"
+    },
+    {
+        "student_email": "filipe.garrido@ufba.br",
+        "advisor_email": "rita.suzana@ufba.com",
+        "enrollment_number": "218222090",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2019-10-01",
+        "defense_prediction_date": "2022-08-30"
+    },
+    {
+        "student_email": "paulo.prsdesouza@gmail.com",
+        "advisor_email": "fdurao@ufba.com",
+        "enrollment_number": "2019125219",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2019-10-17",
+        "defense_prediction_date": "2023-02-17"
+    },
+    {
+        "student_email": "jessicadesouza@ufba.br",
+        "advisor_email": "laisns@ufba.com",
+        "enrollment_number": "2020128062",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2021-09-01",
+        "defense_prediction_date": "2023-09-01"
+    },
+    {
+        "student_email": "biiabriito02@gmail.com",
+        "advisor_email": "msouza1@ufba.com",
+        "enrollment_number": "218222089",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2018-11-01",
+        "defense_prediction_date": "2022-08-31"
+    },
+    {
+        "student_email": "otavio.neto@ufba.br",
+        "advisor_email": "laisns@ufba.com",
+        "enrollment_number": "2020128017",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2021-03-01",
+        "defense_prediction_date": "2022-12-30"
+    },
+    {
+        "student_email": "cruz.paulo@ufba.br",
+        "advisor_email": "eduardo.almeida@ufba.com",
+        "enrollment_number": "2020128026",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2022-03-01",
+        "defense_prediction_date": "2022-12-30"
+    },
+    {
+        "student_email": "jamilevasconcelos@gmail.com",
+        "advisor_email": "gmlima@ufba.com",
+        "enrollment_number": "2020127931",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2021-03-01",
+        "defense_prediction_date": "2023-03-31"
+    },
+    {
+        "student_email": "jessicadesouza@ufba.br",
+        "advisor_email": "laisns@ufba.com",
+        "enrollment_number": "2020128062",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2021-09-01",
+        "defense_prediction_date": "2022-10-05"
+    },
+    {
+        "student_email": "dhennya@gmail.com",
+        "advisor_email": "ivan.machado@ufba.com",
+        "enrollment_number": "2019110780",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2019-05-01",
+        "defense_prediction_date": "2023-03-31"
+    },
+    {
+        "student_email": "saulo.matos@ufba.br",
+        "advisor_email": "januario@ufba.com",
+        "enrollment_number": "2019101754",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2019-05-01",
+        "defense_prediction_date": "2023-01-31"
+    },
+    {
+        "student_email": "arielalmeida@ufba.br",
+        "advisor_email": "ricardoar@ufba.com",
+        "enrollment_number": "2021109052",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2021-03-01",
+        "defense_prediction_date": "2023-02-28"
+    },
+    {
+        "student_email": "taniahfeitosa@hotmail.com",
+        "advisor_email": "rita.suzana@ufba.com",
+        "enrollment_number": "2021108725",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2021-06-01",
+        "defense_prediction_date": "2023-01-31"
+    },
+    {
+        "student_email": "dhennya@gmail.com",
+        "advisor_email": "ivan.machado@ufba.com",
+        "enrollment_number": "2019110780",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2023-01-01",
+        "defense_prediction_date": "2023-03-31"
+    },
+    {
+        "student_email": "arielalmeida@ufba.br",
+        "advisor_email": "ricardoar@ufba.com",
+        "enrollment_number": "2021109052",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2021-03-01",
+        "defense_prediction_date": "2023-05-31"
+    },
+    {
+        "student_email": "mirleims@gmail.com",
+        "advisor_email": "marcosb@ufba.com",
+        "enrollment_number": "2019129853",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2020-12-11",
+        "defense_prediction_date": "2023-07-11"
+    },
+    {
+        "student_email": "nfsseixas@gmail.com",
+        "advisor_email": "gustavobf@ufba.com",
+        "enrollment_number": "2019129906",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2019-11-01",
+        "defense_prediction_date": "2023-07-01"
+    },
+    {
+        "student_email": "biancasantana.ls@gmail.com",
+        "advisor_email": "flach@ufba.com",
+        "enrollment_number": "2019129871",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2020-07-01",
+        "defense_prediction_date": "2023-08-05"
+    },
+    {
+        "student_email": "sirox84@gmail.com",
+        "advisor_email": "marcosb@ufba.com",
+        "enrollment_number": "2019129862",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2020-03-01",
+        "defense_prediction_date": "2023-07-31"
+    },
+    {
+        "student_email": "andressamirella21@gmail.com",
+        "advisor_email": "msouza1@ufba.com",
+        "enrollment_number": "2022118780",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2022-08-01",
+        "defense_prediction_date": "2023-10-31"
+    },
+    {
+        "student_email": "larissa.barbosa11@gmail.com",
+        "advisor_email": "rita.suzana@ufba.com",
+        "enrollment_number": "2019129666",
+        "enrollment_program": "DOUTORADO",
+        "enrollment_date": "2019-10-01",
+        "defense_prediction_date": "2023-10-31"
+    },
+    {
+        "student_email": "andreanivaldo@gmail.com",
+        "advisor_email": "dclaro@ufba.com",
+        "enrollment_number": "2022100472",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2022-02-01",
+        "defense_prediction_date": "2024-02-29"
+    },
+    {
+        "student_email": "lailapmota@gmail.com",
+        "advisor_email": "dclaro@ufba.com",
+        "enrollment_number": "2022100481",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2022-02-01",
+        "defense_prediction_date": "2024-01-31"
+    },
+    {
+        "student_email": "alvezsjv@gmail.com",
+        "advisor_email": "gmlima@ufba.com",
+        "enrollment_number": "2022113793",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2023-04-05",
+        "defense_prediction_date": "2024-01-31"
+    },
+    {
+        "student_email": "denis.boaventura@ufba.br",
+        "advisor_email": "fdurao@ufba.com",
+        "enrollment_number": "2022101872",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2022-05-01",
+        "defense_prediction_date": "2024-03-31"
+    },
+    {
+        "student_email": "filipelyrio@gmail.com",
+        "advisor_email": "lrebouca@ufba.com",
+        "enrollment_number": "2023101465",
+        "enrollment_program": "MESTRADO",
+        "enrollment_date": "2023-03-01",
+        "defense_prediction_date": "2025-02-28"
+    }
+]
