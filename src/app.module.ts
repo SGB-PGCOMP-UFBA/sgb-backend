@@ -8,6 +8,7 @@ import { AdvisorModule } from './modules/advisor/advisor.module'
 import { ScholarshipModule } from './modules/scholarship/scholarship.module'
 import { AdminModule } from './modules/admin/admin.module'
 import { AgencyModule } from './modules/agency/agency.module'
+import { EmbedNotificationModule } from './modules/embed-notification/embed-notification.module'
 import { ScheduleModule } from '@nestjs/schedule'
 import { NotificationModule } from './services/ending-scholarship-notification/notification.module'
 import { ReportModule } from './services/pdf-reports/reports.module'
@@ -29,6 +30,7 @@ require('dotenv')
     AdminModule,
     StudentModule,
     AdvisorModule,
+    EmbedNotificationModule,
     PasswordRecoveryModule
   ],
   controllers: [],

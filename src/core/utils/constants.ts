@@ -55,6 +55,9 @@ const constants = {
       CREATION_FAILED: "Cant't create agency.",
       NOT_FOUND: 'Agency not found.'
     },
+    notification: {
+      CREATION_FAILED: "Cant't create notification."
+    },
     student: {
       CREATION_STARTED: 'The process of inserting a new student has started.',
       CREATION_COMPLETED:
