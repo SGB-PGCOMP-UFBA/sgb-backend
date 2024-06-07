@@ -96,7 +96,15 @@ export class AdvisorService {
     return advisor
   }
 
-  async updatePassword(email: string, password: string) {
+  async updatePassword(email: string, password: string): Promise<void> {
+    const findAdvisor = await this.advisorRepository.findOne({
+      where: { email }
+    })
+
+    if (!findAdvisor) {
+      throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
+    }
+
     const passwordHash = await hashPassword(password)
     await this.advisorRepository.update({ email }, { password: passwordHash })
   }

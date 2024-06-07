@@ -114,10 +114,19 @@ export class StudentService {
       throw new NotFoundException(constants.exceptionMessages.student.NOT_FOUND)
     }
 
-    this.updatePassword(email, password)
+    const passwordHash = await hashPassword(password)
+    await this.studentRepository.update({ email }, { password: passwordHash })
   }
 
   async updatePassword(email: string, password: string): Promise<void> {
+    const findStudent = await this.studentRepository.findOne({
+      where: { email }
+    })
+
+    if (!findStudent) {
+      throw new NotFoundException(constants.exceptionMessages.student.NOT_FOUND)
+    }
+
     const passwordHash = await hashPassword(password)
     await this.studentRepository.update({ email }, { password: passwordHash })
   }

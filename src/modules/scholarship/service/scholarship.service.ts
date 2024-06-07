@@ -138,7 +138,6 @@ export class ScholarshipService {
 
       return newScholarship
     } catch (error) {
-      console.log(error)
       throw new BadRequestException(
         constants.exceptionMessages.scholarship.CREATION_FAILED
       )

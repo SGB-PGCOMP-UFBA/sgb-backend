@@ -5,6 +5,7 @@ import { AdvisorService } from '../service/advisor.service'
 import { AdvisorMapper } from '../mapper/advisor.mapper'
 import { CreateAdvisorDto } from '../dto/create-advisor.dto'
 import { UpdateAdvisorDto } from '../dto/update-advisor.dto'
+import { UpdateAdvisorPasswordDto } from '../dto/update-advisor-password.dto'
 
 @Controller('v1/advisor')
 export class AdvisorController {
@@ -52,6 +53,11 @@ export class AdvisorController {
   async update(@Param('id') id: number, @Body() dto: UpdateAdvisorDto) {
     const updatedAdvisor = await this.advisorService.update(id, dto)
     return AdvisorMapper.detailed(updatedAdvisor)
+  }
+
+  @Patch('/update-password')
+  async updatePassword(@Body() dto: UpdateAdvisorPasswordDto) {
+    return await this.advisorService.updatePassword(dto.email, dto.password)
   }
 
   @Delete(':id')

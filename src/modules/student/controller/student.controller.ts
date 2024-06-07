@@ -16,6 +16,7 @@ import { CreateStudentDto } from '../dto/create-student.dto'
 import { StudentService } from '../service/student.service'
 import { StudentMapper } from '../mapper/student.mapper'
 import { UpdateStudentDto } from '../dto/update-student.dto'
+import { UpdateStudentPasswordDto } from '../dto/update-student-password.dto'
 
 @Controller('v1/student')
 export class StudentController {
@@ -34,7 +35,7 @@ export class StudentController {
   }
 
   @Get('/list')
-  async finPaginated(
+  async findPaginated(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10
   ) {
@@ -74,6 +75,11 @@ export class StudentController {
   async update(@Param('id') id: number, @Body() dto: UpdateStudentDto) {
     const updatedStudent = await this.studentsService.update(id, dto)
     return StudentMapper.detailed(updatedStudent)
+  }
+
+  @Patch('/update-password')
+  async updatePassword(@Body() dto: UpdateStudentPasswordDto) {
+    return await this.studentsService.updatePassword(dto.email, dto.password)
   }
 
   @Delete(':id')

@@ -1,7 +1,18 @@
-import { Controller, Get, Post, Body, Param, Delete, HttpCode, HttpStatus } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  Patch
+} from '@nestjs/common'
 import { AdminService } from '../service/admin.service'
 import { CreateAdminDto } from '../dto/create-admin.dto'
 import { AdminMapper } from '../mapper/admin.mapper'
+import { UpdateAdminPasswordDto } from '../dto/update-admin-password.dto'
 
 @Controller('v1/admin')
 export class AdminController {
@@ -17,6 +28,11 @@ export class AdminController {
   async findAll() {
     const admins = await this.adminService.findAll()
     return admins.map((admin) => AdminMapper.detailed(admin))
+  }
+
+  @Patch('/update-password')
+  async updatePassword(@Body() dto: UpdateAdminPasswordDto) {
+    return await this.adminService.updatePassword(dto.email, dto.password)
   }
 
   @Delete(':id')

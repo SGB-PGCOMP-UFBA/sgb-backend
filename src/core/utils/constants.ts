@@ -23,7 +23,10 @@ const constants = {
     EMAIL_FORMAT_ERROR:
       'Insira um E-mail válido! Formato: alguem@exemplo.com.br',
     ENROLLMENT_NUMBER_FORMAT_ERROR:
-      'Insira um número de matrícula válido com 9 dígitos.'
+      'Insira um número de matrícula válido com 9 dígitos.',
+    PASSWORD_IS_WEAK:
+      'A senha deve conter pelo menos 6 caracteres, incluindo 1 número, 1 letra maiúscula e 1 caracter especial.',
+    PASSWORD_NOT_MATCHING: 'A senha e o confirmar senha são diferentes.'
   },
   negotialValidationMessages: {
     EMAIL_ALREADY_REGISTERED: 'Parece que este e-mail já está sendo utilizado.',
