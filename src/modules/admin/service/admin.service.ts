@@ -49,7 +49,6 @@ export class AdminService {
       throw new NotFoundException(constants.exceptionMessages.admin.NOT_FOUND)
     }
 
-    console.log(dto)
     await this.validateUpdatingAdmin(dto, adminFromDatabase)
 
     try {
