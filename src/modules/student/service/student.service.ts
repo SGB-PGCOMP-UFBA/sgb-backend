@@ -132,23 +132,23 @@ export class StudentService {
   }
 
   async update(dto: UpdateStudentDto) {
-    const student = await this.studentRepository.findOneBy({
-      email: dto.currentEmail
+    const studentFromDatabase = await this.studentRepository.findOneBy({
+      email: dto.current_email
     })
-    if (!student) {
+    if (!studentFromDatabase) {
       throw new NotFoundException(constants.exceptionMessages.student.NOT_FOUND)
     }
 
-    await this.validateUpdatingStudent(dto)
+    await this.validateUpdatingStudent(dto, studentFromDatabase)
 
     try {
       const updatedStudent = await this.studentRepository.save({
-        id: student.id,
-        name: dto.name || student.name,
-        email: dto.email || student.email,
-        tax_id: dto.tax_id || student.tax_id,
-        phone_number: dto.phone_number || student.phone_number,
-        link_to_lattes: dto.link_to_lattes || student.link_to_lattes
+        id: studentFromDatabase.id,
+        name: dto.name || studentFromDatabase.name,
+        email: dto.email || studentFromDatabase.email,
+        tax_id: dto.tax_id || studentFromDatabase.tax_id,
+        phone_number: dto.phone_number || studentFromDatabase.phone_number,
+        link_to_lattes: dto.link_to_lattes || studentFromDatabase.link_to_lattes
       })
 
       return updatedStudent
@@ -168,8 +168,11 @@ export class StudentService {
     throw new NotFoundException(constants.exceptionMessages.student.NOT_FOUND)
   }
 
-  async validateUpdatingStudent(dto: UpdateStudentDto) {
-    if (dto.tax_id) {
+  async validateUpdatingStudent(
+    dto: UpdateStudentDto,
+    studentFromDatabase: Student
+  ) {
+    if (dto.tax_id && dto.tax_id !== studentFromDatabase.tax_id) {
       const studentFromTaxId = await this.studentRepository.findOneBy({
         tax_id: dto.tax_id
       })
@@ -180,7 +183,7 @@ export class StudentService {
       }
     }
 
-    if (dto.email) {
+    if (dto.email && dto.email !== studentFromDatabase.email) {
       const studentFromEmail = await this.studentRepository.findOneBy({
         email: dto.email
       })
@@ -191,13 +194,30 @@ export class StudentService {
       }
     }
 
-    if (dto.phone_number) {
+    if (
+      dto.phone_number &&
+      dto.phone_number !== studentFromDatabase.phone_number
+    ) {
       const studentFromPhoneNumber = await this.studentRepository.findOneBy({
         phone_number: dto.phone_number
       })
       if (studentFromPhoneNumber) {
         throw new BadRequestException(
           constants.negotialValidationMessages.PHONE_NUMBER_ALREADY_REGISTERED
+        )
+      }
+    }
+
+    if (
+      dto.link_to_lattes &&
+      dto.link_to_lattes !== studentFromDatabase.link_to_lattes
+    ) {
+      const studentFromPhoneNumber = await this.studentRepository.findOneBy({
+        link_to_lattes: dto.link_to_lattes
+      })
+      if (studentFromPhoneNumber) {
+        throw new BadRequestException(
+          constants.negotialValidationMessages.LINK_TO_LATTES_ALREADY_REGISTERED
         )
       }
     }

@@ -11,7 +11,7 @@ import { constants } from '../../../core/utils/constants'
 
 export class UpdateAdvisorDto {
   @IsString()
-  readonly currentEmail: string
+  readonly current_email: string
 
   @IsOptional()
   @IsString()

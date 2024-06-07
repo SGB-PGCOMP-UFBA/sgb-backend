@@ -43,13 +43,14 @@ export class AdminService {
 
   async update(dto: UpdateAdminDto) {
     const adminFromDatabase = await this.adminRepository.findOneBy({
-      email: dto.currentEmail
+      email: dto.current_email
     })
     if (!adminFromDatabase) {
       throw new NotFoundException(constants.exceptionMessages.admin.NOT_FOUND)
     }
 
-    await this.validateUpdatingAdmin(dto)
+    console.log(dto)
+    await this.validateUpdatingAdmin(dto, adminFromDatabase)
 
     try {
       const updatedAdmin = await this.adminRepository.save({
@@ -90,8 +91,8 @@ export class AdminService {
     throw new NotFoundException(constants.exceptionMessages.admin.NOT_FOUND)
   }
 
-  async validateUpdatingAdmin(dto: UpdateAdminDto) {
-    if (dto.tax_id) {
+  async validateUpdatingAdmin(dto: UpdateAdminDto, adminFromDatabase: Admin) {
+    if (dto.tax_id && dto.tax_id !== adminFromDatabase.tax_id) {
       const adminFromTaxId = await this.adminRepository.findOneBy({
         tax_id: dto.tax_id
       })
@@ -102,7 +103,7 @@ export class AdminService {
       }
     }
 
-    if (dto.email) {
+    if (dto.email && dto.email !== adminFromDatabase.email) {
       const adminFromEmail = await this.adminRepository.findOneBy({
         email: dto.email
       })
@@ -113,7 +114,10 @@ export class AdminService {
       }
     }
 
-    if (dto.phone_number) {
+    if (
+      dto.phone_number &&
+      dto.phone_number !== adminFromDatabase.phone_number
+    ) {
       const adminFromPhoneNumber = await this.adminRepository.findOneBy({
         phone_number: dto.phone_number
       })

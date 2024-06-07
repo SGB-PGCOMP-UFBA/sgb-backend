@@ -33,6 +33,7 @@ export class AdminController {
 
   @Patch()
   async update(@Body() dto: UpdateAdminDto) {
+    console.log(dto)
     const updatedAdmin = await this.adminService.update(dto)
     return AdminMapper.detailed(updatedAdmin)
   }

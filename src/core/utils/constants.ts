@@ -32,7 +32,9 @@ const constants = {
     EMAIL_ALREADY_REGISTERED: 'Parece que este e-mail já está sendo utilizado.',
     TAX_ID_ALREADY_REGISTERED: 'Parece que este CPF já está sendo utilizado.',
     PHONE_NUMBER_ALREADY_REGISTERED:
-      'Parece que este número de telefone já está sendo utilizado.'
+      'Parece que este número de telefone já está sendo utilizado.',
+    LINK_TO_LATTES_ALREADY_REGISTERED:
+      'Parece que este link para o currículo lattes já está sendo utilizado.'
   },
   exceptionMessages: {
     admin: {

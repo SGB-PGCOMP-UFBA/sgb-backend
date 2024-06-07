@@ -52,23 +52,23 @@ export class AdvisorService {
   }
 
   async update(dto: UpdateAdvisorDto) {
-    const advisor = await this.advisorRepository.findOneBy({
-      email: dto.currentEmail
+    const advisorFromDatabase = await this.advisorRepository.findOneBy({
+      email: dto.current_email
     })
-    if (!advisor) {
+    if (!advisorFromDatabase) {
       throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
     }
 
-    await this.validateUpdatingAdvisor(dto)
+    await this.validateUpdatingAdvisor(dto, advisorFromDatabase)
 
     try {
       const updatedAdvisor = await this.advisorRepository.save({
-        id: advisor.id,
-        name: dto.name || advisor.name,
-        email: dto.email || advisor.email,
-        status: dto.status || advisor.status,
-        tax_id: dto.tax_id || advisor.tax_id,
-        phone_number: dto.phone_number || advisor.phone_number
+        id: advisorFromDatabase.id,
+        name: dto.name || advisorFromDatabase.name,
+        email: dto.email || advisorFromDatabase.email,
+        status: dto.status || advisorFromDatabase.status,
+        tax_id: dto.tax_id || advisorFromDatabase.tax_id,
+        phone_number: dto.phone_number || advisorFromDatabase.phone_number
       })
 
       return updatedAdvisor
@@ -140,8 +140,11 @@ export class AdvisorService {
     throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
   }
 
-  async validateUpdatingAdvisor(dto: UpdateAdvisorDto) {
-    if (dto.tax_id) {
+  async validateUpdatingAdvisor(
+    dto: UpdateAdvisorDto,
+    advisorFromDatabase: Advisor
+  ) {
+    if (dto.tax_id && dto.tax_id !== advisorFromDatabase.tax_id) {
       const advisorFromTaxId = await this.advisorRepository.findOneBy({
         tax_id: dto.tax_id
       })
@@ -152,7 +155,7 @@ export class AdvisorService {
       }
     }
 
-    if (dto.email) {
+    if (dto.email && dto.email !== advisorFromDatabase.email) {
       const advisorFromEmail = await this.advisorRepository.findOneBy({
         email: dto.email
       })
@@ -163,7 +166,10 @@ export class AdvisorService {
       }
     }
 
-    if (dto.phone_number) {
+    if (
+      dto.phone_number &&
+      dto.phone_number !== advisorFromDatabase.phone_number
+    ) {
       const advisorFromPhoneNumber = await this.advisorRepository.findOneBy({
         phone_number: dto.phone_number
       })
