@@ -6,15 +6,11 @@ import {
 } from '@nestjs/common'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
-import { paginate, IPaginationOptions } from 'nestjs-typeorm-paginate'
 import { Student } from '../entities/student.entity'
 import { CreateStudentDto } from '../dto/create-student.dto'
 import { comparePassword, hashPassword } from '../../../core/utils/bcrypt'
 import { decidePassword } from '../../../core/utils/password'
-import { PageDto } from '../../../core/pagination/page.dto'
-import { PageMetaDto } from '../../../core/pagination/page-meta.dto'
 import { constants } from '../../../core/utils/constants'
-import { StudentMapper } from '../mapper/student.mapper'
 import { UpdateStudentDto } from '../dto/update-student.dto'
 
 @Injectable()
@@ -49,7 +45,6 @@ export class StudentService {
   async findAll(): Promise<Student[]> {
     return await this.studentRepository.find({
       relations: [
-        'articles',
         'enrollments',
         'enrollments.advisor',
         'enrollments.scholarships'
@@ -60,7 +55,6 @@ export class StudentService {
   async findAllByAdvisorId(advisorId: number): Promise<Student[]> {
     return await this.studentRepository.find({
       relations: [
-        'articles',
         'enrollments',
         'enrollments.advisor',
         'enrollments.scholarships'
@@ -71,28 +65,6 @@ export class StudentService {
         }
       }
     })
-  }
-
-  async findAllPaginated(options: IPaginationOptions): Promise<PageDto<any>> {
-    const studentsPaginate = paginate<Student>(
-      this.studentRepository,
-      options,
-      { relations: ['articles'] }
-    )
-    const items = (await studentsPaginate).items
-    const meta = (await studentsPaginate).meta
-
-    const itemsDto = items.map((student) => StudentMapper.detailed(student))
-
-    const metaDto = new PageMetaDto(
-      meta.totalItems,
-      meta.itemCount,
-      meta.itemsPerPage,
-      meta.totalPages,
-      meta.currentPage
-    )
-
-    return new PageDto(itemsDto, metaDto)
   }
 
   async findOneByEmail(email: string): Promise<Student> {

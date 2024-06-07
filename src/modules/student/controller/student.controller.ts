@@ -3,9 +3,6 @@ import {
   Controller,
   Get,
   Post,
-  DefaultValuePipe,
-  ParseIntPipe,
-  Query,
   Patch,
   Delete,
   HttpCode,
@@ -32,15 +29,6 @@ export class StudentController {
   async findAllByAdvisorId(@Param('advisorId') advisorId: number) {
     const students = await this.studentsService.findAllByAdvisorId(advisorId)
     return students.map((student) => StudentMapper.detailed(student))
-  }
-
-  @Get('/list')
-  async findPaginated(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10
-  ) {
-    limit = limit > 100 ? 100 : limit
-    return await this.studentsService.findAllPaginated({ page, limit })
   }
 
   @Post()
