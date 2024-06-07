@@ -9,13 +9,16 @@ export class UpdateAdvisorPasswordDto {
   @IsEmail({}, { message: constants.bodyValidationMessages.EMAIL_FORMAT_ERROR })
   readonly email: string
 
+  @IsString()
+  readonly current_password: string
+
   @IsStrongPassword({
     message: constants.bodyValidationMessages.PASSWORD_IS_WEAK
   })
-  readonly password: string
+  readonly new_password: string
 
-  @IsPasswordMatching('password', {
+  @IsPasswordMatching('new_password', {
     message: constants.bodyValidationMessages.PASSWORD_NOT_MATCHING
   })
-  readonly confirm: string
+  readonly confirm_new_password: string
 }

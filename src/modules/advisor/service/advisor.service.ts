@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Advisor } from '../entities/advisor.entity'
-import { hashPassword } from '../../../core/utils/bcrypt'
+import { comparePassword, hashPassword } from '../../../core/utils/bcrypt'
 import { decidePassword } from '../../../core/utils/password'
 import { CreateAdvisorDto } from '../dto/create-advisor.dto'
 import { UpdateAdvisorDto } from '../dto/update-advisor.dto'
@@ -106,7 +106,11 @@ export class AdvisorService {
     return advisor
   }
 
-  async updatePassword(email: string, password: string): Promise<void> {
+  async updatePassword(
+    email: string,
+    current_password: string,
+    new_password: string
+  ): Promise<void> {
     const findAdvisor = await this.advisorRepository.findOne({
       where: { email }
     })
@@ -115,7 +119,18 @@ export class AdvisorService {
       throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
     }
 
-    const passwordHash = await hashPassword(password)
+    const isPasswordMatching = await comparePassword(
+      current_password,
+      findAdvisor.password
+    )
+
+    if (!isPasswordMatching) {
+      throw new BadRequestException(
+        constants.bodyValidationMessages.CURRENT_PASSWORD_NOT_MATCHING
+      )
+    }
+
+    const passwordHash = await hashPassword(new_password)
     await this.advisorRepository.update({ email }, { password: passwordHash })
   }
 
@@ -128,7 +143,8 @@ export class AdvisorService {
       throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
     }
 
-    this.updatePassword(email, password)
+    const passwordHash = await hashPassword(password)
+    await this.advisorRepository.update({ email }, { password: passwordHash })
   }
 
   async delete(id: number) {

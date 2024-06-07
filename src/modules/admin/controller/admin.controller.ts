@@ -39,7 +39,11 @@ export class AdminController {
 
   @Patch('/update-password')
   async updatePassword(@Body() dto: UpdateAdminPasswordDto) {
-    return await this.adminService.updatePassword(dto.email, dto.password)
+    return await this.adminService.updatePassword(
+      dto.email,
+      dto.current_password,
+      dto.new_password
+    )
   }
 
   @Delete(':id')

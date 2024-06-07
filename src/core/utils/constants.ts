@@ -26,7 +26,8 @@ const constants = {
       'Insira um número de matrícula válido com 9 dígitos.',
     PASSWORD_IS_WEAK:
       'A senha deve conter pelo menos 6 caracteres, incluindo 1 número, 1 letra maiúscula e 1 caracter especial.',
-    PASSWORD_NOT_MATCHING: 'A senha e o confirmar senha são diferentes.'
+    PASSWORD_NOT_MATCHING: 'A senha e o confirmar senha são diferentes.',
+    CURRENT_PASSWORD_NOT_MATCHING: 'Sua senha atual está incorreta.'
   },
   negotialValidationMessages: {
     EMAIL_ALREADY_REGISTERED: 'Parece que este e-mail já está sendo utilizado.',
@@ -40,7 +41,8 @@ const constants = {
     admin: {
       CREATION_FAILED: "Cant't create admin.",
       UPDATE_FAILED: "Cant't update admin.",
-      NOT_FOUND: 'Admin not found.'
+      NOT_FOUND: 'Admin not found.',
+      WRONG_PASSWORD: 'Invalid password.'
     },
     advisor: {
       CREATION_FAILED: "Cant't create advisor.",

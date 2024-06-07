@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm'
 import { Admin } from '../entities/admin.entity'
 import { constants } from '../../../core/utils/constants'
-import { hashPassword } from '../../../core/utils/bcrypt'
+import { comparePassword, hashPassword } from '../../../core/utils/bcrypt'
 import { decidePassword } from '../../../core/utils/password'
 import { CreateAdminDto } from '../dto/create-admin.dto'
 import { UpdateAdminDto } from '../dto/update-admin.dto'
@@ -68,7 +68,11 @@ export class AdminService {
     }
   }
 
-  async updatePassword(email: string, password: string): Promise<void> {
+  async updatePassword(
+    email: string,
+    current_password: string,
+    new_password: string
+  ): Promise<void> {
     const findAdmin = await this.adminRepository.findOne({
       where: { email }
     })
@@ -77,7 +81,18 @@ export class AdminService {
       throw new NotFoundException(constants.exceptionMessages.admin.NOT_FOUND)
     }
 
-    const passwordHash = await hashPassword(password)
+    const isPasswordMatching = await comparePassword(
+      current_password,
+      findAdmin.password
+    )
+
+    if (!isPasswordMatching) {
+      throw new BadRequestException(
+        constants.bodyValidationMessages.CURRENT_PASSWORD_NOT_MATCHING
+      )
+    }
+
+    const passwordHash = await hashPassword(new_password)
     await this.adminRepository.update({ email }, { password: passwordHash })
   }
 

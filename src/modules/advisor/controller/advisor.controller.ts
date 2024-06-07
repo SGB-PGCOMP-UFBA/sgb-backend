@@ -57,7 +57,11 @@ export class AdvisorController {
 
   @Patch('/update-password')
   async updatePassword(@Body() dto: UpdateAdvisorPasswordDto) {
-    return await this.advisorService.updatePassword(dto.email, dto.password)
+    return await this.advisorService.updatePassword(
+      dto.email,
+      dto.current_password,
+      dto.new_password
+    )
   }
 
   @Delete(':id')

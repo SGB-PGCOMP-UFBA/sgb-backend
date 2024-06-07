@@ -79,7 +79,11 @@ export class StudentController {
 
   @Patch('/update-password')
   async updatePassword(@Body() dto: UpdateStudentPasswordDto) {
-    return await this.studentsService.updatePassword(dto.email, dto.password)
+    return await this.studentsService.updatePassword(
+      dto.email,
+      dto.current_password,
+      dto.new_password
+    )
   }
 
   @Delete(':id')

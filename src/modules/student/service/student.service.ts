@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { paginate, IPaginationOptions } from 'nestjs-typeorm-paginate'
 import { Student } from '../entities/student.entity'
 import { CreateStudentDto } from '../dto/create-student.dto'
-import { hashPassword } from '../../../core/utils/bcrypt'
+import { comparePassword, hashPassword } from '../../../core/utils/bcrypt'
 import { decidePassword } from '../../../core/utils/password'
 import { PageDto } from '../../../core/pagination/page.dto'
 import { PageMetaDto } from '../../../core/pagination/page-meta.dto'
@@ -118,7 +118,11 @@ export class StudentService {
     await this.studentRepository.update({ email }, { password: passwordHash })
   }
 
-  async updatePassword(email: string, password: string): Promise<void> {
+  async updatePassword(
+    email: string,
+    current_password: string,
+    new_password: string
+  ): Promise<void> {
     const findStudent = await this.studentRepository.findOne({
       where: { email }
     })
@@ -127,7 +131,18 @@ export class StudentService {
       throw new NotFoundException(constants.exceptionMessages.student.NOT_FOUND)
     }
 
-    const passwordHash = await hashPassword(password)
+    const isPasswordMatching = await comparePassword(
+      current_password,
+      findStudent.password
+    )
+
+    if (!isPasswordMatching) {
+      throw new BadRequestException(
+        constants.bodyValidationMessages.CURRENT_PASSWORD_NOT_MATCHING
+      )
+    }
+
+    const passwordHash = await hashPassword(new_password)
     await this.studentRepository.update({ email }, { password: passwordHash })
   }
 
