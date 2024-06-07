@@ -51,22 +51,32 @@ export class AdvisorService {
     }
   }
 
-  async update(id: number, dto: UpdateAdvisorDto) {
-    const advisor = await this.advisorRepository.findOneBy({ id: id })
+  async update(dto: UpdateAdvisorDto) {
+    const advisor = await this.advisorRepository.findOneBy({
+      email: dto.currentEmail
+    })
     if (!advisor) {
       throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
     }
 
-    const updatedAdvisor = await this.advisorRepository.save({
-      id: advisor.id,
-      name: dto.name || advisor.name,
-      email: dto.email || advisor.email,
-      status: dto.status || advisor.status,
-      tax_id: dto.tax_id,
-      phone_number: dto.phone_number
-    })
+    await this.validateUpdatingAdvisor(dto)
 
-    return updatedAdvisor
+    try {
+      const updatedAdvisor = await this.advisorRepository.save({
+        id: advisor.id,
+        name: dto.name || advisor.name,
+        email: dto.email || advisor.email,
+        status: dto.status || advisor.status,
+        tax_id: dto.tax_id || advisor.tax_id,
+        phone_number: dto.phone_number || advisor.phone_number
+      })
+
+      return updatedAdvisor
+    } catch (error) {
+      throw new BadRequestException(
+        constants.exceptionMessages.advisor.UPDATE_FAILED
+      )
+    }
   }
 
   async findOneById(id: number): Promise<Advisor> {
@@ -130,14 +140,38 @@ export class AdvisorService {
     throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
   }
 
-  async validateAdvisor(tax_id: string, email: string) {
-    const advisorTax_id = await this.advisorRepository.findOneBy({ tax_id })
-    if (advisorTax_id)
-      throw new BadRequestException('Tax ID already registered')
+  async validateUpdatingAdvisor(dto: UpdateAdvisorDto) {
+    if (dto.tax_id) {
+      const advisorFromTaxId = await this.advisorRepository.findOneBy({
+        tax_id: dto.tax_id
+      })
+      if (advisorFromTaxId) {
+        throw new BadRequestException(
+          constants.negotialValidationMessages.TAX_ID_ALREADY_REGISTERED
+        )
+      }
+    }
 
-    const advisor_email = await this.advisorRepository.findOneBy({ email })
-    if (advisor_email) {
-      throw new BadRequestException('Email already registered')
+    if (dto.email) {
+      const advisorFromEmail = await this.advisorRepository.findOneBy({
+        email: dto.email
+      })
+      if (advisorFromEmail) {
+        throw new BadRequestException(
+          constants.negotialValidationMessages.EMAIL_ALREADY_REGISTERED
+        )
+      }
+    }
+
+    if (dto.phone_number) {
+      const advisorFromPhoneNumber = await this.advisorRepository.findOneBy({
+        phone_number: dto.phone_number
+      })
+      if (advisorFromPhoneNumber) {
+        throw new BadRequestException(
+          constants.negotialValidationMessages.PHONE_NUMBER_ALREADY_REGISTERED
+        )
+      }
     }
   }
 }

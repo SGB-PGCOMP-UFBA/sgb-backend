@@ -30,16 +30,19 @@ const constants = {
   },
   negotialValidationMessages: {
     EMAIL_ALREADY_REGISTERED: 'Parece que este e-mail já está sendo utilizado.',
-    TAX_ID_ALREADY_REGISTERED:
-      'Parece que já existe um usuário cadastrado com este CPF.'
+    TAX_ID_ALREADY_REGISTERED: 'Parece que este CPF já está sendo utilizado.',
+    PHONE_NUMBER_ALREADY_REGISTERED:
+      'Parece que este número de telefone já está sendo utilizado.'
   },
   exceptionMessages: {
     admin: {
       CREATION_FAILED: "Cant't create admin.",
+      UPDATE_FAILED: "Cant't update admin.",
       NOT_FOUND: 'Admin not found.'
     },
     advisor: {
       CREATION_FAILED: "Cant't create advisor.",
+      UPDATE_FAILED: "Cant't update advisor.",
       NOT_FOUND: 'Advisor not found.'
     },
     article: {
@@ -55,6 +58,7 @@ const constants = {
       CREATION_COMPLETED:
         'The process of inserting a new student has been completed.',
       CREATION_FAILED: "Cant't create student.",
+      UPDATE_FAILED: "Cant't update student.",
       NOT_FOUND: 'Student not found.',
       COUNT_BY_SCHOLARSHIP_FAILED: 'Failed to count students by scholarship.'
     },

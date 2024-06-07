@@ -3,13 +3,12 @@ import {
   IsEmail,
   Length,
   IsOptional,
-  MaxLength,
-  IsIn
+  MaxLength
 } from 'class-validator'
 import { Transform } from 'class-transformer'
 import { constants } from '../../../core/utils/constants'
 
-export class UpdateAdvisorDto {
+export class UpdateAdminDto {
   @IsString()
   readonly currentEmail: string
 
@@ -25,13 +24,6 @@ export class UpdateAdvisorDto {
   @Transform((params) => (params.value?.length > 0 ? params.value : null))
   @MaxLength(80)
   readonly name: string | null
-
-  @IsOptional()
-  @IsString()
-  @Transform((params) => (params.value?.length > 0 ? params.value : null))
-  @Transform(({ value }) => value.toUpperCase())
-  @IsIn(['ACTIVE', 'INACTIVE'])
-  readonly status: string | null
 
   @IsOptional()
   @IsString()

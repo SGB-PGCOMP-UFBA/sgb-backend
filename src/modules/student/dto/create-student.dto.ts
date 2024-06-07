@@ -3,7 +3,6 @@ import {
   IsEmail,
   IsUrl,
   Length,
-  Matches,
   MaxLength,
   IsOptional
 } from 'class-validator'
@@ -17,9 +16,6 @@ export class CreateStudentDto {
   @IsString()
   @MaxLength(80)
   @IsEmail({}, { message: constants.bodyValidationMessages.EMAIL_FORMAT_ERROR })
-  @Matches(constants.expressions.REGEX_EMAIL, {
-    message: constants.bodyValidationMessages.EMAIL_FORMAT_ERROR
-  })
   readonly email: string
 
   @IsString()

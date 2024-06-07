@@ -49,9 +49,9 @@ export class AdvisorController {
     return advisors.map((advisor) => AdvisorMapper.forFilter(advisor))
   }
 
-  @Patch(':id')
-  async update(@Param('id') id: number, @Body() dto: UpdateAdvisorDto) {
-    const updatedAdvisor = await this.advisorService.update(id, dto)
+  @Patch()
+  async update(@Body() dto: UpdateAdvisorDto) {
+    const updatedAdvisor = await this.advisorService.update(dto)
     return AdvisorMapper.detailed(updatedAdvisor)
   }
 

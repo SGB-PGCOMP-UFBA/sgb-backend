@@ -5,11 +5,12 @@ import {
   NotFoundException
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { CreateAdminDto } from '../dto/create-admin.dto'
 import { Admin } from '../entities/admin.entity'
 import { constants } from '../../../core/utils/constants'
 import { hashPassword } from '../../../core/utils/bcrypt'
 import { decidePassword } from '../../../core/utils/password'
+import { CreateAdminDto } from '../dto/create-admin.dto'
+import { UpdateAdminDto } from '../dto/update-admin.dto'
 
 @Injectable()
 export class AdminService {
@@ -28,7 +29,9 @@ export class AdminService {
       await this.adminRepository.save(newAdmin)
       return newAdmin
     } catch (error) {
-      throw new BadRequestException("Can't create admin.")
+      throw new BadRequestException(
+        constants.exceptionMessages.admin.CREATION_FAILED
+      )
     }
   }
 
@@ -36,6 +39,33 @@ export class AdminService {
     return await this.adminRepository.find({
       order: { name: 'ASC' }
     })
+  }
+
+  async update(dto: UpdateAdminDto) {
+    const adminFromDatabase = await this.adminRepository.findOneBy({
+      email: dto.currentEmail
+    })
+    if (!adminFromDatabase) {
+      throw new NotFoundException(constants.exceptionMessages.admin.NOT_FOUND)
+    }
+
+    await this.validateUpdatingAdmin(dto)
+
+    try {
+      const updatedAdmin = await this.adminRepository.save({
+        id: adminFromDatabase.id,
+        name: dto.name || adminFromDatabase.name,
+        email: dto.email || adminFromDatabase.email,
+        tax_id: dto.tax_id || adminFromDatabase.tax_id,
+        phone_number: dto.phone_number || adminFromDatabase.phone_number
+      })
+
+      return updatedAdmin
+    } catch (error) {
+      throw new BadRequestException(
+        constants.exceptionMessages.admin.UPDATE_FAILED
+      )
+    }
   }
 
   async updatePassword(email: string, password: string): Promise<void> {
@@ -57,6 +87,41 @@ export class AdminService {
       return true
     }
 
-    throw new NotFoundException('Admin not found.')
+    throw new NotFoundException(constants.exceptionMessages.admin.NOT_FOUND)
+  }
+
+  async validateUpdatingAdmin(dto: UpdateAdminDto) {
+    if (dto.tax_id) {
+      const adminFromTaxId = await this.adminRepository.findOneBy({
+        tax_id: dto.tax_id
+      })
+      if (adminFromTaxId) {
+        throw new BadRequestException(
+          constants.negotialValidationMessages.TAX_ID_ALREADY_REGISTERED
+        )
+      }
+    }
+
+    if (dto.email) {
+      const adminFromEmail = await this.adminRepository.findOneBy({
+        email: dto.email
+      })
+      if (adminFromEmail) {
+        throw new BadRequestException(
+          constants.negotialValidationMessages.EMAIL_ALREADY_REGISTERED
+        )
+      }
+    }
+
+    if (dto.phone_number) {
+      const adminFromPhoneNumber = await this.adminRepository.findOneBy({
+        phone_number: dto.phone_number
+      })
+      if (adminFromPhoneNumber) {
+        throw new BadRequestException(
+          constants.negotialValidationMessages.PHONE_NUMBER_ALREADY_REGISTERED
+        )
+      }
+    }
   }
 }

@@ -131,21 +131,32 @@ export class StudentService {
     await this.studentRepository.update({ email }, { password: passwordHash })
   }
 
-  async update(id: number, dto: UpdateStudentDto) {
-    const student = await this.studentRepository.findOneBy({ id: id })
+  async update(dto: UpdateStudentDto) {
+    const student = await this.studentRepository.findOneBy({
+      email: dto.currentEmail
+    })
     if (!student) {
       throw new NotFoundException(constants.exceptionMessages.student.NOT_FOUND)
     }
 
-    const updatedStudent = await this.studentRepository.save({
-      id: student.id,
-      name: dto.name || student.name,
-      email: dto.email || student.email,
-      tax_id: dto.tax_id || student.tax_id,
-      phone_number: dto.phone_number || student.phone_number
-    })
+    await this.validateUpdatingStudent(dto)
 
-    return updatedStudent
+    try {
+      const updatedStudent = await this.studentRepository.save({
+        id: student.id,
+        name: dto.name || student.name,
+        email: dto.email || student.email,
+        tax_id: dto.tax_id || student.tax_id,
+        phone_number: dto.phone_number || student.phone_number,
+        link_to_lattes: dto.link_to_lattes || student.link_to_lattes
+      })
+
+      return updatedStudent
+    } catch (error) {
+      throw new BadRequestException(
+        constants.exceptionMessages.student.UPDATE_FAILED
+      )
+    }
   }
 
   async delete(id: number) {
@@ -155,5 +166,40 @@ export class StudentService {
     }
 
     throw new NotFoundException(constants.exceptionMessages.student.NOT_FOUND)
+  }
+
+  async validateUpdatingStudent(dto: UpdateStudentDto) {
+    if (dto.tax_id) {
+      const studentFromTaxId = await this.studentRepository.findOneBy({
+        tax_id: dto.tax_id
+      })
+      if (studentFromTaxId) {
+        throw new BadRequestException(
+          constants.negotialValidationMessages.TAX_ID_ALREADY_REGISTERED
+        )
+      }
+    }
+
+    if (dto.email) {
+      const studentFromEmail = await this.studentRepository.findOneBy({
+        email: dto.email
+      })
+      if (studentFromEmail) {
+        throw new BadRequestException(
+          constants.negotialValidationMessages.EMAIL_ALREADY_REGISTERED
+        )
+      }
+    }
+
+    if (dto.phone_number) {
+      const studentFromPhoneNumber = await this.studentRepository.findOneBy({
+        phone_number: dto.phone_number
+      })
+      if (studentFromPhoneNumber) {
+        throw new BadRequestException(
+          constants.negotialValidationMessages.PHONE_NUMBER_ALREADY_REGISTERED
+        )
+      }
+    }
   }
 }

@@ -10,9 +10,10 @@ import {
   Patch
 } from '@nestjs/common'
 import { AdminService } from '../service/admin.service'
-import { CreateAdminDto } from '../dto/create-admin.dto'
 import { AdminMapper } from '../mapper/admin.mapper'
 import { UpdateAdminPasswordDto } from '../dto/update-admin-password.dto'
+import { CreateAdminDto } from '../dto/create-admin.dto'
+import { UpdateAdminDto } from '../dto/update-admin.dto'
 
 @Controller('v1/admin')
 export class AdminController {
@@ -28,6 +29,12 @@ export class AdminController {
   async findAll() {
     const admins = await this.adminService.findAll()
     return admins.map((admin) => AdminMapper.detailed(admin))
+  }
+
+  @Patch()
+  async update(@Body() dto: UpdateAdminDto) {
+    const updatedAdmin = await this.adminService.update(dto)
+    return AdminMapper.detailed(updatedAdmin)
   }
 
   @Patch('/update-password')

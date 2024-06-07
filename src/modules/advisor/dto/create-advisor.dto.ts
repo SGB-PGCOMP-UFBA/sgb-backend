@@ -2,7 +2,6 @@ import {
   IsString,
   IsEmail,
   Length,
-  Matches,
   IsOptional,
   MaxLength,
   IsIn
@@ -18,9 +17,6 @@ export class CreateAdvisorDto {
   @IsString()
   @MaxLength(80)
   @IsEmail({}, { message: constants.bodyValidationMessages.EMAIL_FORMAT_ERROR })
-  @Matches(constants.expressions.REGEX_EMAIL, {
-    message: constants.bodyValidationMessages.EMAIL_FORMAT_ERROR
-  })
   readonly email: string
 
   @IsOptional()
