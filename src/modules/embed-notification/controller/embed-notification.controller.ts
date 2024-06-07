@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common'
+import { Controller, Get, Param, Patch, Query } from '@nestjs/common'
 import { EmbedNotificationService } from '../service/embed-notification.service'
 import { EmbedNotificationMapper } from '../mapper/embed-notification.mapper'
 
@@ -18,5 +18,10 @@ export class EmbedNotificationController {
       owner_type
     )
     return notifications.map((admin) => EmbedNotificationMapper.detailed(admin))
+  }
+
+  @Patch('/consume/:id')
+  async consume(@Param('id') id: number) {
+    return await this.embedNotificationService.consume(id)
   }
 }

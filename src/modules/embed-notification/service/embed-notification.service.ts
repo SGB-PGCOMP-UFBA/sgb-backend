@@ -18,7 +18,8 @@ export class EmbedNotificationService {
   ): Promise<EmbedNotification[]> {
     return await this.embedNotificationRepository.find({
       where: { owner_id, owner_type, consumed: false },
-      order: { created_at: 'DESC' }
+      order: { created_at: 'DESC' },
+      take: 10
     })
   }
 
@@ -33,6 +34,19 @@ export class EmbedNotificationService {
     } catch (error) {
       throw new BadRequestException(
         constants.exceptionMessages.notification.CREATION_FAILED
+      )
+    }
+  }
+
+  async consume(id: number): Promise<EmbedNotification> {
+    try {
+      return await this.embedNotificationRepository.save({
+        id: id,
+        consumed: true
+      })
+    } catch (error) {
+      throw new BadRequestException(
+        constants.exceptionMessages.notification.UPDATE_FAILED
       )
     }
   }
