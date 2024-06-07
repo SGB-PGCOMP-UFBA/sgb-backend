@@ -7,6 +7,7 @@ export function toResponseUserDto(user: User): ResponseUserDto {
     user.tax_id,
     user.name,
     user.role,
-    user.email
+    user.email,
+    user.phone_number
   )
 }

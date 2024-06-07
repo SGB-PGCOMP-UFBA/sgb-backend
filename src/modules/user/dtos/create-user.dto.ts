@@ -9,6 +9,7 @@ export class CreateUserDto {
     this.role = user.role
     this.email = user.email
     this.password = user.password
+    this.phone_number = user.phone_number
     this.created_at = user.created_at
     this.updated_at = user.updated_at
   }
@@ -30,6 +31,12 @@ export class CreateUserDto {
 
   @IsString()
   readonly email: string
+
+  @IsString()
+  readonly phone_number: string
+
+  @IsString()
+  readonly link_to_lattes: string
 
   @IsDate()
   readonly created_at: Date

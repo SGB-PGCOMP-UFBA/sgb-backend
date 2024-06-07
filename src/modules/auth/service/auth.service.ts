@@ -38,7 +38,8 @@ export class AuthService {
       user.tax_id,
       user.name,
       user.role,
-      user.email
+      user.email,
+      user.phone_number
     )
   }
 
@@ -54,7 +55,8 @@ export class AuthService {
       role: loggedUser.role,
       tax_id: loggedUser.tax_id,
       name: loggedUser.name,
-      email: loggedUser.email
+      email: loggedUser.email,
+      phone_number: loggedUser.phone_number
     }
   }
 }
