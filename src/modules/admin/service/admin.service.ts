@@ -57,8 +57,8 @@ export class AdminService {
         id: adminFromDatabase.id,
         name: dto.name || adminFromDatabase.name,
         email: dto.email || adminFromDatabase.email,
-        tax_id: dto.tax_id || adminFromDatabase.tax_id,
-        phone_number: dto.phone_number || adminFromDatabase.phone_number
+        tax_id: dto.tax_id,
+        phone_number: dto.phone_number
       })
 
       return updatedAdmin

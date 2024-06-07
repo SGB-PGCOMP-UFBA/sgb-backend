@@ -146,9 +146,10 @@ export class StudentService {
         id: studentFromDatabase.id,
         name: dto.name || studentFromDatabase.name,
         email: dto.email || studentFromDatabase.email,
-        tax_id: dto.tax_id || studentFromDatabase.tax_id,
-        phone_number: dto.phone_number || studentFromDatabase.phone_number,
-        link_to_lattes: dto.link_to_lattes || studentFromDatabase.link_to_lattes
+        link_to_lattes:
+          dto.link_to_lattes || studentFromDatabase.link_to_lattes,
+        tax_id: dto.tax_id,
+        phone_number: dto.phone_number
       })
 
       return updatedStudent

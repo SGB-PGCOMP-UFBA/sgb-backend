@@ -67,8 +67,8 @@ export class AdvisorService {
         name: dto.name || advisorFromDatabase.name,
         email: dto.email || advisorFromDatabase.email,
         status: dto.status || advisorFromDatabase.status,
-        tax_id: dto.tax_id || advisorFromDatabase.tax_id,
-        phone_number: dto.phone_number || advisorFromDatabase.phone_number
+        tax_id: dto.tax_id,
+        phone_number: dto.phone_number
       })
 
       return updatedAdvisor
