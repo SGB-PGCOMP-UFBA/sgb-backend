@@ -47,7 +47,8 @@ export class StudentService {
       relations: [
         'enrollments',
         'enrollments.advisor',
-        'enrollments.scholarships'
+        'enrollments.scholarships',
+        'enrollments.scholarships.agency'
       ]
     })
   }
@@ -57,7 +58,8 @@ export class StudentService {
       relations: [
         'enrollments',
         'enrollments.advisor',
-        'enrollments.scholarships'
+        'enrollments.scholarships',
+        'enrollments.scholarships.agency'
       ],
       where: {
         enrollments: {

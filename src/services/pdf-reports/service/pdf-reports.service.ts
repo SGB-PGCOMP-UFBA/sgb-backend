@@ -1,13 +1,16 @@
-import PDFKit from 'pdfkit'
 import { Injectable } from '@nestjs/common'
 import { StudentService } from '../../../modules/student/service/student.service'
 import { formatDate, formatterDate } from '../../../core/utils/date-utils'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const PDFKit = require('pdfkit')
 
 @Injectable()
 export class PdfReportService {
   constructor(private studentService: StudentService) {}
 
   async generatePDF(): Promise<Buffer> {
+    const students = await this.studentService.findAll()
+
     const pdfBuffer: Buffer = await new Promise(async (resolve) => {
       const doc = new PDFKit({ size: 'A4' })
       doc.fontSize(25)
@@ -16,8 +19,6 @@ export class PdfReportService {
         .text('Relatório de Bolsas Alocadas', { align: 'center' })
       doc.lineWidth(15)
       doc.lineCap('butt').moveTo(50, 120).lineTo(550, 120).stroke()
-
-      const students = await this.studentService.findAll()
 
       for (const student of students) {
         doc.moveDown(2)
