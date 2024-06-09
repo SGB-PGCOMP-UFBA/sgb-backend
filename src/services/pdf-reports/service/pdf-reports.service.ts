@@ -1,115 +1,118 @@
 import { Injectable } from '@nestjs/common'
-import { StudentService } from '../../../modules/student/service/student.service'
 import { formatDate, formatterDate } from '../../../core/utils/date-utils'
+import { ScholarshipService } from '../../..//modules/scholarship/service/scholarship.service'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const PDFKit = require('pdfkit')
 
 @Injectable()
 export class PdfReportService {
-  constructor(private studentService: StudentService) {}
+  constructor(private scholarshipService: ScholarshipService) {}
+
+  textInRowFirst(doc, text, heigth) {
+    doc.y = heigth
+    doc.x = 30
+    doc.fillColor('black')
+    doc.text(text, {
+      paragraphGap: 5,
+      indent: 5,
+      align: 'justify',
+      columns: 1
+    })
+    return doc
+  }
+
+  row(doc, heigth) {
+    doc.lineJoin('miter').rect(30, heigth, 500, 20).stroke()
+    return doc
+  }
+
+  _getScholarshipsInCurrentYear(scholarships, currentYear) {
+    return scholarships.filter((scholarship) => {
+      const startedAtYear = new Date(
+        scholarship.scholarship_starts_at
+      ).getFullYear()
+
+      return startedAtYear === currentYear
+    })
+  }
 
   async generatePDF(): Promise<Buffer> {
-    const students = await this.studentService.findAll()
+    const doc = new PDFKit({ size: 'A4', font: 'Times-Roman' })
+    const currentYear = new Date().getFullYear()
+    const scholarships = await this.scholarshipService.findAll()
+
+    const scholarshipsInCurrentYear = this._getScholarshipsInCurrentYear(
+      scholarships,
+      currentYear
+    )
 
     const pdfBuffer: Buffer = await new Promise(async (resolve) => {
-      const doc = new PDFKit({ size: 'A4' })
-      doc.fontSize(25)
       doc
-        .font('Times-Roman')
-        .text('Relatório de Bolsas Alocadas', { align: 'center' })
-      doc.lineWidth(15)
-      doc.lineCap('butt').moveTo(50, 120).lineTo(550, 120).stroke()
+        .fontSize(18)
+        .font('Times-Bold')
+        .text(`RELATÓRIO DE BOLSAS DO PGCOMP - ${currentYear}`, {
+          align: 'center'
+        })
+      doc
+        .lineWidth(2)
+        .lineCap('butt')
+        .moveTo(doc.x, doc.y)
+        .lineTo(doc.x + 450, doc.y)
+        .stroke()
+        .moveDown(0.5)
+      doc
+        .fontSize(10)
+        .font('Times-Bold')
+        .text(`Emitido em ${new Date().toLocaleString('pt-BR')}`, {
+          align: 'right'
+        })
+        .moveDown(1.5)
+      doc
+        .fontSize(12)
+        .font('Times-Bold')
+        .text(`BOLSAS INICIADAS`, {
+          align: 'justify'
+        })
+        .moveDown(0.5)
 
-      for (const student of students) {
-        doc.moveDown(2)
-        doc.fontSize(12)
-        doc.font('Times-Roman').text('Nome: ' + student.name)
-        doc.text('Matrícula: ' + student.enrollments[0].enrollment_number)
+      if (scholarshipsInCurrentYear.length === 0) {
         doc
-          .text('Curso: ' + student.enrollments[0].enrollment_program)
-          .fontSize(12)
-        doc.text('Email: ' + student.email)
-        doc.text('Telefone: ' + student.phone_number).fontSize(12)
-        const enrollment_date = formatterDate(
-          student.enrollments[0].enrollment_date.toString()
-        )
-        const defense_date = formatDate(
-          student.enrollments[0].defense_prediction_date
-        )
-        doc
-          .text(
-            'Data de início no PGCOMP: ' +
-              enrollment_date +
-              '           Data de defesa: ' +
-              defense_date
-          )
-          .fontSize(12)
-        if (student.enrollments == null) {
-          doc
-            .font('Times-Bold')
-            .text('Estudante sem bolsa de pesquisa', { align: 'center' })
-        } else {
-          doc.fontSize(12)
-          doc.text(
-            'Agência da bolsa de pesquisa: ' +
-              student.enrollments[0].scholarships[0].agency.name
-          )
-          const scholarship_start = formatDate(
-            student.enrollments[0].scholarships[0].scholarship_starts_at
-          )
-          const scholarship_end = formatDate(
-            student.enrollments[0].scholarships[0].scholarship_ends_at
-          )
-          doc
-            .text(
-              'Data de início da bolsa: ' +
-                scholarship_start +
-                '                   Data de fim da bolsa: ' +
-                scholarship_end
-            )
-            .fontSize(12)
-          if (
-            student.enrollments[0].scholarships[0].extension_ends_at == null ||
-            student.enrollments[0].scholarships[0].extension_ends_at.getTime() ==
-              student.enrollments[0].scholarships[0].scholarship_ends_at.getTime()
-          ) {
-            doc
-              .font('Times-Bold')
-              .text('Sem extensão de bolsa cadastrada', { align: 'center' })
-          } else {
-            doc
-              .font('Times-Bold')
-              .text(
-                'Bolsa extendida até: ' +
-                  formatDate(
-                    student.enrollments[0].scholarships[0].extension_ends_at
-                  ),
-                { align: 'center' }
-              )
-          }
-        }
-        doc.fontSize(12)
-        if (student.enrollments[0].advisor != null) {
+          .font('Times-Roman')
+          .list([`Nenhuma bolsa foi iniciada no ano de ${currentYear}`], {
+            indent: 20,
+            bulletIndent: 20,
+            textIndent: 20
+          })
+      } else {
+        scholarshipsInCurrentYear.forEach((scholarship) => {
           doc
             .font('Times-Roman')
-            .text('Orientador(a): ' + student.enrollments[0].advisor.name)
-          doc
             .text(
-              'Email do(a) orientador(a): ' +
-                student.enrollments[0].advisor.email
+              `Bolsa de pesquisa iniciada em ${formatDate(
+                scholarship.scholarship_starts_at
+              )} para o estudante ${scholarship.student.name}`
             )
-            .fontSize(12)
-        } else {
-          doc.text('Estudante sem orientador(a)')
-        }
-        doc.moveDown(2)
-        doc.lineWidth(5)
-        doc
-          .lineCap('butt')
-          .moveTo(doc.x, doc.y)
-          .lineTo(doc.x + 450, doc.y)
-          .stroke()
+        })
       }
+
+      doc.moveDown(100.5)
+
+      this.row(doc, 90)
+      this.row(doc, 110)
+      this.row(doc, 130)
+      this.row(doc, 150)
+      this.row(doc, 170)
+      this.row(doc, 190)
+      this.row(doc, 210)
+
+      this.textInRowFirst(doc, 'Nombre o razón social', 100)
+      this.textInRowFirst(doc, 'RUT', 120)
+      this.textInRowFirst(doc, 'Dirección', 140)
+      this.textInRowFirst(doc, 'Comuna', 160)
+      this.textInRowFirst(doc, 'Ciudad', 180)
+      this.textInRowFirst(doc, 'Telefono', 200)
+      this.textInRowFirst(doc, 'e-mail', 220)
+
       doc.end()
 
       const buffer = []
@@ -119,6 +122,7 @@ export class PdfReportService {
         resolve(data)
       })
     })
+
     return pdfBuffer
   }
 }
