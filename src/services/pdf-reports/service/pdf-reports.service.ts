@@ -1,128 +1,275 @@
+import { jsPDF } from 'jspdf'
 import { Injectable } from '@nestjs/common'
-import { formatDate, formatterDate } from '../../../core/utils/date-utils'
 import { ScholarshipService } from '../../..//modules/scholarship/service/scholarship.service'
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const PDFKit = require('pdfkit')
+import {
+  HEADERS_FOR_SCHOLARSHIPS_STARTING_CURRENT_YEAR,
+  HEADERS_FOR_SCHOLARSHIPS_ENDING_CURRENT_YEAR,
+  getFirstAndLastNameFromCompleteName,
+  getScholarshipsSplitedByStartingYear,
+  getScholarshipsSplitedByEndingYear
+} from './pdf-reports.helper'
 
 @Injectable()
 export class PdfReportService {
   constructor(private scholarshipService: ScholarshipService) {}
 
-  textInRowFirst(doc, text, heigth) {
-    doc.y = heigth
-    doc.x = 30
-    doc.fillColor('black')
-    doc.text(text, {
-      paragraphGap: 5,
-      indent: 5,
-      align: 'justify',
-      columns: 1
+  _createRowsByStartingYear(scholarships) {
+    const result = []
+
+    scholarships.sort((a, b) => {
+      const dateA = new Date(a.scholarship_starts_at).getTime()
+      const dateB = new Date(b.scholarship_starts_at).getTime()
+      return dateA - dateB
     })
-    return doc
-  }
 
-  row(doc, heigth) {
-    doc.lineJoin('miter').rect(30, heigth, 500, 20).stroke()
-    return doc
-  }
-
-  _getScholarshipsInCurrentYear(scholarships, currentYear) {
-    return scholarships.filter((scholarship) => {
-      const startedAtYear = new Date(
-        scholarship.scholarship_starts_at
-      ).getFullYear()
-
-      return startedAtYear === currentYear
-    })
-  }
-
-  async generatePDF(): Promise<Buffer> {
-    const doc = new PDFKit({ size: 'A4', font: 'Times-Roman' })
-    const currentYear = new Date().getFullYear()
-    const scholarships = await this.scholarshipService.findAll()
-
-    const scholarshipsInCurrentYear = this._getScholarshipsInCurrentYear(
-      scholarships,
-      currentYear
-    )
-
-    const pdfBuffer: Buffer = await new Promise(async (resolve) => {
-      doc
-        .fontSize(18)
-        .font('Times-Bold')
-        .text(`RELATÓRIO DE BOLSAS DO PGCOMP - ${currentYear}`, {
-          align: 'center'
-        })
-      doc
-        .lineWidth(2)
-        .lineCap('butt')
-        .moveTo(doc.x, doc.y)
-        .lineTo(doc.x + 450, doc.y)
-        .stroke()
-        .moveDown(0.5)
-      doc
-        .fontSize(10)
-        .font('Times-Bold')
-        .text(`Emitido em ${new Date().toLocaleString('pt-BR')}`, {
-          align: 'right'
-        })
-        .moveDown(1.5)
-      doc
-        .fontSize(12)
-        .font('Times-Bold')
-        .text(`BOLSAS INICIADAS`, {
-          align: 'justify'
-        })
-        .moveDown(0.5)
-
-      if (scholarshipsInCurrentYear.length === 0) {
-        doc
-          .font('Times-Roman')
-          .list([`Nenhuma bolsa foi iniciada no ano de ${currentYear}`], {
-            indent: 20,
-            bulletIndent: 20,
-            textIndent: 20
-          })
-      } else {
-        scholarshipsInCurrentYear.forEach((scholarship) => {
-          doc
-            .font('Times-Roman')
-            .text(
-              `Bolsa de pesquisa iniciada em ${formatDate(
-                scholarship.scholarship_starts_at
-              )} para o estudante ${scholarship.student.name}`
-            )
-        })
+    for (const scholarship of scholarships) {
+      const data = {
+        agency: scholarship.agency.name,
+        course: scholarship.enrollment.enrollment_program,
+        student_name: getFirstAndLastNameFromCompleteName(
+          scholarship.enrollment.student.name
+        ),
+        advisor_name: getFirstAndLastNameFromCompleteName(
+          scholarship.enrollment.advisor.name
+        ),
+        starting_date: new Date(
+          scholarship.scholarship_starts_at
+        ).toLocaleDateString('pt-BR')
       }
 
-      doc.moveDown(100.5)
+      result.push(Object.assign({}, data))
+    }
 
-      this.row(doc, 90)
-      this.row(doc, 110)
-      this.row(doc, 130)
-      this.row(doc, 150)
-      this.row(doc, 170)
-      this.row(doc, 190)
-      this.row(doc, 210)
+    return result
+  }
 
-      this.textInRowFirst(doc, 'Nombre o razón social', 100)
-      this.textInRowFirst(doc, 'RUT', 120)
-      this.textInRowFirst(doc, 'Dirección', 140)
-      this.textInRowFirst(doc, 'Comuna', 160)
-      this.textInRowFirst(doc, 'Ciudad', 180)
-      this.textInRowFirst(doc, 'Telefono', 200)
-      this.textInRowFirst(doc, 'e-mail', 220)
+  _createRowsByEndingYear(scholarships) {
+    const result = []
 
-      doc.end()
-
-      const buffer = []
-      doc.on('data', buffer.push.bind(buffer))
-      doc.on('end', () => {
-        const data = Buffer.concat(buffer)
-        resolve(data)
-      })
+    scholarships.sort((a, b) => {
+      const dateA = new Date(a.scholarship_ends_at).getTime()
+      const dateB = new Date(b.scholarship_ends_at).getTime()
+      return dateA - dateB
     })
 
-    return pdfBuffer
+    for (const scholarship of scholarships) {
+      const data = {
+        agency: scholarship.agency.name,
+        course: scholarship.enrollment.enrollment_program,
+        student_name: getFirstAndLastNameFromCompleteName(
+          scholarship.enrollment.student.name
+        ),
+        advisor_name: getFirstAndLastNameFromCompleteName(
+          scholarship.enrollment.advisor.name
+        ),
+        ending_date: new Date(
+          scholarship.scholarship_ends_at
+        ).toLocaleDateString('pt-BR')
+      }
+
+      result.push(Object.assign({}, data))
+    }
+
+    return result
+  }
+
+  async generatePDF(): Promise<ArrayBuffer> {
+    const scholarships = await this.scholarshipService.findAll()
+
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+    const docWidth = doc.internal.pageSize.getWidth()
+
+    const currentYear = new Date().getFullYear()
+    const previousYear = currentYear - 1
+    const currentYearStr = currentYear.toString()
+    const previousYearStr = previousYear.toString()
+
+    const scholarshipsByStartingYear =
+      getScholarshipsSplitedByStartingYear(scholarships)
+    const scholarshipsStartingOnCurrentYear =
+      scholarshipsByStartingYear[currentYearStr]
+    const scholarshipsStartingOnPreviousYear =
+      scholarshipsByStartingYear[previousYearStr]
+
+    const scholarshipsByEndingYear =
+      getScholarshipsSplitedByEndingYear(scholarships)
+    const scholarshipsEndingOnCurrentYear =
+      scholarshipsByEndingYear[currentYearStr]
+    const scholarshipsEndingOnPreviousYear =
+      scholarshipsByEndingYear[previousYearStr]
+
+    doc
+      .setFontSize(18)
+      .setFont('times', 'bold')
+      .text(
+        `RELATÓRIO DE BOLSAS DO PGCOMP - ${currentYear}`,
+        docWidth / 2,
+        30,
+        {
+          align: 'center'
+        }
+      )
+
+    doc.line(30, 32, docWidth - 30, 32, 'S').setLineWidth(1)
+
+    doc
+      .setFontSize(10)
+      .setFont('times', 'bold')
+      .text(
+        `Emitido em ${new Date().toLocaleString('pt-BR')}`,
+        docWidth - 30,
+        37,
+        {
+          align: 'right'
+        }
+      )
+
+    doc
+      .setFontSize(12)
+      .setFont('times', 'bold')
+      .text(`BOLSAS INICIADAS ESTE ANO`, 30, 50, {
+        align: 'justify'
+      })
+
+    if (!scholarshipsStartingOnCurrentYear) {
+      doc
+        .setFont('times', 'normal')
+        .text(
+          '\u2022 ' + `Nenhuma bolsa foi pleiteada no ano de ${currentYear}.`,
+          35,
+          60,
+          {
+            align: 'justify'
+          }
+        )
+
+      if (scholarshipsStartingOnPreviousYear) {
+        doc.text(
+          '\u2022 ' +
+            `Em comparação, no ano de ${previousYear}, o PGCOMP foi contemplado com ${scholarshipsStartingOnPreviousYear.length} novos bolsistas.`,
+          35,
+          65,
+          {
+            align: 'justify'
+          }
+        )
+      }
+    } else {
+      doc
+        .setFontSize(12)
+        .setFont('times', 'normal')
+        .text(
+          '\u2022 ' +
+            `${scholarshipsStartingOnCurrentYear.length} novas bolsas foram pleiteadas no ano de ${currentYear}.`,
+          35,
+          60,
+          {
+            align: 'justify'
+          }
+        )
+
+      if (scholarshipsStartingOnPreviousYear) {
+        doc.text(
+          '\u2022 ' +
+            `Em comparação, no ano de ${previousYear}, o PGCOMP foi contemplado com ${scholarshipsStartingOnPreviousYear.length} novos bolsistas.`,
+          35,
+          65,
+          {
+            align: 'justify'
+          }
+        )
+      }
+
+      const headers = HEADERS_FOR_SCHOLARSHIPS_STARTING_CURRENT_YEAR as any
+
+      const rows = this._createRowsByStartingYear(
+        scholarshipsStartingOnCurrentYear
+      )
+
+      const margins = { top: 30, left: 20, bottom: 20, right: 25 } as any
+
+      const positionOfStartingCurrentYearTable =
+        scholarshipsStartingOnPreviousYear ? 70 : 65
+
+      doc.table(25, positionOfStartingCurrentYearTable, rows, headers, {
+        fontSize: 12,
+        margins
+      })
+    }
+
+    doc.addPage()
+
+    doc
+      .setFontSize(12)
+      .setFont('times', 'bold')
+      .text(`BOLSAS EM FINALIZAÇÃO NESTE ANO`, 30, 30, {
+        align: 'justify'
+      })
+
+    if (!scholarshipsEndingOnCurrentYear) {
+      doc
+        .setFont('times', 'normal')
+        .text(
+          '\u2022 ' + `Nenhuma bolsa irá finalizar no ano de ${currentYear}.`,
+          35,
+          40,
+          {
+            align: 'justify'
+          }
+        )
+
+      if (scholarshipsEndingOnPreviousYear) {
+        doc.text(
+          '\u2022 ' +
+            `Em comparação, no ano de ${previousYear}, ${scholarshipsEndingOnPreviousYear.length} bolsas foram finalizadas no PGCOMP.`,
+          35,
+          45,
+          {
+            align: 'justify'
+          }
+        )
+      }
+    } else {
+      doc
+        .setFontSize(12)
+        .setFont('times', 'normal')
+        .text(
+          '\u2022 ' +
+            `${scholarshipsEndingOnCurrentYear.length} bolsas serão finalizadas no ano de ${currentYear}.`,
+          35,
+          40,
+          {
+            align: 'justify'
+          }
+        )
+
+      if (scholarshipsEndingOnPreviousYear) {
+        doc.text(
+          '\u2022 ' +
+            `Em comparação, no ano de ${previousYear}, ${scholarshipsEndingOnPreviousYear.length} bolsas foram finalizadas no PGCOMP.`,
+          35,
+          45,
+          {
+            align: 'justify'
+          }
+        )
+      }
+      const headers = HEADERS_FOR_SCHOLARSHIPS_ENDING_CURRENT_YEAR as any
+
+      const rows = this._createRowsByEndingYear(scholarshipsEndingOnCurrentYear)
+
+      const margins = { top: 30, left: 20, bottom: 20, right: 25 } as any
+
+      const positionOfEndingCurrentYearTable = scholarshipsEndingOnPreviousYear
+        ? 50
+        : 55
+
+      doc.table(25, positionOfEndingCurrentYearTable, rows, headers, {
+        fontSize: 12,
+        margins
+      })
+    }
+
+    return doc.output('arraybuffer')
   }
 }

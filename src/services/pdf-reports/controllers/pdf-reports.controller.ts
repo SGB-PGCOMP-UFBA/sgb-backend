@@ -9,16 +9,18 @@ export class PdfReportController {
 
   @Get('/generate-pdf')
   async generateReport(@Res() response: Response): Promise<void> {
-    const doc = await this.reportService.generatePDF()
+    const arrayBuffer = await this.reportService.generatePDF()
     const filename =
-      'RELATORIO DE BOLSAS ATUALIZADO EM ' +
-      moment().format('DD-MM-yy hh:mm:ss') +
-      '.pdf'
+      'RELATORIO_PGCOMP_SAB ' + moment().format('DD-MM-yy hh:mm:ss') + '.pdf'
+
+    const buffer = Buffer.from(arrayBuffer)
+
     response.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': 'attachment; filename="' + filename + '"',
-      'Content-Length': doc.length
+      'Content-Length': buffer.length
     })
-    response.end(doc)
+
+    response.send(buffer)
   }
 }
