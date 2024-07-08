@@ -210,6 +210,7 @@ export class ScholarshipService {
           'COUNT(scholarship.id) as count'
         ])
         .groupBy('agency.name, enrollment.enrollment_program')
+        .orderBy('agency.name', 'ASC')
         .getRawMany()
 
       return result
