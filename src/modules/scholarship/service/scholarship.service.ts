@@ -18,6 +18,17 @@ import { ScholarshipFilters } from '../filters/IScholarshipFilters'
 import { AgencyService } from '../../../modules/agency/service/agency.service'
 import { EnrollmentService } from '../../../modules/enrollment/services/enrollment.service'
 
+const orderByMapping = {
+  DAT_MATRICULA_ASC: ['enrollment', 'enrollment_date', 'ASC'],
+  DAT_MATRICULA_DESC: ['enrollment', 'enrollment_date', 'DESC'],
+  DAT_DEFESA_ASC: ['enrollment', 'defense_prediction_date', 'ASC'],
+  DAT_DEFESA_DESC: ['enrollment', 'defense_prediction_date', 'DESC'],
+  DAT_INICIO_ASC: ['scholarship', 'scholarship_starts_at', 'ASC'],
+  DAT_INICIO_DESC: ['scholarship', 'scholarship_starts_at', 'DESC'],
+  DAT_TERMINO_ASC: ['scholarship', 'scholarship_ends_at', 'ASC'],
+  DAT_TERMINO_DESC: ['scholarship', 'scholarship_ends_at', 'DESC']
+}
+
 @Injectable()
 export class ScholarshipService {
   constructor(
@@ -60,7 +71,8 @@ export class ScholarshipService {
         'enrollment.student',
         'enrollment.advisor'
       ],
-      where: {}
+      where: {},
+      order: {}
     }
 
     if (filters?.scholarshipStatus && filters?.scholarshipStatus !== 'ALL') {
@@ -83,6 +95,15 @@ export class ScholarshipService {
 
       findOptions.where['enrollment']['advisor'] = {
         name: Like(`%${filters.advisorName}%`)
+      }
+    }
+    if (filters?.orderBy && orderByMapping[filters.orderBy]) {
+      const [table, field, order] = orderByMapping[filters.orderBy]
+      if (table === 'enrollment') {
+        findOptions.order[table] = {}
+        findOptions.order[table][field] = order
+      } else {
+        findOptions.order[field] = order
       }
     }
 
