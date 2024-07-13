@@ -19,6 +19,12 @@ export class Agency {
   @Column({ nullable: false })
   description: string
 
+  @Column({ nullable: false, default: 0 })
+  masters_degree_awarded_scholarships: number
+
+  @Column({ nullable: false, default: 0 })
+  doctorate_degree_awarded_scholarships: number
+
   @CreateDateColumn()
   created_at: Date
 
