@@ -6,7 +6,8 @@ export class AdvisorMapper {
     return {
       id: advisor.id,
       key: advisor.name,
-      value: advisor.name
+      value: advisor.name,
+      email: advisor.email
     }
   }
 

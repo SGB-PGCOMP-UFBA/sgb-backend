@@ -1,7 +1,16 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Patch
+} from '@nestjs/common'
 import { EnrollmentService } from '../services/enrollment.service'
-import { CreateEnrollmentDto } from '../dtos/create-enrollment.dto'
 import { EnrollmentMapper } from '../mappers/enrollment.mapper'
+import { CreateEnrollmentDto } from '../dtos/create-enrollment.dto'
+import { UpdateEnrollmentDto } from '../dtos/update-enrollment.dto'
 
 @Controller('v1/enrollment')
 export class EnrollmentController {
@@ -38,8 +47,14 @@ export class EnrollmentController {
     )
   }
 
+  @Patch(':id')
+  async update(@Param('id') id: number, @Body() dto: UpdateEnrollmentDto) {
+    const updatedEnrollment = await this.enrollmentService.update(id, dto)
+    return EnrollmentMapper.detailed(updatedEnrollment)
+  }
+
   @Delete(':id')
-  async delete(@Param('id') id: string) {
-    return await this.enrollmentService.delete(+id)
+  async delete(@Param('id') id: number) {
+    return await this.enrollmentService.delete(id)
   }
 }

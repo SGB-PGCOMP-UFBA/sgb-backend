@@ -9,12 +9,14 @@ import {
   HttpCode,
   Query,
   DefaultValuePipe,
-  ParseIntPipe
+  ParseIntPipe,
+  Patch
 } from '@nestjs/common'
 import { ScholarshipService } from '../service/scholarship.service'
-import { CreateScholarshipDto } from '../dto/create-scholarship.dto'
 import { ScholarshipMapper } from '../mapper/scholarship.mapper'
 import { ScholarshipFilters } from '../filters/IScholarshipFilters'
+import { CreateScholarshipDto } from '../dto/create-scholarship.dto'
+import { UpdateScholarshipDto } from '../dto/update-scholarship.dto'
 
 @Controller('v1/scholarship')
 export class ScholarshipController {
@@ -104,6 +106,12 @@ export class ScholarshipController {
       resultCount,
       agencyName
     )
+  }
+
+  @Patch(':id')
+  async update(@Param('id') id: number, @Body() dto: UpdateScholarshipDto) {
+    const updatedScholarship = await this.scholarshipService.update(id, dto)
+    return ScholarshipMapper.detailed(updatedScholarship)
   }
 
   @Delete(':id')

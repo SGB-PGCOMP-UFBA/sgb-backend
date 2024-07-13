@@ -9,14 +9,16 @@ import { FindManyOptions, Like, Repository } from 'typeorm'
 import { paginate, IPaginationOptions } from 'nestjs-typeorm-paginate'
 import { PageDto } from '../../../core/pagination/page.dto'
 import { PageMetaDto } from '../../../core/pagination/page-meta.dto'
-import { CreateScholarshipDto } from '../dto/create-scholarship.dto'
 import { Scholarship } from '../entities/scholarship.entity'
 import { constants } from '../../../core/utils/constants'
 import { StatusEnum } from '../../../core/enums/StatusEnum'
 import { ScholarshipMapper } from '../mapper/scholarship.mapper'
 import { ScholarshipFilters } from '../filters/IScholarshipFilters'
+import { StudentService } from '../../../modules/student/service/student.service'
 import { AgencyService } from '../../../modules/agency/service/agency.service'
 import { EnrollmentService } from '../../../modules/enrollment/services/enrollment.service'
+import { CreateScholarshipDto } from '../dto/create-scholarship.dto'
+import { UpdateScholarshipDto } from '../dto/update-scholarship.dto'
 
 const orderByMapping = {
   DAT_MATRICULA_ASC: ['enrollment', 'enrollment_date', 'ASC'],
@@ -35,7 +37,8 @@ export class ScholarshipService {
     @InjectRepository(Scholarship)
     private scholarshipRepository: Repository<Scholarship>,
     private agencyService: AgencyService,
-    private enrollmentService: EnrollmentService
+    private enrollmentService: EnrollmentService,
+    private studentService: StudentService
   ) {}
 
   async findAll(): Promise<Scholarship[]> {
@@ -168,6 +171,49 @@ export class ScholarshipService {
     } catch (error) {
       throw new BadRequestException(
         constants.exceptionMessages.scholarship.CREATION_FAILED
+      )
+    }
+  }
+
+  async update(id: number, dto: UpdateScholarshipDto) {
+    try {
+      const student = await this.studentService.findOneByEmail(
+        dto.student_email
+      )
+
+      const enrollment = await this.enrollmentService.findOneByIdAndStudentId(
+        dto.enrollment_id,
+        student.id
+      )
+
+      const scholarship = await this.scholarshipRepository.findOneBy({
+        id: id,
+        enrollment_id: enrollment.id
+      })
+
+      if (!scholarship) {
+        throw new NotFoundException(
+          constants.exceptionMessages.scholarship.NOT_FOUND
+        )
+      }
+
+      const updatedScholarship = await this.scholarshipRepository.save({
+        id: scholarship.id,
+        salary: dto.salary,
+        extension_ends_at: dto.extension_ends_at,
+        status: dto.status || scholarship.status,
+        agency_id: dto.agency_id || scholarship.agency_id,
+        scholarship_starts_at:
+          dto.scholarship_starts_at || scholarship.scholarship_starts_at,
+        scholarship_ends_at:
+          dto.scholarship_ends_at || scholarship.scholarship_ends_at
+      })
+
+      return updatedScholarship
+    } catch (error) {
+      throw new BadRequestException(
+        constants.exceptionMessages.scholarship.UPDATE_FAILED,
+        error
       )
     }
   }
