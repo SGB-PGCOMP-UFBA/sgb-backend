@@ -18,7 +18,7 @@ export class AgencyService {
 
   async findAll(): Promise<Agency[]> {
     return await this.agencyRepository.find({
-      relations: ['scholarships'],
+      relations: ['scholarships', 'scholarships.enrollment'],
       order: { name: 'ASC' }
     })
   }
@@ -62,7 +62,11 @@ export class AgencyService {
     const updatedAgency = await this.agencyRepository.save({
       id: agency.id,
       name: dto.name || agency.name,
-      description: dto.description || agency.description
+      description: dto.description || agency.description,
+      masters_degree_awarded_scholarships:
+        dto.masters_degree_awarded_scholarships,
+      doctorate_degree_awarded_scholarships:
+        dto.doctorate_degree_awarded_scholarships
     })
 
     return updatedAgency

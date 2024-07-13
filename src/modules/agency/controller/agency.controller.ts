@@ -40,7 +40,7 @@ export class AgencyController {
   @Patch(':id')
   async update(@Param('id') id: number, @Body() dto: UpdateAgencyDto) {
     const updatedAgency = await this.agencyService.update(id, dto)
-    return AgencyMapper.detailed(updatedAgency)
+    return AgencyMapper.simplified(updatedAgency)
   }
 
   @Delete(':id')

@@ -13,6 +13,8 @@ export class AgencyMapper {
   static simplified(agency: Agency) {
     return {
       id: agency.id,
+      name: agency.name,
+      description: agency.description,
       created_at: agency.created_at,
       updated_at: agency.updated_at
     }
@@ -23,9 +25,22 @@ export class AgencyMapper {
 
     return {
       ...simplified,
-      name: agency.name,
-      description: agency.description,
-      scholarshipsCount: agency.scholarships ? agency.scholarships.length : 0
+      masters_degree_awarded_scholarships:
+        agency.masters_degree_awarded_scholarships,
+      masters_degree_allocated_scholarships: agency.scholarships.filter(
+        (scholarship) =>
+          (scholarship.status === 'ON_GOING' ||
+            scholarship.status === 'EXTENDED') &&
+          scholarship.enrollment.enrollment_program === 'MESTRADO'
+      ).length,
+      doctorate_degree_awarded_scholarships:
+        agency.doctorate_degree_awarded_scholarships,
+      doctorate_degree_allocated_scholarships: agency.scholarships.filter(
+        (scholarship) =>
+          (scholarship.status === 'ON_GOING' ||
+            scholarship.status === 'EXTENDED') &&
+          scholarship.enrollment.enrollment_program === 'DOUTORADO'
+      ).length
     }
   }
 

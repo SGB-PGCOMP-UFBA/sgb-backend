@@ -38,7 +38,7 @@ export class ScholarshipMapper {
 
   static detailedWithRelations(scholarship: Scholarship) {
     const agency = scholarship.agency
-      ? AgencyMapper.detailed(scholarship.agency)
+      ? AgencyMapper.simplified(scholarship.agency)
       : null
     const enrollment = scholarship.enrollment
       ? EnrollmentMapper.detailed(scholarship.enrollment)

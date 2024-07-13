@@ -5,7 +5,7 @@ import {
   InternalServerErrorException
 } from '@nestjs/common/exceptions'
 import { InjectRepository } from '@nestjs/typeorm'
-import { FindManyOptions, Like, Repository } from 'typeorm'
+import { FindManyOptions, In, Like, Repository } from 'typeorm'
 import { paginate, IPaginationOptions } from 'nestjs-typeorm-paginate'
 import { PageDto } from '../../../core/pagination/page.dto'
 import { PageMetaDto } from '../../../core/pagination/page-meta.dto'
@@ -142,7 +142,9 @@ export class ScholarshipService {
         'enrollment.student',
         'enrollment.advisor'
       ],
-      where: { status: 'ON_GOING' }
+      where: {
+        status: In(['ON_GOING', 'EXTENDED'])
+      }
     })
   }
 
@@ -267,7 +269,9 @@ export class ScholarshipService {
         .createQueryBuilder('scholarship')
         .innerJoin('scholarship.agency', 'agency')
         .innerJoin('scholarship.enrollment', 'enrollment')
-        .where('scholarship.status = :status', { status: 'ON_GOING' })
+        .where('scholarship.status IN (:...statuses)', {
+          statuses: ['ON_GOING', 'EXTENDED']
+        })
         .andWhere('enrollment.enrollment_program = :course', {
           course: programName
         })
