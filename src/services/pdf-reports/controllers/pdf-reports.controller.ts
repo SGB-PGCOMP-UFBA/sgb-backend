@@ -11,7 +11,7 @@ export class PdfReportController {
   async generateReport(@Res() response: Response): Promise<void> {
     const arrayBuffer = await this.reportService.generatePDF()
     const filename =
-      'RELATORIO_PGCOMP_SAB ' + moment().format('DD-MM-yy hh:mm:ss') + '.pdf'
+      'RELATORIO_PGCOMP_SGB ' + moment().format('DD-MM-yy hh:mm:ss') + '.pdf'
 
     const buffer = Buffer.from(arrayBuffer)
 
