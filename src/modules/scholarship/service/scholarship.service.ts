@@ -179,9 +179,7 @@ export class ScholarshipService {
 
   async update(id: number, dto: UpdateScholarshipDto) {
     try {
-      const student = await this.studentService.findOneByEmail(
-        dto.student_email
-      )
+      const student = await this.studentService.findByEmail(dto.student_email)
 
       const enrollment = await this.enrollmentService.findOneByIdAndStudentId(
         dto.enrollment_id,

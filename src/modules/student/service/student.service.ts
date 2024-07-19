@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException
 } from '@nestjs/common'
-import { Repository } from 'typeorm'
+import { FindOneOptions, Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Student } from '../entities/student.entity'
 import { CreateStudentDto } from '../dto/create-student.dto'
@@ -69,10 +69,30 @@ export class StudentService {
     })
   }
 
-  async findOneByEmail(email: string): Promise<Student> {
-    const student = await this.studentRepository.findOneBy({ email })
+  async findByEmail(
+    email: string,
+    chargeDependencies = false
+  ): Promise<Student> {
+    const findOneOptions: FindOneOptions<Student> = {
+      where: { email },
+      relations: []
+    }
+
+    if (chargeDependencies) {
+      findOneOptions.relations = [
+        'enrollments',
+        'enrollments.advisor',
+        'enrollments.scholarships',
+        'enrollments.scholarships.agency'
+      ]
+    }
+
+    const student = await this.studentRepository.findOne({
+      ...findOneOptions
+    })
+
     if (!student) {
-      this.logger.error(`'${email}' não foi encontrado na base de estudantes.`)
+      this.logger.error(`Busca por estudante com e-mail = '${email}' falhou.`)
       throw new NotFoundException(constants.exceptionMessages.student.NOT_FOUND)
     }
 

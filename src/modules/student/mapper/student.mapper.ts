@@ -35,4 +35,16 @@ export class StudentMapper {
       enrollments
     }
   }
+
+  static detailedWithFullRelations(student: Student) {
+    const detailed = this.detailed(student)
+    const enrollments = student.enrollments?.map((enrollment) =>
+      EnrollmentMapper.detailedWithFullRelations(enrollment)
+    )
+
+    return {
+      ...detailed,
+      enrollments
+    }
+  }
 }

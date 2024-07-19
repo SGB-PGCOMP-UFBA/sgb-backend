@@ -54,7 +54,7 @@ export class EnrollmentService {
     student_email: string,
     enrollment_program: string
   ): Promise<Enrollment> {
-    const student = await this.studentService.findOneByEmail(student_email)
+    const student = await this.studentService.findByEmail(student_email)
 
     const enrollment = await this.enrollmentRepository.findOneBy({
       student_id: student.id,
@@ -76,7 +76,7 @@ export class EnrollmentService {
         dto.advisor_email
       )
 
-      const student = await this.studentService.findOneByEmail(
+      const student = await this.studentService.findByEmail(
         dto.student_email
       )
 
@@ -105,7 +105,7 @@ export class EnrollmentService {
         dto.advisor_email
       )
 
-      const student = await this.studentService.findOneByEmail(
+      const student = await this.studentService.findByEmail(
         dto.student_email
       )
 

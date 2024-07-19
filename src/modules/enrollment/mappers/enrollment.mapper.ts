@@ -53,4 +53,20 @@ export class EnrollmentMapper {
       scholarships
     }
   }
+
+  static detailedWithFullRelations(enrollment: Enrollment) {
+    const detailed = this.detailed(enrollment)
+    const advisor = enrollment.advisor
+      ? AdvisorMapper.detailed(enrollment.advisor)
+      : null
+    const scholarships = enrollment.scholarships?.map((scholarship) =>
+      ScholarshipMapper.detailedWithFullRelations(scholarship)
+    )
+
+    return {
+      ...detailed,
+      advisor,
+      scholarships
+    }
+  }
 }

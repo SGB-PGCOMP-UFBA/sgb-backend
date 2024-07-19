@@ -25,6 +25,12 @@ export class StudentController {
     return students.map((student) => StudentMapper.detailed(student))
   }
 
+  @Get(':email')
+  async findByEmail(@Param('email') email: string) {
+    const student = await this.studentsService.findByEmail(email, true)
+    return StudentMapper.detailedWithFullRelations(student)
+  }
+
   @Get('/by-advisor/:advisorId')
   async findAllByAdvisorId(@Param('advisorId') advisorId: number) {
     const students = await this.studentsService.findAllByAdvisorId(advisorId)

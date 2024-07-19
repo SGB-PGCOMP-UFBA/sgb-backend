@@ -66,6 +66,24 @@ export class ScholarshipMapper {
     }
   }
 
+  static detailedWithFullRelations(scholarship: Scholarship) {
+    const agency = scholarship.agency
+      ? AgencyMapper.simplified(scholarship.agency)
+      : null
+
+    return {
+      id: scholarship.id,
+      status: scholarship.status,
+      scholarship_starts_at: scholarship.scholarship_starts_at,
+      scholarship_ends_at: scholarship.scholarship_ends_at,
+      extension_ends_at: scholarship.extension_ends_at,
+      salary: scholarship.salary,
+      created_at: scholarship.created_at,
+      updated_at: scholarship.updated_at,
+      agency
+    }
+  }
+
   static countOnGoingScholarshipsGroupingByAgencyForCourse(counts) {
     const result = {}
 
