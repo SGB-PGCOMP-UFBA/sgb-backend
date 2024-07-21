@@ -5,7 +5,9 @@ import {
   Body,
   Param,
   Delete,
-  Patch
+  Patch,
+  HttpStatus,
+  HttpCode
 } from '@nestjs/common'
 import { EnrollmentService } from '../services/enrollment.service'
 import { EnrollmentMapper } from '../mappers/enrollment.mapper'
@@ -54,6 +56,7 @@ export class EnrollmentController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id') id: number) {
     return await this.enrollmentService.delete(id)
   }
