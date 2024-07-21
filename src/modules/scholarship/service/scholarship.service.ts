@@ -152,9 +152,9 @@ export class ScholarshipService {
     try {
       const agency = await this.agencyService.findOneByName(dto.agency_name)
       const enrollment =
-        await this.enrollmentService.findOneByStudentEmailAndEnrollmentProgram(
+        await this.enrollmentService.findOneByStudentEmailAndEnrollmentNumber(
           dto.student_email,
-          dto.enrollment_program
+          dto.enrollment_number
         )
 
       const newScholarship = this.scholarshipRepository.create({
