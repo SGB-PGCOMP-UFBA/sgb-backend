@@ -9,7 +9,6 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Student } from '../entities/student.entity'
 import { CreateStudentDto } from '../dto/create-student.dto'
 import { comparePassword, hashPassword } from '../../../core/utils/bcrypt'
-import { decidePassword } from '../../../core/utils/password'
 import { constants } from '../../../core/utils/constants'
 import { UpdateStudentDto } from '../dto/update-student.dto'
 
@@ -24,7 +23,7 @@ export class StudentService {
   async createStudent(dto: CreateStudentDto): Promise<Student> {
     this.logger.log(constants.exceptionMessages.student.CREATION_STARTED)
     try {
-      const passwordHash = await hashPassword(decidePassword(dto))
+      const passwordHash = await hashPassword(dto.password)
       const newStudent = this.studentRepository.create({
         ...dto,
         password: passwordHash

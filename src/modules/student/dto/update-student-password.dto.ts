@@ -1,6 +1,6 @@
 import { IsString, IsEmail, MaxLength } from 'class-validator'
 import { IsPasswordMatching } from '../../../core/constraints/IsPasswordMatchingConstraint'
-import { IsStrongPassword } from '../../../core/constraints/IsStrongPasswordConstraint'
+import { IsAcceptablePassword } from '../../../core/constraints/IsPasswordAcceptableConstraint'
 import { constants } from '../../../core/utils/constants'
 
 export class UpdateStudentPasswordDto {
@@ -12,8 +12,8 @@ export class UpdateStudentPasswordDto {
   @IsString()
   readonly current_password: string
 
-  @IsStrongPassword({
-    message: constants.bodyValidationMessages.PASSWORD_IS_WEAK
+  @IsAcceptablePassword({
+    message: constants.bodyValidationMessages.PASSWORD_IS_NOT_ACCEPTABLE
   })
   readonly new_password: string
 

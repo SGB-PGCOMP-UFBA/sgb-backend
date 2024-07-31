@@ -7,6 +7,7 @@ import {
   IsOptional
 } from 'class-validator'
 import { constants } from '../../../core/utils/constants'
+import { IsAcceptablePassword } from '../../../core/constraints/IsPasswordAcceptableConstraint'
 
 export class CreateStudentDto {
   @IsString({ message: constants.bodyValidationMessages.NAME_FORMAT_ERROR })
@@ -18,7 +19,9 @@ export class CreateStudentDto {
   @IsEmail({}, { message: constants.bodyValidationMessages.EMAIL_FORMAT_ERROR })
   readonly email: string
 
-  @IsString()
+  @IsAcceptablePassword({
+    message: constants.bodyValidationMessages.PASSWORD_IS_NOT_ACCEPTABLE
+  })
   readonly password: string
 
   @IsOptional()

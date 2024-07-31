@@ -7,9 +7,11 @@ import { constants } from '../../core/utils/constants'
 import { EmailModule } from '../email-sending/email.module'
 import { StudentModule } from '../../modules/student/student.module'
 import { AdvisorModule } from '../../modules/advisor/advisor.module'
+import { AdminModule } from '../../modules/admin/admin.module'
 
 @Module({
   imports: [
+    AdminModule,
     AdvisorModule,
     StudentModule,
     EmailModule,

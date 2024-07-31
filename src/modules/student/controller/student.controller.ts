@@ -7,7 +7,9 @@ import {
   Delete,
   HttpCode,
   Param,
-  HttpStatus
+  HttpStatus,
+  UsePipes,
+  ValidationPipe
 } from '@nestjs/common'
 import { CreateStudentDto } from '../dto/create-student.dto'
 import { StudentService } from '../service/student.service'
@@ -38,6 +40,7 @@ export class StudentController {
   }
 
   @Post()
+  @UsePipes(new ValidationPipe({ transform: true }))
   async create(@Body() dto: CreateStudentDto) {
     const student = await this.studentsService.createStudent(dto)
     return StudentMapper.simplified(student)

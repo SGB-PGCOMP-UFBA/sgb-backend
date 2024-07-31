@@ -13,11 +13,12 @@ import { EmailService } from './service/email.service'
       useFactory: async (configService: ConfigService) => ({
         transport: {
           host: configService.get('EMAIL_HOST'),
-          secure: false,
+          port: configService.get('EMAIL_PORT'),
           auth: {
             user: configService.get('EMAIL_USER'),
             pass: configService.get('EMAIL_PASSWORD')
-          }
+          },
+          secure: false
         },
         defaults: {
           from: `No Reply <${configService.get('EMAIL_FROM')}>`

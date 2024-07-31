@@ -7,6 +7,7 @@ import {
 } from 'class-validator'
 import { constants } from '../../../core/utils/constants'
 import { Transform } from 'class-transformer'
+import { IsAcceptablePassword } from '../../../core/constraints/IsPasswordAcceptableConstraint'
 
 export class CreateAdminDto {
   @IsString()
@@ -17,7 +18,7 @@ export class CreateAdminDto {
   @IsEmail({}, { message: constants.bodyValidationMessages.EMAIL_FORMAT_ERROR })
   readonly email: string
 
-  @IsString()
+  @IsAcceptablePassword()
   readonly password: string
 
   @IsOptional()

@@ -7,7 +7,6 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Advisor } from '../entities/advisor.entity'
 import { comparePassword, hashPassword } from '../../../core/utils/bcrypt'
-import { decidePassword } from '../../../core/utils/password'
 import { CreateAdvisorDto } from '../dto/create-advisor.dto'
 import { UpdateAdvisorDto } from '../dto/update-advisor.dto'
 import { constants } from '../../../core/utils/constants'
@@ -33,11 +32,11 @@ export class AdvisorService {
     return advisors
   }
 
-  async create(createAdvisorDto: CreateAdvisorDto) {
+  async create(dto: CreateAdvisorDto) {
     try {
-      const passwordHash = await hashPassword(decidePassword(createAdvisorDto))
+      const passwordHash = await hashPassword(dto.password)
       const newAdvisor = this.advisorRepository.create({
-        ...createAdvisorDto,
+        ...dto,
         password: passwordHash
       })
 
