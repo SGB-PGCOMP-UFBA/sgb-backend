@@ -1,0 +1,10 @@
+version: '3.9'
+
+services:
+  sgb-api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: sgb-api:latest
+    ports:
+      - "3333:3333"
