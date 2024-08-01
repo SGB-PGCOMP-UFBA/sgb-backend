@@ -10,10 +10,12 @@ import { comparePassword, hashPassword } from '../../../core/utils/bcrypt'
 import { CreateAdvisorDto } from '../dto/create-advisor.dto'
 import { UpdateAdvisorDto } from '../dto/update-advisor.dto'
 import { constants } from '../../../core/utils/constants'
+import { EmailService } from '../../../services/email-sending/service/email.service'
 
 @Injectable()
 export class AdvisorService {
   constructor(
+    private emailService: EmailService,
     @InjectRepository(Advisor) private advisorRepository: Repository<Advisor>
   ) {}
 
@@ -41,6 +43,17 @@ export class AdvisorService {
       })
 
       await this.advisorRepository.save(newAdvisor)
+
+      if (dto.notify) {
+        await this.emailService.sendEmail({
+          to: newAdvisor.email,
+          subject: 'Bem-vindo ao SGB-PGCOMP!',
+          template: 'welcome-advisor',
+          context: {
+            newPassword: dto.password
+          }
+        })
+      }
 
       return newAdvisor
     } catch (error) {

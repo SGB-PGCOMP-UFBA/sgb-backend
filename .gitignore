@@ -38,7 +38,3 @@ lerna-debug.log*
 
 #ENV
 .env
-
-#DBA
-schema.sql
-Procfile

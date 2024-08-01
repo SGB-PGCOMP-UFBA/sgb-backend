@@ -4,7 +4,8 @@ import {
   Length,
   IsOptional,
   MaxLength,
-  IsIn
+  IsIn,
+  IsBoolean
 } from 'class-validator'
 import { Transform } from 'class-transformer'
 import { constants } from '../../../core/utils/constants'
@@ -44,4 +45,8 @@ export class CreateAdvisorDto {
     message: constants.bodyValidationMessages.PHONE_FORMAT_ERROR
   })
   readonly phone_number: string | null
+
+  @IsOptional()
+  @IsBoolean()
+  readonly notify: boolean
 }
