@@ -1,19 +1,22 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
   Param,
   Delete,
   HttpCode,
   HttpStatus,
-  Patch
+  Patch,
+  UseGuards
 } from '@nestjs/common'
 import { AdminService } from '../service/admin.service'
 import { AdminMapper } from '../mapper/admin.mapper'
 import { UpdateAdminPasswordDto } from '../dto/update-admin-password.dto'
 import { CreateAdminDto } from '../dto/create-admin.dto'
 import { UpdateAdminDto } from '../dto/update-admin.dto'
+import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
+import { RolesGuard } from '../../../modules/auth/guards/roles.guard'
+import { Roles } from '../../../modules/auth/decorators/role.decorator'
 
 @Controller('v1/admin')
 export class AdminController {
@@ -25,19 +28,17 @@ export class AdminController {
     return AdminMapper.simplified(admin)
   }
 
-  @Get()
-  async findAll() {
-    const admins = await this.adminService.findAll()
-    return admins.map((admin) => AdminMapper.detailed(admin))
-  }
-
   @Patch()
+  @Roles('ADMIN')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   async update(@Body() dto: UpdateAdminDto) {
     const updatedAdmin = await this.adminService.update(dto)
     return AdminMapper.detailed(updatedAdmin)
   }
 
   @Patch('/update-password')
+  @Roles('ADMIN')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   async updatePassword(@Body() dto: UpdateAdminPasswordDto) {
     return await this.adminService.updatePassword(
       dto.email,
@@ -48,6 +49,8 @@ export class AdminController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @Roles('ADMIN')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   async delete(@Param('id') id: string) {
     return await this.adminService.remove(+id)
   }

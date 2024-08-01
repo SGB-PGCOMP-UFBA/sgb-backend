@@ -9,13 +9,17 @@ import {
   Param,
   HttpStatus,
   UsePipes,
-  ValidationPipe
+  ValidationPipe,
+  UseGuards
 } from '@nestjs/common'
 import { CreateStudentDto } from '../dto/create-student.dto'
 import { StudentService } from '../service/student.service'
 import { StudentMapper } from '../mapper/student.mapper'
 import { UpdateStudentDto } from '../dto/update-student.dto'
 import { UpdateStudentPasswordDto } from '../dto/update-student-password.dto'
+import { Roles } from '../../../modules/auth/decorators/role.decorator'
+import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
+import { RolesGuard } from '../../../modules/auth/guards/roles.guard'
 
 @Controller('v1/student')
 export class StudentController {
@@ -47,6 +51,8 @@ export class StudentController {
   }
 
   @Post('/create-for-list')
+  @Roles('ADMIN')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   async createForList(@Body() listDto: CreateStudentDto[]) {
     let count = 0
     const promises = []
@@ -69,12 +75,16 @@ export class StudentController {
   }
 
   @Patch()
+  @Roles('STUDENT')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   async update(@Body() dto: UpdateStudentDto) {
     const updatedStudent = await this.studentsService.update(dto)
     return StudentMapper.detailed(updatedStudent)
   }
 
   @Patch('/update-password')
+  @Roles('STUDENT')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   async updatePassword(@Body() dto: UpdateStudentPasswordDto) {
     return await this.studentsService.updatePassword(
       dto.email,
@@ -85,6 +95,8 @@ export class StudentController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @Roles('ADMIN')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   async delete(@Param('id') id: string) {
     return await this.studentsService.delete(+id)
   }

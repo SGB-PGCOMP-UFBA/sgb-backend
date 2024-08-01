@@ -1,6 +1,7 @@
-import { Controller, Get, Param, Patch, Query } from '@nestjs/common'
+import { Controller, Get, Param, Patch, Query, UseGuards } from '@nestjs/common'
 import { EmbedNotificationService } from '../service/embed-notification.service'
 import { EmbedNotificationMapper } from '../mapper/embed-notification.mapper'
+import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
 
 @Controller('v1/embed-notification')
 export class EmbedNotificationController {
@@ -9,6 +10,7 @@ export class EmbedNotificationController {
   ) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async findAll(
     @Query('owner_id') owner_id: number,
     @Query('owner_type') owner_type: string
@@ -21,6 +23,7 @@ export class EmbedNotificationController {
   }
 
   @Patch('/consume/:id')
+  @UseGuards(JwtAuthGuard)
   async consume(@Param('id') id: number) {
     return await this.embedNotificationService.consume(id)
   }

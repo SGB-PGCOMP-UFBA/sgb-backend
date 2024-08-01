@@ -45,8 +45,10 @@ export class AuthService {
 
   async login(loggedUser: ResponseUserDto) {
     const payload = {
+      authenticated_at: new Date().toISOString(),
+      role: loggedUser.role,
       username: loggedUser.name,
-      sub: loggedUser.id
+      sub: `${loggedUser.id}-${loggedUser.role}`
     }
 
     return {
