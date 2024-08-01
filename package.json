@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "db:migrate": "node dist/node_modules/typeorm/cli.js migration:run --d dist/src/config/ormconfig.js",
     "postinstall": "npm run build",
     "build": "rimraf dist && nest build && npm run copy-templates",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -91,8 +92,8 @@
     "supertest": "^6.1.3",
     "ts-jest": "28.0.5",
     "ts-loader": "^9.2.3",
-    "ts-node": "^10.9.1",
-    "tsconfig-paths": "4.0.0"
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.0.0"
   },
   "jest": {
     "moduleFileExtensions": [
