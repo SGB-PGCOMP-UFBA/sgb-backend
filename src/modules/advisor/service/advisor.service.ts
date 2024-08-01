@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -14,6 +15,8 @@ import { EmailService } from '../../../services/email-sending/service/email.serv
 
 @Injectable()
 export class AdvisorService {
+  private readonly logger = new Logger(AdvisorService.name)
+
   constructor(
     private emailService: EmailService,
     @InjectRepository(Advisor) private advisorRepository: Repository<Advisor>
@@ -35,6 +38,8 @@ export class AdvisorService {
   }
 
   async create(dto: CreateAdvisorDto) {
+    this.logger.log(constants.exceptionMessages.advisor.CREATION_STARTED)
+
     try {
       const passwordHash = await hashPassword(dto.password)
       const newAdvisor = this.advisorRepository.create({
@@ -43,6 +48,7 @@ export class AdvisorService {
       })
 
       await this.advisorRepository.save(newAdvisor)
+      this.logger.log(constants.exceptionMessages.advisor.CREATION_COMPLETED)
 
       if (dto.notify) {
         await this.emailService.sendEmail({
@@ -57,6 +63,10 @@ export class AdvisorService {
 
       return newAdvisor
     } catch (error) {
+      this.logger.error(
+        constants.exceptionMessages.advisor.CREATION_FAILED,
+        error
+      )
       throw new BadRequestException(
         constants.exceptionMessages.advisor.CREATION_FAILED
       )

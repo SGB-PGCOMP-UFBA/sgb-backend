@@ -7,7 +7,7 @@ import { CustomValidationException } from './core/exceptions/CustomValidationExc
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: true,
-    logger: ['error']
+    logger: ['error', 'log', 'warn']
   })
 
   app.useGlobalFilters(new HttpExceptionFilter())

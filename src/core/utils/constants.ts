@@ -45,6 +45,9 @@ const constants = {
       WRONG_PASSWORD: 'Invalid password.'
     },
     advisor: {
+      CREATION_STARTED: 'The process of inserting a new advisor has started.',
+      CREATION_COMPLETED:
+        'The process of inserting a new advisor has been completed.',
       CREATION_FAILED: "Cant't create advisor.",
       UPDATE_FAILED: "Cant't update advisor.",
       NOT_FOUND: 'Advisor not found.'
