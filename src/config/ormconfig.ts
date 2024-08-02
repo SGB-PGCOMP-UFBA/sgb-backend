@@ -3,12 +3,12 @@ import * as dotenv from 'dotenv'
 dotenv.config()
 
 export const connectionSource = new DataSource({
-  type: 'postgres',
-  url: process.env.DATABASE_URL,
   logging: false,
   synchronize: false,
   name: 'default',
-  entities: ['src/**/**.entity{.ts,.js}'],
-  migrations: ['src/core/database/migrations/**/*{.ts,.js}'],
-  subscribers: ['src/core/database/migrations/**/*{.ts,.js}']
+  type: 'postgres',
+  url: process.env.DATABASE_URL,
+  entities: ['dist/modules/**/**.entity{.ts,.js}'],
+  migrations: ['dist/core/database/migrations/**/*{.ts,.js}'],
+  subscribers: ['dist/core/database/migrations/**/*{.ts,.js}']
 })
