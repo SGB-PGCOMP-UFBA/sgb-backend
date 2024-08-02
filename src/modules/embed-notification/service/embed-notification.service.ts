@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { EmbedNotification } from '../entity/embed-notification.entity'
@@ -7,6 +7,8 @@ import { constants } from '../../../core/utils/constants'
 
 @Injectable()
 export class EmbedNotificationService {
+  private readonly logger = new Logger(EmbedNotificationService.name)
+
   constructor(
     @InjectRepository(EmbedNotification)
     private embedNotificationRepository: Repository<EmbedNotification>
@@ -32,6 +34,10 @@ export class EmbedNotificationService {
 
       return newNotification
     } catch (error) {
+      this.logger.error(
+        constants.exceptionMessages.notification.CREATION_FAILED,
+        error
+      )
       throw new BadRequestException(
         constants.exceptionMessages.notification.CREATION_FAILED
       )

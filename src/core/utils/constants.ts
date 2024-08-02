@@ -74,12 +74,20 @@ const constants = {
       COUNT_BY_SCHOLARSHIP_FAILED: 'Failed to count students by scholarship.'
     },
     enrollment: {
+      CREATION_STARTED:
+        'The process of inserting a new enrollment has started.',
+      CREATION_COMPLETED:
+        'The process of inserting a new enrollment has been completed.',
       CREATION_FAILED: "Cant't create enrollment.",
       UPDATE_FAILED: "Cant't update enrollment.",
       DEACTIVATE_FAILED: "Can't deactivate this enrollment.",
       NOT_FOUND: 'Enrollment not found.'
     },
     scholarship: {
+      CREATION_STARTED:
+        'The process of inserting a new scholarship has started.',
+      CREATION_COMPLETED:
+        'The process of inserting a new scholarship has been completed.',
       CREATION_FAILED: "Cant't create scholarship.",
       UPDATE_FAILED: "Cant't update scholarship.",
       DEACTIVATE_FAILED: "Can't deactivate this scholarship.",

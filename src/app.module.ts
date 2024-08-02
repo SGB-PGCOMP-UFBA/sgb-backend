@@ -19,7 +19,9 @@ require('dotenv')
 @Module({
   imports: [
     ScheduleModule.forRoot(),
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true
+    }),
     DatabaseModule,
     EmailModule,
     NotificationModule,

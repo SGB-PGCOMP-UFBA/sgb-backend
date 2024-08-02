@@ -34,7 +34,11 @@ export class StudentService {
 
       return newStudent
     } catch (error) {
-      this.logger.error(error.detail)
+      this.logger.error(
+        constants.exceptionMessages.student.CREATION_FAILED,
+        error,
+        `Student Email: ${dto.email}`
+      )
       throw new BadRequestException(
         constants.exceptionMessages.student.CREATION_FAILED
       )

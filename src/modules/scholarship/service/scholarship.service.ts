@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import {
   BadRequestException,
   NotFoundException,
@@ -33,6 +33,8 @@ const orderByMapping = {
 
 @Injectable()
 export class ScholarshipService {
+  private readonly logger = new Logger(ScholarshipService.name)
+
   constructor(
     @InjectRepository(Scholarship)
     private scholarshipRepository: Repository<Scholarship>,
@@ -149,6 +151,7 @@ export class ScholarshipService {
   }
 
   async create(dto: CreateScholarshipDto): Promise<Scholarship> {
+    this.logger.log(constants.exceptionMessages.scholarship.CREATION_STARTED)
     try {
       const agency = await this.agencyService.findOneByName(dto.agency_name)
       const enrollment =
@@ -169,8 +172,19 @@ export class ScholarshipService {
 
       await this.scholarshipRepository.save(newScholarship)
 
+      this.logger.log(
+        constants.exceptionMessages.scholarship.CREATION_COMPLETED
+      )
+
       return newScholarship
     } catch (error) {
+      this.logger.error(
+        constants.exceptionMessages.scholarship.CREATION_FAILED,
+        error,
+        `Student Email: ${dto.student_email}`,
+        `Enrollment Number: ${dto.enrollment_number}`,
+        `Agency Name: ${dto.agency_name}`
+      )
       throw new BadRequestException(
         constants.exceptionMessages.scholarship.CREATION_FAILED
       )

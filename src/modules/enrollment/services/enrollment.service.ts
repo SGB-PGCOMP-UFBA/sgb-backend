@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm'
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import {
   BadRequestException,
@@ -14,6 +14,8 @@ import { UpdateEnrollmentDto } from '../dtos/update-enrollment.dto'
 
 @Injectable()
 export class EnrollmentService {
+  private readonly logger = new Logger(EnrollmentService.name)
+
   constructor(
     @InjectRepository(Enrollment)
     private enrollmentRepository: Repository<Enrollment>,
@@ -71,6 +73,8 @@ export class EnrollmentService {
   }
 
   async create(dto: CreateEnrollmentDto): Promise<Enrollment> {
+    this.logger.log(constants.exceptionMessages.enrollment.CREATION_STARTED)
+
     try {
       const advisor = await this.advisorService.findOneByEmail(
         dto.advisor_email
@@ -89,8 +93,19 @@ export class EnrollmentService {
 
       await this.enrollmentRepository.save(newEnrollment)
 
+      this.logger.log(constants.exceptionMessages.enrollment.CREATION_COMPLETED)
+
       return newEnrollment
     } catch (error) {
+      this.logger.error(
+        constants.exceptionMessages.enrollment.CREATION_FAILED,
+        error,
+        `Student Email: ${dto.student_email}`,
+        `Advisor Email: ${dto.advisor_email}`,
+        `Enrollment Number: ${dto.enrollment_number}`,
+        `Enrollment Program: ${dto.enrollment_program}`
+      )
+
       throw new BadRequestException(
         constants.exceptionMessages.enrollment.CREATION_FAILED
       )
