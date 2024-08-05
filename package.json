@@ -5,6 +5,10 @@
   "author": "Hérson Reis Rezende dos Santos (herson.reis@ufba.br)",
   "private": true,
   "license": "UNLICENSED",
+  "engines": {
+    "node": "18.20.4",
+    "npm": "10.7.0"
+  },
   "scripts": {
     "db:migrate": "node ./node_modules/typeorm/cli.js migration:run --d dist/config/ormconfig.js",
     "build": "rimraf dist && nest build && npm run copy-templates",
