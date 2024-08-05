@@ -2,12 +2,15 @@ import * as dotenv from 'dotenv'
 dotenv.config()
 
 const constants = {
+  api: {
+    API_KEY: process.env.API_KEY
+  },
   errors: {
     TOKEN_EXPIRED_ERROR: 'TokenExpiredError'
   },
   jwt: {
-    secretKey: process.env.SECRET_KEY,
-    expirationTime: process.env.EXPIRES_IN
+    SECRET_KEY: process.env.APP_SECRET_KEY,
+    EXPIRATION_TIME: process.env.APP_SECRET_KEY_EXPIRES_IN
   },
   expressions: {
     REGEX_TAX_ID: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,

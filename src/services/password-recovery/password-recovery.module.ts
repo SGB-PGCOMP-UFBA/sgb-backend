@@ -17,8 +17,8 @@ import { AdminModule } from '../../modules/admin/admin.module'
     EmailModule,
     ConfigModule,
     JwtModule.register({
-      secret: constants.jwt.secretKey,
-      signOptions: { expiresIn: constants.jwt.expirationTime }
+      secret: constants.jwt.SECRET_KEY,
+      signOptions: { expiresIn: constants.jwt.EXPIRATION_TIME }
     })
   ],
   controllers: [PasswordRecoveryController],

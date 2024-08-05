@@ -1,6 +1,7 @@
 import { Repository } from 'typeorm'
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException
 } from '@nestjs/common'
@@ -17,7 +18,11 @@ export class AdminService {
     @InjectRepository(Admin) private adminRepository: Repository<Admin>
   ) {}
 
-  async create(dto: CreateAdminDto) {
+  async create(key: string, dto: CreateAdminDto) {
+    if (key !== constants.api.API_KEY) {
+      throw new ForbiddenException()
+    }
+
     try {
       const passwordHash = await hashPassword(dto.password)
       const newAdmin = this.adminRepository.create({

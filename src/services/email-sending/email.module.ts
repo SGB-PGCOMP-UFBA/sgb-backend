@@ -21,7 +21,7 @@ import { EmailService } from './service/email.service'
           secure: false
         },
         defaults: {
-          from: `No Reply <${configService.get('EMAIL_FROM')}>`
+          from: `No Reply <${configService.get('EMAIL_USER')}>`
         },
         template: {
           dir: join(__dirname, './templates'),

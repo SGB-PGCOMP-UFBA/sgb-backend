@@ -17,8 +17,8 @@ import { constants } from '../../core/utils/constants'
     TypeOrmModule.forFeature([Student, Advisor, Admin]),
     PassportModule,
     JwtModule.register({
-      secret: constants.jwt.secretKey,
-      signOptions: { expiresIn: constants.jwt.expirationTime }
+      secret: constants.jwt.SECRET_KEY,
+      signOptions: { expiresIn: constants.jwt.EXPIRATION_TIME }
     })
   ],
   providers: [AuthService, UserService, LocalStrategy, JwtStrategy],
