@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm'
-import { NotFoundException } from '@nestjs/common'
+import { Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Student } from '../../student/entities/student.entity'
 import { CreateUserDto } from '../dtos/create-user.dto'
@@ -8,6 +8,8 @@ import { Admin } from '../../admin/entities/admin.entity'
 import { constants } from '../../../core/utils/constants'
 
 export class UserService {
+  private readonly logger = new Logger(UserService.name)
+
   constructor(
     @InjectRepository(Student)
     private studentRepository: Repository<Student>,
@@ -36,8 +38,11 @@ export class UserService {
     const user = await userRepository.findOne({ where: { email } })
 
     if (!user) {
+      this.logger.error(`User could not be authenticated: ${email}`)
       throw new NotFoundException(constants.exceptionMessages.user.NOT_FOUND)
     }
+
+    this.logger.log(`User Authenticated: ${user.email}`)
 
     return new CreateUserDto(user)
   }
