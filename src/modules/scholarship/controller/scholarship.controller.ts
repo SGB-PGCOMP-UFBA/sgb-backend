@@ -18,9 +18,10 @@ import { ScholarshipMapper } from '../mapper/scholarship.mapper'
 import { ScholarshipFilters } from '../filters/IScholarshipFilters'
 import { CreateScholarshipDto } from '../dto/create-scholarship.dto'
 import { UpdateScholarshipDto } from '../dto/update-scholarship.dto'
+import { Roles } from '../../../modules/auth/decorators/role.decorator'
 import { RolesGuard } from '../../../modules/auth/guards/roles.guard'
 import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
-import { Roles } from '../../../modules/auth/decorators/role.decorator'
+import { EnvironmentGuard } from '../../../modules/auth/guards/environment.guard'
 
 @Controller('v1/scholarship')
 export class ScholarshipController {
@@ -37,7 +38,7 @@ export class ScholarshipController {
 
   @Post('/create-for-list')
   @Roles('ADMIN')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, EnvironmentGuard)
   async createForList(@Body() listDto: CreateScholarshipDto[]) {
     let count = 0
     const promises = []

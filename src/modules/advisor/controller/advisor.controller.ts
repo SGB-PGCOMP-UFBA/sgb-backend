@@ -6,9 +6,10 @@ import { AdvisorMapper } from '../mapper/advisor.mapper'
 import { CreateAdvisorDto } from '../dto/create-advisor.dto'
 import { UpdateAdvisorDto } from '../dto/update-advisor.dto'
 import { UpdateAdvisorPasswordDto } from '../dto/update-advisor-password.dto'
-import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
 import { Roles } from '../../../modules/auth/decorators/role.decorator'
 import { RolesGuard } from '../../../modules/auth/guards/roles.guard'
+import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
+import { EnvironmentGuard } from '../../../modules/auth/guards/environment.guard'
 
 @Controller('v1/advisor')
 export class AdvisorController {
@@ -24,7 +25,7 @@ export class AdvisorController {
 
   @Post('/create-for-list')
   @Roles('ADMIN')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, EnvironmentGuard)
   async createForList(@Body() listDto: CreateAdvisorDto[]) {
     let count = 0
     const promises = []

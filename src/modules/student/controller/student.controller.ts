@@ -18,8 +18,9 @@ import { StudentMapper } from '../mapper/student.mapper'
 import { UpdateStudentDto } from '../dto/update-student.dto'
 import { UpdateStudentPasswordDto } from '../dto/update-student-password.dto'
 import { Roles } from '../../../modules/auth/decorators/role.decorator'
-import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
 import { RolesGuard } from '../../../modules/auth/guards/roles.guard'
+import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
+import { EnvironmentGuard } from '../../../modules/auth/guards/environment.guard'
 
 @Controller('v1/student')
 export class StudentController {
@@ -52,7 +53,7 @@ export class StudentController {
 
   @Post('/create-for-list')
   @Roles('ADMIN')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, EnvironmentGuard)
   async createForList(@Body() listDto: CreateStudentDto[]) {
     let count = 0
     const promises = []

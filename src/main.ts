@@ -22,7 +22,9 @@ async function bootstrap() {
   )
 
   app.enableCors({
-    origin: '*'
+    origin: 'https://sgb.app.ic.ufba.br',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Accept, Authorization, x-api-key'
   })
 
   await app.listen(process.env.PORT || 5001)
