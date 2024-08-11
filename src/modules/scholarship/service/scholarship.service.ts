@@ -166,7 +166,7 @@ export class ScholarshipService {
         scholarship_starts_at: dto.scholarship_starts_at,
         scholarship_ends_at: dto.scholarship_ends_at,
         extension_ends_at: dto.extension_ends_at,
-        status: dto.status || StatusEnum.ON_GOING,
+        status: dto.status || 'ON_GOING',
         salary: dto.salary
       })
 
