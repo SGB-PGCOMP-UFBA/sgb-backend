@@ -26,7 +26,7 @@ export class Student implements User {
   @Column({ length: 80, nullable: false, unique: true })
   email: string
 
-  @Column({ length: 80, nullable: false })
+  @Column({ length: 80, nullable: false, unique: true })
   link_to_lattes: string
 
   @Column({ nullable: false })

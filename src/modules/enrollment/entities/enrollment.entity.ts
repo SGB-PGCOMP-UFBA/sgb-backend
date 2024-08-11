@@ -26,7 +26,7 @@ export class Enrollment {
   @Column({ nullable: false })
   enrollment_date: Date
 
-  @Column({ nullable: false, length: 9 })
+  @Column({ nullable: false, length: 9, unique: true })
   enrollment_number: string
 
   @Column({ nullable: false, enum: ['MESTRADO', 'DOUTORADO'] })
