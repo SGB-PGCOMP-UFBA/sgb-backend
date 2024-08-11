@@ -7,6 +7,7 @@ import {
 import { FindOneOptions, Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Student } from '../entities/student.entity'
+import { EmbedNotificationService } from '../../../modules/embed-notification/service/embed-notification.service'
 import { CreateStudentDto } from '../dto/create-student.dto'
 import { comparePassword, hashPassword } from '../../../core/utils/bcrypt'
 import { constants } from '../../../core/utils/constants'
@@ -17,6 +18,7 @@ export class StudentService {
   private readonly logger = new Logger(StudentService.name)
 
   constructor(
+    private embedNotificationService: EmbedNotificationService,
     @InjectRepository(Student) private studentRepository: Repository<Student>
   ) {}
 
@@ -30,6 +32,14 @@ export class StudentService {
       })
 
       await this.studentRepository.save(newStudent)
+      await this.embedNotificationService.create({
+        owner_id: newStudent.id,
+        owner_type: 'STUDENT',
+        title: 'Bem-vindo ao SGB-PGCOMP',
+        description:
+          'Seja bem-vindo ao sistema de gestão de bolsas. Não se esqueça de finalizar o seu cadastro!'
+      })
+
       this.logger.log(constants.exceptionMessages.student.CREATION_COMPLETED)
 
       return newStudent
@@ -158,8 +168,7 @@ export class StudentService {
         id: studentFromDatabase.id,
         name: dto.name || studentFromDatabase.name,
         email: dto.email || studentFromDatabase.email,
-        link_to_lattes:
-          dto.link_to_lattes || studentFromDatabase.link_to_lattes,
+        link_to_lattes: dto.link_to_lattes,
         tax_id: dto.tax_id,
         phone_number: dto.phone_number
       })

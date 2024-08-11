@@ -64,6 +64,8 @@ const constants = {
       NOT_FOUND: 'Agency not found.'
     },
     notification: {
+      CREATION_COMPLETED:
+        'The process of inserting a new notification has been completed.',
       CREATION_FAILED: "Cant't create notification.",
       UPDATE_FAILED: "Cant't update notification."
     },

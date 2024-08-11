@@ -32,6 +32,10 @@ export class EmbedNotificationService {
       })
       await this.embedNotificationRepository.save(newNotification)
 
+      this.logger.log(
+        constants.exceptionMessages.notification.CREATION_COMPLETED
+      )
+
       return newNotification
     } catch (error) {
       this.logger.error(
