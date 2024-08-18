@@ -95,7 +95,7 @@ const constants = {
         'The process of inserting a new scholarship has been completed.',
       CREATION_FAILED: "Cant't create scholarship.",
       UPDATE_FAILED: "Cant't update scholarship.",
-      DEACTIVATE_FAILED: "Can't deactivate this scholarship.",
+      FINISH_FAILED: "Can't finish this scholarship.",
       NOT_FOUND: 'Scholarship not found.',
       COUNT_FAILED: 'Failed to count scholarships.'
     },

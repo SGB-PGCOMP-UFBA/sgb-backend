@@ -21,7 +21,7 @@ export class Admin implements User {
   @Column({ length: 11, nullable: true, unique: true })
   phone_number: string
 
-  @Column({ length: 80, nullable: false, unique: true })
+  @Column({ length: 50, nullable: false, unique: true })
   email: string
 
   @Column({ nullable: false })

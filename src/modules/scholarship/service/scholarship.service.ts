@@ -243,12 +243,12 @@ export class ScholarshipService {
     )
   }
 
-  async deactivate(id: number): Promise<void> {
+  async finishScholarship(id: number): Promise<void> {
     try {
       await this.scholarshipRepository.update(id, { status: 'FINISHED' })
     } catch (error) {
       throw new InternalServerErrorException(
-        constants.exceptionMessages.scholarship.DEACTIVATE_FAILED
+        constants.exceptionMessages.scholarship.FINISH_FAILED
       )
     }
   }

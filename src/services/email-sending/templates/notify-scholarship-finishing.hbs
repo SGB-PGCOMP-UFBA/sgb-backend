@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitação de Nova Senha</title>
+    <title>Notificação de Expiração da Bolsa</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -21,10 +21,10 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border-left: 6px solid #007BFF;
         }
-        h2 {
+        h1 {
             color: #007BFF;
             font-size: 28px;
-            text-align: center;
+            text-align: left;
             border-bottom: 2px solid #007BFF;
             padding-bottom: 10px;
             margin-bottom: 20px;
@@ -32,11 +32,25 @@
         p {
             line-height: 1.8;
             font-size: 16px;
-            color: #292536;
         }
         .highlight {
             font-weight: bold;
             color: #007BFF;
+        }
+        .button {
+            display: inline-block;
+            background-color: #007BFF;
+            color: white;
+            padding: 12px 25px;
+            margin-top: 20px;
+            text-align: center;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #0056b3;
         }
         .footer {
             margin-top: 30px;
@@ -54,17 +68,18 @@
     </style>
 </head>
 <body>
-    <center>
-        <div class="container">
-            <h2>Solicitação de Nova Senha</h2>
-            <p>Uma nova senha foi gerada para o seu usuário!</p>
-            <p>Nova senha: <span class="highlight">{{newPassword}}</span></p>
-            <div class="footer">
-                <p>Se você não solicitou a mudança de senha, por favor, entre em contato com o nosso suporte imediatamente.</p>
-                <p>Atenciosamente,<br>Sistema de Gerenciamento de Bolsas - PGCOMP UFBA</p>
-                <a href="https://sgb.app.ic.ufba.br" class="button" target="_blank">SGB PGCOMP</a>
-            </div>
-        </div>
-    </center>
+    <div class="container">
+        <h1>Notificação Importante</h1>
+        <p>Prezado(a) <span class="highlight">{{name}}</span>,</p>
+
+        <p>Gostaríamos de informá-lo(a) que a sua bolsa no  <span class="highlight">Sistema de Gerenciamento de Bolsas do PGCOMP - UFBA</span> irá expirar em <span class="highlight">{{months}}</span> {{monthLabel}}.</p>
+
+        <p>Por favor, certifique-se de tomar as providências necessárias caso deseje renovar ou estender a duração da sua bolsa.</p>
+
+        <p class="footer">Se precisar de mais informações, não hesite em entrar em contato com a coordenação do programa ou com o seu orientador.</p>
+
+        <p class="footer">Atenciosamente,<br>
+        Sistema de Gerenciamento de Bolsas - PGCOMP UFBA</p>
+    </div>
 </body>
 </html>

@@ -1,12 +1,70 @@
-<html>
-  <body>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitação de Nova Senha</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e9f5ff;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-left: 6px solid #007BFF;
+        }
+        h2 {
+            color: #007BFF;
+            font-size: 28px;
+            text-align: center;
+            border-bottom: 2px solid #007BFF;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        p {
+            line-height: 1.8;
+            font-size: 16px;
+            color: #292536;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #007BFF;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #555;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
     <center>
-      <div style='background-color: white; max-width: 840px; margin: 0; padding: 30px;'>
-        <h2 style='color: #292536; text-align: center'>Seja bem-vindo!</h2>
-        <p>Foi gerado um cadastro no Sistema de Gerenciamento de Bolsas do PGCOMP para o seu e-mail.</p>
-        <p>Sua senha para acesso é: {{newPassword}}</p>
-        <div style='margin: 20px auto; width: 120px; padding: 10px 20px; background-color: #442d52; border-radius: 5px'></div>
-      </div>
+        <div class="container">
+            <h2>Seja bem-vindo!a</h2>
+            <p>Foi gerado um cadastro no Sistema de Gerenciamento de Bolsas do PGCOMP para o seu e-mail.</p>
+            <p>Sua senha para acesso é: <span class="highlight">{{newPassword}}</span></p>
+            <div class="footer">
+                <p>Se você não solicitou este cadastro, por favor, entre em contato com o nosso suporte imediatamente.</p>
+                <p>Atenciosamente,<br>Sistema de Gerenciamento de Bolsas - PGCOMP UFBA</p>
+                <a href="https://sgb.app.ic.ufba.br" class="button" target="_blank">SGB PGCOMP</a>
+            </div>
+        </div>
     </center>
-  </body>
+</body>
 </html>

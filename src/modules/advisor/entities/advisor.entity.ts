@@ -23,7 +23,7 @@ export class Advisor implements User {
   @Column({ length: 80, nullable: false })
   name: string
 
-  @Column({ length: 80, nullable: false, unique: true })
+  @Column({ length: 50, nullable: false, unique: true })
   email: string
 
   @Column({ nullable: false })
