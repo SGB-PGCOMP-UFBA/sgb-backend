@@ -4,7 +4,7 @@
   "description": "",
   "author": "Hérson Reis Rezende dos Santos (herson.reis@ufba.br)",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "GPL-3.0",
   "engines": {
     "node": "18.20.4",
     "npm": "10.7.0"

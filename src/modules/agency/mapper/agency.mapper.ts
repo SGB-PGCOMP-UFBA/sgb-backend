@@ -25,6 +25,7 @@ export class AgencyMapper {
 
     return {
       ...simplified,
+      scholarshipsSinceBeginning: agency.scholarships.length,
       masters_degree_awarded_scholarships:
         agency.masters_degree_awarded_scholarships,
       masters_degree_allocated_scholarships: agency.scholarships.filter(
