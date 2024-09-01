@@ -11,7 +11,6 @@ import { PageDto } from '../../../core/pagination/page.dto'
 import { PageMetaDto } from '../../../core/pagination/page-meta.dto'
 import { Scholarship } from '../entities/scholarship.entity'
 import { constants } from '../../../core/utils/constants'
-import { StatusEnum } from '../../../core/enums/StatusEnum'
 import { ScholarshipMapper } from '../mapper/scholarship.mapper'
 import { ScholarshipFilters } from '../filters/IScholarshipFilters'
 import { StudentService } from '../../../modules/student/service/student.service'
@@ -191,6 +190,47 @@ export class ScholarshipService {
     }
   }
 
+  async createIfNotExists(dto): Promise<Scholarship> {
+    this.logger.log(constants.exceptionMessages.scholarship.CREATION_STARTED)
+    try {
+      const agency = await this.agencyService.findOneByName(dto.agency_name)
+      const enrollment =
+        await this.enrollmentService.findOneByStudentEmailAndEnrollmentNumber(
+          dto.student_email,
+          dto.enrollment_number
+        )
+
+      const newScholarship = this.scholarshipRepository.create({
+        agency_id: agency.id,
+        enrollment_id: enrollment.id,
+        scholarship_starts_at: dto.scholarship_starts_at,
+        scholarship_ends_at: dto.scholarship_ends_at,
+        extension_ends_at: dto.extension_ends_at,
+        status: dto.status || 'ON_GOING',
+        salary: dto.salary || null
+      })
+
+      await this.scholarshipRepository.save(newScholarship)
+
+      this.logger.log(
+        constants.exceptionMessages.scholarship.CREATION_COMPLETED
+      )
+
+      return newScholarship
+    } catch (error) {
+      this.logger.error(
+        constants.exceptionMessages.scholarship.CREATION_FAILED,
+        error,
+        `Student Email: ${dto.student_email}`,
+        `Enrollment Number: ${dto.enrollment_number}`,
+        `Agency Name: ${dto.agency_name}`
+      )
+      throw new BadRequestException(
+        constants.exceptionMessages.scholarship.CREATION_FAILED
+      )
+    }
+  }
+
   async update(id: number, dto: UpdateScholarshipDto) {
     try {
       const student = await this.studentService.findByEmail(dto.student_email)
@@ -241,6 +281,11 @@ export class ScholarshipService {
     throw new NotFoundException(
       constants.exceptionMessages.scholarship.NOT_FOUND
     )
+  }
+
+  async deleteAll() {
+    this.logger.warn(constants.exceptionMessages.scholarship.DELETE_ALL_STARTED)
+    await this.scholarshipRepository.createQueryBuilder().delete().execute()
   }
 
   async finishScholarship(id: number): Promise<void> {

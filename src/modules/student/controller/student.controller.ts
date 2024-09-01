@@ -20,7 +20,6 @@ import { UpdateStudentPasswordDto } from '../dto/update-student-password.dto'
 import { Roles } from '../../../modules/auth/decorators/role.decorator'
 import { RolesGuard } from '../../../modules/auth/guards/roles.guard'
 import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
-import { EnvironmentGuard } from '../../../modules/auth/guards/environment.guard'
 
 @Controller('v1/student')
 export class StudentController {
@@ -47,32 +46,8 @@ export class StudentController {
   @Post()
   @UsePipes(new ValidationPipe({ transform: true }))
   async create(@Body() dto: CreateStudentDto) {
-    const student = await this.studentsService.createStudent(dto)
+    const student = await this.studentsService.create(dto)
     return StudentMapper.simplified(student)
-  }
-
-  @Post('/create-for-list')
-  @Roles('ADMIN')
-  @UseGuards(JwtAuthGuard, RolesGuard, EnvironmentGuard)
-  async createForList(@Body() listDto: CreateStudentDto[]) {
-    let count = 0
-    const promises = []
-
-    listDto.forEach((dto) => {
-      const promise = this.studentsService
-        .createStudent(dto)
-        .then((student) => {
-          if (student.created_at) {
-            count++
-          }
-        })
-
-      promises.push(promise)
-    })
-
-    await Promise.all(promises)
-
-    return `${count} - students created successfully!`
   }
 
   @Patch()

@@ -22,39 +22,6 @@ export class StudentService {
     @InjectRepository(Student) private studentRepository: Repository<Student>
   ) {}
 
-  async createStudent(dto: CreateStudentDto): Promise<Student> {
-    this.logger.log(constants.exceptionMessages.student.CREATION_STARTED)
-    try {
-      const passwordHash = await hashPassword(dto.password)
-      const newStudent = this.studentRepository.create({
-        ...dto,
-        password: passwordHash
-      })
-
-      await this.studentRepository.save(newStudent)
-      await this.embedNotificationService.create({
-        owner_id: newStudent.id,
-        owner_type: 'STUDENT',
-        title: 'Bem-vindo ao SGB-PGCOMP',
-        description:
-          'Seja bem-vindo ao sistema de gestão de bolsas. Não se esqueça de finalizar o seu cadastro!'
-      })
-
-      this.logger.log(constants.exceptionMessages.student.CREATION_COMPLETED)
-
-      return newStudent
-    } catch (error) {
-      this.logger.error(
-        constants.exceptionMessages.student.CREATION_FAILED,
-        error,
-        `Student Email: ${dto.email}`
-      )
-      throw new BadRequestException(
-        constants.exceptionMessages.student.CREATION_FAILED
-      )
-    }
-  }
-
   async findAll(): Promise<Student[]> {
     return await this.studentRepository.find({
       relations: [
@@ -110,6 +77,88 @@ export class StudentService {
     }
 
     return student
+  }
+
+  async create(dto: CreateStudentDto): Promise<Student> {
+    this.logger.log(constants.exceptionMessages.student.CREATION_STARTED)
+    try {
+      const passwordHash = await hashPassword(dto.password)
+      const newStudent = this.studentRepository.create({
+        ...dto,
+        password: passwordHash
+      })
+
+      await this.studentRepository.save(newStudent)
+      await this.embedNotificationService.create({
+        owner_id: newStudent.id,
+        owner_type: 'STUDENT',
+        title: 'Bem-vindo ao SGB-PGCOMP',
+        description:
+          'Seja bem-vindo ao sistema de gestão de bolsas. Não se esqueça de finalizar o seu cadastro!'
+      })
+
+      this.logger.log(constants.exceptionMessages.student.CREATION_COMPLETED)
+
+      return newStudent
+    } catch (error) {
+      this.logger.error(
+        constants.exceptionMessages.student.CREATION_FAILED,
+        error,
+        `Student Email: ${dto.email}`
+      )
+      throw new BadRequestException(
+        constants.exceptionMessages.student.CREATION_FAILED
+      )
+    }
+  }
+
+  async createIfNotExists(dto): Promise<Student> {
+    this.logger.log(constants.exceptionMessages.student.CREATION_STARTED)
+
+    const studentFromEmail = await this.studentRepository.findOneBy({
+      email: dto.email
+    })
+
+    if (studentFromEmail) {
+      throw new BadRequestException(
+        constants.negotialValidationMessages.EMAIL_ALREADY_REGISTERED
+      )
+    }
+
+    try {
+      const passwordHash = await hashPassword(dto.password)
+      const newStudent = this.studentRepository.create({
+        name: dto.name,
+        email: dto.email,
+        password: passwordHash,
+        tax_id: dto.tax_id || null,
+        phone_number: dto.phone_number || null,
+        link_to_lattes: dto.link_to_lattes || null,
+        created_at: dto.created_at
+      })
+
+      await this.studentRepository.save(newStudent)
+      await this.embedNotificationService.create({
+        owner_id: newStudent.id,
+        owner_type: 'STUDENT',
+        title: 'Bem-vindo ao SGB-PGCOMP',
+        description:
+          'Seja bem-vindo ao sistema de gestão de bolsas. Não se esqueça de finalizar o seu cadastro!'
+      })
+
+      this.logger.log(constants.exceptionMessages.student.CREATION_COMPLETED)
+
+      return newStudent
+    } catch (error) {
+      this.logger.error(
+        constants.exceptionMessages.student.CREATION_FAILED,
+        error,
+        `Student Email: ${dto.email}`
+      )
+      throw new BadRequestException(
+        constants.exceptionMessages.student.CREATION_FAILED
+      )
+    }
   }
 
   async resetPassword(email: string, password: string): Promise<void> {

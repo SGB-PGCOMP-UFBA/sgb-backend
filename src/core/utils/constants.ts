@@ -33,6 +33,8 @@ const constants = {
     CURRENT_PASSWORD_NOT_MATCHING: 'Sua senha atual está incorreta.'
   },
   negotialValidationMessages: {
+    ENROLLMENT_NUMBER_ALREADY_REGISTERED:
+      'Parece que esta matrícula já está cadastrada.',
     EMAIL_ALREADY_REGISTERED: 'Parece que este e-mail já está sendo utilizado.',
     TAX_ID_ALREADY_REGISTERED: 'Parece que este CPF já está sendo utilizado.',
     PHONE_NUMBER_ALREADY_REGISTERED:
@@ -86,7 +88,8 @@ const constants = {
       CREATION_FAILED: "Cant't create enrollment.",
       UPDATE_FAILED: "Cant't update enrollment.",
       DEACTIVATE_FAILED: "Can't deactivate this enrollment.",
-      NOT_FOUND: 'Enrollment not found.'
+      NOT_FOUND: 'Enrollment not found.',
+      DELETE_ALL_STARTED: 'The process of deleting all enrollments has started.'
     },
     scholarship: {
       CREATION_STARTED:
@@ -97,7 +100,9 @@ const constants = {
       UPDATE_FAILED: "Cant't update scholarship.",
       FINISH_FAILED: "Can't finish this scholarship.",
       NOT_FOUND: 'Scholarship not found.',
-      COUNT_FAILED: 'Failed to count scholarships.'
+      COUNT_FAILED: 'Failed to count scholarships.',
+      DELETE_ALL_STARTED:
+        'The process of deleting all scholarships has started.'
     },
     user: {
       SOMETHING_WRONG: 'Something went wrong.',
@@ -106,6 +111,13 @@ const constants = {
     },
     token: {
       EXPIRED_ERROR: 'This token has expired, please try again!'
+    },
+    dataManager: {
+      IMPORT_FAILED: "Can't import scholarships from CSV file.",
+      EXPORT_FAILED: "Can't export scholarships to CSV file.",
+      INVALID_FILE: 'Only CSV files are allowed.',
+      PROCESS_FAILED: 'Error processing the CSV file.',
+      PROCESS_COMPLETED: 'CSV file processed successfully.'
     }
   }
 }

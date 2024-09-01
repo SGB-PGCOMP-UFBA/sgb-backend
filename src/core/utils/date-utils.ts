@@ -1,3 +1,5 @@
+import * as moment from 'moment'
+
 function getDatePlusDays(days: number): Date {
   const actualDate = new Date()
 
@@ -33,6 +35,16 @@ function formattedNow() {
     minute: '2-digit',
     second: '2-digit'
   })
+}
+
+export function parseDate(dateString, format = 'dd/MM/yyyy') {
+  const parsedDate = moment(dateString, format, new Date().toISOString())
+
+  if (parsedDate.isValid()) {
+    return parsedDate.format('YYYY-MM-DD')
+  }
+
+  return null
 }
 
 export { getDatePlusDays, formatterDate, formatDate, formattedNow }

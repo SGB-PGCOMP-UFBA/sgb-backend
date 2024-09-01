@@ -112,6 +112,56 @@ export class EnrollmentService {
     }
   }
 
+  async createIfNotExists(dto): Promise<Enrollment> {
+    this.logger.log(constants.exceptionMessages.enrollment.CREATION_STARTED)
+
+    const enrollmentFromNumber = await this.enrollmentRepository.findOneBy({
+      enrollment_number: dto.enrollment_number
+    })
+
+    if (enrollmentFromNumber) {
+      throw new BadRequestException(
+        constants.negotialValidationMessages.ENROLLMENT_NUMBER_ALREADY_REGISTERED
+      )
+    }
+
+    try {
+      const advisor = await this.advisorService.findOneByEmail(
+        dto.advisor_email
+      )
+
+      const student = await this.studentService.findByEmail(dto.student_email)
+
+      const newEnrollment = this.enrollmentRepository.create({
+        student_id: student.id,
+        advisor_id: advisor.id,
+        enrollment_date: dto.enrollment_date,
+        enrollment_number: dto.enrollment_number,
+        enrollment_program: dto.enrollment_program,
+        defense_prediction_date: dto.defense_prediction_date || null
+      })
+
+      await this.enrollmentRepository.save(newEnrollment)
+
+      this.logger.log(constants.exceptionMessages.enrollment.CREATION_COMPLETED)
+
+      return newEnrollment
+    } catch (error) {
+      this.logger.error(
+        constants.exceptionMessages.enrollment.CREATION_FAILED,
+        error,
+        `Student Email: ${dto.student_email}`,
+        `Advisor Email: ${dto.advisor_email}`,
+        `Enrollment Number: ${dto.enrollment_number}`,
+        `Enrollment Program: ${dto.enrollment_program}`
+      )
+
+      throw new BadRequestException(
+        constants.exceptionMessages.enrollment.CREATION_FAILED
+      )
+    }
+  }
+
   async update(id: number, dto: UpdateEnrollmentDto) {
     try {
       const advisor = await this.advisorService.findOneByEmail(
@@ -160,5 +210,10 @@ export class EnrollmentService {
     throw new NotFoundException(
       constants.exceptionMessages.enrollment.NOT_FOUND
     )
+  }
+
+  async deleteAll() {
+    this.logger.warn(constants.exceptionMessages.enrollment.DELETE_ALL_STARTED)
+    await this.enrollmentRepository.createQueryBuilder().delete().execute()
   }
 }

@@ -21,7 +21,6 @@ import { UpdateScholarshipDto } from '../dto/update-scholarship.dto'
 import { Roles } from '../../../modules/auth/decorators/role.decorator'
 import { RolesGuard } from '../../../modules/auth/guards/roles.guard'
 import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
-import { EnvironmentGuard } from '../../../modules/auth/guards/environment.guard'
 
 @Controller('v1/scholarship')
 export class ScholarshipController {
@@ -34,25 +33,6 @@ export class ScholarshipController {
     const scholarship = await this.scholarshipService.create(dto)
 
     return ScholarshipMapper.simplified(scholarship)
-  }
-
-  @Post('/create-for-list')
-  @Roles('ADMIN')
-  @UseGuards(JwtAuthGuard, RolesGuard, EnvironmentGuard)
-  async createForList(@Body() listDto: CreateScholarshipDto[]) {
-    let count = 0
-    const promises = []
-
-    listDto.forEach((dto) => {
-      const promise = this.scholarshipService.create(dto).then(() => {
-        count++
-      })
-      promises.push(promise)
-    })
-
-    await Promise.all(promises)
-
-    return `${count} - scholarships created successfully!`
   }
 
   @Get('/paginated')

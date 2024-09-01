@@ -3,52 +3,46 @@ import {
   Post,
   UseInterceptors,
   UploadedFile,
-  BadRequestException,
   Get,
-  Res
+  Res,
+  UseGuards,
+  Body
 } from '@nestjs/common'
 import * as moment from 'moment'
-import * as csvParser from 'csv-parser'
 import { Response } from 'express'
 import { File } from 'multer'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { Readable } from 'stream'
-import { DataManagerService } from '../service/data-manager.service'
+import { DataManagerCsvService } from '../service/data-manager-csv.service'
+import { DataManagerJsonService } from '../service/data-manager-json.service'
+import { Roles } from '../../auth/decorators/role.decorator'
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
+import { RolesGuard } from '../../auth/guards/roles.guard'
+import { CreateStudentDto } from '../../student/dto/create-student.dto'
+import { CreateScholarshipDto } from 'src/modules/scholarship/dto/create-scholarship.dto'
+import { CreateEnrollmentDto } from 'src/modules/enrollment/dtos/create-enrollment.dto'
 
 @Controller('v1/data-manager')
 export class DataManagerController {
-  constructor(private readonly dataManagerService: DataManagerService) {}
+  constructor(
+    private readonly dataManagerCsvService: DataManagerCsvService,
+    private readonly dataManagerJsonService: DataManagerJsonService
+  ) {}
 
-  @Post('/import-scholarships')
+  @Post('/import-data')
   @UseInterceptors(FileInterceptor('file'))
-  async importScholarships(@UploadedFile() file: File) {
-    if (file.mimetype !== 'text/csv') {
-      throw new BadRequestException('Apenas arquivos CSV são permitidos.')
-    }
-
-    const results = []
-    const stream = Readable.from(file.buffer)
-
-    return new Promise((resolve, reject) => {
-      stream
-        .pipe(csvParser())
-        .on('data', (data) => results.push(data))
-        .on('end', () => resolve(results))
-        .on('error', (error) => reject(error))
-    })
-      .then((data) => {
-        console.log(data)
-        return { message: 'Arquivo processado com sucesso!', data }
-      })
-      .catch((error) => {
-        throw new BadRequestException('Erro ao processar o arquivo CSV')
-      })
+  @Roles('ADMIN')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async importData(@UploadedFile() file: File) {
+    return this.dataManagerCsvService.importDataFromCsv(file)
   }
 
-  @Get('/export-scholarships')
-  async exportScholarships(@Res() response: Response): Promise<void> {
-    const arrayBuffer = 'email;senha'
-    const filename = 'backup_' + moment().format('DD-MM-yy hh:mm:ss') + '.csv'
+  @Get('/export-data')
+  @Roles('ADMIN')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async exportData(@Res() response: Response): Promise<void> {
+    const arrayBuffer = await this.dataManagerCsvService.exportDataToCsv()
+    const filename =
+      'backup_sgb_' + moment().format('DD-MM-yy hh:mm:ss') + '.csv'
     const buffer = Buffer.from(arrayBuffer)
 
     response.set({
@@ -58,5 +52,26 @@ export class DataManagerController {
     })
 
     response.send(buffer)
+  }
+
+  @Post('/create-students-from-json-list')
+  @Roles('ADMIN')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async createStudentsFromJsonList(@Body() list: CreateStudentDto[]) {
+    return this.dataManagerJsonService.createStudentFromJsonList(list)
+  }
+
+  @Post('/create-enrollments-from-json-list')
+  @Roles('ADMIN')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async createEnrollmentFromJsonList(@Body() list: CreateEnrollmentDto[]) {
+    return this.dataManagerJsonService.createEnrollmentFromJsonList(list)
+  }
+
+  @Post('/create-scholarchips-from-json-list')
+  @Roles('ADMIN')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async createScholarchipsFromJsonList(@Body() list: CreateScholarshipDto[]) {
+    return this.dataManagerJsonService.createScholarshipFromJsonList(list)
   }
 }

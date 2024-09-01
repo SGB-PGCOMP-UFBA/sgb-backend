@@ -17,7 +17,6 @@ import { UpdateEnrollmentDto } from '../dtos/update-enrollment.dto'
 import { Roles } from '../../../modules/auth/decorators/role.decorator'
 import { RolesGuard } from '../../../modules/auth/guards/roles.guard'
 import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
-import { EnvironmentGuard } from '../../../modules/auth/guards/environment.guard'
 
 @Controller('v1/enrollment')
 export class EnrollmentController {
@@ -30,25 +29,6 @@ export class EnrollmentController {
   async create(@Body() dto: CreateEnrollmentDto) {
     const enrollment = await this.enrollmentService.create(dto)
     return EnrollmentMapper.simplified(enrollment)
-  }
-
-  @Post('/create-for-list')
-  @Roles('ADMIN')
-  @UseGuards(JwtAuthGuard, RolesGuard, EnvironmentGuard)
-  async createForList(@Body() listDto: CreateEnrollmentDto[]) {
-    let count = 0
-    const promises = []
-
-    listDto.forEach((dto) => {
-      const promise = this.enrollmentService.create(dto).then(() => {
-        count++
-      })
-      promises.push(promise)
-    })
-
-    await Promise.all(promises)
-
-    return `${count} - enrollments created successfully!`
   }
 
   @Get('/filter-list')
