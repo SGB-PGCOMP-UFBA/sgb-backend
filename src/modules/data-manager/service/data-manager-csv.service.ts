@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common'
 import * as csvParser from 'csv-parser'
+import { stringify } from 'csv-stringify/sync'
 import { Readable } from 'stream'
 import { File } from 'multer'
 import { ScholarshipService } from '../../scholarship/service/scholarship.service'
@@ -21,7 +22,54 @@ export class DataManagerCsvService {
   ) {}
 
   async exportDataToCsv() {
-    return ''
+    const data = await this.scholarshipService.findAll()
+
+    if (data.length > 0) {
+      const csvData = data.map((item) => ({
+        nome_do_estudante: item.enrollment.student.name,
+        email_do_estudante: item.enrollment.student.email,
+        telefone_do_estudante: item.enrollment.student.phone_number,
+        link_lattes_do_estudante: item.enrollment.student.link_to_lattes,
+        cpf_do_estudante: item.enrollment.student.tax_id,
+        matricula: item.enrollment.enrollment_number,
+        curso: item.enrollment.enrollment_program,
+        agencia: item.agency.name,
+        status_da_bolsa: item.status,
+        nome_do_orientador: item.enrollment.advisor.name,
+        email_do_orientador: item.enrollment.advisor.email,
+        criado_em: item.created_at.toISOString(),
+        data_inicio_bolsa: item.scholarship_starts_at.toISOString(),
+        data_fim_bolsa: item.scholarship_ends_at.toISOString(),
+        data_matricula_pgcomp: item.enrollment.enrollment_date.toISOString(),
+        data_previsao_defesa:
+          item.enrollment.defense_prediction_date.toISOString()
+      }))
+
+      const csvContent = stringify(csvData, {
+        header: true,
+        delimiter: ',', // Defina o delimitador desejado aqui
+        columns: [
+          'nome_do_estudante',
+          'email_do_estudante',
+          'telefone_do_estudante',
+          'link_lattes_do_estudante',
+          'cpf_do_estudante',
+          'matricula',
+          'curso',
+          'agencia',
+          'status_da_bolsa',
+          'nome_do_orientador',
+          'email_do_orientador',
+          'criado_em',
+          'data_inicio_bolsa',
+          'data_fim_bolsa',
+          'data_matricula_pgcomp',
+          'data_previsao_defesa'
+        ]
+      })
+      return Buffer.from(csvContent)
+    }
+    return Buffer.from('')
   }
 
   async importDataFromCsv(file: File) {
@@ -140,6 +188,9 @@ export class DataManagerCsvService {
       name: item.nome_do_estudante,
       email: item.email_do_estudante,
       password: Math.random().toString(36).slice(-4),
+      tax_id: item.cpf_do_estudante
+        ? item.cpf_do_estudante.replace(/[^0-9]/g, '')
+        : null,
       phone_number:
         item.telefone_do_estudante.replace(/[^0-9]/g, '').length <= 11
           ? item.telefone_do_estudante.replace(/[^0-9]/g, '')

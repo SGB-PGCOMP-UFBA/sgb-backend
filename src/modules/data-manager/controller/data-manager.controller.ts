@@ -40,10 +40,9 @@ export class DataManagerController {
   @Roles('ADMIN')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async exportData(@Res() response: Response): Promise<void> {
-    const arrayBuffer = await this.dataManagerCsvService.exportDataToCsv()
+    const buffer = await this.dataManagerCsvService.exportDataToCsv()
     const filename =
       'backup_sgb_' + moment().format('DD-MM-yy hh:mm:ss') + '.csv'
-    const buffer = Buffer.from(arrayBuffer)
 
     response.set({
       'Content-Type': 'text/csv',
