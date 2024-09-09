@@ -293,4 +293,9 @@ export class StudentService {
       }
     }
   }
+
+  async deleteAll() {
+    this.logger.warn(constants.exceptionMessages.student.DELETE_ALL_STARTED)
+    await this.studentRepository.createQueryBuilder().delete().execute()
+  }
 }

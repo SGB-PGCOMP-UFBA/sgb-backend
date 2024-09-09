@@ -78,7 +78,8 @@ const constants = {
       CREATION_FAILED: "Cant't create student.",
       UPDATE_FAILED: "Cant't update student.",
       NOT_FOUND: 'Student not found.',
-      COUNT_BY_SCHOLARSHIP_FAILED: 'Failed to count students by scholarship.'
+      COUNT_BY_SCHOLARSHIP_FAILED: 'Failed to count students by scholarship.',
+      DELETE_ALL_STARTED: 'The process of deleting all students has started.'
     },
     enrollment: {
       CREATION_STARTED:

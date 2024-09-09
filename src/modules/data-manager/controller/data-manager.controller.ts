@@ -6,7 +6,9 @@ import {
   Get,
   Res,
   UseGuards,
-  Body
+  Body,
+  Delete,
+  Headers
 } from '@nestjs/common'
 import * as moment from 'moment'
 import { Response } from 'express'
@@ -14,6 +16,7 @@ import { File } from 'multer'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { DataManagerCsvService } from '../service/data-manager-csv.service'
 import { DataManagerJsonService } from '../service/data-manager-json.service'
+import { DataManagerPurgeService } from '../service/data-manager-purge.service'
 import { Roles } from '../../auth/decorators/role.decorator'
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
 import { RolesGuard } from '../../auth/guards/roles.guard'
@@ -25,7 +28,8 @@ import { CreateEnrollmentDto } from 'src/modules/enrollment/dtos/create-enrollme
 export class DataManagerController {
   constructor(
     private readonly dataManagerCsvService: DataManagerCsvService,
-    private readonly dataManagerJsonService: DataManagerJsonService
+    private readonly dataManagerJsonService: DataManagerJsonService,
+    private readonly dataManagerPurgeService: DataManagerPurgeService
   ) {}
 
   @Post('/import-data')
@@ -72,5 +76,12 @@ export class DataManagerController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   async createScholarchipsFromJsonList(@Body() list: CreateScholarshipDto[]) {
     return this.dataManagerJsonService.createScholarshipFromJsonList(list)
+  }
+
+  @Delete('/purge-all-data')
+  @Roles('ADMIN')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async create(@Headers('x-api-key') key: string) {
+    return this.dataManagerPurgeService.purgeAllData(key)
   }
 }

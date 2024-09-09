@@ -17,7 +17,6 @@ import { CreateAdminDto } from '../dto/create-admin.dto'
 import { UpdateAdminDto } from '../dto/update-admin.dto'
 import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
 import { RolesGuard } from '../../../modules/auth/guards/roles.guard'
-import { EnvironmentGuard } from '../../../modules/auth/guards/environment.guard'
 import { Roles } from '../../../modules/auth/decorators/role.decorator'
 
 @Controller('v1/admin')
@@ -25,7 +24,6 @@ export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Post()
-  @UseGuards(EnvironmentGuard)
   async create(@Headers('x-api-key') key: string, @Body() dto: CreateAdminDto) {
     const admin = await this.adminService.create(key, dto)
     return AdminMapper.simplified(admin)
