@@ -3,8 +3,7 @@ import {
   IsEmail,
   Length,
   IsOptional,
-  MaxLength,
-  IsUrl
+  MaxLength
 } from 'class-validator'
 import { Transform } from 'class-transformer'
 import { constants } from '../../../core/utils/constants'
@@ -45,10 +44,8 @@ export class UpdateStudentDto {
   @IsOptional()
   @IsString()
   @Transform((params) => (params.value?.length > 0 ? params.value : null))
-  @IsUrl(
-    {},
-    { message: constants.bodyValidationMessages.LATTES_LINK_FORMAT_ERROR }
-  )
-  @MaxLength(80)
+  @MaxLength(80, {
+    message: constants.bodyValidationMessages.LATTES_LINK_FORMAT_ERROR
+  })
   readonly link_to_lattes: string | null
 }

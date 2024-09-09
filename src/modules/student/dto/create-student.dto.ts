@@ -1,7 +1,6 @@
 import {
   IsString,
   IsEmail,
-  IsUrl,
   Length,
   MaxLength,
   IsOptional
@@ -25,11 +24,9 @@ export class CreateStudentDto {
   readonly password: string
 
   @IsOptional()
-  @IsUrl(
-    {},
-    { message: constants.bodyValidationMessages.LATTES_LINK_FORMAT_ERROR }
-  )
-  @MaxLength(80)
+  @MaxLength(80, {
+    message: constants.bodyValidationMessages.LATTES_LINK_FORMAT_ERROR
+  })
   readonly link_to_lattes: string
 
   @IsOptional()

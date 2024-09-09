@@ -51,7 +51,7 @@ export class StudentController {
   }
 
   @Patch()
-  @Roles('STUDENT')
+  @Roles('STUDENT', 'ADMIN')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async update(@Body() dto: UpdateStudentDto) {
     const updatedStudent = await this.studentsService.update(dto)

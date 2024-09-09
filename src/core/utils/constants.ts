@@ -21,7 +21,7 @@ const constants = {
     NAME_FORMAT_ERROR: 'Insira um nome válido.',
     PHONE_FORMAT_ERROR: 'Insira um número de telefone válido.',
     LATTES_LINK_FORMAT_ERROR:
-      'O link para o currículo lattes digitado possui um formato inválido.',
+      'O link digitado para o currículo lattes possui um formato inválido.',
     TAX_ID_FORMAT_ERROR: 'O CPF digitado possui um formato inválido.',
     EMAIL_FORMAT_ERROR: 'O e-mail digitado possui um formato inválido.',
     ENROLLMENT_NUMBER_FORMAT_ERROR:
