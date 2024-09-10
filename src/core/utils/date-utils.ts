@@ -37,8 +37,16 @@ function formattedNow() {
   })
 }
 
-export function parseDate(dateString, format = 'dd/MM/yyyy') {
-  const parsedDate = moment(dateString, format, new Date().toISOString())
+const allDateFormats = [
+  'dd/MM/yyyy',
+  'DD-MMM-YYYY',
+  'YYYY-MM-DD',
+  'M/D/YYYY HH:mm:ss',
+  'YYYY-MM-DD HH:mm:ss'
+]
+
+export function parseDate(dateString, formats = allDateFormats) {
+  const parsedDate = moment(dateString, formats, new Date().toISOString())
 
   if (parsedDate.isValid()) {
     return parsedDate.format('YYYY-MM-DD')

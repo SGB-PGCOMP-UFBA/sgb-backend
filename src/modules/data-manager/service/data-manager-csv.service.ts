@@ -10,6 +10,7 @@ import { ImportError } from '../dto/import-error.dto'
 import { ImportObject } from '../dto/import-object.dto'
 import { constants } from '../../../core/utils/constants'
 import { parseDate } from '../../../core/utils/date-utils'
+import { isNotEmpty } from '../../../core/utils/string-utils'
 
 @Injectable()
 export class DataManagerCsvService {
@@ -26,17 +27,20 @@ export class DataManagerCsvService {
 
     if (data.length > 0) {
       const csvData = data.map((item) => ({
-        nome_do_estudante: item.enrollment.student.name,
-        email_do_estudante: item.enrollment.student.email,
-        telefone_do_estudante: item.enrollment.student.phone_number,
-        link_lattes_do_estudante: item.enrollment.student.link_to_lattes,
-        cpf_do_estudante: item.enrollment.student.tax_id,
-        matricula: item.enrollment.enrollment_number,
-        curso: item.enrollment.enrollment_program,
-        agencia: item.agency.name,
-        status_da_bolsa: item.status,
-        nome_do_orientador: item.enrollment.advisor.name,
-        email_do_orientador: item.enrollment.advisor.email,
+        nome_do_estudante: item.enrollment.student.name?.trim(),
+        email_do_estudante: item.enrollment.student.email?.trim(),
+        telefone_do_estudante: item.enrollment.student.phone_number?.trim(),
+        link_lattes_do_estudante:
+          item.enrollment.student.link_to_lattes?.trim(),
+        cpf_do_estudante: item.enrollment.student.tax_id?.trim(),
+        matricula: item.enrollment.enrollment_number?.trim(),
+        curso: item.enrollment.enrollment_program?.trim(),
+        agencia: item.agency.name?.trim(),
+        status_da_bolsa: item.status?.trim(),
+        nome_do_orientador: item.enrollment.advisor.name?.trim(),
+        email_do_orientador: item.enrollment.advisor.email?.trim(),
+        cpf_do_orientador: item.enrollment.advisor.tax_id?.trim(),
+        telefone_do_orientador: item.enrollment.advisor.phone_number?.trim(),
         criado_em: item.created_at.toISOString(),
         data_inicio_bolsa: item.scholarship_starts_at.toISOString(),
         data_fim_bolsa: item.scholarship_ends_at.toISOString(),
@@ -60,6 +64,8 @@ export class DataManagerCsvService {
           'status_da_bolsa',
           'nome_do_orientador',
           'email_do_orientador',
+          'cpf_do_orientador',
+          'telefone_do_orientador',
           'criado_em',
           'data_inicio_bolsa',
           'data_fim_bolsa',
@@ -77,54 +83,68 @@ export class DataManagerCsvService {
     const dataFile = await this.processImportedFile(file)
     const dataObject = await this.processImportedDataFile(dataFile, errors)
 
-    await this.enrollmentService.deleteAll()
-    await this.scholarshipService.deleteAll()
+    this.scholarshipService.deleteAll()
+    this.enrollmentService.deleteAll()
 
-    const countStudents = await this.insertStudents(dataObject.students, errors)
-    const countEnrollments = await this.insertEnrollments(
-      dataObject.enrollments,
-      errors
+    this.logger.log(`${dataObject.students.length} estudantes serão criados.`)
+    for (const dto of dataObject.students) {
+      try {
+        await this.studentService.create(dto)
+      } catch (error) {
+        this.logger.error(
+          `Erro ao criar o estudante ${dto.name} (${dto.email})`
+        )
+        errors.push({
+          student_name: dto.name,
+          student_email: dto.email,
+          description: `Não foi possível criar este estudante: ${error.message}.`
+        })
+      }
+    }
+
+    this.logger.log(
+      `${dataObject.enrollments.length} matrículas serão criadas.`
     )
-    const countScholarchips = await this.insertScholarships(
-      dataObject.scholarships,
-      errors
-    )
-
-    return {
-      errors,
-      count_inserted_students: countStudents,
-      count_inserted_enrollments: countEnrollments,
-      count_inserted_scholarships: countScholarchips
-    }
-  }
-
-  private async processImportedDataFile(
-    data: any[],
-    errors: ImportError[]
-  ): Promise<any> {
-    const students = []
-    const enrollments = []
-    const scholarships = []
-
-    for (const item of data) {
-      const student = this.createStudent(item, errors)
-      if (student) students.push(student)
-      else continue
-
-      const enrollment = this.createEnrollment(item, errors)
-      if (enrollment) enrollments.push(enrollment)
-      else continue
-
-      const scholarship = this.createScholarship(item, errors)
-      if (scholarship) scholarships.push(scholarship)
+    for (const dto of dataObject.enrollments) {
+      try {
+        await this.enrollmentService.create(dto)
+      } catch (error) {
+        this.logger.error(
+          `Erro ao criar a matrícula de número ${dto.enrollment_number} para o estudante ${dto.student_email}.`
+        )
+        errors.push({
+          student_email: dto.student_email,
+          advisor_email: dto.advisor_email,
+          enrollment_program: dto.enrollment_program,
+          enrollment_number: dto.enrollment_number,
+          enrollment_date: dto.enrollment_date,
+          description: `Não foi possível criar esta matrícula: ${error.message}.`
+        })
+      }
     }
 
-    return {
-      students,
-      enrollments,
-      scholarships,
-      errors
+    this.logger.log(`${dataObject.scholarships.length} bolsas serão criadas.`)
+    for (const dto of dataObject.scholarships) {
+      try {
+        await this.scholarshipService.create(dto)
+      } catch (error) {
+        this.logger.error(
+          `Erro ao criar a bolsa ${dto.agency_name} para a matrícula ${dto.enrollment_number}.`
+        )
+        errors.push({
+          student_email: dto.student_email,
+          agency_name: dto.agency_name,
+          enrollment_number: dto.enrollment_number,
+          scholarship_start_date: dto.scholarship_starts_at,
+          scholarship_end_date: dto.scholarship_ends_at,
+          scholarship_status: dto.status,
+          description: `Não foi possível criar esta bolsa: ${error.message}.`
+        })
+      }
     }
+
+    this.logger.log(`Importação finalizada com sucesso.`)
+    return { errors }
   }
 
   private async processImportedFile(file: File): Promise<any[]> {
@@ -147,7 +167,9 @@ export class DataManagerCsvService {
           .on('error', (error) => reject(error))
       })
 
+      this.logger.log(`${results.length} registros extraídos do arquivo.`)
       this.logger.log(constants.exceptionMessages.dataManager.PROCESS_COMPLETED)
+
       return results
     } catch (error) {
       this.logger.error(constants.exceptionMessages.dataManager.PROCESS_FAILED)
@@ -157,30 +179,63 @@ export class DataManagerCsvService {
     }
   }
 
-  private createStudent(item: ImportObject, errors: ImportError[]) {
+  private async processImportedDataFile(
+    data: any[],
+    errors: ImportError[]
+  ): Promise<any> {
+    const students = []
+    const enrollments = []
+    const scholarships = []
+
+    for (const item of data) {
+      const student = this.createStudentObject(item, errors)
+      const studentExists = this.isDuplicatedStudent(student, students, errors)
+      if (student && !studentExists) {
+        students.push(student)
+      }
+
+      const enrollment = this.createEnrollmentObject(item, errors)
+      const enrollmentExists = this.isDuplicatedEnrollment(
+        enrollment,
+        enrollments,
+        errors
+      )
+      if (enrollment && !enrollmentExists) {
+        enrollments.push(enrollment)
+      }
+
+      const scholarship = this.createScholarshipObject(item, errors)
+      if (scholarship) {
+        scholarships.push(scholarship)
+      }
+    }
+
+    return {
+      students,
+      enrollments,
+      scholarships,
+      errors
+    }
+  }
+
+  private createStudentObject(item: ImportObject, errors: ImportError[]) {
     const requiredFields = [
       { key: 'nome_do_estudante' },
       { key: 'email_do_estudante' }
     ]
 
     const missingFields = requiredFields
-      .filter((field) => !item[field.key])
+      .filter((field) => !isNotEmpty(item[field.key]))
       .map((field) => field.key)
 
     if (missingFields.length > 0) {
       errors.push({
-        studentName: item.nome_do_estudante,
-        studentEmail: item.email_do_estudante,
+        student_name: item.nome_do_estudante,
+        student_email: item.email_do_estudante,
         description: `Não foi possível criar o estudante, pois os seguintes campos obrigatórios não foram preenchidos: ${missingFields.join(
           ', '
         )}.`
       })
-      this.logger.error(
-        `Não foi possível criar o estudante, pois os seguintes campos obrigatórios não foram preenchidos: ${missingFields.join(
-          ', '
-        )}.`,
-        item
-      )
       return null
     }
 
@@ -188,22 +243,20 @@ export class DataManagerCsvService {
       name: item.nome_do_estudante,
       email: item.email_do_estudante,
       password: Math.random().toString(36).slice(-4),
-      tax_id: item.cpf_do_estudante
+      tax_id: isNotEmpty(item.cpf_do_estudante)
         ? item.cpf_do_estudante.replace(/[^0-9]/g, '')
         : null,
-      phone_number:
-        item.telefone_do_estudante.replace(/[^0-9]/g, '').length <= 11
-          ? item.telefone_do_estudante.replace(/[^0-9]/g, '')
-          : null,
-      link_to_lattes:
-        item.link_lattes_do_estudante.length <= 80
-          ? item.link_lattes_do_estudante
-          : null,
-      created_at: parseDate(item.criado_em, 'M/D/YYYY HH:mm:ss')
+      phone_number: isNotEmpty(item.telefone_do_estudante)
+        ? item.telefone_do_estudante.replace(/[^0-9]/g, '')
+        : null,
+      link_to_lattes: isNotEmpty(item.link_lattes_do_estudante)
+        ? item.link_lattes_do_estudante.slice(0, 80)
+        : null,
+      created_at: parseDate(item.criado_em)
     }
   }
 
-  private createEnrollment(item: ImportObject, errors: ImportError[]) {
+  private createEnrollmentObject(item: ImportObject, errors: ImportError[]) {
     const requiredFields = [
       { key: 'email_do_estudante' },
       { key: 'email_do_orientador' },
@@ -213,27 +266,21 @@ export class DataManagerCsvService {
     ]
 
     const missingFields = requiredFields
-      .filter((field) => !item[field.key])
+      .filter((field) => !isNotEmpty(item[field.key]))
       .map((field) => field.key)
 
     if (missingFields.length > 0) {
       errors.push({
-        studentName: item.nome_do_estudante,
-        studentEmail: item.email_do_estudante,
-        advisorEmail: item.email_do_orientador,
-        enrollmentProgram: item.curso,
-        enrollmentNumber: item.matricula,
-        enrollmentDate: item.data_matricula_pgcomp,
+        student_name: item.nome_do_estudante,
+        student_email: item.email_do_estudante,
+        advisor_email: item.email_do_orientador,
+        enrollment_program: item.curso,
+        enrollment_number: item.matricula,
+        enrollment_date: item.data_matricula_pgcomp,
         description: `Não foi possível criar a matrícula, pois os seguintes campos obrigatórios não foram preenchidos: ${missingFields.join(
           ', '
         )}.`
       })
-      this.logger.error(
-        `Não foi possível criar a matrícula, pois os seguintes campos obrigatórios não foram preenchidos: ${missingFields.join(
-          ', '
-        )}.`,
-        item
-      )
       return null
     }
 
@@ -242,16 +289,13 @@ export class DataManagerCsvService {
       advisor_email: item.email_do_orientador,
       enrollment_number: item.matricula,
       enrollment_program: item.curso.toUpperCase(),
-      enrollment_date: parseDate(item.data_matricula_pgcomp, 'DD-MMM-YYYY'),
-      defense_prediction_date: parseDate(
-        item.data_previsao_defesa,
-        'DD-MMM-YYYY'
-      ),
-      created_at: parseDate(item.criado_em, 'M/D/YYYY HH:mm:ss')
+      enrollment_date: parseDate(item.data_matricula_pgcomp),
+      defense_prediction_date: parseDate(item.data_previsao_defesa),
+      created_at: parseDate(item.criado_em)
     }
   }
 
-  private createScholarship(item: ImportObject, errors: ImportError[]) {
+  private createScholarshipObject(item: ImportObject, errors: ImportError[]) {
     const requiredFields = [
       { key: 'email_do_estudante' },
       { key: 'matricula' },
@@ -267,22 +311,16 @@ export class DataManagerCsvService {
 
     if (missingFields.length > 0) {
       errors.push({
-        studentEmail: item.email_do_estudante,
-        agencyName: item.agencia,
-        enrollmentNumber: item.matricula,
-        scholarshipStartDate: item.data_inicio_bolsa,
-        scholarshipEndDate: item.data_fim_bolsa,
-        scholarshipStatus: item.status_da_bolsa,
+        student_email: item.email_do_estudante,
+        agency_name: item.agencia,
+        enrollment_number: item.matricula,
+        scholarship_start_date: item.data_inicio_bolsa,
+        scholarship_end_date: item.data_fim_bolsa,
+        scholarship_status: item.status_da_bolsa,
         description: `Não foi possível criar a bolsa, pois os seguintes campos obrigatórios não foram preenchidos: ${missingFields.join(
           ', '
         )}.`
       })
-      this.logger.error(
-        `Não foi possível criar a bolsa, pois os seguintes campos obrigatórios não foram preenchidos: ${missingFields.join(
-          ', '
-        )}.`,
-        item
-      )
       return null
     }
 
@@ -291,72 +329,43 @@ export class DataManagerCsvService {
       enrollment_number: item.matricula,
       status: item.status_da_bolsa,
       agency_name: item.agencia.toUpperCase() || 'OUTRAS',
-      scholarship_starts_at: parseDate(item.data_inicio_bolsa, 'DD-MMM-YYYY'),
-      scholarship_ends_at: parseDate(item.data_fim_bolsa, 'DD-MMM-YYYY'),
-      created_at: parseDate(item.criado_em, 'M/D/YYYY HH:mm:ss')
+      scholarship_starts_at: parseDate(item.data_inicio_bolsa),
+      scholarship_ends_at: parseDate(item.data_fim_bolsa),
+      created_at: parseDate(item.criado_em)
     }
   }
 
-  private async insertStudents(students: any[], errors: ImportError[]) {
-    let count = 0
+  private isDuplicatedStudent(
+    student: any,
+    students: any[],
+    errors: ImportError[]
+  ): boolean {
+    if (!student) return true
 
-    for (const dto of students) {
-      try {
-        const student = await this.studentService.createIfNotExists(dto)
-        if (student.created_at) {
-          count++
-        }
-      } catch (error) {
-        errors.push({
-          studentName: dto.name,
-          studentEmail: dto.email,
-          description: error.message
-        })
-      }
-    }
-
-    return count
+    return students.some(
+      (s) =>
+        (isNotEmpty(student.email) && s.email === student.email) ||
+        (isNotEmpty(student.tax_id) && s.tax_id === student.tax_id) ||
+        (isNotEmpty(student.phone_number) &&
+          s.phone_number === student.phone_number) ||
+        (isNotEmpty(student.link_to_lattes) &&
+          s.link_to_lattes === student.link_to_lattes)
+    )
   }
 
-  private async insertEnrollments(enrollments: any[], errors: ImportError[]) {
-    let count = 0
+  private isDuplicatedEnrollment(
+    enrollment: any,
+    enrollments: any[],
+    errors: ImportError[]
+  ): boolean {
+    if (!enrollment) return true
 
-    for (const dto of enrollments) {
-      try {
-        const enrollment = await this.enrollmentService.createIfNotExists(dto)
-        if (enrollment.created_at) {
-          count++
-        }
-      } catch (error) {
-        errors.push({
-          studentName: dto.name,
-          studentEmail: dto.email,
-          description: error.message
-        })
-      }
-    }
-
-    return count
-  }
-
-  private async insertScholarships(students: any[], errors: ImportError[]) {
-    let count = 0
-
-    for (const dto of students) {
-      try {
-        const student = await this.scholarshipService.createIfNotExists(dto)
-        if (student.created_at) {
-          count++
-        }
-      } catch (error) {
-        errors.push({
-          studentName: dto.name,
-          studentEmail: dto.email,
-          description: error.message
-        })
-      }
-    }
-
-    return count
+    return enrollments.some(
+      (e) =>
+        isNotEmpty(enrollment.student_email) &&
+        e.student_email === enrollment.student_email &&
+        isNotEmpty(enrollment.enrollment_number) &&
+        e.enrollment_number === enrollment.enrollment_number
+    )
   }
 }

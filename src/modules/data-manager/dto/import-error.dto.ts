@@ -1,13 +1,13 @@
 export class ImportError {
-  studentName?: string
-  studentEmail?: string
-  advisorEmail?: string
-  enrollmentNumber?: string
-  enrollmentProgram?: string
-  enrollmentDate?: string
-  agencyName?: string
-  scholarshipStartDate?: string
-  scholarshipEndDate?: string
-  scholarshipStatus?: string
+  student_name?: string
+  student_email?: string
+  advisor_email?: string
+  enrollment_number?: string
+  enrollment_program?: string
+  enrollment_date?: string
+  agency_name?: string
+  scholarship_start_date?: string
+  scholarship_end_date?: string
+  scholarship_status?: string
   description: string
 }

@@ -21,4 +21,10 @@ function generateRandomNumber(length: number) {
   return result
 }
 
-export { generateRandomString, generateRandomNumber }
+function isNotEmpty(value: string): boolean {
+  return (
+    value !== null && value !== undefined && value.replace(/\s+/g, '') !== ''
+  )
+}
+
+export { generateRandomString, generateRandomNumber, isNotEmpty }

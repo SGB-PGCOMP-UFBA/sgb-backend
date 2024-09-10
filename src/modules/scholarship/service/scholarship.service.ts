@@ -185,48 +185,7 @@ export class ScholarshipService {
         `Agency Name: ${dto.agency_name}`
       )
       throw new BadRequestException(
-        constants.exceptionMessages.scholarship.CREATION_FAILED
-      )
-    }
-  }
-
-  async createIfNotExists(dto): Promise<Scholarship> {
-    this.logger.log(constants.exceptionMessages.scholarship.CREATION_STARTED)
-    try {
-      const agency = await this.agencyService.findOneByName(dto.agency_name)
-      const enrollment =
-        await this.enrollmentService.findOneByStudentEmailAndEnrollmentNumber(
-          dto.student_email,
-          dto.enrollment_number
-        )
-
-      const newScholarship = this.scholarshipRepository.create({
-        agency_id: agency.id,
-        enrollment_id: enrollment.id,
-        scholarship_starts_at: dto.scholarship_starts_at,
-        scholarship_ends_at: dto.scholarship_ends_at,
-        extension_ends_at: dto.extension_ends_at,
-        status: dto.status || 'ON_GOING',
-        salary: dto.salary || null
-      })
-
-      await this.scholarshipRepository.save(newScholarship)
-
-      this.logger.log(
-        constants.exceptionMessages.scholarship.CREATION_COMPLETED
-      )
-
-      return newScholarship
-    } catch (error) {
-      this.logger.error(
-        constants.exceptionMessages.scholarship.CREATION_FAILED,
-        error,
-        `Student Email: ${dto.student_email}`,
-        `Enrollment Number: ${dto.enrollment_number}`,
-        `Agency Name: ${dto.agency_name}`
-      )
-      throw new BadRequestException(
-        constants.exceptionMessages.scholarship.CREATION_FAILED
+        error.message || constants.exceptionMessages.scholarship.CREATION_FAILED
       )
     }
   }
@@ -286,6 +245,9 @@ export class ScholarshipService {
   async deleteAll() {
     this.logger.warn(constants.exceptionMessages.scholarship.DELETE_ALL_STARTED)
     await this.scholarshipRepository.createQueryBuilder().delete().execute()
+    await this.scholarshipRepository.query(
+      `ALTER SEQUENCE scholarship_id_seq RESTART WITH 1`
+    )
   }
 
   async finishScholarship(id: number): Promise<void> {

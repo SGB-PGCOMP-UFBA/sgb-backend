@@ -50,7 +50,8 @@ const constants = {
       WRONG_PASSWORD: 'Invalid password.'
     },
     advisor: {
-      CREATION_STARTED: 'The process of inserting a new advisor has started.',
+      CREATION_STARTED:
+        'The process of inserting a new advisor has been started.',
       CREATION_COMPLETED:
         'The process of inserting a new advisor has been completed.',
       CREATION_FAILED: "Cant't create advisor.",
@@ -69,32 +70,38 @@ const constants = {
       CREATION_COMPLETED:
         'The process of inserting a new notification has been completed.',
       CREATION_FAILED: "Cant't create notification.",
-      UPDATE_FAILED: "Cant't update notification."
+      UPDATE_FAILED: "Cant't update notification.",
+      DELETE_ALL_STARTED:
+        'The process of deleting all notifications has been started.'
     },
     student: {
-      CREATION_STARTED: 'The process of inserting a new student has started.',
+      ALREADY_REGISTERED: 'This student is already registered.',
+      CREATION_STARTED:
+        'The process of inserting a new student has been started.',
       CREATION_COMPLETED:
         'The process of inserting a new student has been completed.',
       CREATION_FAILED: "Cant't create student.",
       UPDATE_FAILED: "Cant't update student.",
       NOT_FOUND: 'Student not found.',
       COUNT_BY_SCHOLARSHIP_FAILED: 'Failed to count students by scholarship.',
-      DELETE_ALL_STARTED: 'The process of deleting all students has started.'
+      DELETE_ALL_STARTED:
+        'The process of deleting all students has been started.'
     },
     enrollment: {
       CREATION_STARTED:
-        'The process of inserting a new enrollment has started.',
+        'The process of inserting a new enrollment has been started.',
       CREATION_COMPLETED:
         'The process of inserting a new enrollment has been completed.',
       CREATION_FAILED: "Cant't create enrollment.",
       UPDATE_FAILED: "Cant't update enrollment.",
       DEACTIVATE_FAILED: "Can't deactivate this enrollment.",
       NOT_FOUND: 'Enrollment not found.',
-      DELETE_ALL_STARTED: 'The process of deleting all enrollments has started.'
+      DELETE_ALL_STARTED:
+        'The process of deleting all enrollments has been started.'
     },
     scholarship: {
       CREATION_STARTED:
-        'The process of inserting a new scholarship has started.',
+        'The process of inserting a new scholarship has been started.',
       CREATION_COMPLETED:
         'The process of inserting a new scholarship has been completed.',
       CREATION_FAILED: "Cant't create scholarship.",
@@ -103,7 +110,7 @@ const constants = {
       NOT_FOUND: 'Scholarship not found.',
       COUNT_FAILED: 'Failed to count scholarships.',
       DELETE_ALL_STARTED:
-        'The process of deleting all scholarships has started.'
+        'The process of deleting all scholarships has been started.'
     },
     user: {
       SOMETHING_WRONG: 'Something went wrong.',
@@ -118,7 +125,8 @@ const constants = {
       EXPORT_FAILED: "Can't export scholarships to CSV file.",
       INVALID_FILE: 'Only CSV files are allowed.',
       PROCESS_FAILED: 'Error processing the CSV file.',
-      PROCESS_COMPLETED: 'CSV file processed successfully.'
+      PROCESS_COMPLETED: 'CSV file processed successfully.',
+      DELETE_FAILED: 'Failed to delete data.'
     }
   }
 }

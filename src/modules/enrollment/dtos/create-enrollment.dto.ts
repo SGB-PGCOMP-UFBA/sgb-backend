@@ -5,7 +5,7 @@ import {
   IsIn,
   IsOptional,
   IsString,
-  Length
+  MaxLength
 } from 'class-validator'
 import { constants } from '../../../core/utils/constants'
 
@@ -23,7 +23,7 @@ export class CreateEnrollmentDto {
   readonly enrollment_date: Date
 
   @IsString()
-  @Length(9, 10)
+  @MaxLength(15)
   readonly enrollment_number: string
 
   @IsString()

@@ -69,4 +69,17 @@ export class EmbedNotificationService {
 
     return false
   }
+
+  async deleteAll() {
+    this.logger.warn(
+      constants.exceptionMessages.notification.DELETE_ALL_STARTED
+    )
+    await this.embedNotificationRepository
+      .createQueryBuilder()
+      .delete()
+      .execute()
+    await this.embedNotificationRepository.query(
+      `ALTER SEQUENCE embed_notification_id_seq RESTART WITH 1`
+    )
+  }
 }
