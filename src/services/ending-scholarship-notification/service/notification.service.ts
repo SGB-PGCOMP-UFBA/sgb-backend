@@ -84,14 +84,18 @@ export class NotificationService {
         owner_id: enrollment.advisor.id,
         owner_type: enrollment.advisor.role,
         title: notificationTitle,
-        description: `A bolsa de ${enrollment.student.name} vai finalizar em ${months} meses!`
+        description: `A bolsa de ${
+          enrollment.student.name
+        } vai finalizar em ${months} ${months === 1 ? 'mês' : 'meses'}!`
       }),
       ...admins.map((admin) =>
         this.embedNotificationService.create({
           owner_id: admin.id,
           owner_type: admin.role,
           title: notificationTitle,
-          description: `A bolsa de ${enrollment.student.name} vai finalizar em ${months} meses!`
+          description: `A bolsa de ${
+            enrollment.student.name
+          } vai finalizar em ${months} ${months === 1 ? 'mês' : 'meses'}!`
         })
       )
     ]
