@@ -82,6 +82,40 @@ export class StudentService {
   async create(dto: CreateStudentDto): Promise<Student> {
     this.logger.log(constants.exceptionMessages.student.CREATION_STARTED)
 
+    try {
+      const passwordHash = await hashPassword(dto.password)
+      const newStudent = this.studentRepository.create({
+        ...dto,
+        password: passwordHash
+      })
+
+      await this.studentRepository.save(newStudent)
+      await this.embedNotificationService.create({
+        owner_id: newStudent.id,
+        owner_type: 'STUDENT',
+        title: 'Bem-vindo ao SGB-PGCOMP',
+        description:
+          'Seja bem-vindo ao sistema de gestão de bolsas. Não se esqueça de finalizar o seu cadastro!'
+      })
+
+      this.logger.log(constants.exceptionMessages.student.CREATION_COMPLETED)
+
+      return newStudent
+    } catch (error) {
+      this.logger.error(
+        constants.exceptionMessages.student.CREATION_FAILED,
+        error,
+        `Student Email: ${dto.email}`
+      )
+      throw new BadRequestException(
+        error.message || constants.exceptionMessages.student.CREATION_FAILED
+      )
+    }
+  }
+
+  async createOrReturnExistent(dto: CreateStudentDto): Promise<Student> {
+    this.logger.log(constants.exceptionMessages.student.CREATION_STARTED)
+
     const studentExists = await this.studentRepository.findOneBy({
       email: dto.email
     })

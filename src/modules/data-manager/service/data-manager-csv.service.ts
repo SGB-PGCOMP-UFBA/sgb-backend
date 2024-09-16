@@ -89,7 +89,7 @@ export class DataManagerCsvService {
     this.logger.log(`${dataObject.students.length} estudantes serão criados.`)
     for (const dto of dataObject.students) {
       try {
-        await this.studentService.create(dto)
+        await this.studentService.createOrReturnExistent(dto)
       } catch (error) {
         this.logger.error(
           `Erro ao criar o estudante ${dto.name} (${dto.email})`

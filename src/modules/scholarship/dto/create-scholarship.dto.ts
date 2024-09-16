@@ -6,7 +6,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  Length
+  MaxLength
 } from 'class-validator'
 import { constants } from '../../../core/utils/constants'
 
@@ -16,7 +16,7 @@ export class CreateScholarshipDto {
   readonly student_email: string
 
   @IsString()
-  @Length(9, 10)
+  @MaxLength(15)
   readonly enrollment_number: string
 
   @IsString()
