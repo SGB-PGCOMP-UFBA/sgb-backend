@@ -40,7 +40,9 @@ export class StudentController {
   @Get('/by-advisor/:advisorId')
   async findAllByAdvisorId(@Param('advisorId') advisorId: number) {
     const students = await this.studentsService.findAllByAdvisorId(advisorId)
-    return students.map((student) => StudentMapper.detailed(student))
+    return students.map((student) =>
+      StudentMapper.detailedWithFullRelations(student)
+    )
   }
 
   @Post()
