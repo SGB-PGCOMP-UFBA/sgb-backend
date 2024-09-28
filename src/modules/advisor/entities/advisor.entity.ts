@@ -35,6 +35,9 @@ export class Advisor implements User {
   @Column({ nullable: false, default: 'ACTIVE' })
   status: string
 
+  @Column({ nullable: false, default: false })
+  has_admin_privileges: boolean
+
   @CreateDateColumn()
   created_at: Date
 

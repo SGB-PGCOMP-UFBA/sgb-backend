@@ -23,19 +23,23 @@ export class UserService {
     email: string,
     role: string
   ): Promise<CreateUserDto> {
-    const repositoryMap = {
-      ADMIN: this.adminRepository,
-      ADVISOR: this.advisorRepository,
-      STUDENT: this.studentRepository
+    let user: Student | Advisor | Admin
+
+    if (role === 'STUDENT') {
+      user = await this.studentRepository.findOne({ where: { email } })
+    } else if (role === 'ADVISOR') {
+      user = await this.advisorRepository.findOne({ where: { email } })
+    } else if (role === 'ADMIN') {
+      user = await this.advisorRepository.findOne({
+        where: { email, has_admin_privileges: true }
+      })
+
+      if (user) {
+        user.role = 'ADVISOR_WITH_ADMIN_PRIVILEGES'
+      } else {
+        user = await this.adminRepository.findOne({ where: { email } })
+      }
     }
-
-    const userRepository = repositoryMap[role]
-
-    if (!userRepository) {
-      throw new Error(constants.exceptionMessages.user.SOMETHING_WRONG)
-    }
-
-    const user = await userRepository.findOne({ where: { email } })
 
     if (!user) {
       this.logger.error(`User could not be authenticated: ${email}`)
