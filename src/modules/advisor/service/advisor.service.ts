@@ -178,6 +178,21 @@ export class AdvisorService {
     throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
   }
 
+  async grantAdminPrivileges(id: number) {
+    const findAdvisor = await this.advisorRepository.findOne({
+      where: { id }
+    })
+
+    if (!findAdvisor) {
+      throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
+    }
+
+    await this.advisorRepository.update(
+      { id },
+      { has_admin_privileges: !findAdvisor.has_admin_privileges }
+    )
+  }
+
   async validateUpdatingAdvisor(
     dto: UpdateAdvisorDto,
     advisorFromDatabase: Advisor

@@ -53,7 +53,7 @@ export class StudentController {
   }
 
   @Patch()
-  @Roles('STUDENT', 'ADMIN')
+  @Roles('STUDENT', 'ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async update(@Body() dto: UpdateStudentDto) {
     const updatedStudent = await this.studentsService.update(dto)
@@ -61,7 +61,7 @@ export class StudentController {
   }
 
   @Patch('/update-password')
-  @Roles('STUDENT')
+  @Roles('STUDENT', 'ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async updatePassword(@Body() dto: UpdateStudentPasswordDto) {
     return await this.studentsService.updatePassword(
@@ -73,7 +73,7 @@ export class StudentController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async delete(@Param('id') id: string) {
     return await this.studentsService.delete(+id)

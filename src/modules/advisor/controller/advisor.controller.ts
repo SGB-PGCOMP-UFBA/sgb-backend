@@ -16,7 +16,7 @@ export class AdvisorController {
   constructor(private readonly advisorService: AdvisorService) {}
 
   @Post()
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async create(@Body() dto: CreateAdvisorDto) {
     const advisor = await this.advisorService.create(dto)
@@ -46,7 +46,7 @@ export class AdvisorController {
   }
 
   @Get()
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async findAll() {
     const advisors = await this.advisorService.findAll()
@@ -61,7 +61,7 @@ export class AdvisorController {
   }
 
   @Patch()
-  @Roles('ADMIN', 'ADVISOR')
+  @Roles('ADMIN', 'ADVISOR', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async update(@Body() dto: UpdateAdvisorDto) {
     const updatedAdvisor = await this.advisorService.update(dto)
@@ -69,7 +69,7 @@ export class AdvisorController {
   }
 
   @Patch('/update-password')
-  @Roles('ADMIN', 'ADVISOR')
+  @Roles('ADMIN', 'ADVISOR', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async updatePassword(@Body() dto: UpdateAdvisorPasswordDto) {
     return await this.advisorService.updatePassword(
@@ -79,9 +79,16 @@ export class AdvisorController {
     )
   }
 
+  @Patch('/grant-admin-privileges/:id')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async grantAdminPrivileges(@Param('id') id: string) {
+    return await this.advisorService.grantAdminPrivileges(+id)
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async delete(@Param('id') id: string) {
     return await this.advisorService.delete(+id)

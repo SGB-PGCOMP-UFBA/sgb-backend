@@ -27,7 +27,7 @@ export class ScholarshipController {
   constructor(private readonly scholarshipService: ScholarshipService) {}
 
   @Post()
-  @Roles('ADMIN', 'STUDENT')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES', 'STUDENT')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async create(@Body() dto: CreateScholarshipDto) {
     const scholarship = await this.scholarshipService.create(dto)
@@ -36,7 +36,7 @@ export class ScholarshipController {
   }
 
   @Get('/paginated')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async findAllPaginated(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
@@ -62,7 +62,7 @@ export class ScholarshipController {
   }
 
   @Get('/count/by-agency-and-course')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async countOnGoingScholarshipsGroupingByAgencyForCourse(
     @Query('programName') programName?: string
@@ -78,7 +78,7 @@ export class ScholarshipController {
   }
 
   @Get('/count/by-course-and-year')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async countScholarshipsGroupingByCourseAndYear() {
     const resultCount =
@@ -90,7 +90,7 @@ export class ScholarshipController {
   }
 
   @Get('/count/by-agency-and-status')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async countScholarshipsGroupingByStatusForAgency(
     @Query('agencyName') agencyName?: string
@@ -107,7 +107,7 @@ export class ScholarshipController {
   }
 
   @Patch(':id')
-  @Roles('ADMIN', 'STUDENT')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES', 'STUDENT')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async update(@Param('id') id: number, @Body() dto: UpdateScholarshipDto) {
     const updatedScholarship = await this.scholarshipService.update(id, dto)
@@ -116,7 +116,7 @@ export class ScholarshipController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Roles('ADMIN', 'STUDENT')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES', 'STUDENT')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async delete(@Param('id') id: string) {
     return await this.scholarshipService.delete(+id)

@@ -24,7 +24,7 @@ export class EnrollmentController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @Roles('ADMIN', 'STUDENT')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES', 'STUDENT')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async create(@Body() dto: CreateEnrollmentDto) {
     const enrollment = await this.enrollmentService.create(dto)
@@ -41,7 +41,7 @@ export class EnrollmentController {
   }
 
   @Patch(':id')
-  @Roles('ADMIN', 'STUDENT')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES', 'STUDENT')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async update(@Param('id') id: number, @Body() dto: UpdateEnrollmentDto) {
     const updatedEnrollment = await this.enrollmentService.update(id, dto)
@@ -50,7 +50,7 @@ export class EnrollmentController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Roles('ADMIN', 'STUDENT')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES', 'STUDENT')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async delete(@Param('id') id: number) {
     return await this.enrollmentService.delete(id)

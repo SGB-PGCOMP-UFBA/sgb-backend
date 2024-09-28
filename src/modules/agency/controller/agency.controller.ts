@@ -23,7 +23,7 @@ export class AgencyController {
   constructor(private readonly agencyService: AgencyService) {}
 
   @Post()
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async create(@Body() dto: CreateAgencyDto) {
     const agency = await this.agencyService.create(dto)
@@ -32,7 +32,7 @@ export class AgencyController {
   }
 
   @Get()
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async findAll() {
     const agencys = await this.agencyService.findAll()
@@ -47,7 +47,7 @@ export class AgencyController {
   }
 
   @Patch(':id')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async update(@Param('id') id: number, @Body() dto: UpdateAgencyDto) {
     const updatedAgency = await this.agencyService.update(id, dto)
@@ -56,7 +56,7 @@ export class AgencyController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async delete(@Param('id') id: number) {
     return await this.agencyService.delete(+id)
