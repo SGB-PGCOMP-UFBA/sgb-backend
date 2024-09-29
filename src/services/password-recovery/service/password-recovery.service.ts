@@ -26,6 +26,7 @@ export class PasswordRecoveryService {
       } else if (dto.role === 'ADVISOR') {
         await this.advisorService.resetPassword(dto.email, newPassword)
       } else if (dto.role === 'ADMIN') {
+        await this.advisorService.resetPassword(dto.email, newPassword, true)
         await this.adminService.resetPassword(dto.email, newPassword)
       }
 

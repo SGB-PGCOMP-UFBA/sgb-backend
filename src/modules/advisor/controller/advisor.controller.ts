@@ -80,6 +80,7 @@ export class AdvisorController {
   }
 
   @Patch('/grant-admin-privileges/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async grantAdminPrivileges(@Param('id') id: string) {

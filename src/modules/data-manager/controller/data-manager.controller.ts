@@ -34,14 +34,14 @@ export class DataManagerController {
 
   @Post('/import-data')
   @UseInterceptors(FileInterceptor('file'))
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async importData(@UploadedFile() file: File) {
     return this.dataManagerCsvService.importDataFromCsv(file)
   }
 
   @Get('/export-data')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async exportData(@Res() response: Response): Promise<void> {
     const buffer = await this.dataManagerCsvService.exportDataToCsv()
@@ -58,28 +58,28 @@ export class DataManagerController {
   }
 
   @Post('/create-students-from-json-list')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async createStudentsFromJsonList(@Body() list: CreateStudentDto[]) {
     return this.dataManagerJsonService.createStudentFromJsonList(list)
   }
 
   @Post('/create-enrollments-from-json-list')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async createEnrollmentFromJsonList(@Body() list: CreateEnrollmentDto[]) {
     return this.dataManagerJsonService.createEnrollmentFromJsonList(list)
   }
 
   @Post('/create-scholarchips-from-json-list')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async createScholarchipsFromJsonList(@Body() list: CreateScholarshipDto[]) {
     return this.dataManagerJsonService.createScholarshipFromJsonList(list)
   }
 
   @Delete('/purge-all-data')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async create(@Headers('x-api-key') key: string) {
     return this.dataManagerPurgeService.purgeAllData(key)

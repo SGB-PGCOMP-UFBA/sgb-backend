@@ -156,9 +156,13 @@ export class AdvisorService {
     await this.advisorRepository.update({ email }, { password: passwordHash })
   }
 
-  async resetPassword(email: string, password: string): Promise<void> {
+  async resetPassword(
+    email: string,
+    password: string,
+    has_admin_privileges = false
+  ): Promise<void> {
     const findAdvisor = await this.advisorRepository.findOne({
-      where: { email }
+      where: { email, has_admin_privileges }
     })
 
     if (!findAdvisor) {

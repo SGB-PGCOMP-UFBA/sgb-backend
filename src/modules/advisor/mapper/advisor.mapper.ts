@@ -30,7 +30,8 @@ export class AdvisorMapper {
       phone_number: advisor.phone_number ? advisor.phone_number : null,
       name: advisor.name,
       email: advisor.email,
-      enrollmentsCount: advisor.enrollments ? advisor.enrollments.length : 0
+      enrollmentsCount: advisor.enrollments ? advisor.enrollments.length : 0,
+      has_admin_privileges: advisor.has_admin_privileges
     }
   }
 
