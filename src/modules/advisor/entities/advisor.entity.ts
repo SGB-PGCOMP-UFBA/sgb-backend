@@ -14,17 +14,17 @@ export class Advisor implements User {
   @PrimaryGeneratedColumn()
   id: number
 
-  @Column({ length: 11, nullable: true, unique: true })
+  @Column({ length: 50, nullable: false, unique: true })
+  email: string
+
+  @Column({ length: 11, nullable: true })
   tax_id: string
 
-  @Column({ length: 11, nullable: true, unique: true })
+  @Column({ length: 11, nullable: true })
   phone_number: string
 
   @Column({ length: 80, nullable: false })
   name: string
-
-  @Column({ length: 50, nullable: false, unique: true })
-  email: string
 
   @Column({ nullable: false })
   password: string
