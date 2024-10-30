@@ -24,11 +24,31 @@ export class PasswordRecoveryService {
       if (dto.role === 'STUDENT') {
         await this.studentService.resetPassword(dto.email, newPassword)
       } else if (dto.role === 'ADVISOR') {
-        await this.advisorService.resetPassword(dto.email, newPassword)
+        try {
+          await this.advisorService.resetPassword(dto.email, newPassword)
+        } catch (error) {
+          if (error instanceof NotFoundException) {
+            await this.advisorService.resetPassword(
+              dto.email,
+              newPassword,
+              true
+            )
+          }
+        }
       } else if (dto.role === 'ADVISOR_WITH_ADMIN_PRIVILEGES') {
         await this.advisorService.resetPassword(dto.email, newPassword, true)
       } else if (dto.role === 'ADMIN') {
-        await this.adminService.resetPassword(dto.email, newPassword)
+        try {
+          await this.adminService.resetPassword(dto.email, newPassword)
+        } catch (error) {
+          if (error instanceof NotFoundException) {
+            await this.advisorService.resetPassword(
+              dto.email,
+              newPassword,
+              true
+            )
+          }
+        }
       }
 
       this.logger.log(`Password Reseted: ${dto.email}`)
