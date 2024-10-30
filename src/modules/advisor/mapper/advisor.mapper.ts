@@ -14,7 +14,9 @@ export class AdvisorMapper {
   static simplified(advisor: Advisor) {
     return {
       id: advisor.id,
-      role: advisor.role,
+      role: advisor.has_admin_privileges
+        ? 'ADVISOR_WITH_ADMIN_PRIVILEGES'
+        : advisor.role,
       status: advisor.status,
       created_at: advisor.created_at,
       updated_at: advisor.updated_at

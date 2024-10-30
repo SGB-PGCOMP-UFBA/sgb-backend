@@ -25,8 +25,9 @@ export class PasswordRecoveryService {
         await this.studentService.resetPassword(dto.email, newPassword)
       } else if (dto.role === 'ADVISOR') {
         await this.advisorService.resetPassword(dto.email, newPassword)
-      } else if (dto.role === 'ADMIN') {
+      } else if (dto.role === 'ADVISOR_WITH_ADMIN_PRIVILEGES') {
         await this.advisorService.resetPassword(dto.email, newPassword, true)
+      } else if (dto.role === 'ADMIN') {
         await this.adminService.resetPassword(dto.email, newPassword)
       }
 
