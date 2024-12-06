@@ -4,4 +4,5 @@ export interface ScholarshipFilters {
   advisorName?: string
   programName?: string
   orderBy?: string
+  studentName?: string
 }

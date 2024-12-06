@@ -5,7 +5,7 @@ import {
   InternalServerErrorException
 } from '@nestjs/common/exceptions'
 import { InjectRepository } from '@nestjs/typeorm'
-import { FindManyOptions, In, Like, Repository } from 'typeorm'
+import { FindManyOptions, ILike, In, Like, Repository } from 'typeorm'
 import { paginate, IPaginationOptions } from 'nestjs-typeorm-paginate'
 import { PageDto } from '../../../core/pagination/page.dto'
 import { PageMetaDto } from '../../../core/pagination/page-meta.dto'
@@ -99,6 +99,15 @@ export class ScholarshipService {
 
       findOptions.where['enrollment']['advisor'] = {
         name: Like(`%${filters.advisorName}%`)
+      }
+    }
+    if (filters?.studentName && filters?.studentName !== '') {
+      if (!findOptions.where['enrollment']) {
+        findOptions.where['enrollment'] = {}
+      }
+
+      findOptions.where['enrollment']['student'] = {
+        name: ILike(`%${filters.studentName}%`)
       }
     }
     if (filters?.orderBy && orderByMapping[filters.orderBy]) {
