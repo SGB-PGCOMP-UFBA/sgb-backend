@@ -21,11 +21,13 @@ export class DataManagerJsonService {
     const promises = []
 
     list.forEach((dto) => {
-      const promise = this.studentService.createOrReturnExistent(dto).then((student) => {
-        if (student.created_at) {
-          count++
-        }
-      })
+      const promise = this.studentService
+        .createOrReturnExistent(dto)
+        .then((student) => {
+          if (student.created_at) {
+            count++
+          }
+        })
 
       promises.push(promise)
     })
