@@ -110,7 +110,9 @@ const constants = {
       NOT_FOUND: 'Scholarship not found.',
       COUNT_FAILED: 'Failed to count scholarships.',
       DELETE_ALL_STARTED:
-        'The process of deleting all scholarships has been started.'
+        'The process of deleting all scholarships has been started.',
+      ALREADY_REGISTERED:
+        'Já existe uma bolsa cadastrada com os mesmos detalhes informados.'
     },
     user: {
       SOMETHING_WRONG: 'Something went wrong.',

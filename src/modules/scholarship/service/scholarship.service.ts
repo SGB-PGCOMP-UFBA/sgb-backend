@@ -168,6 +168,24 @@ export class ScholarshipService {
           dto.enrollment_number
         )
 
+      const scholarship = await this.scholarshipRepository.findOneBy({
+        enrollment_id: enrollment.id,
+        agency_id: agency.id,
+        salary: dto.salary,
+        scholarship_starts_at: dto.scholarship_starts_at,
+        scholarship_ends_at: dto.scholarship_ends_at
+      })
+
+      if (scholarship) {
+        this.logger.warn(
+          constants.exceptionMessages.scholarship.ALREADY_REGISTERED
+        )
+
+        throw new BadRequestException(
+          constants.exceptionMessages.scholarship.ALREADY_REGISTERED
+        )
+      }
+
       const newScholarship = this.scholarshipRepository.create({
         agency_id: agency.id,
         enrollment_id: enrollment.id,
@@ -189,12 +207,17 @@ export class ScholarshipService {
       this.logger.error(
         constants.exceptionMessages.scholarship.CREATION_FAILED,
         error,
+        error.message,
         `Student Email: ${dto.student_email}`,
         `Enrollment Number: ${dto.enrollment_number}`,
         `Agency Name: ${dto.agency_name}`
       )
       throw new BadRequestException(
-        error.message || constants.exceptionMessages.scholarship.CREATION_FAILED
+        error.message
+          ? error.message
+          : error.response.message
+          ? error.response.message
+          : constants.exceptionMessages.scholarship.CREATION_FAILED
       )
     }
   }
