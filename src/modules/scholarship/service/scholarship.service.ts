@@ -231,6 +231,27 @@ export class ScholarshipService {
         student.id
       )
 
+      const idempotencyScholarship = await this.scholarshipRepository.findOneBy(
+        {
+          enrollment_id: enrollment.id,
+          agency: { id: dto.agency_id },
+          salary: dto.salary,
+          scholarship_starts_at: dto.scholarship_starts_at,
+          scholarship_ends_at: dto.scholarship_ends_at,
+          extension_ends_at: dto.extension_ends_at
+        }
+      )
+
+      if (idempotencyScholarship) {
+        this.logger.warn(
+          constants.exceptionMessages.scholarship.ALREADY_REGISTERED
+        )
+
+        throw new BadRequestException(
+          constants.exceptionMessages.scholarship.ALREADY_REGISTERED
+        )
+      }
+
       const scholarship = await this.scholarshipRepository.findOneBy({
         id: id,
         enrollment_id: enrollment.id
@@ -257,8 +278,11 @@ export class ScholarshipService {
       return updatedScholarship
     } catch (error) {
       throw new BadRequestException(
-        constants.exceptionMessages.scholarship.UPDATE_FAILED,
-        error
+        error.message
+          ? error.message
+          : error.response.message
+          ? error.response.message
+          : constants.exceptionMessages.scholarship.UPDATE_FAILED
       )
     }
   }
