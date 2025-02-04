@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:16
+    container_name: sgb-api-database
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sgb_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - mynetwork
+    restart: always
+
+volumes:
+  postgres_data:
+
+networks:
+  mynetwork:
+    driver: bridge
