@@ -5,7 +5,7 @@ import {
   InternalServerErrorException
 } from '@nestjs/common/exceptions'
 import { InjectRepository } from '@nestjs/typeorm'
-import { FindManyOptions, ILike, In, Like, Repository } from 'typeorm'
+import { FindManyOptions, ILike, In, LessThanOrEqual, Like, Repository } from 'typeorm'
 import { paginate, IPaginationOptions } from 'nestjs-typeorm-paginate'
 import { PageDto } from '../../../core/pagination/page.dto'
 import { PageMetaDto } from '../../../core/pagination/page-meta.dto'
@@ -18,6 +18,7 @@ import { AgencyService } from '../../../modules/agency/service/agency.service'
 import { EnrollmentService } from '../../../modules/enrollment/services/enrollment.service'
 import { CreateScholarshipDto } from '../dto/create-scholarship.dto'
 import { UpdateScholarshipDto } from '../dto/update-scholarship.dto'
+import { today } from '../../../core/utils/date-utils'
 
 const orderByMapping = {
   DAT_MATRICULA_ASC: ['enrollment', 'enrollment_date', 'ASC'],
@@ -80,7 +81,12 @@ export class ScholarshipService {
     }
 
     if (filters?.scholarshipStatus && filters?.scholarshipStatus !== 'ALL') {
-      findOptions.where['status'] = Like(`%${filters.scholarshipStatus}%`)
+      if(filters?.scholarshipStatus === 'ON_GOING') {
+        findOptions.where['status'] = In(['ON_GOING', 'EXTENDED'])
+      }
+      else {
+        findOptions.where['status'] = Like(`%${filters.scholarshipStatus}%`)
+      }
     }
     if (filters?.agencyName && filters?.agencyName !== 'ALL') {
       findOptions.where['agency'] = {
@@ -155,6 +161,27 @@ export class ScholarshipService {
       where: {
         status: In(['ON_GOING', 'EXTENDED'])
       }
+    })
+  }
+
+  async findAllEndingToday(): Promise<Scholarship[]> {
+    return await this.scholarshipRepository.find({
+      relations: [
+      'agency',
+      'enrollment',
+      'enrollment.student',
+      'enrollment.advisor'
+      ],
+      where: [
+        {
+          status: In(['ON_GOING']),
+          scholarship_ends_at: LessThanOrEqual(new Date())
+        },
+        {
+          status: In(['EXTENDED']),
+          extension_ends_at: LessThanOrEqual(new Date())
+        }
+      ]
     })
   }
 

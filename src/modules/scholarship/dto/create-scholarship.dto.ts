@@ -20,6 +20,8 @@ export class CreateScholarshipDto {
   readonly enrollment_number: string
 
   @IsString()
+  @Transform(({ value }) => value.toUpperCase())
+  @IsIn(['CAPES', 'CNPQ', 'FAPESB', 'OUTRAS'])
   readonly agency_name: string
 
   @Type(() => Date)

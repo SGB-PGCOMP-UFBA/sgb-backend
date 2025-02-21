@@ -16,6 +16,7 @@ import { DataManagerModule } from './modules/data-manager/data-manager.module'
 import { NotificationModule } from './services/ending-scholarship-notification/notification.module'
 import { ReportModule } from './services/pdf-reports/reports.module'
 import { PasswordRecoveryModule } from './services/password-recovery/password-recovery.module'
+import { CronTasksModule } from './tasks/cron-tasks.module'
 
 require('dotenv')
 
@@ -40,7 +41,8 @@ require('dotenv')
     AdvisorModule,
     EmbedNotificationModule,
     PasswordRecoveryModule,
-    DataManagerModule
+    DataManagerModule,
+    CronTasksModule
   ],
   controllers: [],
   providers: []

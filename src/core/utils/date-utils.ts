@@ -37,6 +37,12 @@ function formattedNow() {
   })
 }
 
+function today(): Date {
+  const now = new Date()
+  now.setUTCHours(0, 0, 0, 0)
+  return now
+}
+
 const allDateFormats = [
   'dd/MM/yyyy',
   'DD-MMM-YYYY',
@@ -55,4 +61,4 @@ export function parseDate(dateString, formats = allDateFormats) {
   return null
 }
 
-export { getDatePlusDays, formatterDate, formatDate, formattedNow }
+export { getDatePlusDays, formatterDate, formatDate, formattedNow, today }

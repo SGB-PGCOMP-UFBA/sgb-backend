@@ -31,7 +31,7 @@
     "copy-templates": "copyfiles --up 1 src/services/email-sending/templates/*.hbs ./dist"
   },
   "dependencies": {
-    "@nestjs-modules/mailer": "^1.8.1",
+    "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^9.0.0",

@@ -14,7 +14,7 @@ export class EmailService {
       this.logger.log(`Sending e-mail to ${dto.to}.`)
       await this.mailerService.sendMail(dto)
     } catch (error) {
-      this.logger.error(`Error sendint e-mail to ${dto.to}.`, error)
+      this.logger.error(`Error sending e-mail to ${dto.to}.`, error)
     }
   }
 }
