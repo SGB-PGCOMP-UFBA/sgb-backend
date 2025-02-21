@@ -13,7 +13,7 @@ export class ScholarShipFinalizerService {
 
   private readonly logger = new Logger(ScholarShipFinalizerService.name)
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async notifyAlmostEndedScholarships() {
     this.logger.log('Starting task to finalize scholarships that ends today.')
 
