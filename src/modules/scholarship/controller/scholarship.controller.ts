@@ -89,6 +89,18 @@ export class ScholarshipController {
     )
   }
 
+  @Get('/count/by-course-and-year/:agencyName')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async countScholarshipsGroupingByCourseAndYearFilteringByAgency(@Param('agencyName') agencyName: string) {
+    const resultCount =
+      await this.scholarshipService.countScholarshipsGroupingByCourseAndYearFilteringByAgencyName(agencyName)
+
+    return ScholarshipMapper.countScholarshipsGroupingByCourseAndYear(
+      resultCount
+    )
+  }
+
   @Get('/count/by-agency-and-status')
   @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
