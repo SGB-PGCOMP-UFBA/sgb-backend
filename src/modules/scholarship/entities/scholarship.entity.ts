@@ -9,6 +9,7 @@ import {
 } from 'typeorm'
 import { Agency } from '../../agency/entities/agency.entity'
 import { Enrollment } from '../../enrollment/entities/enrollment.entity'
+import { Allocation } from 'src/modules/allocation/entities/allocation.entity'
 
 @Entity('scholarship')
 export class Scholarship {
@@ -20,6 +21,9 @@ export class Scholarship {
 
   @Column({ nullable: false })
   agency_id: number
+
+  @Column({ nullable: true })
+  allocation_id: number
 
   @Column({ nullable: false })
   scholarship_starts_at: Date
@@ -49,4 +53,8 @@ export class Scholarship {
   @ManyToOne(() => Agency, (agency) => agency.scholarships)
   @JoinColumn({ name: 'agency_id' })
   agency: Agency
+
+  @ManyToOne(() => Allocation, (allocation) => allocation.scholarships)
+  @JoinColumn({ name: 'allocation_id' })
+  allocation: Allocation
 }
