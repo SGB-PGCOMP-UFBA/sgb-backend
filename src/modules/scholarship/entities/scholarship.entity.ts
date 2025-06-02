@@ -9,7 +9,7 @@ import {
 } from 'typeorm'
 import { Agency } from '../../agency/entities/agency.entity'
 import { Enrollment } from '../../enrollment/entities/enrollment.entity'
-import { Allocation } from 'src/modules/allocation/entities/allocation.entity'
+import { Allocation } from '../../allocation/entities/allocation.entity'
 
 @Entity('scholarship')
 export class Scholarship {
@@ -22,7 +22,7 @@ export class Scholarship {
   @Column({ nullable: false })
   agency_id: number
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: null })
   allocation_id: number
 
   @Column({ nullable: false })

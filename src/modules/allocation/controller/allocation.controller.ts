@@ -1,34 +1,57 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { AllocationService } from '../service/allocation.service';
-import { CreateAllocationDto } from '../dto/create-allocation.dto';
-import { UpdateAllocationDto } from '../dto/update-allocation.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  HttpStatus,
+  HttpCode
+} from '@nestjs/common'
+import { AllocationService } from '../service/allocation.service'
+import { CreateAllocationDto } from '../dto/create-allocation.dto'
+import { UpdateAllocationDto } from '../dto/update-allocation.dto'
+import { RolesGuard } from '../../../modules/auth/guards/roles.guard'
+import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
+import { Roles } from '../../../modules/auth/decorators/role.decorator'
 
-@Controller('allocation')
+@Controller('v1/allocation')
 export class AllocationController {
   constructor(private readonly allocationService: AllocationService) {}
 
   @Post()
-  create(@Body() createAllocationDto: CreateAllocationDto) {
-    return this.allocationService.create(createAllocationDto);
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async create(@Body() createAllocationDto: CreateAllocationDto) {
+    return await this.allocationService.create(createAllocationDto)
   }
 
   @Get()
-  findAll() {
-    return this.allocationService.findAll();
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async findAll() {
+    return await this.allocationService.findAll()
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.allocationService.findOne(+id);
+    return this.allocationService.findOne(+id)
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAllocationDto: UpdateAllocationDto) {
-    return this.allocationService.update(+id, updateAllocationDto);
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async update(@Param('id') id: number, @Body() updateAllocationDto: UpdateAllocationDto) {
+    return await this.allocationService.update(id, updateAllocationDto)
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.allocationService.remove(+id);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async delete(@Param('id') id: number) {
+    return await this.allocationService.delete(id)
   }
 }

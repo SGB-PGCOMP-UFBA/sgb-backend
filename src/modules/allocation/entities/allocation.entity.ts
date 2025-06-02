@@ -1,4 +1,4 @@
-import { Scholarship } from 'src/modules/scholarship/entities/scholarship.entity'
+import { Scholarship } from '../../scholarship/entities/scholarship.entity'
 import {
   Column,
   CreateDateColumn,
@@ -28,6 +28,6 @@ export class Allocation {
   @UpdateDateColumn()
   updated_at: Date
 
-  @OneToMany(() => Scholarship, (scholarship) => scholarship.agency)
+  @OneToMany(() => Scholarship, (scholarship) => scholarship.allocation)
   scholarships: Scholarship[]
 }
