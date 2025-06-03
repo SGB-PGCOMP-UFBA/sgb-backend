@@ -46,6 +46,15 @@ export class AllocationService {
     })
   }
 
+  async findOneByName(name: string): Promise<Allocation> {
+      const allocation = await this.allocationRepository.findOneBy({ name })
+      if (!allocation) {
+        throw new NotFoundException(constants.exceptionMessages.allocation.NOT_FOUND)
+      }
+  
+      return allocation
+    }
+
   async update(id: number, updateAllocationDto: UpdateAllocationDto): Promise<Allocation> {
     const allocation = await this.allocationRepository.findOneBy({ id })
     if (!allocation)

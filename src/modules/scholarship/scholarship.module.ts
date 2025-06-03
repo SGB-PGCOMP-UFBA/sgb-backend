@@ -6,12 +6,14 @@ import { StudentModule } from '../student/student.module'
 import { ScholarshipService } from './service/scholarship.service'
 import { ScholarshipController } from './controller/scholarship.controller'
 import { Scholarship } from './entities/scholarship.entity'
+import { AllocationModule } from '../allocation/allocation.module'
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Scholarship]),
     EnrollmentModule,
     AgencyModule,
+    AllocationModule,
     StudentModule
   ],
   controllers: [ScholarshipController],

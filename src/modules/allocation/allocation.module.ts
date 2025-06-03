@@ -7,6 +7,7 @@ import { Allocation } from './entities/allocation.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([Allocation])],
   controllers: [AllocationController],
-  providers: [AllocationService]
+  providers: [AllocationService],
+  exports: [AllocationService]
 })
 export class AllocationModule {}

@@ -77,6 +77,10 @@ export class ScholarshipMapper {
       ? AgencyMapper.simplified(scholarship.agency)
       : null
 
+    const allocation = scholarship.allocation
+      ? AllocationMapper.simplified(scholarship.allocation)
+      : null
+
     return {
       id: scholarship.id,
       status: scholarship.status,
@@ -86,7 +90,8 @@ export class ScholarshipMapper {
       salary: scholarship.salary,
       created_at: scholarship.created_at,
       updated_at: scholarship.updated_at,
-      agency
+      agency,
+      allocation,
     }
   }
 
