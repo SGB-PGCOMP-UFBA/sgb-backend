@@ -27,6 +27,10 @@ export class UpdateScholarshipDto {
   readonly agency_id: number
 
   @IsOptional()
+  @IsString()
+  readonly allocation_id: number
+
+  @IsOptional()
   @Type(() => Date)
   @IsDate()
   readonly scholarship_starts_at: Date

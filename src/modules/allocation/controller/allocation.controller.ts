@@ -16,6 +16,7 @@ import { UpdateAllocationDto } from '../dto/update-allocation.dto'
 import { RolesGuard } from '../../../modules/auth/guards/roles.guard'
 import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
 import { Roles } from '../../../modules/auth/decorators/role.decorator'
+import { AllocationMapper } from '../mapper/allocation.mapper'
 
 @Controller('v1/allocation')
 export class AllocationController {
@@ -32,12 +33,20 @@ export class AllocationController {
   @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async findAll() {
-    return await this.allocationService.findAll()
+    const allocations = await this.allocationService.findAll()
+    return allocations.map((allocation => AllocationMapper.detailed(allocation)))
   }
 
-  @Get(':id')
+  @Get('/by-id/:id')
   findOne(@Param('id') id: string) {
     return this.allocationService.findOne(+id)
+  }
+
+  @Get('/filter-list')
+  @UseGuards(JwtAuthGuard)
+  async findAllForFilter() {
+    const allocations = await this.allocationService.findAllForFilter()
+    return allocations.map((allocation) => AllocationMapper.forFilter(allocation))
   }
 
   @Patch(':id')

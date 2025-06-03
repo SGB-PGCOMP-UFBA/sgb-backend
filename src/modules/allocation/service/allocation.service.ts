@@ -40,6 +40,12 @@ export class AllocationService {
     return `This action returns a #${id} allocation`
   }
 
+  async findAllForFilter(): Promise<Allocation[]> {
+    return await this.allocationRepository.find({
+      order: { name: 'ASC' }
+    })
+  }
+
   async update(id: number, updateAllocationDto: UpdateAllocationDto): Promise<Allocation> {
     const allocation = await this.allocationRepository.findOneBy({ id })
     if (!allocation)

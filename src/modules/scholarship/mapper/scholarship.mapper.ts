@@ -3,6 +3,7 @@ import { AgencyMapper } from '../../agency/mapper/agency.mapper'
 import { EnrollmentMapper } from '../../enrollment/mappers/enrollment.mapper'
 import { StudentMapper } from '../../student/mapper/student.mapper'
 import { AdvisorMapper } from '../../advisor/mapper/advisor.mapper'
+import { AllocationMapper } from '../../allocation/mapper/allocation.mapper'
 import { StatusEnum } from '../../../core/enums/StatusEnum'
 
 export class ScholarshipMapper {
@@ -17,6 +18,7 @@ export class ScholarshipMapper {
     return {
       id: scholarship.id,
       agency_id: scholarship.agency_id,
+      allocation_id: scholarship.allocation_id,
       enrollment_id: scholarship.enrollment_id,
       status: scholarship.status,
       created_at: scholarship.created_at,
@@ -40,6 +42,9 @@ export class ScholarshipMapper {
     const agency = scholarship.agency
       ? AgencyMapper.simplified(scholarship.agency)
       : null
+    const allocation = scholarship.allocation
+      ? AllocationMapper.simplified(scholarship.allocation)
+      : null
     const enrollment = scholarship.enrollment
       ? EnrollmentMapper.detailed(scholarship.enrollment)
       : null
@@ -60,6 +65,7 @@ export class ScholarshipMapper {
       created_at: scholarship.created_at,
       updated_at: scholarship.updated_at,
       agency,
+      allocation,
       enrollment,
       student,
       advisor

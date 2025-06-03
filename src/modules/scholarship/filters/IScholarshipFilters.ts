@@ -3,6 +3,7 @@ export interface ScholarshipFilters {
   agencyName?: string
   advisorName?: string
   programName?: string
+  allocationName?: string
   orderBy?: string
   studentName?: string
 }

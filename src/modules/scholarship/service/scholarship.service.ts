@@ -72,6 +72,7 @@ export class ScholarshipService {
     const findOptions: FindManyOptions<Scholarship> = {
       relations: [
         'agency',
+        'allocation',
         'enrollment',
         'enrollment.student',
         'enrollment.advisor'
@@ -91,6 +92,11 @@ export class ScholarshipService {
     if (filters?.agencyName && filters?.agencyName !== 'ALL') {
       findOptions.where['agency'] = {
         name: Like(`%${filters.agencyName}%`)
+      }
+    }
+    if (filters?.allocationName && filters?.allocationName !== 'ALL') {
+      findOptions.where['allocation'] = {
+        name: Like(`%${filters.allocationName}%`)
       }
     }
     if (filters?.programName && filters?.programName !== 'ALL') {
@@ -262,6 +268,7 @@ export class ScholarshipService {
         {
           enrollment_id: enrollment.id,
           agency: { id: dto.agency_id },
+          allocation: { id: dto.allocation_id },
           salary: dto.salary,
           scholarship_starts_at: dto.scholarship_starts_at,
           scholarship_ends_at: dto.scholarship_ends_at,
@@ -296,6 +303,7 @@ export class ScholarshipService {
         extension_ends_at: dto.extension_ends_at,
         status: dto.status || scholarship.status,
         agency_id: dto.agency_id || scholarship.agency_id,
+        allocation_id: dto.allocation_id || scholarship.allocation_id,
         scholarship_starts_at:
           dto.scholarship_starts_at || scholarship.scholarship_starts_at,
         scholarship_ends_at:
