@@ -108,8 +108,11 @@ export class StudentService {
         error,
         `Student Email: ${dto.email}`
       )
+      const errorMessage = String(error.message).includes('duplicate key')
+        ? 'Email or CPF already in use'
+        : error.message
       throw new BadRequestException(
-        error.message || constants.exceptionMessages.student.CREATION_FAILED
+        errorMessage || constants.exceptionMessages.student.CREATION_FAILED
       )
     }
   }
