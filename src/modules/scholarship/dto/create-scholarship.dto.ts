@@ -24,6 +24,10 @@ export class CreateScholarshipDto {
   @IsIn(['CAPES', 'CNPQ', 'FAPESB', 'OUTRAS'])
   readonly agency_name: string
 
+  @IsString()
+  @Transform(({value}) => value.toUpperCase())
+  readonly allocation_name: string
+
   @Type(() => Date)
   @IsDate()
   readonly scholarship_starts_at: Date

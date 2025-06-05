@@ -15,6 +15,7 @@ import { ScholarshipMapper } from '../mapper/scholarship.mapper'
 import { ScholarshipFilters } from '../filters/IScholarshipFilters'
 import { StudentService } from '../../../modules/student/service/student.service'
 import { AgencyService } from '../../../modules/agency/service/agency.service'
+import { AllocationService } from '../../../modules/allocation/service/allocation.service'
 import { EnrollmentService } from '../../../modules/enrollment/services/enrollment.service'
 import { CreateScholarshipDto } from '../dto/create-scholarship.dto'
 import { UpdateScholarshipDto } from '../dto/update-scholarship.dto'
@@ -39,6 +40,7 @@ export class ScholarshipService {
     @InjectRepository(Scholarship)
     private scholarshipRepository: Repository<Scholarship>,
     private agencyService: AgencyService,
+    private allocationService: AllocationService,
     private enrollmentService: EnrollmentService,
     private studentService: StudentService
   ) {}
@@ -72,6 +74,7 @@ export class ScholarshipService {
     const findOptions: FindManyOptions<Scholarship> = {
       relations: [
         'agency',
+        'allocation',
         'enrollment',
         'enrollment.student',
         'enrollment.advisor'
@@ -91,6 +94,11 @@ export class ScholarshipService {
     if (filters?.agencyName && filters?.agencyName !== 'ALL') {
       findOptions.where['agency'] = {
         name: Like(`%${filters.agencyName}%`)
+      }
+    }
+    if (filters?.allocationName && filters?.allocationName !== 'ALL') {
+      findOptions.where['allocation'] = {
+        name: Like(`%${filters.allocationName}%`)
       }
     }
     if (filters?.programName && filters?.programName !== 'ALL') {
@@ -189,6 +197,7 @@ export class ScholarshipService {
     this.logger.log(constants.exceptionMessages.scholarship.CREATION_STARTED)
     try {
       const agency = await this.agencyService.findOneByName(dto.agency_name)
+      const allocation = await this.allocationService.findOneByName(dto.allocation_name)
       const enrollment =
         await this.enrollmentService.findOneByStudentEmailAndEnrollmentNumber(
           dto.student_email,
@@ -198,6 +207,7 @@ export class ScholarshipService {
       const scholarship = await this.scholarshipRepository.findOneBy({
         enrollment_id: enrollment.id,
         agency_id: agency.id,
+        allocation_id: allocation.id,
         salary: dto.salary,
         scholarship_starts_at: dto.scholarship_starts_at,
         scholarship_ends_at: dto.scholarship_ends_at
@@ -215,6 +225,7 @@ export class ScholarshipService {
 
       const newScholarship = this.scholarshipRepository.create({
         agency_id: agency.id,
+        allocation_id: allocation.id,
         enrollment_id: enrollment.id,
         scholarship_starts_at: dto.scholarship_starts_at,
         scholarship_ends_at: dto.scholarship_ends_at,
@@ -237,7 +248,8 @@ export class ScholarshipService {
         error.message,
         `Student Email: ${dto.student_email}`,
         `Enrollment Number: ${dto.enrollment_number}`,
-        `Agency Name: ${dto.agency_name}`
+        `Agency Name: ${dto.agency_name}`,
+        `Allocation Name: ${dto.allocation_name}`
       )
       throw new BadRequestException(
         error.message
@@ -262,6 +274,7 @@ export class ScholarshipService {
         {
           enrollment_id: enrollment.id,
           agency: { id: dto.agency_id },
+          allocation: { id: dto.allocation_id },
           salary: dto.salary,
           scholarship_starts_at: dto.scholarship_starts_at,
           scholarship_ends_at: dto.scholarship_ends_at,
@@ -296,6 +309,7 @@ export class ScholarshipService {
         extension_ends_at: dto.extension_ends_at,
         status: dto.status || scholarship.status,
         agency_id: dto.agency_id || scholarship.agency_id,
+        allocation_id: dto.allocation_id || scholarship.allocation_id,
         scholarship_starts_at:
           dto.scholarship_starts_at || scholarship.scholarship_starts_at,
         scholarship_ends_at:

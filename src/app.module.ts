@@ -11,6 +11,7 @@ import { AdvisorModule } from './modules/advisor/advisor.module'
 import { ScholarshipModule } from './modules/scholarship/scholarship.module'
 import { AdminModule } from './modules/admin/admin.module'
 import { AgencyModule } from './modules/agency/agency.module'
+import { AllocationModule } from './modules/allocation/allocation.module'
 import { EmbedNotificationModule } from './modules/embed-notification/embed-notification.module'
 import { DataManagerModule } from './modules/data-manager/data-manager.module'
 import { NotificationModule } from './services/ending-scholarship-notification/notification.module'
@@ -42,7 +43,8 @@ require('dotenv')
     EmbedNotificationModule,
     PasswordRecoveryModule,
     DataManagerModule,
-    CronTasksModule
+    CronTasksModule,
+    AllocationModule
   ],
   controllers: [],
   providers: []

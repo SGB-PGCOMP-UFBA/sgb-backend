@@ -29,7 +29,6 @@ export class CreateStudentDto {
   })
   readonly link_to_lattes: string
 
-  @IsOptional()
   @IsString({ message: constants.bodyValidationMessages.TAX_ID_FORMAT_ERROR })
   @Length(11, 11, {
     message: constants.bodyValidationMessages.TAX_ID_FORMAT_ERROR

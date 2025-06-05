@@ -66,6 +66,10 @@ const constants = {
       CREATION_FAILED: "Cant't create agency.",
       NOT_FOUND: 'Agency not found.'
     },
+    allocation: {
+      CREATION_FAILED: "Cant't create allocation.",
+      NOT_FOUND: 'Allocation not found.'
+    },
     notification: {
       CREATION_COMPLETED:
         'The process of inserting a new notification has been completed.',
