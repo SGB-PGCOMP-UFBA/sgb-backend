@@ -432,6 +432,35 @@ export class ScholarshipService {
     }
   }
 
+  async countFinishedScholarshipsGroupingByAgencyForCourse(programName: string) {
+    try {
+      const result = await this.scholarshipRepository
+        .createQueryBuilder('scholarship')
+        .innerJoin('scholarship.agency', 'agency')
+        .innerJoin('scholarship.enrollment', 'enrollment')
+        .where('scholarship.status IN (:...statuses)', {
+          statuses: ['FINISHED']
+        })
+        .andWhere('enrollment.enrollment_program = :course', {
+          course: programName
+        })
+        .select([
+          'agency.name as agency_name',
+          'enrollment.enrollment_program as course_name',
+          'COUNT(scholarship.id) as count'
+        ])
+        .groupBy('agency.name, enrollment.enrollment_program')
+        .orderBy('agency.name', 'ASC')
+        .getRawMany()
+
+      return result
+    } catch (error) {
+      throw new InternalServerErrorException(
+        constants.exceptionMessages.scholarship.COUNT_FAILED
+      )
+    }
+  }
+
   async countScholarshipsGroupingByStatusForAgency(agencyName: string) {
     try {
       const result = await this.scholarshipRepository
