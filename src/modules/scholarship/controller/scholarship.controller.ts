@@ -65,13 +65,21 @@ export class ScholarshipController {
   @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async countOnGoingScholarshipsGroupingByAgencyForCourse(
-    @Query('programName') programName?: string
+    @Query('programName') programName?: string,
+    @Query('scholarshipStatus') scholharShip?: string
   ) {
-    const resultCount =
-      await this.scholarshipService.countOnGoingScholarshipsGroupingByAgencyForCourse(
-        programName
-      )
+    let resultCount: any[]
 
+    if (scholharShip && scholharShip == 'FINISHED')
+      resultCount =
+        await this.scholarshipService.countFinishedScholarshipsGroupingByAgencyForCourse(
+          programName
+        )
+    else
+      resultCount =
+        await this.scholarshipService.countOnGoingScholarshipsGroupingByAgencyForCourse(
+          programName
+        )
     return ScholarshipMapper.countOnGoingScholarshipsGroupingByAgencyForCourse(
       resultCount
     )
