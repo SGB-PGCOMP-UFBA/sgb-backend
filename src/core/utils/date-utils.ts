@@ -1,4 +1,6 @@
 import * as moment from 'moment'
+import { Enrollment } from 'src/modules/enrollment/entities/enrollment.entity'
+import { constants } from './constants'
 
 function getDatePlusDays(days: number): Date {
   const actualDate = new Date()
@@ -61,4 +63,37 @@ export function parseDate(dateString, formats = allDateFormats) {
   return null
 }
 
-export { getDatePlusDays, formatterDate, formatDate, formattedNow, today }
+function validateScholarshipDuration(
+  dates: { givenDate: Date; referenceDate: Date },
+  enrollment: Partial<Enrollment>,
+  extension?: boolean
+): { isValid: boolean; errorMessage: string } {
+  const validationObject = {
+    isValid: true,
+    errorMessage: ''
+  }
+
+  if (dates.givenDate.getTime() - dates.referenceDate.getTime() < 0) {
+    validationObject.isValid = false
+    validationObject.errorMessage = extension 
+      ? constants.exceptionMessages.dates.EXTENSION_DATE_SMALLER
+      : constants.exceptionMessages.dates.END_DATE_SMALLER
+    return validationObject
+  }
+
+  const scholarshipTimeLimitInYears = enrollment.enrollment_program === 'MESTRADO' ? 2 : 4
+  const maxDiffDate = new Date(
+    dates.givenDate.getTime() - dates.referenceDate.getTime()
+  )
+
+  if (maxDiffDate.getFullYear() - 1970 >= scholarshipTimeLimitInYears) {
+    validationObject.isValid = false
+    validationObject.errorMessage = extension
+      ? constants.exceptionMessages.dates.EXTENSION_DATE_EXCEEDED
+      : constants.exceptionMessages.dates.END_DATE_EXCEEDED
+  }
+
+  return validationObject
+}
+
+export { getDatePlusDays, formatterDate, formatDate, formattedNow, today, validateScholarshipDuration }
