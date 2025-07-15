@@ -19,7 +19,7 @@ import { AllocationService } from '../../../modules/allocation/service/allocatio
 import { EnrollmentService } from '../../../modules/enrollment/services/enrollment.service'
 import { CreateScholarshipDto } from '../dto/create-scholarship.dto'
 import { UpdateScholarshipDto } from '../dto/update-scholarship.dto'
-import { today } from '../../../core/utils/date-utils'
+import { validateScholarshipDuration } from '../../../core/utils/date-utils'
 
 const orderByMapping = {
   DAT_MATRICULA_ASC: ['enrollment', 'enrollment_date', 'ASC'],
@@ -223,6 +223,19 @@ export class ScholarshipService {
         )
       }
 
+      const isValidEndDate = validateScholarshipDuration(
+        {
+          givenDate: dto.scholarship_ends_at,
+          referenceDate: dto.scholarship_starts_at
+        },
+        enrollment
+      )
+      if (!isValidEndDate.isValid) {
+        this.logger.warn(isValidEndDate.errorMessage)
+
+        throw new BadRequestException(isValidEndDate.errorMessage)
+      }
+
       const newScholarship = this.scholarshipRepository.create({
         agency_id: agency.id,
         allocation_id: allocation.id,
@@ -301,6 +314,33 @@ export class ScholarshipService {
         throw new NotFoundException(
           constants.exceptionMessages.scholarship.NOT_FOUND
         )
+      }
+
+      const isValidEndDate = validateScholarshipDuration(
+        {
+          givenDate: dto.scholarship_ends_at,
+          referenceDate: dto.scholarship_starts_at
+        },
+        enrollment
+      )
+      if (!isValidEndDate.isValid) {
+        this.logger.warn(isValidEndDate.errorMessage)
+
+        throw new BadRequestException(isValidEndDate.errorMessage)
+      }
+
+      const isValidExtensionDate = validateScholarshipDuration(
+        {
+          givenDate: dto.extension_ends_at,
+          referenceDate: dto.scholarship_ends_at
+        },
+        enrollment,
+        true
+      )
+      if (!isValidExtensionDate.isValid) {
+        this.logger.warn(isValidExtensionDate.errorMessage)
+
+        throw new BadRequestException(isValidExtensionDate.errorMessage)
       }
 
       const updatedScholarship = await this.scholarshipRepository.save({

@@ -133,6 +133,12 @@ const constants = {
       PROCESS_FAILED: 'Error processing the CSV file.',
       PROCESS_COMPLETED: 'CSV file processed successfully.',
       DELETE_FAILED: 'Failed to delete data.'
+    },
+    dates: {
+      END_DATE_SMALLER: "End date can't be smaller than the start date",
+      END_DATE_EXCEEDED: "End date can't exceed the estimated limit",
+      EXTENSION_DATE_SMALLER: "Extension date can't be smaller than the end date",
+      EXTENSION_DATE_EXCEEDED: "Extension date can't exceed the 6 months limit",
     }
   }
 }
