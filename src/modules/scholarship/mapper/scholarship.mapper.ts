@@ -91,7 +91,7 @@ export class ScholarshipMapper {
       created_at: scholarship.created_at,
       updated_at: scholarship.updated_at,
       agency,
-      allocation,
+      allocation
     }
   }
 
@@ -140,5 +140,97 @@ export class ScholarshipMapper {
     })
 
     return result
+  }
+
+  static countAllScholarshipsGroupingBetweenDates(counts) {
+    interface AgencyScholarshipReport {
+      agencyName: string
+      scholarshipsTotal: number
+      totalMasters: number
+      totalPhd: number
+      activeCount: DegreeCount
+      inactiveCount: DegreeCount
+      finishedCount: DegreeCount
+      onGoingCount: DegreeCount
+      extendedCount: DegreeCount
+    }
+
+    interface DegreeCount {
+      masters: number
+      phd: number
+    }
+
+    const statusKeyMap: Record<string, string> = {
+      ACTIVE: 'activeCount',
+      INACTIVE: 'inactiveCount',
+      FINISHED: 'finishedCount',
+      ON_GOING: 'onGoingCount',
+      EXTENDED: 'extendedCount'
+    }
+
+    const requiredAgencies = ['CNPQ', 'CAPES', 'FAPESB']
+
+    const initialData: Record<string, AgencyScholarshipReport> = {}
+
+    requiredAgencies.forEach((name) => {
+      initialData[name] = {
+        agencyName: name,
+        scholarshipsTotal: 0,
+        totalMasters: 0,
+        totalPhd: 0,
+        activeCount: { masters: 0, phd: 0 },
+        inactiveCount: { masters: 0, phd: 0 },
+        finishedCount: { masters: 0, phd: 0 },
+        onGoingCount: { masters: 0, phd: 0 },
+        extendedCount: { masters: 0, phd: 0 }
+      }
+    })
+
+    const groupedData = counts.reduce((acc: AgencyScholarshipReport, row) => {
+      const name = row.agency_name
+      const status = row.status // ACTIVE, INACTIVE, FINISHED, ON_GOING, EXTENDED
+
+      if (!acc[name]) {
+        acc[name] = {
+          agencyName: name,
+          scholarshipsTotal: 0,
+          totalMasters: 0,
+          totalPhd: 0,
+          activeCount: { masters: 0, phd: 0 },
+          inactiveCount: { masters: 0, phd: 0 },
+          finishedCount: { masters: 0, phd: 0 },
+          onGoingCount: { masters: 0, phd: 0 },
+          extendedCount: { masters: 0, phd: 0 }
+        }
+      }
+
+      const mCount = Number(row.masters_count)
+      const pCount = Number(row.phd_count)
+
+      acc[name].scholarshipsTotal += mCount + pCount
+      acc[name].totalMasters += mCount
+      acc[name].totalPhd += pCount
+
+      const targetKey = statusKeyMap[status]
+
+      if (targetKey) {
+        acc[name][targetKey].masters += mCount
+        acc[name][targetKey].phd += pCount
+      }
+
+      return acc
+    }, initialData)
+
+    return Object.values(groupedData).sort(
+      (a: AgencyScholarshipReport, b: AgencyScholarshipReport) => {
+        const indexA = requiredAgencies.indexOf(a.agencyName)
+        const indexB = requiredAgencies.indexOf(b.agencyName)
+
+        const posA = indexA === -1 ? 99 : indexA
+        const posB = indexB === -1 ? 99 : indexB
+
+        return posA - posB
+      }
+    )
   }
 }

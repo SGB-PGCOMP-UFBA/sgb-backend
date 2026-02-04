@@ -1,4 +1,5 @@
 import { jsPDF } from 'jspdf'
+import autoTable from 'jspdf-autotable'
 import { Injectable } from '@nestjs/common'
 import { ScholarshipService } from '../../..//modules/scholarship/service/scholarship.service'
 import {
@@ -8,6 +9,7 @@ import {
   getScholarshipsSplitedByStartingYear,
   getScholarshipsSplitedByEndingYear
 } from './pdf-reports.helper'
+import { QuadrennialReportDto } from '../dtos/quadrennial-report.dto'
 
 @Injectable()
 export class PdfReportService {
@@ -269,6 +271,136 @@ export class PdfReportService {
         margins
       })
     }
+
+    return doc.output('arraybuffer')
+  }
+
+  async generateQuadrennialPDF(
+    dto: QuadrennialReportDto
+  ): Promise<ArrayBuffer> {
+    const doc = new jsPDF({
+      unit: 'mm',
+      format: 'a4',
+      orientation: 'portrait'
+    })
+
+    const docWidth = doc.internal.pageSize.getWidth()
+    let currentY = 20
+
+    // Cabeçalho Principal do Relatório
+    doc.setFontSize(16).setFont('times', 'bold')
+    doc.text(
+      'RELATÓRIO QUADRIENAL DE BOLSAS - PGCOMP',
+      docWidth / 2,
+      currentY,
+      {
+        align: 'center'
+      }
+    )
+
+    currentY += 8
+    doc.setFontSize(11).setFont('times', 'normal')
+    doc.text(
+      `Período: ${dto.startDate} até ${dto.endDate}`,
+      docWidth / 2,
+      currentY,
+      {
+        align: 'center'
+      }
+    )
+
+    currentY += 10
+    doc.setFontSize(10).setFont('times', 'italic')
+    doc.text(
+      `Emitido em: ${new Date().toLocaleString('pt-BR')}`,
+      docWidth - 20,
+      currentY,
+      {
+        align: 'right'
+      }
+    )
+
+    currentY += 10
+
+    // Iterar por cada agência para criar tabelas separadas
+    dto.data.forEach((agency, index) => {
+      // Verificar se a nova tabela cabe na página, senão cria nova página
+      if (currentY > 215) {
+        doc.addPage()
+        currentY = 20
+      }
+
+      // Título da Agência (Nome da Agência)
+      doc.setFontSize(12).setFont('times', 'bold')
+      doc.setTextColor(237, 108, 2)
+      doc.text(agency.agencyName.toUpperCase(), 14, currentY)
+      doc.setTextColor(0, 0, 0)
+
+      // Estrutura de dados
+      const tableBody: any[][] = [
+        ['Ativas', agency.activeCount.masters, agency.activeCount.phd],
+        ['Em Andamento', agency.onGoingCount.masters, agency.onGoingCount.phd],
+        ['Prorrogadas', agency.extendedCount.masters, agency.extendedCount.phd],
+        ['Concluídas', agency.finishedCount.masters, agency.finishedCount.phd],
+        [
+          {
+            content: 'TOTAL TIPO BOLSA',
+            styles: { fontStyle: 'bold', fillColor: [240, 240, 240] }
+          },
+          {
+            content: agency.totalMasters,
+            styles: {
+              halign: 'center',
+              fontStyle: 'bold',
+              fillColor: [240, 240, 240]
+            }
+          },
+          {
+            content: agency.totalPhd,
+            styles: {
+              halign: 'center',
+              fontStyle: 'bold',
+              fillColor: [240, 240, 240]
+            }
+          }
+        ],
+        [
+          { content: 'TOTAL GERAL', styles: { fontStyle: 'bold' } },
+          {
+            content: agency.scholarshipsTotal,
+            colSpan: 2,
+            styles: { halign: 'center', fontStyle: 'bold' }
+          }
+        ]
+      ]
+
+      autoTable(doc, {
+        startY: currentY + 2,
+        head: [['Status da Bolsa', 'Mestrado', 'Doutorado']],
+        body: tableBody,
+        theme: 'grid',
+        headStyles: {
+          fillColor: [60, 60, 60],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold'
+        },
+        styles: {
+          font: 'times',
+          fontSize: 10,
+          cellPadding: 3
+        },
+        columnStyles: {
+          0: { cellWidth: 80 }, // Status
+          1: { halign: 'center' }, // Mestrado
+          2: { halign: 'center' } // Doutorado
+        },
+        margin: { left: 14, right: 14 },
+        pageBreak: 'auto'
+      })
+
+      // Atualiza o Y para a próxima agência baseada no final da tabela anterior
+      currentY = (doc as any).lastAutoTable.finalY + 15
+    })
 
     return doc.output('arraybuffer')
   }
