@@ -21,6 +21,7 @@ import { UpdateScholarshipDto } from '../dto/update-scholarship.dto'
 import { Roles } from '../../../modules/auth/decorators/role.decorator'
 import { RolesGuard } from '../../../modules/auth/guards/roles.guard'
 import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
+import { CountScholarshipsAsReportBetweenDatesDto } from '../dto/count-scholarship-courses-between-dates.dto'
 
 @Controller('v1/scholarship')
 export class ScholarshipController {
@@ -100,9 +101,13 @@ export class ScholarshipController {
   @Get('/count/by-course-and-year/:agencyName')
   @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  async countScholarshipsGroupingByCourseAndYearFilteringByAgency(@Param('agencyName') agencyName: string) {
+  async countScholarshipsGroupingByCourseAndYearFilteringByAgency(
+    @Param('agencyName') agencyName: string
+  ) {
     const resultCount =
-      await this.scholarshipService.countScholarshipsGroupingByCourseAndYearFilteringByAgencyName(agencyName)
+      await this.scholarshipService.countScholarshipsGroupingByCourseAndYearFilteringByAgencyName(
+        agencyName
+      )
 
     return ScholarshipMapper.countScholarshipsGroupingByCourseAndYear(
       resultCount
@@ -123,6 +128,20 @@ export class ScholarshipController {
     return ScholarshipMapper.countScholarshipsGroupingByStatusForAgency(
       resultCount,
       agencyName
+    )
+  }
+
+  @Get('/report/all-between-dates')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async countScholarshipsAsReportBetweenDates(
+    @Query() dto: CountScholarshipsAsReportBetweenDatesDto
+  ) {
+    const resultCount =
+      await this.scholarshipService.countScholarshipsAsReportBetweenDates(dto)
+
+    return ScholarshipMapper.countAllScholarshipsGroupingBetweenDates(
+      resultCount
     )
   }
 
