@@ -338,14 +338,16 @@ export class ScholarshipService {
         throw new BadRequestException(isValidEndDate.errorMessage)
       }
 
-      const isValidExtensionDate = validateScholarshipDuration(
-        {
-          givenDate: dto.extension_ends_at,
-          referenceDate: dto.scholarship_ends_at
-        },
-        enrollment,
-        true
-      )
+      const isValidExtensionDate = dto.extension_ends_at
+        ? validateScholarshipDuration(
+            {
+              givenDate: dto.extension_ends_at,
+              referenceDate: dto.scholarship_ends_at
+            },
+            enrollment,
+            true
+          )
+        : { isValid: true, errorMessage: '' }
       if (!isValidExtensionDate.isValid) {
         this.logger.warn(isValidExtensionDate.errorMessage)
 
