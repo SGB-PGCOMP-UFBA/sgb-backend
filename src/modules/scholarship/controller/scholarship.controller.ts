@@ -145,6 +145,19 @@ export class ScholarshipController {
     )
   }
 
+  @Get('/filtered-students-emails')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async copyFilteredScholarshipsStudentsEmails(
+    @Query() filters?: ScholarshipFilters
+  ) {
+    const emailsArray =
+      await this.scholarshipService.copyFilteredScholarshipsStudentsEmails(
+        filters
+      )
+    return ScholarshipMapper.copyFilteredScholarshipsStudentsEmails(emailsArray)
+  }
+
   @Patch(':id')
   @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES', 'STUDENT')
   @UseGuards(JwtAuthGuard, RolesGuard)

@@ -233,4 +233,8 @@ export class ScholarshipMapper {
       }
     )
   }
+
+  static copyFilteredScholarshipsStudentsEmails(emailsArray: string[]) {
+    return emailsArray.join(', ')
+  }
 }

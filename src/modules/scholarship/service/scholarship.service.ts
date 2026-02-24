@@ -575,4 +575,61 @@ export class ScholarshipService {
       )
     }
   }
+
+  async copyFilteredScholarshipsStudentsEmails(filters: ScholarshipFilters): Promise<string[]> {
+    try {
+      const query = this.scholarshipRepository
+        .createQueryBuilder('scholarship')
+        .innerJoin('scholarship.enrollment', 'enrollment')
+        .innerJoin('enrollment.student', 'student')
+        .leftJoin('scholarship.agency', 'agency')
+        .leftJoin('scholarship.allocation', 'allocation')
+        .leftJoin('enrollment.advisor', 'advisor')
+        .select('DISTINCT student.email', 'email')
+
+      if (filters?.scholarshipStatus && filters?.scholarshipStatus !== 'ALL') {
+        if (filters?.scholarshipStatus === 'ON_GOING') {
+          query.andWhere('scholarship.status IN (:...statuses)', {
+            statuses: ['ON_GOING', 'EXTENDED']
+          })
+        } else {
+          query.andWhere('scholarship.status LIKE :status', {
+            status: `%${filters.scholarshipStatus}%`
+          })
+        }
+      }
+
+      if (filters?.agencyName && filters?.agencyName !== 'ALL') {
+        query.andWhere('agency.name LIKE :agencyName', {
+          agencyName: `%${filters.agencyName}%`
+        })
+      }
+
+      if (filters?.allocationName && filters?.allocationName !== 'ALL') {
+        query.andWhere('allocation.name LIKE :allocationName', {
+          allocationName: `%${filters.allocationName}%`
+        })
+      }
+
+      if (filters?.programName && filters?.programName !== 'ALL') {
+        query.andWhere('enrollment.enrollment_program LIKE :programName', {
+          programName: `%${filters.programName}%`
+        })
+      }
+
+      if (filters?.advisorName && filters?.advisorName !== 'ALL') {
+        query.andWhere('advisor.name LIKE :advisorName', {
+          advisorName: `%${filters.advisorName}%`
+        })
+      }
+
+      const rawResults = await query.getRawMany()
+
+      return rawResults.map((row) => row.email)
+    } catch (error) {
+      console.error('Erro ao buscar e-mails:', error)
+      throw new InternalServerErrorException('Falha ao gerar lista de e-mails.')
+    }
+  }
+
 }
