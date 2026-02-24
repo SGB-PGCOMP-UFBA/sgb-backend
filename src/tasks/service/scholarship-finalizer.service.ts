@@ -24,6 +24,11 @@ export class ScholarShipFinalizerService {
     this.logger.log(`[${scholarships.length}] scholarships found to be finalized today.`)
 
     for (const scholarship of scholarships) {
+      if (scholarship.status === 'ON_GOING' && !!scholarship.extension_ends_at) {
+        await this.scholarshipService.extendScholarship(scholarship.id)
+        continue
+      }
+  
       await this.scholarshipService.finishScholarship(scholarship.id)
       await this.notifyStudentAndAdvisor(scholarship)
       this.logger.log(`Scholarship [${scholarship.id}] finished!`)

@@ -408,6 +408,16 @@ export class ScholarshipService {
     }
   }
 
+  async extendScholarship(id: number): Promise<void> {
+    try {
+      await this.scholarshipRepository.update(id, { status: 'EXTENDED' })
+    } catch (error) {
+      throw new InternalServerErrorException(
+        constants.exceptionMessages.scholarship.EXTEND_FAILED
+      )
+    }
+  }
+
   async countScholarshipsGroupingByCourseAndYear() {
     try {
       const result = await this.scholarshipRepository
@@ -576,7 +586,9 @@ export class ScholarshipService {
     }
   }
 
-  async copyFilteredScholarshipsStudentsEmails(filters: ScholarshipFilters): Promise<string[]> {
+  async copyFilteredScholarshipsStudentsEmails(
+    filters: ScholarshipFilters
+  ): Promise<string[]> {
     try {
       const query = this.scholarshipRepository
         .createQueryBuilder('scholarship')
@@ -631,5 +643,4 @@ export class ScholarshipService {
       throw new InternalServerErrorException('Falha ao gerar lista de e-mails.')
     }
   }
-
 }

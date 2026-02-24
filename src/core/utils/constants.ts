@@ -111,6 +111,7 @@ const constants = {
       CREATION_FAILED: "Cant't create scholarship.",
       UPDATE_FAILED: "Cant't update scholarship.",
       FINISH_FAILED: "Can't finish this scholarship.",
+      EXTEND_FAILED: "Can't extend this scholarship.",
       NOT_FOUND: 'Scholarship not found.',
       COUNT_FAILED: 'Failed to count scholarships.',
       DELETE_ALL_STARTED:
