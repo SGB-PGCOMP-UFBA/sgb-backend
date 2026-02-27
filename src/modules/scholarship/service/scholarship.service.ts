@@ -9,6 +9,7 @@ import {
   FindManyOptions,
   ILike,
   In,
+  IsNull,
   LessThanOrEqual,
   Like,
   Repository
@@ -300,7 +301,7 @@ export class ScholarshipService {
           salary: dto.salary,
           scholarship_starts_at: dto.scholarship_starts_at,
           scholarship_ends_at: dto.scholarship_ends_at,
-          extension_ends_at: dto.extension_ends_at
+          extension_ends_at: dto.extension_ends_at ?? IsNull()
         }
       )
 
