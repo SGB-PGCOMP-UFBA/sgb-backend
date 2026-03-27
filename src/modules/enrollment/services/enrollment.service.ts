@@ -72,6 +72,18 @@ export class EnrollmentService {
     return enrollment
   }
 
+  async verifyExistentByStudentEmailAndNumber(
+    student_email: string,
+    enrollment_number: string
+  ): Promise<Enrollment> {
+    const enrollment = await this.enrollmentRepository.findOneBy({
+      student: { email: student_email },
+      enrollment_number
+    })
+
+    return enrollment
+  }
+
   async create(dto: CreateEnrollmentDto): Promise<Enrollment> {
     this.logger.log(constants.exceptionMessages.enrollment.CREATION_STARTED)
 

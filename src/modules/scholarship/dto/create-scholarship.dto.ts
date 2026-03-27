@@ -45,9 +45,9 @@ export class CreateScholarshipDto {
   @IsOptional()
   @Type(() => Date)
   @IsDate()
-  readonly extension_ends_at: Date
+  readonly extension_ends_at?: Date
 
   @IsOptional()
   @IsNumber()
-  readonly salary: number
+  readonly salary?: number
 }
