@@ -82,11 +82,10 @@ function validateScholarshipDuration(
   }
 
   const scholarshipTimeLimitInYears = enrollment.enrollment_program === 'MESTRADO' ? 2 : 4
-  const maxDiffDate = new Date(
-    dates.givenDate.getTime() - dates.referenceDate.getTime()
-  )
+  const limitDate = new Date(dates.referenceDate)
+  limitDate.setFullYear(limitDate.getFullYear() + scholarshipTimeLimitInYears)
 
-  if (maxDiffDate.getFullYear() - 1970 >= scholarshipTimeLimitInYears) {
+  if (dates.givenDate > limitDate) {
     validationObject.isValid = false
     validationObject.errorMessage = extension
       ? constants.exceptionMessages.dates.EXTENSION_DATE_EXCEEDED
