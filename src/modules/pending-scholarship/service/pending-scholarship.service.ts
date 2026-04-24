@@ -1,6 +1,8 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
+  InternalServerErrorException,
   Logger,
   NotFoundException
 } from '@nestjs/common'
@@ -20,10 +22,14 @@ import { UpdateScholarshipCsvUtil } from 'src/modules/data-manager/utils/update-
 import { ApprovePendingScholarshipDto } from '../dto/approve-pending-scholarship.dto'
 import { ScholarshipService } from 'src/modules/scholarship/service/scholarship.service'
 import { AgencyEnum } from 'src/core/enums/AgencyEnum'
+import { Student } from 'src/modules/student/entities/student.entity'
+import { Enrollment } from 'src/modules/enrollment/entities/enrollment.entity'
+import { Response } from 'express'
+import { EmailService } from 'src/services/email-sending/service/email.service'
 
 @Injectable()
 export class PendingScholarshipService {
-  private readonly logger = new Logger(StudentService.name)
+  private readonly logger = new Logger(PendingScholarshipService.name)
 
   constructor(
     @InjectRepository(PendingScholarship)
@@ -31,7 +37,8 @@ export class PendingScholarshipService {
     private readonly studentService: StudentService,
     private readonly advisorService: AdvisorService,
     private readonly enrollmentService: EnrollmentService,
-    private readonly scholarshipSerice: ScholarshipService
+    private readonly scholarshipService: ScholarshipService,
+    private readonly emailService: EmailService
   ) {}
 
   async create(dto: CreatePendingScholarshipDto): Promise<PendingScholarship> {
@@ -44,7 +51,10 @@ export class PendingScholarshipService {
     if (existentPendingScholarship) return null
 
     const newPendingScholarship = this.pendingScholarshipRepository.create(dto)
-    return await this.pendingScholarshipRepository.save(newPendingScholarship)
+    const pendingScholarship = await this.pendingScholarshipRepository.save(
+      newPendingScholarship
+    )
+    return pendingScholarship
   }
 
   async findAll(): Promise<PendingScholarship[]> {
@@ -67,7 +77,24 @@ export class PendingScholarshipService {
     })
   }
 
-  async approve(dto: ApprovePendingScholarshipDto) {
+  async delete(id: number) {
+    const pendingScholarhsip =
+      await this.pendingScholarshipRepository.findOneBy({ id })
+    if (!pendingScholarhsip)
+      throw new NotFoundException(
+        `Can't delete data: ${constants.exceptionMessages.pendingScholarship.NOT_FOUND}`
+      )
+    try {
+      await this.pendingScholarshipRepository.remove(pendingScholarhsip)
+    } catch (error) {
+      throw new InternalServerErrorException(
+        constants.exceptionMessages.pendingScholarship.DELETE_FAILED,
+        error.message
+      )
+    }
+  }
+
+  async approve(dto: ApprovePendingScholarshipDto, response: Response) {
     const pendingScholarhsip = await this.findOne(dto.id)
     if (!pendingScholarhsip)
       throw new NotFoundException(
@@ -76,46 +103,60 @@ export class PendingScholarshipService {
       )
 
     const temporaryPassword = generateRandomPassword()
+    let student: Student,
+      enrollment: Enrollment,
+      responseCode = 201,
+      sendEmail = true
 
     try {
       if (!Object.keys(AgencyEnum).includes(pendingScholarhsip.agency))
         throw new BadRequestException('Agency name is not valid.')
+
       const advisor = await this.advisorService.findOneById(dto.advisor_id)
+
       const existentEnrollment =
-        await this.enrollmentService.verifyExistentByStudentEmailAndNumber(
-          dto.email,
+        await this.enrollmentService.verifyExistentByNumber(
           dto.enrollment_number
         )
-      if (existentEnrollment)
-        throw new BadRequestException('Enrollment number already in use.')
 
-      await this.studentService.create({
-        email: dto.email,
-        name: pendingScholarhsip.student_name,
-        tax_id: pendingScholarhsip.tax_id,
-        password: temporaryPassword,
-        link_to_lattes: null,
-        phone_number: null
-      })
+      if (!existentEnrollment) {
+        student = await this.studentService.create({
+          email: dto.email,
+          name: pendingScholarhsip.student_name,
+          tax_id: pendingScholarhsip.tax_id,
+          password: temporaryPassword,
+          link_to_lattes: null,
+          phone_number: null
+        })
 
-      const createEnrollmentDto: CreateEnrollmentDto = {
-        student_email: dto.email,
-        advisor_email: advisor.email,
-        enrollment_number: dto.enrollment_number,
-        enrollment_program: pendingScholarhsip.enrollment_program,
-        defense_prediction_date: null,
-        enrollment_date: pendingScholarhsip.scholarship_starts_at
+        const createEnrollmentDto: CreateEnrollmentDto = {
+          student_email: dto.email,
+          advisor_email: advisor.email,
+          enrollment_number: dto.enrollment_number,
+          enrollment_program: pendingScholarhsip.enrollment_program,
+          defense_prediction_date: null,
+          enrollment_date: pendingScholarhsip.scholarship_starts_at
+        }
+        enrollment = await this.enrollmentService.create(createEnrollmentDto)
+      } else if (existentEnrollment.scholarships.length) {
+        throw new ConflictException('This enrollment already has an active scholarship.')
+      } else {
+        enrollment = existentEnrollment
+        student = existentEnrollment.student
+        await this.studentService.update({
+          current_email: student.email,
+          tax_id: pendingScholarhsip.tax_id
+        })
+        responseCode = 200
+        sendEmail = false
       }
-      const enrollment = await this.enrollmentService.create(
-        createEnrollmentDto
-      )
 
       const scholarshipStatus = UpdateScholarshipCsvUtil.defineStatus(
         pendingScholarhsip.scholarship_starts_at,
         pendingScholarhsip.scholarship_ends_at
       )
       const createScholarshipDto: CreateScholarshipDto = {
-        student_email: dto.email,
+        student_email: student.email,
         enrollment_number: enrollment.enrollment_number,
         agency_name: pendingScholarhsip.agency,
         allocation_name: 'REMOTO',
@@ -124,27 +165,32 @@ export class PendingScholarshipService {
         status: scholarshipStatus
       }
 
-      const scholarhsip = await this.scholarshipSerice.create(
-        createScholarshipDto
-      )
-
+      await this.scholarshipService.create(createScholarshipDto)
       await this.pendingScholarshipRepository.delete(pendingScholarhsip.id)
 
-      return scholarhsip
+      if(sendEmail)
+        await this.emailService.sendEmailStudentAutomaticallyRegistered(student.email, temporaryPassword)
+
+      return response.status(responseCode).send({ name: student.name, email: student.email })
+
     } catch (error) {
       if (error.response) {
+        this.logger.error('Aprove pending scholarship error', error.response.message)
+
         switch (error.response.statusCode) {
           case 400:
             throw new BadRequestException(error.response.message)
           case 404:
             throw new NotFoundException(error.response.message)
+          case 409:
+            throw new ConflictException(error.response.message)
           default:
             throw new BadRequestException(
               'Could not approve this student scholarhsip'
             )
         }
       }
-      this.logger.log('Aprove pending scholarship error', error)
+      this.logger.error('Aprove pending scholarship error', error)
       return error
     }
   }

@@ -121,6 +121,8 @@ const constants = {
     },
     pendingScholarship: {
       APROVE_NOT_FOUND: 'Pending scholarship not found to approve.',
+      NOT_FOUND: 'Pending scholarship not found.',
+      DELETE_FAILED: 'Could not delete. Database error.'
     },
     user: {
       SOMETHING_WRONG: 'Something went wrong.',

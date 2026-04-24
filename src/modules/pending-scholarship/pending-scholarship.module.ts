@@ -7,6 +7,7 @@ import { StudentModule } from '../student/student.module'
 import { AdvisorModule } from '../advisor/advisor.module'
 import { EnrollmentModule } from '../enrollment/enrollment.module'
 import { ScholarshipModule } from '../scholarship/scholarship.module'
+import { EmailModule } from 'src/services/email-sending/email.module'
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { ScholarshipModule } from '../scholarship/scholarship.module'
     StudentModule,
     AdvisorModule,
     EnrollmentModule,
-    ScholarshipModule
+    ScholarshipModule,
+    EmailModule
   ],
   controllers: [PendingScholarshipController],
   providers: [PendingScholarshipService],

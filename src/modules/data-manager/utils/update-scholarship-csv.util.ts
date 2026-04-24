@@ -3,7 +3,6 @@ import { Student } from 'src/modules/student/entities/student.entity'
 import { StudentService } from 'src/modules/student/service/student.service'
 import { Repository, UpdateResult } from 'typeorm'
 import { ListUpdatesFromImport } from '../dto/list-updates.dto'
-import { PendingScholarshipService } from 'src/modules/pending-scholarship/service/pending-scholarship.service'
 
 export interface ScholarshipRow {
   Nome: string
@@ -167,7 +166,7 @@ export class UpdateScholarshipCsvUtil {
       const updatesDone: ListUpdatesFromImport = {
         student_name: match.enrollment.student.name,
         student_email: match.enrollment.student.email,
-        description: ''
+        description: 'Esse registro recebeu atualização nos seguintes campos: '
       }
       const listOfUpdatedFields: string[] = []
 

@@ -3,6 +3,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import {
   BadRequestException,
+  ConflictException,
   NotFoundException
 } from '@nestjs/common/exceptions'
 import { AdvisorService } from '../../../modules/advisor/service/advisor.service'
@@ -72,15 +73,25 @@ export class EnrollmentService {
     return enrollment
   }
 
-  async verifyExistentByStudentEmailAndNumber(
-    student_email: string,
-    enrollment_number: string
-  ): Promise<Enrollment> {
-    const enrollment = await this.enrollmentRepository.findOneBy({
-      student: { email: student_email },
-      enrollment_number
-    })
+  async verifyExistentByNumber(enrollment_number: string): Promise<Enrollment> {
+    const query = this.enrollmentRepository
+      .createQueryBuilder('enrollment')
+      .addSelect(['scholarships.id', 'scholarships.status', 'student.email', 'student.name'])
+      .leftJoin(
+        'enrollment.scholarships',
+        'scholarships',
+        'scholarships.status IN (:...statuses)',
+        { statuses: ['ON_GOING', 'EXTENDED'] }
+      )
+      .leftJoin(
+        'enrollment.student',
+        'student',
+      )
+      .where(`enrollment.enrollment_number = :enrollmentNumber`, {
+        enrollmentNumber: enrollment_number
+      })
 
+    const enrollment = await query.getOne()
     return enrollment
   }
 
@@ -88,6 +99,9 @@ export class EnrollmentService {
     this.logger.log(constants.exceptionMessages.enrollment.CREATION_STARTED)
 
     try {
+      const existentEnollment = await this.enrollmentRepository.findOneBy({enrollment_number: dto.enrollment_number})
+      if (existentEnollment) throw new ConflictException(`Matrícula com código ${dto.enrollment_number} já existente no sistema`)
+
       const advisor = await this.advisorService.findOneByEmail(
         dto.advisor_email
       )
