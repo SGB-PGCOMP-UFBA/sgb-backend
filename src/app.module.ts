@@ -18,6 +18,7 @@ import { NotificationModule } from './services/ending-scholarship-notification/n
 import { ReportModule } from './services/pdf-reports/reports.module'
 import { PasswordRecoveryModule } from './services/password-recovery/password-recovery.module'
 import { CronTasksModule } from './tasks/cron-tasks.module'
+import { PendingScholarshipModule } from './modules/pending-scholarship/pending-scholarship.module';
 
 require('dotenv')
 
@@ -44,7 +45,8 @@ require('dotenv')
     PasswordRecoveryModule,
     DataManagerModule,
     CronTasksModule,
-    AllocationModule
+    AllocationModule,
+    PendingScholarshipModule
   ],
   controllers: [],
   providers: []

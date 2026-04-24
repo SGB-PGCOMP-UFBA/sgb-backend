@@ -73,7 +73,9 @@ function validateScholarshipDuration(
     errorMessage: ''
   }
 
-  if (dates.givenDate.getTime() - dates.referenceDate.getTime() < 0) {
+  const givenDateFormat = new Date(dates.givenDate), referenceDateFormat = new Date(dates.referenceDate)
+
+  if (givenDateFormat.getTime() - referenceDateFormat.getTime() < 0) {
     validationObject.isValid = false
     validationObject.errorMessage = extension 
       ? constants.exceptionMessages.dates.EXTENSION_DATE_SMALLER
@@ -85,7 +87,7 @@ function validateScholarshipDuration(
   const limitDate = new Date(dates.referenceDate)
   limitDate.setFullYear(limitDate.getFullYear() + scholarshipTimeLimitInYears)
 
-  if (dates.givenDate > limitDate) {
+  if (givenDateFormat > limitDate) {
     validationObject.isValid = false
     validationObject.errorMessage = extension
       ? constants.exceptionMessages.dates.EXTENSION_DATE_EXCEEDED

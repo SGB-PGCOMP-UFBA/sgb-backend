@@ -11,6 +11,11 @@ import { ImportObject } from '../dto/import-object.dto'
 import { constants } from '../../../core/utils/constants'
 import { parseDate } from '../../../core/utils/date-utils'
 import { isNotEmpty } from '../../../core/utils/string-utils'
+import { UpdateScholarshipCsvUtil } from '../utils/update-scholarship-csv.util'
+import { Scholarship } from 'src/modules/scholarship/entities/scholarship.entity'
+import { ListUpdatesFromImport } from '../dto/list-updates.dto'
+import { PendingScholarshipService } from 'src/modules/pending-scholarship/service/pending-scholarship.service'
+import { CreatePendingScholarshipDto } from 'src/modules/pending-scholarship/dto/create-pending-scholarship.dto'
 
 @Injectable()
 export class DataManagerCsvService {
@@ -19,7 +24,8 @@ export class DataManagerCsvService {
   constructor(
     private enrollmentService: EnrollmentService,
     private scholarshipService: ScholarshipService,
-    private studentService: StudentService
+    private studentService: StudentService,
+    private readonly pendingScholarshipService: PendingScholarshipService
   ) {}
 
   async exportDataToCsv() {
@@ -161,7 +167,18 @@ export class DataManagerCsvService {
     try {
       await new Promise<void>((resolve, reject) => {
         stream
-          .pipe(csvParser({ separator: ',' }))
+          .pipe(
+            csvParser({
+              separator: ',',
+              mapHeaders: ({ header }) => {
+                return header
+                  .trim()
+                  .replace(/[\s/]+/g, '_')
+                  .normalize('NFD')
+                  .replace(/[\u0300-\u036f]/g, '')
+              }
+            })
+          )
           .on('data', (data) => results.push(data))
           .on('end', () => resolve())
           .on('error', (error) => reject(error))
@@ -367,5 +384,73 @@ export class DataManagerCsvService {
         isNotEmpty(enrollment.enrollment_number) &&
         e.enrollment_number === enrollment.enrollment_number
     )
+  }
+
+  async updateScholarshipsDataFromCsv(file: File) {
+    const listUpdatesFromImport: ListUpdatesFromImport[] = []
+    const scholarshipRepository = this.scholarshipService.getRepository()
+    const dataFile = await this.processImportedFile(file)
+    const dataObject =
+      UpdateScholarshipCsvUtil.processDataToUpdateFile(dataFile)
+
+    this.logger.log(`${dataObject.length} bolsas para UFBA serão analisadas.`)
+
+    const scholarshipMatchesPromiseArray: Promise<Partial<Scholarship>>[] = []
+    dataObject.forEach((scholarship) => {
+      scholarshipMatchesPromiseArray.push(
+        this.scholarshipService.findForUpdate(scholarship)
+      )
+    })
+
+    const scholarshipMatches = await Promise.all(scholarshipMatchesPromiseArray)
+
+    const {
+      studentsToUpdatePromisses,
+      scholarshipsToUpdatePromisses,
+      newScholarshipsToAprove
+    } =
+      UpdateScholarshipCsvUtil.discriminateScholarshipMatchesForUpdateForInsert(
+        dataObject,
+        scholarshipMatches,
+        scholarshipRepository,
+        this.studentService,
+        listUpdatesFromImport
+      )
+
+    this.logger.log(
+      `${studentsToUpdatePromisses.length} bolsas serão atualizadas no sistema.`
+    )
+    await Promise.all(studentsToUpdatePromisses)
+    await Promise.all(scholarshipsToUpdatePromisses)
+
+    const newPendingScholarshipsPromisses = newScholarshipsToAprove.map(
+      (newScholarship) => {
+        const pendingScholarhsip: CreatePendingScholarshipDto = {
+          student_name: newScholarship.student.name,
+          tax_id: newScholarship.student.tax_id,
+          enrollment_program: newScholarship.enrollment.enrollment_program,
+          agency: newScholarship.agency,
+          scholarship_starts_at: newScholarship.startsAt,
+          scholarship_ends_at: newScholarship.endsAt
+        }
+        return this.pendingScholarshipService.create(pendingScholarhsip)
+      }
+    )
+
+    const pendingScholarships = await Promise.all(
+      newPendingScholarshipsPromisses
+    )
+    this.logger.log(
+      `${
+        pendingScholarships.filter((pendingScholarship) => {
+          return !!pendingScholarship
+        }).length
+      } nova(s) bolsa(s) foram encontradas e devem ser analisadas.`
+    )
+
+    return {
+      listUpdatesFromImport,
+      pendingScholarships
+    }
   }
 }

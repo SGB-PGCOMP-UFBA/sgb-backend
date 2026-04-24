@@ -29,6 +29,7 @@ import { CreateScholarshipDto } from '../dto/create-scholarship.dto'
 import { UpdateScholarshipDto } from '../dto/update-scholarship.dto'
 import { validateScholarshipDuration } from '../../../core/utils/date-utils'
 import { CountScholarshipsAsReportBetweenDatesDto } from '../dto/count-scholarship-courses-between-dates.dto'
+import { ProcessedScholarship } from 'src/modules/data-manager/utils/update-scholarship-csv.util'
 
 const orderByMapping = {
   DAT_MATRICULA_ASC: ['enrollment', 'enrollment_date', 'ASC'],
@@ -53,6 +54,10 @@ export class ScholarshipService {
     private enrollmentService: EnrollmentService,
     private studentService: StudentService
   ) {}
+
+  getRepository(): Repository<Scholarship> {
+    return this.scholarshipRepository
+  }
 
   async findAll(): Promise<Scholarship[]> {
     return await this.scholarshipRepository.find({
@@ -643,5 +648,37 @@ export class ScholarshipService {
       console.error('Erro ao buscar e-mails:', error)
       throw new InternalServerErrorException('Falha ao gerar lista de e-mails.')
     }
+  }
+
+  async findForUpdate(
+    scholarship: ProcessedScholarship
+  ): Promise<Partial<Scholarship>> {
+    const searchQuery = this.scholarshipRepository
+      .createQueryBuilder('scholarship')
+      .select([
+        'scholarship.id',
+        'scholarship.scholarship_starts_at',
+        'scholarship.scholarship_ends_at',
+        'scholarship.status',
+        'student.id',
+        'student.name',
+        'student.tax_id',
+        'student.email',
+        'agency.name',
+        'enrollment.enrollment_program'
+      ])
+      .leftJoin('scholarship.enrollment', 'enrollment')
+      .leftJoin('enrollment.student', 'student')
+      .leftJoin('scholarship.agency', 'agency')
+
+      .where('enrollment.enrollment_program = :program', {
+        program: scholarship.enrollment.enrollment_program
+      })
+      .andWhere('agency.name = :agency', { agency: scholarship.agency })
+      .andWhere('student.name ILike :studentName', {
+        studentName: `%${scholarship.student.name}%`
+      })
+
+    return searchQuery.getOne()
   }
 }

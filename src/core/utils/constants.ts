@@ -119,6 +119,11 @@ const constants = {
       ALREADY_REGISTERED:
         'Já existe uma bolsa cadastrada com os mesmos detalhes informados.'
     },
+    pendingScholarship: {
+      APROVE_NOT_FOUND: 'Pending scholarship not found to approve.',
+      NOT_FOUND: 'Pending scholarship not found.',
+      DELETE_FAILED: 'Could not delete. Database error.'
+    },
     user: {
       SOMETHING_WRONG: 'Something went wrong.',
       NOT_FOUND: 'User not found.',

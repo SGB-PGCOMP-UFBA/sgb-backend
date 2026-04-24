@@ -17,4 +17,19 @@ export class EmailService {
       this.logger.error(`Error sending e-mail to ${dto.to}.`, error)
     }
   }
+
+  async sendEmailStudentAutomaticallyRegistered(
+    toEmail: string,
+    password: string
+  ) {
+    const emailDto: EmailDto = {
+      to: toEmail,
+      subject: 'Você foi adicionado ao SGB-PGCOMP!',
+      template: 'student-registered',
+      context: {
+        newPassword: password
+      }
+    }
+    return await this.sendEmail(emailDto)
+  }
 }
