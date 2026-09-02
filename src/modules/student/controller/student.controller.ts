@@ -26,18 +26,24 @@ export class StudentController {
   constructor(private readonly studentsService: StudentService) {}
 
   @Get()
+  @Roles('STUDENT', 'ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   async findAll() {
     const students = await this.studentsService.findAll()
     return students.map((student) => StudentMapper.detailed(student))
   }
 
   @Get(':email')
+  @Roles('STUDENT', 'ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   async findByEmail(@Param('email') email: string) {
     const student = await this.studentsService.findByEmail(email, true)
     return StudentMapper.detailedWithFullRelations(student)
   }
 
   @Get('/by-advisor/:advisorId')
+  @Roles('STUDENT', 'ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   async findAllByAdvisorId(@Param('advisorId') advisorId: number) {
     const students = await this.studentsService.findAllByAdvisorId(advisorId)
     return students.map((student) =>
