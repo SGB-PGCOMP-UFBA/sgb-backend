@@ -7,6 +7,7 @@ export class ImportObject {
   readonly matricula: string
   readonly curso: string
   readonly agencia: string
+  readonly alocacao: string
   readonly nome_do_orientador: string
   readonly email_do_orientador: string
   readonly criado_em: string

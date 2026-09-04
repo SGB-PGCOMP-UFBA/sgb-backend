@@ -6,6 +6,7 @@ export class ImportError {
   enrollment_program?: string
   enrollment_date?: string
   agency_name?: string
+  allocation_name?: string
   scholarship_start_date?: string
   scholarship_end_date?: string
   scholarship_status?: string

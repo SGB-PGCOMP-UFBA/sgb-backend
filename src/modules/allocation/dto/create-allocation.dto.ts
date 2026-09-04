@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString, MaxLength } from "class-validator"
+import { IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator'
 
 export class CreateAllocationDto {
   @IsString()
@@ -7,9 +7,11 @@ export class CreateAllocationDto {
 
   @IsOptional()
   @IsNumber()
+  @Min(0)
   readonly masters_degree_awarded_scholarships: number
 
   @IsOptional()
   @IsNumber()
+  @Min(0)
   readonly doctorate_degree_awarded_scholarships: number
 }

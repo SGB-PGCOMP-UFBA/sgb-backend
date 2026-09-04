@@ -133,13 +133,14 @@ export class DataManagerCsvService {
     for (const dto of dataObject.scholarships) {
       try {
         await this.scholarshipService.create(dto)
-      } catch (error) {
+      } catch (error: any) {
         this.logger.error(
           `Erro ao criar a bolsa ${dto.agency_name} para a matrícula ${dto.enrollment_number}.`
         )
         errors.push({
           student_email: dto.student_email,
           agency_name: dto.agency_name,
+          allocation_name: dto.allocation_name,
           enrollment_number: dto.enrollment_number,
           scholarship_start_date: dto.scholarship_starts_at,
           scholarship_end_date: dto.scholarship_ends_at,
@@ -317,6 +318,7 @@ export class DataManagerCsvService {
       { key: 'email_do_estudante' },
       { key: 'matricula' },
       { key: 'agencia' },
+      { key: 'alocacao' },
       { key: 'data_inicio_bolsa' },
       { key: 'data_fim_bolsa' },
       { key: 'status_da_bolsa' }
@@ -330,6 +332,7 @@ export class DataManagerCsvService {
       errors.push({
         student_email: item.email_do_estudante,
         agency_name: item.agencia,
+        allocation_name: item.alocacao,
         enrollment_number: item.matricula,
         scholarship_start_date: item.data_inicio_bolsa,
         scholarship_end_date: item.data_fim_bolsa,
@@ -346,6 +349,7 @@ export class DataManagerCsvService {
       enrollment_number: item.matricula,
       status: item.status_da_bolsa,
       agency_name: item.agencia.toUpperCase() || 'OUTRAS',
+      allocation_name: item.alocacao.toUpperCase(),
       scholarship_starts_at: parseDate(item.data_inicio_bolsa),
       scholarship_ends_at: parseDate(item.data_fim_bolsa),
       created_at: parseDate(item.criado_em)
