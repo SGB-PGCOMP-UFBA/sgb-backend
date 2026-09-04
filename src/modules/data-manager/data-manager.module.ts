@@ -7,13 +7,15 @@ import { DataManagerCsvService } from './service/data-manager-csv.service'
 import { DataManagerJsonService } from './service/data-manager-json.service'
 import { DataManagerPurgeService } from './service/data-manager-purge.service'
 import { DataManagerController } from './controller/data-manager.controller'
+import { PendingScholarshipModule } from '../pending-scholarship/pending-scholarship.module'
 
 @Module({
   imports: [
     ScholarshipModule,
     EnrollmentModule,
     StudentModule,
-    EmbedNotificationModule
+    EmbedNotificationModule,
+    PendingScholarshipModule
   ],
   controllers: [DataManagerController],
   providers: [

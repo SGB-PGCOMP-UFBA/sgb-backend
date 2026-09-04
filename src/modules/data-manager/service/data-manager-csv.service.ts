@@ -11,6 +11,11 @@ import { ImportObject } from '../dto/import-object.dto'
 import { constants } from '../../../core/utils/constants'
 import { parseDate } from '../../../core/utils/date-utils'
 import { isNotEmpty } from '../../../core/utils/string-utils'
+import { UpdateScholarshipCsvUtil } from '../utils/update-scholarship-csv.util'
+import { Scholarship } from 'src/modules/scholarship/entities/scholarship.entity'
+import { ListUpdatesFromImport } from '../dto/list-updates.dto'
+import { PendingScholarshipService } from 'src/modules/pending-scholarship/service/pending-scholarship.service'
+import { CreatePendingScholarshipDto } from 'src/modules/pending-scholarship/dto/create-pending-scholarship.dto'
 
 @Injectable()
 export class DataManagerCsvService {
@@ -19,7 +24,8 @@ export class DataManagerCsvService {
   constructor(
     private enrollmentService: EnrollmentService,
     private scholarshipService: ScholarshipService,
-    private studentService: StudentService
+    private studentService: StudentService,
+    private readonly pendingScholarshipService: PendingScholarshipService
   ) {}
 
   async exportDataToCsv() {
@@ -127,13 +133,14 @@ export class DataManagerCsvService {
     for (const dto of dataObject.scholarships) {
       try {
         await this.scholarshipService.create(dto)
-      } catch (error) {
+      } catch (error: any) {
         this.logger.error(
           `Erro ao criar a bolsa ${dto.agency_name} para a matrícula ${dto.enrollment_number}.`
         )
         errors.push({
           student_email: dto.student_email,
           agency_name: dto.agency_name,
+          allocation_name: dto.allocation_name,
           enrollment_number: dto.enrollment_number,
           scholarship_start_date: dto.scholarship_starts_at,
           scholarship_end_date: dto.scholarship_ends_at,
@@ -161,7 +168,18 @@ export class DataManagerCsvService {
     try {
       await new Promise<void>((resolve, reject) => {
         stream
-          .pipe(csvParser({ separator: ',' }))
+          .pipe(
+            csvParser({
+              separator: ',',
+              mapHeaders: ({ header }) => {
+                return header
+                  .trim()
+                  .replace(/[\s/]+/g, '_')
+                  .normalize('NFD')
+                  .replace(/[\u0300-\u036f]/g, '')
+              }
+            })
+          )
           .on('data', (data) => results.push(data))
           .on('end', () => resolve())
           .on('error', (error) => reject(error))
@@ -300,6 +318,7 @@ export class DataManagerCsvService {
       { key: 'email_do_estudante' },
       { key: 'matricula' },
       { key: 'agencia' },
+      { key: 'alocacao' },
       { key: 'data_inicio_bolsa' },
       { key: 'data_fim_bolsa' },
       { key: 'status_da_bolsa' }
@@ -313,6 +332,7 @@ export class DataManagerCsvService {
       errors.push({
         student_email: item.email_do_estudante,
         agency_name: item.agencia,
+        allocation_name: item.alocacao,
         enrollment_number: item.matricula,
         scholarship_start_date: item.data_inicio_bolsa,
         scholarship_end_date: item.data_fim_bolsa,
@@ -329,6 +349,7 @@ export class DataManagerCsvService {
       enrollment_number: item.matricula,
       status: item.status_da_bolsa,
       agency_name: item.agencia.toUpperCase() || 'OUTRAS',
+      allocation_name: item.alocacao.toUpperCase(),
       scholarship_starts_at: parseDate(item.data_inicio_bolsa),
       scholarship_ends_at: parseDate(item.data_fim_bolsa),
       created_at: parseDate(item.criado_em)
@@ -367,5 +388,73 @@ export class DataManagerCsvService {
         isNotEmpty(enrollment.enrollment_number) &&
         e.enrollment_number === enrollment.enrollment_number
     )
+  }
+
+  async updateScholarshipsDataFromCsv(file: File) {
+    const listUpdatesFromImport: ListUpdatesFromImport[] = []
+    const scholarshipRepository = this.scholarshipService.getRepository()
+    const dataFile = await this.processImportedFile(file)
+    const dataObject =
+      UpdateScholarshipCsvUtil.processDataToUpdateFile(dataFile)
+
+    this.logger.log(`${dataObject.length} bolsas para UFBA serão analisadas.`)
+
+    const scholarshipMatchesPromiseArray: Promise<Partial<Scholarship>>[] = []
+    dataObject.forEach((scholarship) => {
+      scholarshipMatchesPromiseArray.push(
+        this.scholarshipService.findForUpdate(scholarship)
+      )
+    })
+
+    const scholarshipMatches = await Promise.all(scholarshipMatchesPromiseArray)
+
+    const {
+      studentsToUpdatePromisses,
+      scholarshipsToUpdatePromisses,
+      newScholarshipsToAprove
+    } =
+      UpdateScholarshipCsvUtil.discriminateScholarshipMatchesForUpdateForInsert(
+        dataObject,
+        scholarshipMatches,
+        scholarshipRepository,
+        this.studentService,
+        listUpdatesFromImport
+      )
+
+    this.logger.log(
+      `${studentsToUpdatePromisses.length} bolsas serão atualizadas no sistema.`
+    )
+    await Promise.all(studentsToUpdatePromisses)
+    await Promise.all(scholarshipsToUpdatePromisses)
+
+    const newPendingScholarshipsPromisses = newScholarshipsToAprove.map(
+      (newScholarship) => {
+        const pendingScholarhsip: CreatePendingScholarshipDto = {
+          student_name: newScholarship.student.name,
+          tax_id: newScholarship.student.tax_id,
+          enrollment_program: newScholarship.enrollment.enrollment_program,
+          agency: newScholarship.agency,
+          scholarship_starts_at: newScholarship.startsAt,
+          scholarship_ends_at: newScholarship.endsAt
+        }
+        return this.pendingScholarshipService.create(pendingScholarhsip)
+      }
+    )
+
+    const pendingScholarships = await Promise.all(
+      newPendingScholarshipsPromisses
+    )
+    this.logger.log(
+      `${
+        pendingScholarships.filter((pendingScholarship) => {
+          return !!pendingScholarship
+        }).length
+      } nova(s) bolsa(s) foram encontradas e devem ser analisadas.`
+    )
+
+    return {
+      listUpdatesFromImport,
+      pendingScholarships
+    }
   }
 }

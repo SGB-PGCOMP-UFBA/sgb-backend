@@ -29,6 +29,21 @@ import { CreateScholarshipDto } from '../dto/create-scholarship.dto'
 import { UpdateScholarshipDto } from '../dto/update-scholarship.dto'
 import { validateScholarshipDuration } from '../../../core/utils/date-utils'
 import { CountScholarshipsAsReportBetweenDatesDto } from '../dto/count-scholarship-courses-between-dates.dto'
+import { ProgramEnum } from '../../../core/enums/ProgramEnum'
+import {
+  ACTIVE_SCHOLARSHIP_STATUSES,
+  getAwardedSlotsByProgram,
+  hasAvailableSlot
+} from '../utils/scholarship-allocation.util'
+import { ProcessedScholarship } from 'src/modules/data-manager/utils/update-scholarship-csv.util'
+
+interface QuotaTarget {
+  type: 'agency' | 'allocation'
+  id: number
+  name: string
+  masters_degree_awarded_scholarships?: number
+  doctorate_degree_awarded_scholarships?: number
+}
 
 const orderByMapping = {
   DAT_MATRICULA_ASC: ['enrollment', 'enrollment_date', 'ASC'],
@@ -53,6 +68,10 @@ export class ScholarshipService {
     private enrollmentService: EnrollmentService,
     private studentService: StudentService
   ) {}
+
+  getRepository(): Repository<Scholarship> {
+    return this.scholarshipRepository
+  }
 
   async findAll(): Promise<Scholarship[]> {
     return await this.scholarshipRepository.find({
@@ -201,6 +220,111 @@ export class ScholarshipService {
     })
   }
 
+  private async listOccupiedSlots(params: {
+    program: string
+    agencyId?: number
+    allocationId?: number
+    excludingScholarshipId?: number
+  }): Promise<number[]> {
+    const query = this.scholarshipRepository
+      .createQueryBuilder('scholarship')
+      .innerJoin('scholarship.enrollment', 'enrollment')
+      .select('DISTINCT scholarship.enrollment_id', 'enrollment_id')
+      .where('scholarship.status IN (:...statuses)', {
+        statuses: ACTIVE_SCHOLARSHIP_STATUSES
+      })
+      .andWhere('enrollment.enrollment_program = :program', {
+        program: params.program
+      })
+
+    if (params.agencyId) {
+      query.andWhere('scholarship.agency_id = :agencyId', {
+        agencyId: params.agencyId
+      })
+    }
+
+    if (params.allocationId) {
+      query.andWhere('scholarship.allocation_id = :allocationId', {
+        allocationId: params.allocationId
+      })
+    }
+
+    if (params.excludingScholarshipId) {
+      query.andWhere('scholarship.id != :excludingScholarshipId', {
+        excludingScholarshipId: params.excludingScholarshipId
+      })
+    }
+
+    const rows = await query.getRawMany()
+
+    return rows.map((row) => Number(row.enrollment_id))
+  }
+
+  private async assertHasAvailableSlot(
+    target: QuotaTarget,
+    enrollment: { id: number; program: string },
+    excludingScholarshipId?: number
+  ): Promise<void> {
+    const awardedSlots = getAwardedSlotsByProgram(target, enrollment.program)
+
+    const occupiedSlots = await this.listOccupiedSlots({
+      program: enrollment.program,
+      agencyId: target.type === 'agency' ? target.id : undefined,
+      allocationId: target.type === 'allocation' ? target.id : undefined,
+      excludingScholarshipId
+    })
+
+    const isAvailable = hasAvailableSlot({
+      awardedSlots,
+      occupiedSlots,
+      enrollmentId: enrollment.id
+    })
+
+    if (isAvailable) return
+
+    const scope = target.type === 'agency' ? 'A agência' : 'A alocação'
+    const program = ProgramEnum[enrollment.program] || enrollment.program
+    const message =
+      awardedSlots <= 0
+        ? `${constants.exceptionMessages.scholarship.QUOTA_NOT_CONFIGURED} ` +
+          `${scope} ${target.name} não possui vagas de ${program} concedidas.`
+        : `${constants.exceptionMessages.scholarship.NO_SLOTS_AVAILABLE} ` +
+          `${scope} ${target.name} possui ${awardedSlots} vaga(s) de ${program} ` +
+          `concedida(s) e ${occupiedSlots.length} já alocada(s).`
+
+    this.logger.warn(message)
+
+    throw new BadRequestException(message)
+  }
+
+  private async assertScholarshipFitsInAvailableSlots(params: {
+    agency?: QuotaTarget | null
+    allocation?: QuotaTarget | null
+    enrollment: { id: number; enrollment_program: string }
+    excludingScholarshipId?: number
+  }): Promise<void> {
+    const enrollment = {
+      id: params.enrollment.id,
+      program: params.enrollment.enrollment_program
+    }
+
+    if (params.agency) {
+      await this.assertHasAvailableSlot(
+        { ...params.agency, type: 'agency' },
+        enrollment,
+        params.excludingScholarshipId
+      )
+    }
+
+    if (params.allocation) {
+      await this.assertHasAvailableSlot(
+        { ...params.allocation, type: 'allocation' },
+        enrollment,
+        params.excludingScholarshipId
+      )
+    }
+  }
+
   async create(dto: CreateScholarshipDto): Promise<Scholarship> {
     this.logger.log(constants.exceptionMessages.scholarship.CREATION_STARTED)
     try {
@@ -246,6 +370,16 @@ export class ScholarshipService {
         throw new BadRequestException(isValidEndDate.errorMessage)
       }
 
+      const status = dto.status || 'ON_GOING'
+
+      if (ACTIVE_SCHOLARSHIP_STATUSES.includes(status)) {
+        await this.assertScholarshipFitsInAvailableSlots({
+          agency: { ...agency, type: 'agency' },
+          allocation: allocation ? { ...allocation, type: 'allocation' } : null,
+          enrollment
+        })
+      }
+
       const newScholarship = this.scholarshipRepository.create({
         agency_id: agency.id,
         allocation_id: allocation.id,
@@ -253,7 +387,7 @@ export class ScholarshipService {
         scholarship_starts_at: dto.scholarship_starts_at,
         scholarship_ends_at: dto.scholarship_ends_at,
         extension_ends_at: dto.extension_ends_at,
-        status: dto.status || 'ON_GOING',
+        status: status,
         salary: dto.salary
       })
 
@@ -264,7 +398,7 @@ export class ScholarshipService {
       )
 
       return newScholarship
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         constants.exceptionMessages.scholarship.CREATION_FAILED,
         error,
@@ -355,6 +489,27 @@ export class ScholarshipService {
         throw new BadRequestException(isValidExtensionDate.errorMessage)
       }
 
+      const nextStatus = dto.status || scholarship.status
+
+      if (ACTIVE_SCHOLARSHIP_STATUSES.includes(nextStatus)) {
+        const nextAgencyId = dto.agency_id || scholarship.agency_id
+        const nextAllocationId = dto.allocation_id || scholarship.allocation_id
+
+        const nextAgency = await this.agencyService.findOneById(nextAgencyId)
+        const nextAllocation = nextAllocationId
+          ? await this.allocationService.findOneById(nextAllocationId)
+          : null
+
+        await this.assertScholarshipFitsInAvailableSlots({
+          agency: nextAgency ? { ...nextAgency, type: 'agency' } : null,
+          allocation: nextAllocation
+            ? { ...nextAllocation, type: 'allocation' }
+            : null,
+          enrollment,
+          excludingScholarshipId: scholarship.id
+        })
+      }
+
       const updatedScholarship = await this.scholarshipRepository.save({
         id: scholarship.id,
         salary: dto.salary,
@@ -369,7 +524,7 @@ export class ScholarshipService {
       })
 
       return updatedScholarship
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(
         error.message
           ? error.message
@@ -643,5 +798,37 @@ export class ScholarshipService {
       console.error('Erro ao buscar e-mails:', error)
       throw new InternalServerErrorException('Falha ao gerar lista de e-mails.')
     }
+  }
+
+  async findForUpdate(
+    scholarship: ProcessedScholarship
+  ): Promise<Partial<Scholarship>> {
+    const searchQuery = this.scholarshipRepository
+      .createQueryBuilder('scholarship')
+      .select([
+        'scholarship.id',
+        'scholarship.scholarship_starts_at',
+        'scholarship.scholarship_ends_at',
+        'scholarship.status',
+        'student.id',
+        'student.name',
+        'student.tax_id',
+        'student.email',
+        'agency.name',
+        'enrollment.enrollment_program'
+      ])
+      .leftJoin('scholarship.enrollment', 'enrollment')
+      .leftJoin('enrollment.student', 'student')
+      .leftJoin('scholarship.agency', 'agency')
+
+      .where('enrollment.enrollment_program = :program', {
+        program: scholarship.enrollment.enrollment_program
+      })
+      .andWhere('agency.name = :agency', { agency: scholarship.agency })
+      .andWhere('student.name ILike :studentName', {
+        studentName: `%${scholarship.student.name}%`
+      })
+
+    return searchQuery.getOne()
   }
 }

@@ -1,4 +1,5 @@
 import { ScholarshipMapper } from '../../scholarship/mapper/scholarship.mapper'
+import { countAllocatedScholarshipsByProgram } from '../../scholarship/utils/scholarship-allocation.util'
 import { Agency } from '../entities/agency.entity'
 
 export class AgencyMapper {
@@ -28,20 +29,12 @@ export class AgencyMapper {
       scholarshipsSinceBeginning: agency.scholarships.length,
       masters_degree_awarded_scholarships:
         agency.masters_degree_awarded_scholarships,
-      masters_degree_allocated_scholarships: agency.scholarships.filter(
-        (scholarship) =>
-          (scholarship.status === 'ON_GOING' ||
-            scholarship.status === 'EXTENDED') &&
-          scholarship.enrollment.enrollment_program === 'MESTRADO'
-      ).length,
+      masters_degree_allocated_scholarships:
+        countAllocatedScholarshipsByProgram(agency.scholarships, 'MESTRADO'),
       doctorate_degree_awarded_scholarships:
         agency.doctorate_degree_awarded_scholarships,
-      doctorate_degree_allocated_scholarships: agency.scholarships.filter(
-        (scholarship) =>
-          (scholarship.status === 'ON_GOING' ||
-            scholarship.status === 'EXTENDED') &&
-          scholarship.enrollment.enrollment_program === 'DOUTORADO'
-      ).length
+      doctorate_degree_allocated_scholarships:
+        countAllocatedScholarshipsByProgram(agency.scholarships, 'DOUTORADO')
     }
   }
 

@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString, MaxLength } from 'class-validator'
+import { IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator'
 
 export class CreateAgencyDto {
   @IsString()
@@ -11,9 +11,11 @@ export class CreateAgencyDto {
 
   @IsOptional()
   @IsNumber()
+  @Min(0)
   readonly masters_degree_awarded_scholarships: number
 
   @IsOptional()
   @IsNumber()
+  @Min(0)
   readonly doctorate_degree_awarded_scholarships: number
 }

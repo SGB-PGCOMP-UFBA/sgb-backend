@@ -84,4 +84,13 @@ export class DataManagerController {
   async create(@Headers('x-api-key') key: string) {
     return this.dataManagerPurgeService.purgeAllData(key)
   }
+
+  @Post('/update-scholarships-data')
+  @UseInterceptors(FileInterceptor('file'))
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async updateScholarshipsData(@UploadedFile() file: File) {
+    if (!file) return 'File to update not sent'
+    return this.dataManagerCsvService.updateScholarshipsDataFromCsv(file)
+  }
 }

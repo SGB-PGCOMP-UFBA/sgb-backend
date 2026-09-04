@@ -64,11 +64,17 @@ const constants = {
     },
     agency: {
       CREATION_FAILED: "Cant't create agency.",
-      NOT_FOUND: 'Agency not found.'
+      NOT_FOUND: 'Agency not found.',
+      NAME_IS_REQUIRED: 'A agência de fomento é obrigatória.',
+      AWARDED_BELOW_ALLOCATED:
+        'A quantidade de bolsas concedidas pela agência não pode ser menor que a quantidade já alocada.'
     },
     allocation: {
       CREATION_FAILED: "Cant't create allocation.",
-      NOT_FOUND: 'Allocation not found.'
+      NOT_FOUND: 'Allocation not found.',
+      NAME_IS_REQUIRED: 'A alocação é obrigatória.',
+      AWARDED_BELOW_ALLOCATED:
+        'A quantidade de bolsas concedidas para a alocação não pode ser menor que a quantidade já alocada.'
     },
     notification: {
       CREATION_COMPLETED:
@@ -117,7 +123,15 @@ const constants = {
       DELETE_ALL_STARTED:
         'The process of deleting all scholarships has been started.',
       ALREADY_REGISTERED:
-        'Já existe uma bolsa cadastrada com os mesmos detalhes informados.'
+        'Já existe uma bolsa cadastrada com os mesmos detalhes informados.',
+      NO_SLOTS_AVAILABLE: 'Não há vagas disponíveis para esta bolsa.',
+      QUOTA_NOT_CONFIGURED:
+        'Não há vagas concedidas cadastradas para esta bolsa.'
+    },
+    pendingScholarship: {
+      APROVE_NOT_FOUND: 'Pending scholarship not found to approve.',
+      NOT_FOUND: 'Pending scholarship not found.',
+      DELETE_FAILED: 'Could not delete. Database error.'
     },
     user: {
       SOMETHING_WRONG: 'Something went wrong.',
@@ -138,8 +152,9 @@ const constants = {
     dates: {
       END_DATE_SMALLER: "End date can't be smaller than the start date",
       END_DATE_EXCEEDED: "End date can't exceed the estimated limit",
-      EXTENSION_DATE_SMALLER: "Extension date can't be smaller than the end date",
-      EXTENSION_DATE_EXCEEDED: "Extension date can't exceed the 6 months limit",
+      EXTENSION_DATE_SMALLER:
+        "Extension date can't be smaller than the end date",
+      EXTENSION_DATE_EXCEEDED: "Extension date can't exceed the 6 months limit"
     }
   }
 }

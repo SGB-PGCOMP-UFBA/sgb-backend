@@ -20,12 +20,12 @@ export class CreateScholarshipDto {
   readonly enrollment_number: string
 
   @IsString()
-  @Transform(({ value }) => value.toUpperCase())
+  @Transform(({ value }) => value?.toUpperCase())
   @IsIn(['CAPES', 'CNPQ', 'FAPESB', 'OUTRAS'])
   readonly agency_name: string
 
   @IsString()
-  @Transform(({value}) => value.toUpperCase())
+  @Transform(({ value }) => value?.toUpperCase())
   readonly allocation_name: string
 
   @Type(() => Date)
@@ -38,16 +38,16 @@ export class CreateScholarshipDto {
 
   @IsOptional()
   @IsString()
-  @Transform(({ value }) => value.toUpperCase())
+  @Transform(({ value }) => value?.toUpperCase())
   @IsIn(['ON_GOING', 'EXTENDED', 'FINISHED'])
   readonly status: string
 
   @IsOptional()
   @Type(() => Date)
   @IsDate()
-  readonly extension_ends_at: Date
+  readonly extension_ends_at?: Date
 
   @IsOptional()
   @IsNumber()
-  readonly salary: number
+  readonly salary?: number
 }
