@@ -139,7 +139,9 @@ export class PendingScholarshipService {
         }
         enrollment = await this.enrollmentService.create(createEnrollmentDto)
       } else if (existentEnrollment.scholarships.length) {
-        throw new ConflictException('This enrollment already has an active scholarship.')
+        throw new ConflictException(
+          'This enrollment already has an active scholarship.'
+        )
       } else {
         enrollment = existentEnrollment
         student = existentEnrollment.student
@@ -168,14 +170,21 @@ export class PendingScholarshipService {
       await this.scholarshipService.create(createScholarshipDto)
       await this.pendingScholarshipRepository.delete(pendingScholarhsip.id)
 
-      if(sendEmail)
-        await this.emailService.sendEmailStudentAutomaticallyRegistered(student.email, temporaryPassword)
+      if (sendEmail)
+        await this.emailService.sendEmailStudentAutomaticallyRegistered(
+          student.email,
+          temporaryPassword
+        )
 
-      return response.status(responseCode).send({ name: student.name, email: student.email })
-
+      return response
+        .status(responseCode)
+        .send({ name: student.name, email: student.email })
     } catch (error) {
       if (error.response) {
-        this.logger.error('Aprove pending scholarship error', error.response.message)
+        this.logger.error(
+          'Aprove pending scholarship error',
+          error.response.message
+        )
 
         switch (error.response.statusCode) {
           case 400:

@@ -64,7 +64,7 @@ export class StudentService {
         'enrollments.advisor',
         'enrollments.scholarships',
         'enrollments.scholarships.agency',
-        'enrollments.scholarships.allocation',
+        'enrollments.scholarships.allocation'
       ]
     }
 

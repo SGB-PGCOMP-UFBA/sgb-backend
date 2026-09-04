@@ -31,7 +31,9 @@ export class PdfReportController {
     @Res() response: Response
   ): Promise<void> {
     const buffer = await this.reportService.generateQuadrennialPDF(dto)
-    const filename = `RELATORIO_QUADRIENAL_${dto.startDate}_${dto.endDate}_${moment().format('DD-MM-yy hh:mm:ss')}.pdf`
+    const filename = `RELATORIO_QUADRIENAL_${dto.startDate}_${
+      dto.endDate
+    }_${moment().format('DD-MM-yy hh:mm:ss')}.pdf`
 
     response.set({
       'Content-Type': 'application/pdf',

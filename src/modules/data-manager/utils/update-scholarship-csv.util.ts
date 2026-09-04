@@ -125,7 +125,7 @@ export class UpdateScholarshipCsvUtil {
   static defineStatus(
     scholarshipStart: Date,
     scholarshipEnd: Date,
-    currentStatus: string = ''
+    currentStatus = ''
   ): string {
     const todayDate = new Date()
 

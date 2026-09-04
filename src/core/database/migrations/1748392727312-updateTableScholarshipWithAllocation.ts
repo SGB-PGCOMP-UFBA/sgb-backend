@@ -5,7 +5,9 @@ import {
   TableForeignKey
 } from 'typeorm'
 
-export class UpdateTableScholarshipWithAllocation1748392727312 implements MigrationInterface {
+export class UpdateTableScholarshipWithAllocation1748392727312
+  implements MigrationInterface
+{
   name = 'UpdateTableScholarshipWithAllocation1748392727312'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -14,7 +16,7 @@ export class UpdateTableScholarshipWithAllocation1748392727312 implements Migrat
       new TableColumn({
         name: 'allocation_id',
         type: 'int4',
-        isNullable: true,
+        isNullable: true
       })
     )
     await queryRunner.createForeignKey(
@@ -25,8 +27,7 @@ export class UpdateTableScholarshipWithAllocation1748392727312 implements Migrat
         referencedColumnNames: ['id'],
         columnNames: ['allocation_id'],
         onDelete: 'CASCADE',
-        onUpdate: 'CASCADE',
-
+        onUpdate: 'CASCADE'
       })
     )
   }
