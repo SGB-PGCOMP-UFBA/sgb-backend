@@ -8,7 +8,7 @@ import { EmbedNotificationService } from '../../modules/embed-notification/servi
 export class ScholarShipFinalizerService {
   constructor(
     private scholarshipService: ScholarshipService,
-    private embedNotificationService: EmbedNotificationService,
+    private embedNotificationService: EmbedNotificationService
   ) {}
 
   private readonly logger = new Logger(ScholarShipFinalizerService.name)
@@ -21,14 +21,19 @@ export class ScholarShipFinalizerService {
       this.scholarshipService.findAllEndingToday()
     ])
 
-    this.logger.log(`[${scholarships.length}] scholarships found to be finalized today.`)
+    this.logger.log(
+      `[${scholarships.length}] scholarships found to be finalized today.`
+    )
 
     for (const scholarship of scholarships) {
-      if (scholarship.status === 'ON_GOING' && !!scholarship.extension_ends_at) {
+      if (
+        scholarship.status === 'ON_GOING' &&
+        !!scholarship.extension_ends_at
+      ) {
         await this.scholarshipService.extendScholarship(scholarship.id)
         continue
       }
-  
+
       await this.scholarshipService.finishScholarship(scholarship.id)
       await this.notifyStudentAndAdvisor(scholarship)
       this.logger.log(`Scholarship [${scholarship.id}] finished!`)
@@ -51,7 +56,7 @@ export class ScholarShipFinalizerService {
         owner_type: scholarship.enrollment.advisor.role,
         title: `A bolsa de ${scholarship.enrollment.student.name} expirou!`,
         description: `A bolsa ${scholarship.agency.name} de ${scholarship.enrollment.enrollment_program} do estudante foi finalizada.`
-      }),
+      })
     ]
 
     await Promise.all(notifications)

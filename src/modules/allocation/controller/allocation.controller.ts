@@ -34,7 +34,9 @@ export class AllocationController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   async findAll() {
     const allocations = await this.allocationService.findAll()
-    return allocations.map((allocation => AllocationMapper.detailed(allocation)))
+    return allocations.map((allocation) =>
+      AllocationMapper.detailed(allocation)
+    )
   }
 
   @Get('/by-id/:id')
@@ -46,13 +48,18 @@ export class AllocationController {
   @UseGuards(JwtAuthGuard)
   async findAllForFilter() {
     const allocations = await this.allocationService.findAllForFilter()
-    return allocations.map((allocation) => AllocationMapper.forFilter(allocation))
+    return allocations.map((allocation) =>
+      AllocationMapper.forFilter(allocation)
+    )
   }
 
   @Patch(':id')
   @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  async update(@Param('id') id: number, @Body() updateAllocationDto: UpdateAllocationDto) {
+  async update(
+    @Param('id') id: number,
+    @Body() updateAllocationDto: UpdateAllocationDto
+  ) {
     return await this.allocationService.update(id, updateAllocationDto)
   }
 

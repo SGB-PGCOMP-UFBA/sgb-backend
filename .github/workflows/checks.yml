@@ -1,0 +1,71 @@
+name: Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Espelha o campo `engines` do package.json.
+  NODE_VERSION: "18.20.4"
+
+jobs:
+  build:
+    name: "Run Checks"
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+
+    # Banco descartável só para validar as migrations.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: sgb_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: "Setup Node"
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      # `npm ci` instala exatamente o que está no package-lock.json e falha se
+      # ele divergir do package.json.
+      - name: "Install Dependencies"
+        run: npm ci
+
+      - name: "Run Lint"
+        run: npm run lint:ci
+
+      # O build precisa vir antes das migrations: o ormconfig e as migrations
+      # são carregados de dist/, não de src/.
+      - name: "Build"
+        run: npm run build
+
+      # O TypeORM não gera client, então não há equivalente ao `prisma generate`.
+      # O que corresponde ao `prisma validate` é aplicar as migrations num banco
+      # limpo: pega migration quebrada ou fora de ordem antes do merge.
+      - name: "Run Migrations"
+        run: npm run db:migrate
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/sgb_db

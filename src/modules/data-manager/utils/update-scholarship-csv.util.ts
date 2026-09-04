@@ -1,6 +1,6 @@
-import { Scholarship } from 'src/modules/scholarship/entities/scholarship.entity'
-import { Student } from 'src/modules/student/entities/student.entity'
-import { StudentService } from 'src/modules/student/service/student.service'
+import { Scholarship } from '@/modules/scholarship/entities/scholarship.entity'
+import { Student } from '@/modules/student/entities/student.entity'
+import { StudentService } from '@/modules/student/service/student.service'
 import { Repository, UpdateResult } from 'typeorm'
 import { ListUpdatesFromImport } from '../dto/list-updates.dto'
 
@@ -125,7 +125,7 @@ export class UpdateScholarshipCsvUtil {
   static defineStatus(
     scholarshipStart: Date,
     scholarshipEnd: Date,
-    currentStatus: string = ''
+    currentStatus = ''
   ): string {
     const todayDate = new Date()
 

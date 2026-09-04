@@ -1,5 +1,5 @@
 import { IsEmail, IsNumber, IsString, MaxLength } from 'class-validator'
-import { constants } from 'src/core/utils/constants'
+import { constants } from '@/core/utils/constants'
 
 export class ApprovePendingScholarshipDto {
   @IsNumber()

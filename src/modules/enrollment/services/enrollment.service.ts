@@ -76,17 +76,19 @@ export class EnrollmentService {
   async verifyExistentByNumber(enrollment_number: string): Promise<Enrollment> {
     const query = this.enrollmentRepository
       .createQueryBuilder('enrollment')
-      .addSelect(['scholarships.id', 'scholarships.status', 'student.email', 'student.name'])
+      .addSelect([
+        'scholarships.id',
+        'scholarships.status',
+        'student.email',
+        'student.name'
+      ])
       .leftJoin(
         'enrollment.scholarships',
         'scholarships',
         'scholarships.status IN (:...statuses)',
         { statuses: ['ON_GOING', 'EXTENDED'] }
       )
-      .leftJoin(
-        'enrollment.student',
-        'student',
-      )
+      .leftJoin('enrollment.student', 'student')
       .where(`enrollment.enrollment_number = :enrollmentNumber`, {
         enrollmentNumber: enrollment_number
       })
@@ -99,8 +101,13 @@ export class EnrollmentService {
     this.logger.log(constants.exceptionMessages.enrollment.CREATION_STARTED)
 
     try {
-      const existentEnollment = await this.enrollmentRepository.findOneBy({enrollment_number: dto.enrollment_number})
-      if (existentEnollment) throw new ConflictException(`Matrícula com código ${dto.enrollment_number} já existente no sistema`)
+      const existentEnollment = await this.enrollmentRepository.findOneBy({
+        enrollment_number: dto.enrollment_number
+      })
+      if (existentEnollment)
+        throw new ConflictException(
+          `Matrícula com código ${dto.enrollment_number} já existente no sistema`
+        )
 
       const advisor = await this.advisorService.findOneByEmail(
         dto.advisor_email

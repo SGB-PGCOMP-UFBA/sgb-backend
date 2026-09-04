@@ -1,6 +1,6 @@
 import { Transform, Type } from 'class-transformer'
 import { IsDate, IsIn, IsString, Length, MaxLength } from 'class-validator'
-import { constants } from 'src/core/utils/constants'
+import { constants } from '@/core/utils/constants'
 
 export class CreatePendingScholarshipDto {
   @IsString({ message: constants.bodyValidationMessages.NAME_FORMAT_ERROR })

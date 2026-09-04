@@ -1,5 +1,5 @@
-import * as moment from 'moment'
-import { Enrollment } from 'src/modules/enrollment/entities/enrollment.entity'
+import moment from 'moment'
+import { Enrollment } from '@/modules/enrollment/entities/enrollment.entity'
 import { constants } from './constants'
 
 function getDatePlusDays(days: number): Date {
@@ -73,17 +73,19 @@ function validateScholarshipDuration(
     errorMessage: ''
   }
 
-  const givenDateFormat = new Date(dates.givenDate), referenceDateFormat = new Date(dates.referenceDate)
+  const givenDateFormat = new Date(dates.givenDate),
+    referenceDateFormat = new Date(dates.referenceDate)
 
   if (givenDateFormat.getTime() - referenceDateFormat.getTime() < 0) {
     validationObject.isValid = false
-    validationObject.errorMessage = extension 
+    validationObject.errorMessage = extension
       ? constants.exceptionMessages.dates.EXTENSION_DATE_SMALLER
       : constants.exceptionMessages.dates.END_DATE_SMALLER
     return validationObject
   }
 
-  const scholarshipTimeLimitInYears = enrollment.enrollment_program === 'MESTRADO' ? 2 : 4
+  const scholarshipTimeLimitInYears =
+    enrollment.enrollment_program === 'MESTRADO' ? 2 : 4
   const limitDate = new Date(dates.referenceDate)
   limitDate.setFullYear(limitDate.getFullYear() + scholarshipTimeLimitInYears)
 
@@ -97,4 +99,11 @@ function validateScholarshipDuration(
   return validationObject
 }
 
-export { getDatePlusDays, formatterDate, formatDate, formattedNow, today, validateScholarshipDuration }
+export {
+  getDatePlusDays,
+  formatterDate,
+  formatDate,
+  formattedNow,
+  today,
+  validateScholarshipDuration
+}

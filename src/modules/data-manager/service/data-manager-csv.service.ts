@@ -12,10 +12,10 @@ import { constants } from '../../../core/utils/constants'
 import { parseDate } from '../../../core/utils/date-utils'
 import { isNotEmpty } from '../../../core/utils/string-utils'
 import { UpdateScholarshipCsvUtil } from '../utils/update-scholarship-csv.util'
-import { Scholarship } from 'src/modules/scholarship/entities/scholarship.entity'
+import { Scholarship } from '@/modules/scholarship/entities/scholarship.entity'
 import { ListUpdatesFromImport } from '../dto/list-updates.dto'
-import { PendingScholarshipService } from 'src/modules/pending-scholarship/service/pending-scholarship.service'
-import { CreatePendingScholarshipDto } from 'src/modules/pending-scholarship/dto/create-pending-scholarship.dto'
+import { PendingScholarshipService } from '@/modules/pending-scholarship/service/pending-scholarship.service'
+import { CreatePendingScholarshipDto } from '@/modules/pending-scholarship/dto/create-pending-scholarship.dto'
 
 @Injectable()
 export class DataManagerCsvService {

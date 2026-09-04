@@ -21,8 +21,8 @@ import { Roles } from '../../auth/decorators/role.decorator'
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
 import { RolesGuard } from '../../auth/guards/roles.guard'
 import { CreateStudentDto } from '../../student/dto/create-student.dto'
-import { CreateScholarshipDto } from 'src/modules/scholarship/dto/create-scholarship.dto'
-import { CreateEnrollmentDto } from 'src/modules/enrollment/dtos/create-enrollment.dto'
+import { CreateScholarshipDto } from '@/modules/scholarship/dto/create-scholarship.dto'
+import { CreateEnrollmentDto } from '@/modules/enrollment/dtos/create-enrollment.dto'
 
 @Controller('v1/data-manager')
 export class DataManagerController {

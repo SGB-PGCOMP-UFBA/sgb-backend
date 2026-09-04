@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Param, Delete, HttpCode, HttpStatus, Res } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  Res
+} from '@nestjs/common'
 import { PendingScholarshipService } from '../service/pending-scholarship.service'
 import { CreatePendingScholarshipDto } from '../dto/create-pending-scholarship.dto'
 import { ApprovePendingScholarshipDto } from '../dto/approve-pending-scholarship.dto'
@@ -11,8 +21,12 @@ export class PendingScholarshipController {
   ) {}
 
   @Post()
-  async create(@Body() createPendingScholarshipDto: CreatePendingScholarshipDto) {
-    return await this.pendingScholarshipService.create(createPendingScholarshipDto)
+  async create(
+    @Body() createPendingScholarshipDto: CreatePendingScholarshipDto
+  ) {
+    return await this.pendingScholarshipService.create(
+      createPendingScholarshipDto
+    )
   }
 
   @Get()
@@ -32,7 +46,10 @@ export class PendingScholarshipController {
   }
 
   @Post('/approve')
-  async approve(@Body() aproveDto: ApprovePendingScholarshipDto, @Res() response: Response) {
+  async approve(
+    @Body() aproveDto: ApprovePendingScholarshipDto,
+    @Res() response: Response
+  ) {
     return await this.pendingScholarshipService.approve(aproveDto, response)
   }
 }
