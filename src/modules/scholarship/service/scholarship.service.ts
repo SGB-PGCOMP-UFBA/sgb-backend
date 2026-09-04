@@ -35,7 +35,7 @@ import {
   getAwardedSlotsByProgram,
   hasAvailableSlot
 } from '../utils/scholarship-allocation.util'
-import { ProcessedScholarship } from 'src/modules/data-manager/utils/update-scholarship-csv.util'
+import { ProcessedScholarship } from '@/modules/data-manager/utils/update-scholarship-csv.util'
 
 interface QuotaTarget {
   type: 'agency' | 'allocation'

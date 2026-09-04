@@ -7,7 +7,7 @@ import { StudentModule } from '../student/student.module'
 import { AdvisorModule } from '../advisor/advisor.module'
 import { EnrollmentModule } from '../enrollment/enrollment.module'
 import { ScholarshipModule } from '../scholarship/scholarship.module'
-import { EmailModule } from 'src/services/email-sending/email.module'
+import { EmailModule } from '@/services/email-sending/email.module'
 
 @Module({
   imports: [

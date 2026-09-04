@@ -1,5 +1,5 @@
-import * as moment from 'moment'
-import { Enrollment } from 'src/modules/enrollment/entities/enrollment.entity'
+import moment from 'moment'
+import { Enrollment } from '@/modules/enrollment/entities/enrollment.entity'
 import { constants } from './constants'
 
 function getDatePlusDays(days: number): Date {
