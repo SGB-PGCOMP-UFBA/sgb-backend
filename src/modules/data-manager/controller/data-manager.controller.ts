@@ -10,7 +10,7 @@ import {
   Delete,
   Headers
 } from '@nestjs/common'
-import * as moment from 'moment'
+import { format } from 'date-fns'
 import { Response } from 'express'
 import { File } from 'multer'
 import { FileInterceptor } from '@nestjs/platform-express'
@@ -46,7 +46,7 @@ export class DataManagerController {
   async exportData(@Res() response: Response): Promise<void> {
     const buffer = await this.dataManagerCsvService.exportDataToCsv()
     const filename =
-      'backup_sgb_' + moment().format('DD-MM-yy hh:mm:ss') + '.csv'
+      'backup_sgb_' + format(new Date(), 'dd-MM-yyyy hh:mm:ss') + '.csv'
 
     response.set({
       'Content-Type': 'text/csv',

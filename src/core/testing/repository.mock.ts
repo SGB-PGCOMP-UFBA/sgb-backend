@@ -21,6 +21,7 @@ export function createQueryBuilderMock(rawRows: RawRow[] = []) {
     queryBuilder[method] = vi.fn(chain)
   }
 
+  queryBuilder.getCount = vi.fn().mockResolvedValue(rawRows.length)
   queryBuilder.getRawMany = vi.fn().mockResolvedValue(rawRows)
   queryBuilder.getRawOne = vi.fn().mockResolvedValue(rawRows[0] ?? null)
   queryBuilder.getMany = vi.fn().mockResolvedValue(rawRows)
@@ -34,6 +35,7 @@ export function createRepositoryMock(overrides: Record<string, unknown> = {}) {
     find: vi.fn().mockResolvedValue([]),
     findOne: vi.fn().mockResolvedValue(null),
     findOneBy: vi.fn().mockResolvedValue(null),
+    count: vi.fn().mockResolvedValue(0),
     create: vi.fn((data: unknown) => data),
     save: vi.fn(async (data: unknown) => data),
     merge: vi.fn(

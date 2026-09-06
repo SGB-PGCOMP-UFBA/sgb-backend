@@ -125,6 +125,8 @@ const constants = {
       ALREADY_REGISTERED:
         'Já existe uma bolsa cadastrada com os mesmos detalhes informados.',
       NO_SLOTS_AVAILABLE: 'Não há vagas disponíveis para esta bolsa.',
+      ENROLLMENT_ALREADY_HAS_ACTIVE:
+        'Esta matrícula já possui uma bolsa vigente. Finalize a bolsa atual antes de cadastrar outra.',
       QUOTA_NOT_CONFIGURED:
         'Não há vagas concedidas cadastradas para esta bolsa.'
     },
