@@ -10,10 +10,10 @@ import {
 export class IsPasswordMatchingConstraint
   implements ValidatorConstraintInterface
 {
-  validate(confirm: any, args: ValidationArguments) {
+  validate(confirm: string, args: ValidationArguments) {
     const [relatedPropertyName] = args.constraints
-    const relatedValue = (args.object as any)[relatedPropertyName]
-    return confirm === relatedValue
+    const relatedValue: string = (args.object as any)[relatedPropertyName]
+    return confirm.trim() === relatedValue.trim()
   }
 
   defaultMessage(args: ValidationArguments) {

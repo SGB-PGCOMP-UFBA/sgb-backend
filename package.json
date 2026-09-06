@@ -6,8 +6,8 @@
   "private": true,
   "license": "GPL-3.0",
   "engines": {
-    "node": "18.20.4",
-    "npm": "10.7.0"
+    "node": ">=22.12.0",
+    "npm": ">=10.9.0"
   },
   "scripts": {
     "db:migrate": "node ./node_modules/typeorm/cli.js migration:run --d dist/config/ormconfig.js",
@@ -20,15 +20,14 @@
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "lint:ci": "eslint \"{src,apps,libs,test}/**/*.ts\" --max-warnings=0",
     "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
-    "test": "jest --passWithNoTests",
+    "test": "vitest run",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
     "migration:generate": "npm run typeorm -- migration:generate -d src/config/ormconfig.ts",
     "migration:create": "npm run typeorm migration:create -n ./src/core/database/migrations/<NAME>",
     "migration:run": "npm run typeorm -- migration:run --d src/config/ormconfig.ts",
     "migration:revert": "npm run typeorm -- migration:revert --d src/config/ormconfig.ts",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "copy-templates": "copyfiles --up 1 src/services/email-sending/templates/*.hbs ./dist"
   },
@@ -57,7 +56,6 @@
     "handlebars": "^4.7.7",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^5.0.7",
-    "moment": "^2.29.4",
     "multer": "^1.4.5-lts.1",
     "nestjs-typeorm-paginate": "^4.0.2",
     "nodemailer": "^6.7.8",
@@ -77,9 +75,10 @@
     "@nestjs/cli": "^9.0.0",
     "@nestjs/schematics": "^9.0.0",
     "@nestjs/testing": "^9.0.0",
+    "@swc/core": "^1.16.1",
     "@types/express": "^4.17.13",
     "@types/jest": "28.1.4",
-    "@types/node": "^16.0.0",
+    "@types/node": "^22.10.0",
     "@types/nodemailer": "^6.4.6",
     "@types/passport-jwt": "^3.0.6",
     "@types/passport-local": "^1.0.34",
@@ -102,23 +101,8 @@
     "ts-jest": "28.0.5",
     "ts-loader": "^9.2.3",
     "ts-node": "^10.9.2",
-    "tsconfig-paths": "^4.0.0"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "tsconfig-paths": "^4.0.0",
+    "unplugin-swc": "^1.5.11",
+    "vitest": "^5.0.0"
   }
 }

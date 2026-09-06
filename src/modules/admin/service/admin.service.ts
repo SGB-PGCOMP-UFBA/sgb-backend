@@ -19,7 +19,7 @@ export class AdminService {
   ) {}
 
   async create(key: string, dto: CreateAdminDto) {
-    if (key !== constants.api.API_KEY) {
+    if (!constants.api.API_KEY || key !== constants.api.API_KEY) {
       throw new ForbiddenException()
     }
 
