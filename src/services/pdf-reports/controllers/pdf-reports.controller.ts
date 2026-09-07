@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Res } from '@nestjs/common'
 import { PdfReportService } from '../service/pdf-reports.service'
 import { Response } from 'express'
-import * as moment from 'moment'
+import { format } from 'date-fns'
 import { QuadrennialReportDto } from '../dtos/quadrennial-report.dto'
 
 @Controller('/v1/report')
@@ -12,7 +12,9 @@ export class PdfReportController {
   async generateReport(@Res() response: Response): Promise<void> {
     const arrayBuffer = await this.reportService.generatePDF()
     const filename =
-      'RELATORIO_PGCOMP_SGB ' + moment().format('DD-MM-yy hh:mm:ss') + '.pdf'
+      'RELATORIO_PGCOMP_SGB ' +
+      format(new Date(), 'dd-MM-yyyy hh:mm:ss') +
+      '.pdf'
 
     const buffer = Buffer.from(arrayBuffer)
 
@@ -33,7 +35,7 @@ export class PdfReportController {
     const buffer = await this.reportService.generateQuadrennialPDF(dto)
     const filename = `RELATORIO_QUADRIENAL_${dto.startDate}_${
       dto.endDate
-    }_${moment().format('DD-MM-yy hh:mm:ss')}.pdf`
+    }_${format(new Date(), 'dd-MM-yyyy hh:mm:ss')}.pdf`
 
     response.set({
       'Content-Type': 'application/pdf',

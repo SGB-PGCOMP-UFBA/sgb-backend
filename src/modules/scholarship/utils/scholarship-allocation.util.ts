@@ -6,27 +6,15 @@ export function isActiveScholarship(scholarship: Scholarship): boolean {
   return ACTIVE_SCHOLARSHIP_STATUSES.includes(scholarship?.status)
 }
 
-export function listOccupiedSlotsByProgram(
-  scholarships: Scholarship[] = [],
-  program: string
-): number[] {
-  const occupiedSlots = new Set<number>()
-
-  for (const scholarship of scholarships) {
-    if (!isActiveScholarship(scholarship)) continue
-    if (scholarship.enrollment?.enrollment_program !== program) continue
-
-    occupiedSlots.add(scholarship.enrollment_id ?? scholarship.enrollment.id)
-  }
-
-  return Array.from(occupiedSlots)
-}
-
 export function countAllocatedScholarshipsByProgram(
   scholarships: Scholarship[] = [],
   program: string
 ): number {
-  return listOccupiedSlotsByProgram(scholarships, program).length
+  return scholarships.filter(
+    (scholarship) =>
+      isActiveScholarship(scholarship) &&
+      scholarship.enrollment?.enrollment_program === program
+  ).length
 }
 
 export function getAwardedSlotsByProgram(
@@ -49,12 +37,7 @@ export function getAwardedSlotsByProgram(
 
 export function hasAvailableSlot(params: {
   awardedSlots: number
-  occupiedSlots: number[]
-  enrollmentId: number
+  allocatedSlots: number
 }): boolean {
-  const { awardedSlots, occupiedSlots, enrollmentId } = params
-
-  if (occupiedSlots.includes(enrollmentId)) return true
-
-  return occupiedSlots.length < awardedSlots
+  return params.allocatedSlots < params.awardedSlots
 }
