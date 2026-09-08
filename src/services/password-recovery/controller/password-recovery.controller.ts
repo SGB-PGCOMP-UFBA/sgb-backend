@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common'
-import { ResetPasswordRequestDto } from '../dtos/reset-password-request.dto'
-import { PasswordRecoveryService } from '../service/password-recovery.service'
+import { ResetPasswordRequestDto } from '@/services/password-recovery/dtos/reset-password-request.dto'
+import { PasswordRecoveryService } from '@/services/password-recovery/service/password-recovery.service'
 
 @Controller('v1/passwords')
 export class PasswordRecoveryController {

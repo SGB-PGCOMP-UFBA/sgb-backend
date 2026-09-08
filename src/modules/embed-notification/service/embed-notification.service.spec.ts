@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { createRepositoryMock } from '../../../core/testing/repository.mock'
+import { createRepositoryMock } from '@/core/testing/repository.mock'
 import { EmbedNotificationService } from './embed-notification.service'
 
 const VALID_DTO = {
@@ -10,7 +10,6 @@ const VALID_DTO = {
   description: 'Sua bolsa foi prorrogada por mais 6 meses.'
 } as never
 
-/** O `deleteAll` usa um query builder de DELETE, que o helper padrão não cobre. */
 function createDeleteQueryBuilderMock() {
   const queryBuilder: Record<string, unknown> = {}
   queryBuilder.delete = vi.fn(() => queryBuilder)

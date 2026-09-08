@@ -4,12 +4,12 @@ import {
   NotFoundException
 } from '@nestjs/common'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { makeAdmin } from '../../../core/testing/factories'
-import { createRepositoryMock } from '../../../core/testing/repository.mock'
-import { comparePassword, hashPassword } from '../../../core/utils/bcrypt'
-import { constants } from '../../../core/utils/constants'
-import { CreateAdminDto } from '../dto/create-admin.dto'
-import { UpdateAdminDto } from '../dto/update-admin.dto'
+import { makeAdmin } from '@/core/testing/factories'
+import { createRepositoryMock } from '@/core/testing/repository.mock'
+import { comparePassword, hashPassword } from '@/core/utils/bcrypt'
+import { constants } from '@/core/utils/constants'
+import { CreateAdminDto } from '@/modules/admin/dto/create-admin.dto'
+import { UpdateAdminDto } from '@/modules/admin/dto/update-admin.dto'
 import { AdminService } from './admin.service'
 
 const CHAVE_VALIDA = 'chave-de-teste'

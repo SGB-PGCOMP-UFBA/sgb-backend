@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { makeAdmin } from '../../../core/testing/factories'
+import { makeAdmin } from '@/core/testing/factories'
 import { AdminMapper } from './admin.mapper'
 
 describe('AdminMapper', () => {

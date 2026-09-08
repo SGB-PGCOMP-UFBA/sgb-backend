@@ -1,7 +1,7 @@
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { Injectable } from '@nestjs/common'
-import { ScholarshipService } from '../../..//modules/scholarship/service/scholarship.service'
+import { ScholarshipService } from '@/modules/scholarship/service/scholarship.service'
 import {
   HEADERS_FOR_SCHOLARSHIPS_STARTING_CURRENT_YEAR,
   HEADERS_FOR_SCHOLARSHIPS_ENDING_CURRENT_YEAR,
@@ -9,7 +9,7 @@ import {
   getScholarshipsSplitedByStartingYear,
   getScholarshipsSplitedByEndingYear
 } from './pdf-reports.helper'
-import { QuadrennialReportDto } from '../dtos/quadrennial-report.dto'
+import { QuadrennialReportDto } from '@/services/pdf-reports/dtos/quadrennial-report.dto'
 
 @Injectable()
 export class PdfReportService {

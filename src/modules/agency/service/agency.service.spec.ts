@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   makeAgency,
   makeScholarshipsForProgram
-} from '../../../core/testing/factories'
-import { createRepositoryMock } from '../../../core/testing/repository.mock'
+} from '@/core/testing/factories'
+import { createRepositoryMock } from '@/core/testing/repository.mock'
 import { AgencyService } from './agency.service'
 
 describe('AgencyService', () => {

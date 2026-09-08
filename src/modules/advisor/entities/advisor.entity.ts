@@ -6,8 +6,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm'
-import { User } from '../../user/interfaces/user.interface'
-import { Enrollment } from '../../enrollment/entities/enrollment.entity'
+import { User } from '@/modules/user/interfaces/user.interface'
+import { Enrollment } from '@/modules/enrollment/entities/enrollment.entity'
 
 @Entity('advisor')
 export class Advisor implements User {

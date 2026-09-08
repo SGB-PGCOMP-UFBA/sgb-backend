@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus } from '@nestjs/common'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
-import { makeStudent } from '../../../core/testing/factories'
-import { hashPassword } from '../../../core/utils/bcrypt'
+import { makeStudent } from '@/core/testing/factories'
+import { hashPassword } from '@/core/utils/bcrypt'
 import { AuthService } from './auth.service'
 
 const PLAIN_PASSWORD = 'Senha@123'

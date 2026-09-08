@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { ScholarshipService } from '../../scholarship/service/scholarship.service'
-import { EnrollmentService } from '../../enrollment/services/enrollment.service'
-import { StudentService } from '../../student/service/student.service'
-import { CreateStudentDto } from '../../student/dto/create-student.dto'
-import { CreateScholarshipDto } from '../../scholarship/dto/create-scholarship.dto'
-import { CreateEnrollmentDto } from '../../enrollment/dtos/create-enrollment.dto'
+import { ScholarshipService } from '@/modules/scholarship/service/scholarship.service'
+import { EnrollmentService } from '@/modules/enrollment/services/enrollment.service'
+import { StudentService } from '@/modules/student/service/student.service'
+import { CreateStudentDto } from '@/modules/student/dto/create-student.dto'
+import { CreateScholarshipDto } from '@/modules/scholarship/dto/create-scholarship.dto'
+import { CreateEnrollmentDto } from '@/modules/enrollment/dtos/create-enrollment.dto'
 
 @Injectable()
 export class DataManagerJsonService {

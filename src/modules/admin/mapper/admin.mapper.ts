@@ -1,4 +1,4 @@
-import { Admin } from '../entities/admin.entity'
+import { Admin } from '@/modules/admin/entities/admin.entity'
 
 export class AdminMapper {
   static simplified(admin: Admin) {

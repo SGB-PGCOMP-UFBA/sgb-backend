@@ -1,4 +1,4 @@
-import { Scholarship } from '../entities/scholarship.entity'
+import { Scholarship } from '@/modules/scholarship/entities/scholarship.entity'
 
 export const ACTIVE_SCHOLARSHIP_STATUSES = ['ON_GOING', 'EXTENDED']
 

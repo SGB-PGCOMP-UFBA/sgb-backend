@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { makeStudent } from '../../../core/testing/factories'
+import { makeStudent } from '@/core/testing/factories'
 import { toResponseUserDto } from './user.mapper'
 
 describe('toResponseUserDto', () => {

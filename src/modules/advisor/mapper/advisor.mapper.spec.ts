@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { makeAdvisor, makeEnrollment } from '../../../core/testing/factories'
+import { makeAdvisor, makeEnrollment } from '@/core/testing/factories'
 import { AdvisorMapper } from './advisor.mapper'
 
 describe('AdvisorMapper', () => {

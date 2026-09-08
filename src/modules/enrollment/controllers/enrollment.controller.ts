@@ -10,13 +10,13 @@ import {
   HttpCode,
   UseGuards
 } from '@nestjs/common'
-import { EnrollmentService } from '../services/enrollment.service'
-import { EnrollmentMapper } from '../mappers/enrollment.mapper'
-import { CreateEnrollmentDto } from '../dtos/create-enrollment.dto'
-import { UpdateEnrollmentDto } from '../dtos/update-enrollment.dto'
-import { Roles } from '../../../modules/auth/decorators/role.decorator'
-import { RolesGuard } from '../../../modules/auth/guards/roles.guard'
-import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
+import { EnrollmentService } from '@/modules/enrollment/services/enrollment.service'
+import { EnrollmentMapper } from '@/modules/enrollment/mappers/enrollment.mapper'
+import { CreateEnrollmentDto } from '@/modules/enrollment/dtos/create-enrollment.dto'
+import { UpdateEnrollmentDto } from '@/modules/enrollment/dtos/update-enrollment.dto'
+import { Roles } from '@/modules/auth/decorators/role.decorator'
+import { RolesGuard } from '@/modules/auth/guards/roles.guard'
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard'
 
 @Controller('v1/enrollment')
 export class EnrollmentController {

@@ -10,14 +10,14 @@ import {
   UseGuards,
   Headers
 } from '@nestjs/common'
-import { AdminService } from '../service/admin.service'
-import { AdminMapper } from '../mapper/admin.mapper'
-import { UpdateAdminPasswordDto } from '../dto/update-admin-password.dto'
-import { CreateAdminDto } from '../dto/create-admin.dto'
-import { UpdateAdminDto } from '../dto/update-admin.dto'
-import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
-import { RolesGuard } from '../../../modules/auth/guards/roles.guard'
-import { Roles } from '../../../modules/auth/decorators/role.decorator'
+import { AdminService } from '@/modules/admin/service/admin.service'
+import { AdminMapper } from '@/modules/admin/mapper/admin.mapper'
+import { UpdateAdminPasswordDto } from '@/modules/admin/dto/update-admin-password.dto'
+import { CreateAdminDto } from '@/modules/admin/dto/create-admin.dto'
+import { UpdateAdminDto } from '@/modules/admin/dto/update-admin.dto'
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard'
+import { RolesGuard } from '@/modules/auth/guards/roles.guard'
+import { Roles } from '@/modules/auth/decorators/role.decorator'
 
 @Controller('v1/admin')
 export class AdminController {

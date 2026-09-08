@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { ProgramEnum } from '../../../core/enums/ProgramEnum'
+import { ProgramEnum } from '@/core/enums/ProgramEnum'
 import {
   makeAgency,
   makeAllocation,
   makeEnrollment,
   makeScholarship
-} from '../../../core/testing/factories'
+} from '@/core/testing/factories'
 import { EnrollmentMapper } from './enrollment.mapper'
 
 describe('EnrollmentMapper.forFilter', () => {

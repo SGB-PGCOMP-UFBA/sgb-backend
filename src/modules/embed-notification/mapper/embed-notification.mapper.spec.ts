@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { makeEmbedNotification } from '../../../core/testing/factories'
+import { makeEmbedNotification } from '@/core/testing/factories'
 import { EmbedNotificationMapper } from './embed-notification.mapper'
 
 describe('EmbedNotificationMapper.simplified', () => {

@@ -6,11 +6,11 @@ import {
   Logger,
   NotFoundException
 } from '@nestjs/common'
-import { CreatePendingScholarshipDto } from '../dto/create-pending-scholarship.dto'
+import { CreatePendingScholarshipDto } from '@/modules/pending-scholarship/dto/create-pending-scholarship.dto'
 import { InjectRepository } from '@nestjs/typeorm'
-import { PendingScholarship } from '../entities/pending-scholarship.entity'
+import { PendingScholarship } from '@/modules/pending-scholarship/entities/pending-scholarship.entity'
 import { Repository } from 'typeorm'
-import { SearchPendingScholarshipDto } from '../dto/search-pending-scholarship.dto'
+import { SearchPendingScholarshipDto } from '@/modules/pending-scholarship/dto/search-pending-scholarship.dto'
 import { StudentService } from '@/modules/student/service/student.service'
 import { constants } from '@/core/utils/constants'
 import { generateRandomPassword } from '@/utils/generate-password.utils'
@@ -19,7 +19,7 @@ import { EnrollmentService } from '@/modules/enrollment/services/enrollment.serv
 import { CreateEnrollmentDto } from '@/modules/enrollment/dtos/create-enrollment.dto'
 import { CreateScholarshipDto } from '@/modules/scholarship/dto/create-scholarship.dto'
 import { UpdateScholarshipCsvUtil } from '@/modules/data-manager/utils/update-scholarship-csv.util'
-import { ApprovePendingScholarshipDto } from '../dto/approve-pending-scholarship.dto'
+import { ApprovePendingScholarshipDto } from '@/modules/pending-scholarship/dto/approve-pending-scholarship.dto'
 import { ScholarshipService } from '@/modules/scholarship/service/scholarship.service'
 import { AgencyEnum } from '@/core/enums/AgencyEnum'
 import { Student } from '@/modules/student/entities/student.entity'
@@ -86,7 +86,7 @@ export class PendingScholarshipService {
       )
     try {
       await this.pendingScholarshipRepository.remove(pendingScholarhsip)
-    } catch (error) {
+    } catch (error: any) {
       throw new InternalServerErrorException(
         constants.exceptionMessages.pendingScholarship.DELETE_FAILED,
         error.message
@@ -179,7 +179,7 @@ export class PendingScholarshipService {
       return response
         .status(responseCode)
         .send({ name: student.name, email: student.email })
-    } catch (error) {
+    } catch (error: any) {
       if (error.response) {
         this.logger.error(
           'Aprove pending scholarship error',

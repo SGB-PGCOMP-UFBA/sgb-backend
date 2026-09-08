@@ -6,16 +6,11 @@ import {
   makeEnrollment,
   makeScholarship,
   makeStudent
-} from '../../core/testing/factories'
+} from '@/core/testing/factories'
 import { ScholarShipFinalizerService } from './scholarship-finalizer.service'
 
 const HOJE = new Date('2026-06-30T00:00:00.000Z')
 
-/**
- * Bolsa como `findAllEndingToday` devolve: com agência, matrícula, estudante e
- * orientador carregados (as relações que a notificação lê). A bolsa termina no
- * dia simulado pelos testes (`HOJE`).
- */
 function buildScholarship(overrides: Record<string, unknown> = {}) {
   return {
     ...makeScholarship({

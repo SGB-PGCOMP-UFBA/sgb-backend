@@ -6,7 +6,7 @@ import {
   MaxLength
 } from 'class-validator'
 import { Transform } from 'class-transformer'
-import { constants } from '../../../core/utils/constants'
+import { constants } from '@/core/utils/constants'
 
 export class UpdateStudentDto {
   @IsString()

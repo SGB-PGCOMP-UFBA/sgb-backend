@@ -5,9 +5,9 @@ import {
   Length,
   MaxLength
 } from 'class-validator'
-import { constants } from '../../../core/utils/constants'
+import { constants } from '@/core/utils/constants'
 import { Transform } from 'class-transformer'
-import { IsAcceptablePassword } from '../../../core/constraints/IsPasswordAcceptableConstraint'
+import { IsAcceptablePassword } from '@/core/constraints/IsPasswordAcceptableConstraint'
 
 export class CreateAdminDto {
   @IsString()

@@ -7,9 +7,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn
 } from 'typeorm'
-import { Agency } from '../../agency/entities/agency.entity'
-import { Enrollment } from '../../enrollment/entities/enrollment.entity'
-import { Allocation } from '../../allocation/entities/allocation.entity'
+import { Agency } from '@/modules/agency/entities/agency.entity'
+import { Enrollment } from '@/modules/enrollment/entities/enrollment.entity'
+import { Allocation } from '@/modules/allocation/entities/allocation.entity'
 
 @Entity('scholarship')
 export class Scholarship {

@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Patch, Query, UseGuards } from '@nestjs/common'
-import { EmbedNotificationService } from '../service/embed-notification.service'
-import { EmbedNotificationMapper } from '../mapper/embed-notification.mapper'
-import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
+import { EmbedNotificationService } from '@/modules/embed-notification/service/embed-notification.service'
+import { EmbedNotificationMapper } from '@/modules/embed-notification/mapper/embed-notification.mapper'
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard'
 
 @Controller('v1/embed-notification')
 export class EmbedNotificationController {

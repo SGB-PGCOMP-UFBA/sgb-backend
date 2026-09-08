@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { AgencyModule } from '../agency/agency.module'
-import { EnrollmentModule } from '../enrollment/enrollment.module'
-import { StudentModule } from '../student/student.module'
+import { AgencyModule } from '@/modules/agency/agency.module'
+import { EnrollmentModule } from '@/modules/enrollment/enrollment.module'
+import { StudentModule } from '@/modules/student/student.module'
 import { ScholarshipService } from './service/scholarship.service'
 import { ScholarshipController } from './controller/scholarship.controller'
 import { Scholarship } from './entities/scholarship.entity'
-import { AllocationModule } from '../allocation/allocation.module'
+import { AllocationModule } from '@/modules/allocation/allocation.module'
 
 @Module({
   imports: [

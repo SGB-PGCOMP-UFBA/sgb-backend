@@ -1,12 +1,12 @@
-import { Admin } from '../../modules/admin/entities/admin.entity'
-import { Advisor } from '../../modules/advisor/entities/advisor.entity'
-import { Agency } from '../../modules/agency/entities/agency.entity'
-import { Allocation } from '../../modules/allocation/entities/allocation.entity'
-import { EmbedNotification } from '../../modules/embed-notification/entity/embed-notification.entity'
-import { Enrollment } from '../../modules/enrollment/entities/enrollment.entity'
-import { PendingScholarship } from '../../modules/pending-scholarship/entities/pending-scholarship.entity'
-import { Scholarship } from '../../modules/scholarship/entities/scholarship.entity'
-import { Student } from '../../modules/student/entities/student.entity'
+import { Admin } from '@/modules/admin/entities/admin.entity'
+import { Advisor } from '@/modules/advisor/entities/advisor.entity'
+import { Agency } from '@/modules/agency/entities/agency.entity'
+import { Allocation } from '@/modules/allocation/entities/allocation.entity'
+import { EmbedNotification } from '@/modules/embed-notification/entity/embed-notification.entity'
+import { Enrollment } from '@/modules/enrollment/entities/enrollment.entity'
+import { PendingScholarship } from '@/modules/pending-scholarship/entities/pending-scholarship.entity'
+import { Scholarship } from '@/modules/scholarship/entities/scholarship.entity'
+import { Student } from '@/modules/student/entities/student.entity'
 
 type Overrides<T> = Partial<T> & Record<string, unknown>
 

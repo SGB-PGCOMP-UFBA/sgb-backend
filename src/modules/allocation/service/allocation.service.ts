@@ -5,11 +5,11 @@ import {
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
-import { CreateAllocationDto } from '../dto/create-allocation.dto'
-import { UpdateAllocationDto } from '../dto/update-allocation.dto'
-import { Allocation } from '../entities/allocation.entity'
-import { constants } from '../../../core/utils/constants'
-import { countAllocatedScholarshipsByProgram } from '../../scholarship/utils/scholarship-allocation.util'
+import { CreateAllocationDto } from '@/modules/allocation/dto/create-allocation.dto'
+import { UpdateAllocationDto } from '@/modules/allocation/dto/update-allocation.dto'
+import { Allocation } from '@/modules/allocation/entities/allocation.entity'
+import { constants } from '@/core/utils/constants'
+import { countAllocatedScholarshipsByProgram } from '@/modules/scholarship/utils/scholarship-allocation.util'
 
 @Injectable()
 export class AllocationService {

@@ -3,7 +3,7 @@ import {
   makeAgency,
   makeScholarship,
   makeScholarshipsForProgram
-} from '../../../core/testing/factories'
+} from '@/core/testing/factories'
 import { AgencyMapper } from './agency.mapper'
 
 describe('AgencyMapper.detailed', () => {

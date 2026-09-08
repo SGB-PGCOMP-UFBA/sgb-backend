@@ -7,7 +7,7 @@ import {
   IsNumber
 } from 'class-validator'
 import { Transform, Type } from 'class-transformer'
-import { constants } from '../../../core/utils/constants'
+import { constants } from '@/core/utils/constants'
 
 export class UpdateScholarshipDto {
   @IsNumber()

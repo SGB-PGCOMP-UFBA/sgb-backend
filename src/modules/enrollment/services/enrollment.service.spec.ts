@@ -4,11 +4,11 @@ import {
   makeAdvisor,
   makeEnrollment,
   makeStudent
-} from '../../../core/testing/factories'
+} from '@/core/testing/factories'
 import {
   createQueryBuilderMock,
   createRepositoryMock
-} from '../../../core/testing/repository.mock'
+} from '@/core/testing/repository.mock'
 import { EnrollmentService } from './enrollment.service'
 
 const ADVISOR = makeAdvisor()
@@ -25,7 +25,6 @@ const VALID_DTO = {
   defense_prediction_date: new Date('2026-03-01')
 } as never
 
-/** O `deleteAll` usa um query builder de DELETE, que o helper padrão não cobre. */
 function createDeleteQueryBuilderMock() {
   const queryBuilder: Record<string, unknown> = {}
   queryBuilder.delete = vi.fn(() => queryBuilder)

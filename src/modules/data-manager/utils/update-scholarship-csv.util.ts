@@ -3,7 +3,7 @@ import { Scholarship } from '@/modules/scholarship/entities/scholarship.entity'
 import { Student } from '@/modules/student/entities/student.entity'
 import { StudentService } from '@/modules/student/service/student.service'
 import { Repository, UpdateResult } from 'typeorm'
-import { ListUpdatesFromImport } from '../dto/list-updates.dto'
+import { ListUpdatesFromImport } from '@/modules/data-manager/dto/list-updates.dto'
 
 export interface ScholarshipRow {
   Nome: string

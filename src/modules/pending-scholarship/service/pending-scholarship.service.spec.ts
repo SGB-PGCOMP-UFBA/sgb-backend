@@ -11,12 +11,11 @@ import {
   makePendingScholarship,
   makeScholarship,
   makeStudent
-} from '../../../core/testing/factories'
-import { createRepositoryMock } from '../../../core/testing/repository.mock'
-import { Scholarship } from '../../scholarship/entities/scholarship.entity'
+} from '@/core/testing/factories'
+import { createRepositoryMock } from '@/core/testing/repository.mock'
+import { Scholarship } from '@/modules/scholarship/entities/scholarship.entity'
 import { PendingScholarshipService } from './pending-scholarship.service'
 
-/** Bolsa pendente típica, vinda da importação da planilha da pós. */
 const PENDING = makePendingScholarship({
   id: 55,
   student_name: 'Maria Souza',
@@ -45,7 +44,6 @@ const NEW_STUDENT = makeStudent({
 
 const NEW_ENROLLMENT = makeEnrollment({ id: 90 })
 
-/** Data dentro do período da bolsa: status calculado vira ON_GOING. */
 const DURANTE_A_BOLSA = new Date('2026-09-01T00:00:00.000Z')
 
 describe('PendingScholarshipService', () => {

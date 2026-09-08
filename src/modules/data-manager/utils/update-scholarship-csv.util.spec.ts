@@ -3,9 +3,9 @@ import {
   makeEnrollment,
   makeScholarship,
   makeStudent
-} from '../../../core/testing/factories'
-import { createRepositoryMock } from '../../../core/testing/repository.mock'
-import { ListUpdatesFromImport } from '../dto/list-updates.dto'
+} from '@/core/testing/factories'
+import { createRepositoryMock } from '@/core/testing/repository.mock'
+import { ListUpdatesFromImport } from '@/modules/data-manager/dto/list-updates.dto'
 import {
   ProcessedScholarship,
   ScholarshipRow,

@@ -4,7 +4,7 @@ import {
   makeEnrollment,
   makeScholarship,
   makeScholarshipsForProgram
-} from '../../../core/testing/factories'
+} from '@/core/testing/factories'
 import { AllocationMapper } from './allocation.mapper'
 
 describe('AllocationMapper.forFilter', () => {

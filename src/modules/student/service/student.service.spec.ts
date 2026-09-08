@@ -1,11 +1,11 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { makeStudent } from '../../../core/testing/factories'
-import { createRepositoryMock } from '../../../core/testing/repository.mock'
-import { comparePassword, hashPassword } from '../../../core/utils/bcrypt'
-import { constants } from '../../../core/utils/constants'
-import { CreateStudentDto } from '../dto/create-student.dto'
-import { UpdateStudentDto } from '../dto/update-student.dto'
+import { makeStudent } from '@/core/testing/factories'
+import { createRepositoryMock } from '@/core/testing/repository.mock'
+import { comparePassword, hashPassword } from '@/core/utils/bcrypt'
+import { constants } from '@/core/utils/constants'
+import { CreateStudentDto } from '@/modules/student/dto/create-student.dto'
+import { UpdateStudentDto } from '@/modules/student/dto/update-student.dto'
 import { StudentService } from './student.service'
 
 const CREATE_DTO: CreateStudentDto = {

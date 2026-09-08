@@ -1,4 +1,4 @@
-import { EmbedNotification } from '../entity/embed-notification.entity'
+import { EmbedNotification } from '@/modules/embed-notification/entity/embed-notification.entity'
 
 export class EmbedNotificationMapper {
   static simplified(embedNotifcation: EmbedNotification) {

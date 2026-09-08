@@ -7,7 +7,7 @@ import {
   IsString,
   MaxLength
 } from 'class-validator'
-import { constants } from '../../../core/utils/constants'
+import { constants } from '@/core/utils/constants'
 
 export class CreateEnrollmentDto {
   @IsString()

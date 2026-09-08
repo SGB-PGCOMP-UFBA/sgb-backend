@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
-import { EmbedNotification } from '../entity/embed-notification.entity'
-import { CreateEmbedNotificationDto } from '../dto/create-embed-notification.dto'
-import { constants } from '../../../core/utils/constants'
+import { EmbedNotification } from '@/modules/embed-notification/entity/embed-notification.entity'
+import { CreateEmbedNotificationDto } from '@/modules/embed-notification/dto/create-embed-notification.dto'
+import { constants } from '@/core/utils/constants'
 
 @Injectable()
 export class EmbedNotificationService {

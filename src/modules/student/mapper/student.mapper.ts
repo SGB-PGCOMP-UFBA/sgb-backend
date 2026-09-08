@@ -1,5 +1,5 @@
-import { Student } from '../entities/student.entity'
-import { EnrollmentMapper } from '../../enrollment/mappers/enrollment.mapper'
+import { Student } from '@/modules/student/entities/student.entity'
+import { EnrollmentMapper } from '@/modules/enrollment/mappers/enrollment.mapper'
 
 export class StudentMapper {
   static simplified(student: Student) {

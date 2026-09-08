@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { EmailService } from '../../email-sending/service/email.service'
-import { ScholarshipService } from '../../../modules/scholarship/service/scholarship.service'
-import { EmbedNotificationService } from '../../../modules/embed-notification/service/embed-notification.service'
-import { AdminService } from '../../../modules/admin/service/admin.service'
-import { Enrollment } from '../../../modules/enrollment/entities/enrollment.entity'
-import { Admin } from '../../../modules/admin/entities/admin.entity'
-import { getDatePlusDays } from '../../../core/utils/date-utils'
+import { EmailService } from '@/services/email-sending/service/email.service'
+import { ScholarshipService } from '@/modules/scholarship/service/scholarship.service'
+import { EmbedNotificationService } from '@/modules/embed-notification/service/embed-notification.service'
+import { AdminService } from '@/modules/admin/service/admin.service'
+import { Enrollment } from '@/modules/enrollment/entities/enrollment.entity'
+import { Admin } from '@/modules/admin/entities/admin.entity'
+import { getDatePlusDays } from '@/core/utils/date-utils'
 
 @Injectable()
 export class NotificationService {

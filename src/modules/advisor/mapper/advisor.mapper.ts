@@ -1,5 +1,5 @@
-import { Advisor } from '../entities/advisor.entity'
-import { EnrollmentMapper } from '../../enrollment/mappers/enrollment.mapper'
+import { Advisor } from '@/modules/advisor/entities/advisor.entity'
+import { EnrollmentMapper } from '@/modules/enrollment/mappers/enrollment.mapper'
 
 export class AdvisorMapper {
   static forFilter(advisor: Advisor) {

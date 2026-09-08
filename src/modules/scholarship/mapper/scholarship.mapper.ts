@@ -1,10 +1,10 @@
-import { Scholarship } from '../entities/scholarship.entity'
-import { AgencyMapper } from '../../agency/mapper/agency.mapper'
-import { EnrollmentMapper } from '../../enrollment/mappers/enrollment.mapper'
-import { StudentMapper } from '../../student/mapper/student.mapper'
-import { AdvisorMapper } from '../../advisor/mapper/advisor.mapper'
-import { AllocationMapper } from '../../allocation/mapper/allocation.mapper'
-import { StatusEnum } from '../../../core/enums/StatusEnum'
+import { Scholarship } from '@/modules/scholarship/entities/scholarship.entity'
+import { AgencyMapper } from '@/modules/agency/mapper/agency.mapper'
+import { EnrollmentMapper } from '@/modules/enrollment/mappers/enrollment.mapper'
+import { StudentMapper } from '@/modules/student/mapper/student.mapper'
+import { AdvisorMapper } from '@/modules/advisor/mapper/advisor.mapper'
+import { AllocationMapper } from '@/modules/allocation/mapper/allocation.mapper'
+import { StatusEnum } from '@/core/enums/StatusEnum'
 
 export class ScholarshipMapper {
   static forFilter(scholarship: Scholarship) {

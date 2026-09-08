@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import {
   makeAllocation,
   makeScholarshipsForProgram
-} from '../../../core/testing/factories'
-import { createRepositoryMock } from '../../../core/testing/repository.mock'
+} from '@/core/testing/factories'
+import { createRepositoryMock } from '@/core/testing/repository.mock'
 import { AllocationService } from './allocation.service'
 
 describe('AllocationService', () => {

@@ -1,13 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { StatusEnum } from '../../../core/enums/StatusEnum'
+import { StatusEnum } from '@/core/enums/StatusEnum'
 import {
   makeAgency,
   makeAllocation,
   makeScholarship
-} from '../../../core/testing/factories'
+} from '@/core/testing/factories'
 import { ScholarshipMapper } from './scholarship.mapper'
 
-/** Linha crua do relatório entre datas, como o `getRawMany` devolve. */
 function reportRow(
   agencyName: string,
   status: string,
@@ -109,12 +108,12 @@ describe('ScholarshipMapper.detailed', () => {
     ['objeto Date', new Date('2024-03-01T00:00:00.000Z')]
   ])(
     'quando a data de início chega crua do banco, repassa o valor sem converter (%s)',
-    (_caso, valor) => {
+    (_, value) => {
       const detailed = ScholarshipMapper.detailed(
-        makeScholarship({ scholarship_starts_at: valor as Date })
+        makeScholarship({ scholarship_starts_at: value as Date })
       )
 
-      expect(detailed.scholarship_starts_at).toBe(valor)
+      expect(detailed.scholarship_starts_at).toBe(value)
     }
   )
 
@@ -308,9 +307,9 @@ describe('ScholarshipMapper.countScholarshipsGroupingByCourseAndYear', () => {
     ['undefined', undefined]
   ])(
     'quando a soma de um dos programas vem vazia, zera o programa sem bolsa (%s)',
-    (_caso, vazio) => {
+    (_, empty) => {
       const result = ScholarshipMapper.countScholarshipsGroupingByCourseAndYear(
-        [{ year: '2024', masters_count: 6, phd_count: vazio }]
+        [{ year: '2024', masters_count: 6, phd_count: empty }]
       )
 
       expect(result['2024']).toEqual({ MESTRADO: 6, DOUTORADO: 0 })

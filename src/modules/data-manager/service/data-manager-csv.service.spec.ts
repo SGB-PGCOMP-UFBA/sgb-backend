@@ -6,17 +6,10 @@ import {
   makeEnrollment,
   makeScholarship,
   makeStudent
-} from '../../../core/testing/factories'
-import { createRepositoryMock } from '../../../core/testing/repository.mock'
+} from '@/core/testing/factories'
+import { createRepositoryMock } from '@/core/testing/repository.mock'
 import { DataManagerCsvService } from './data-manager-csv.service'
 
-/**
- * O `import * as csvParser` do service só é chamável com o interop do tsc; sob
- * o Vitest o namespace do módulo CJS não é uma função. Por isso a leitura do
- * arquivo é dublada e os testes entram com as linhas já extraídas, exatamente
- * no formato que o csv-parser entrega (cabeçalhos com espaço/barra viram
- * underline e perdem o acento).
- */
 function stubLinhas(
   service: DataManagerCsvService,
   linhas: Record<string, string>[]

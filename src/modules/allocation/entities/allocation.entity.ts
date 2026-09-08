@@ -1,4 +1,4 @@
-import { Scholarship } from '../../scholarship/entities/scholarship.entity'
+import { Scholarship } from '@/modules/scholarship/entities/scholarship.entity'
 import {
   Column,
   CreateDateColumn,

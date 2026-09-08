@@ -6,11 +6,11 @@ import {
   makeEnrollment,
   makeScholarship,
   makeStudent
-} from '../../../core/testing/factories'
+} from '@/core/testing/factories'
 import {
   createQueryBuilderMock,
   createRepositoryMock
-} from '../../../core/testing/repository.mock'
+} from '@/core/testing/repository.mock'
 import { ScholarshipService } from './scholarship.service'
 
 const AGENCY = makeAgency()
@@ -31,7 +31,6 @@ const VALID_DTO = {
   scholarship_ends_at: new Date('2026-12-01')
 } as never
 
-/** O countAllocatedSlots devolve a contagem de bolsas vigentes. */
 function rowsForCount(total: number) {
   return Array.from({ length: total }, (_, index) => ({ id: index + 1 }))
 }
@@ -71,7 +70,6 @@ describe('ScholarshipService', () => {
     )
   })
 
-  /** Todas as consultas de vaga devolvem a mesma quantidade de alocadas. */
   function withAllocatedSlots(total: number) {
     repository.createQueryBuilder.mockReturnValue(
       createQueryBuilderMock(rowsForCount(total))

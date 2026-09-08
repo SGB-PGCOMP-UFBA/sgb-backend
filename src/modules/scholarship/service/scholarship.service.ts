@@ -15,26 +15,26 @@ import {
   Repository
 } from 'typeorm'
 import { paginate, IPaginationOptions } from 'nestjs-typeorm-paginate'
-import { PageDto } from '../../../core/pagination/page.dto'
-import { PageMetaDto } from '../../../core/pagination/page-meta.dto'
-import { Scholarship } from '../entities/scholarship.entity'
-import { constants } from '../../../core/utils/constants'
-import { ScholarshipMapper } from '../mapper/scholarship.mapper'
-import { ScholarshipFilters } from '../filters/IScholarshipFilters'
-import { StudentService } from '../../../modules/student/service/student.service'
-import { AgencyService } from '../../../modules/agency/service/agency.service'
-import { AllocationService } from '../../../modules/allocation/service/allocation.service'
-import { EnrollmentService } from '../../../modules/enrollment/services/enrollment.service'
-import { CreateScholarshipDto } from '../dto/create-scholarship.dto'
-import { UpdateScholarshipDto } from '../dto/update-scholarship.dto'
-import { validateScholarshipDuration } from '../../../core/utils/date-utils'
-import { CountScholarshipsAsReportBetweenDatesDto } from '../dto/count-scholarship-courses-between-dates.dto'
-import { ProgramEnum } from '../../../core/enums/ProgramEnum'
+import { PageDto } from '@/core/pagination/page.dto'
+import { PageMetaDto } from '@/core/pagination/page-meta.dto'
+import { Scholarship } from '@/modules/scholarship/entities/scholarship.entity'
+import { constants } from '@/core/utils/constants'
+import { ScholarshipMapper } from '@/modules/scholarship/mapper/scholarship.mapper'
+import { ScholarshipFilters } from '@/modules/scholarship/filters/IScholarshipFilters'
+import { StudentService } from '@/modules/student/service/student.service'
+import { AgencyService } from '@/modules/agency/service/agency.service'
+import { AllocationService } from '@/modules/allocation/service/allocation.service'
+import { EnrollmentService } from '@/modules/enrollment/services/enrollment.service'
+import { CreateScholarshipDto } from '@/modules/scholarship/dto/create-scholarship.dto'
+import { UpdateScholarshipDto } from '@/modules/scholarship/dto/update-scholarship.dto'
+import { validateScholarshipDuration } from '@/core/utils/date-utils'
+import { CountScholarshipsAsReportBetweenDatesDto } from '@/modules/scholarship/dto/count-scholarship-courses-between-dates.dto'
+import { ProgramEnum } from '@/core/enums/ProgramEnum'
 import {
   ACTIVE_SCHOLARSHIP_STATUSES,
   getAwardedSlotsByProgram,
   hasAvailableSlot
-} from '../utils/scholarship-allocation.util'
+} from '@/modules/scholarship/utils/scholarship-allocation.util'
 import { ProcessedScholarship } from '@/modules/data-manager/utils/update-scholarship-csv.util'
 
 interface QuotaTarget {

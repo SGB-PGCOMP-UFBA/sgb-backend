@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Post, Res } from '@nestjs/common'
-import { PdfReportService } from '../service/pdf-reports.service'
+import { PdfReportService } from '@/services/pdf-reports/service/pdf-reports.service'
 import { Response } from 'express'
 import { format } from 'date-fns'
-import { QuadrennialReportDto } from '../dtos/quadrennial-report.dto'
+import { QuadrennialReportDto } from '@/services/pdf-reports/dtos/quadrennial-report.dto'
 
 @Controller('/v1/report')
 export class PdfReportController {
