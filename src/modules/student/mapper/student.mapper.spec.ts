@@ -1,37 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { Student } from '../entities/student.entity'
+import { makeEnrollment, makeStudent } from '../../../core/testing/factories'
 import { StudentMapper } from './student.mapper'
-
-function buildEnrollment(id: number) {
-  return {
-    id,
-    student_id: 4,
-    advisor_id: 9,
-    enrollment_date: new Date('2024-03-01'),
-    enrollment_number: `20241234${id}`,
-    enrollment_program: 'MESTRADO',
-    defense_prediction_date: new Date('2026-03-01'),
-    created_at: new Date('2024-03-01'),
-    updated_at: new Date('2024-03-01')
-  }
-}
-
-function buildStudent(overrides: Partial<Student> = {}): Student {
-  return {
-    id: 4,
-    email: 'ana@ufba.br',
-    tax_id: '12345678901',
-    phone_number: '71999999999',
-    name: 'Ana Souza',
-    link_to_lattes: 'http://lattes.cnpq.br/1',
-    password: '$2a$10$hash-super-secreto',
-    role: 'STUDENT',
-    created_at: new Date('2024-08-05'),
-    updated_at: new Date('2024-08-06'),
-    enrollments: [],
-    ...overrides
-  } as Student
-}
 
 describe('StudentMapper', () => {
   it.each([
@@ -40,20 +9,22 @@ describe('StudentMapper', () => {
     ['detailedWithRelations'],
     ['detailedWithFullRelations']
   ] as const)('quando o estudante é mapeado, omite a senha (%s)', (formato) => {
-    const saida = StudentMapper[formato](buildStudent())
+    const saida = StudentMapper[formato](
+      makeStudent({ password: '$2a$10$hash-super-secreto' })
+    )
 
     expect(saida).not.toHaveProperty('password')
     expect(JSON.stringify(saida)).not.toContain('hash-super-secreto')
   })
 
   it('quando o formato é simplified, não expõe nenhum dado pessoal do estudante', () => {
-    expect(
-      Object.keys(StudentMapper.simplified(buildStudent())).sort()
-    ).toEqual(['created_at', 'id', 'role', 'updated_at'])
+    expect(Object.keys(StudentMapper.simplified(makeStudent())).sort()).toEqual(
+      ['created_at', 'id', 'role', 'updated_at']
+    )
   })
 
   it('quando o formato é detailed, acrescenta os dados cadastrais ao simplificado', () => {
-    const student = buildStudent()
+    const student = makeStudent({ name: 'Ana Souza', email: 'ana@ufba.br' })
 
     expect(StudentMapper.detailed(student)).toEqual({
       ...StudentMapper.simplified(student),
@@ -68,8 +39,11 @@ describe('StudentMapper', () => {
   it.each([['detailedWithRelations'], ['detailedWithFullRelations']] as const)(
     'quando a relação de matrículas está carregada, detalha as matrículas (%s)',
     (formato) => {
-      const student = buildStudent({
-        enrollments: [buildEnrollment(1), buildEnrollment(2)] as never
+      const student = makeStudent({
+        enrollments: makeEnrollment.list(2, (index) => ({
+          id: index + 1,
+          enrollment_number: `20241234${index + 1}`
+        }))
       })
 
       const saida = StudentMapper[formato](student)
@@ -86,7 +60,7 @@ describe('StudentMapper', () => {
   it.each([['detailedWithRelations'], ['detailedWithFullRelations']] as const)(
     'quando as matrículas não foram carregadas, mantém a relação indefinida sem quebrar (%s)',
     (formato) => {
-      const student = buildStudent({ enrollments: undefined as never })
+      const student = makeStudent({ enrollments: undefined })
 
       expect(() => StudentMapper[formato](student)).not.toThrow()
       expect(StudentMapper[formato](student).enrollments).toBeUndefined()

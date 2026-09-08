@@ -1,32 +1,11 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  makeAgency,
+  makeScholarshipsForProgram
+} from '../../../core/testing/factories'
 import { createRepositoryMock } from '../../../core/testing/repository.mock'
-import { Agency } from '../entities/agency.entity'
 import { AgencyService } from './agency.service'
-
-function buildScholarship(
-  enrollmentId: number,
-  status: string,
-  program: string
-) {
-  return {
-    enrollment_id: enrollmentId,
-    status,
-    enrollment: { id: enrollmentId, enrollment_program: program }
-  }
-}
-
-function buildAgency(overrides: Partial<Agency> = {}): Agency {
-  return {
-    id: 1,
-    name: 'CAPES',
-    description: 'Agência de fomento',
-    masters_degree_awarded_scholarships: 13,
-    doctorate_degree_awarded_scholarships: 7,
-    scholarships: [],
-    ...overrides
-  } as Agency
-}
 
 describe('AgencyService', () => {
   let repository: ReturnType<typeof createRepositoryMock>
@@ -49,7 +28,7 @@ describe('AgencyService', () => {
     )
 
     it('quando o nome existe, devolve a agência', async () => {
-      const agency = buildAgency()
+      const agency = makeAgency()
       repository.findOneBy.mockResolvedValue(agency)
 
       await expect(service.findOneByName('CAPES')).resolves.toBe(agency)
@@ -68,13 +47,7 @@ describe('AgencyService', () => {
   describe('update', () => {
     it('quando a atualização reduz as concedidas abaixo das já alocadas, recusa a mudança e não salva', async () => {
       repository.findOne.mockResolvedValue(
-        buildAgency({
-          scholarships: [
-            buildScholarship(1, 'ON_GOING', 'MESTRADO'),
-            buildScholarship(2, 'ON_GOING', 'MESTRADO'),
-            buildScholarship(3, 'ON_GOING', 'MESTRADO')
-          ]
-        } as Partial<Agency>)
+        makeAgency({ scholarships: makeScholarshipsForProgram(3, 'MESTRADO') })
       )
 
       await expect(
@@ -85,9 +58,7 @@ describe('AgencyService', () => {
 
     it('quando a atualização zera as concedidas e existe vaga alocada, recusa a mudança', async () => {
       repository.findOne.mockResolvedValue(
-        buildAgency({
-          scholarships: [buildScholarship(1, 'ON_GOING', 'DOUTORADO')]
-        } as Partial<Agency>)
+        makeAgency({ scholarships: makeScholarshipsForProgram(1, 'DOUTORADO') })
       )
 
       await expect(
@@ -97,12 +68,7 @@ describe('AgencyService', () => {
 
     it('quando as concedidas ficam iguais às alocadas, aceita a mudança e salva', async () => {
       repository.findOne.mockResolvedValue(
-        buildAgency({
-          scholarships: [
-            buildScholarship(1, 'ON_GOING', 'MESTRADO'),
-            buildScholarship(2, 'ON_GOING', 'MESTRADO')
-          ]
-        } as Partial<Agency>)
+        makeAgency({ scholarships: makeScholarshipsForProgram(2, 'MESTRADO') })
       )
 
       await service.update(1, {
@@ -115,7 +81,7 @@ describe('AgencyService', () => {
     })
 
     it('quando o dto não informa a cota, preserva o valor atual', async () => {
-      repository.findOne.mockResolvedValue(buildAgency())
+      repository.findOne.mockResolvedValue(makeAgency())
 
       await service.update(1, { name: 'CAPES/PROEX' } as never)
 

@@ -2,10 +2,16 @@ import { ExecutionContext } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { EnvironmentGuard } from './environment.guard'
 
+/**
+ * O guard existe para esconder rotas de carga em massa (ex.: criar orientadores
+ * em lote) do ambiente de produção. A decisão inteira depende de uma comparação
+ * de string com a variável NODE_ENV.
+ */
 describe('EnvironmentGuard', () => {
   let configService: { get: ReturnType<typeof vi.fn> }
   let guard: EnvironmentGuard
 
+  /** O guard não lê nada do contexto; basta um objeto vazio. */
   const context = {} as ExecutionContext
 
   beforeEach(() => {

@@ -5,18 +5,24 @@ import {
   NotFoundException
 } from '@nestjs/common'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  makeAdvisor,
+  makeEnrollment,
+  makePendingScholarship,
+  makeScholarship,
+  makeStudent
+} from '../../../core/testing/factories'
 import { createRepositoryMock } from '../../../core/testing/repository.mock'
+import { Scholarship } from '../../scholarship/entities/scholarship.entity'
 import { PendingScholarshipService } from './pending-scholarship.service'
 
-const PENDING = {
+/** Bolsa pendente típica, vinda da importação da planilha da pós. */
+const PENDING = makePendingScholarship({
   id: 55,
   student_name: 'Maria Souza',
-  tax_id: '12345678901',
-  enrollment_program: 'MESTRADO',
-  agency: 'CAPES',
   scholarship_starts_at: new Date('2026-03-01T00:00:00.000Z'),
   scholarship_ends_at: new Date('2028-02-28T00:00:00.000Z')
-}
+})
 
 const APPROVE_DTO = {
   id: PENDING.id,
@@ -25,20 +31,21 @@ const APPROVE_DTO = {
   enrollment_number: '2024123456'
 } as never
 
-const ADVISOR = { id: 3, email: 'orientador@ufba.br', name: 'Prof. Silva' }
+const ADVISOR = makeAdvisor({
+  id: 3,
+  email: 'orientador@ufba.br',
+  name: 'Prof. Silva'
+})
 
-const NEW_STUDENT = {
+const NEW_STUDENT = makeStudent({
   id: 10,
   name: PENDING.student_name,
   email: 'maria@ufba.br'
-}
+})
 
-const NEW_ENROLLMENT = {
-  id: 90,
-  enrollment_number: '2024123456',
-  enrollment_program: 'MESTRADO'
-}
+const NEW_ENROLLMENT = makeEnrollment({ id: 90 })
 
+/** Data dentro do período da bolsa: status calculado vira ON_GOING. */
 const DURANTE_A_BOLSA = new Date('2026-09-01T00:00:00.000Z')
 
 describe('PendingScholarshipService', () => {
@@ -92,14 +99,17 @@ describe('PendingScholarshipService', () => {
     vi.useRealTimers()
   })
 
-  function existentEnrollment(scholarships: unknown[] = []) {
-    return {
+  /** Matrícula já existente, como `verifyExistentByNumber` devolve. */
+  function existentEnrollment(scholarships: Scholarship[] = []) {
+    return makeEnrollment({
       id: 90,
-      enrollment_number: '2024123456',
-      enrollment_program: 'MESTRADO',
       scholarships,
-      student: { id: 10, name: 'Maria Souza', email: 'maria.antiga@ufba.br' }
-    }
+      student: makeStudent({
+        id: 10,
+        name: 'Maria Souza',
+        email: 'maria.antiga@ufba.br'
+      })
+    })
   }
 
   describe('create', () => {
@@ -334,7 +344,7 @@ describe('PendingScholarshipService', () => {
 
     it('quando a matrícula já tem bolsa ativa, recusa aprovar', async () => {
       enrollmentService.verifyExistentByNumber.mockResolvedValue(
-        existentEnrollment([{ id: 1, status: 'ON_GOING' }])
+        existentEnrollment([makeScholarship({ id: 1, status: 'ON_GOING' })])
       )
 
       await expect(

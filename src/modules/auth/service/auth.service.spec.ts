@@ -1,21 +1,20 @@
 import { HttpException, HttpStatus } from '@nestjs/common'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { makeStudent } from '../../../core/testing/factories'
 import { hashPassword } from '../../../core/utils/bcrypt'
 import { AuthService } from './auth.service'
 
 const PLAIN_PASSWORD = 'Senha@123'
 
-const USER = {
+const USER = makeStudent({
   id: 10,
   tax_id: '123.456.789-00',
   name: 'Maria Souza',
-  role: 'STUDENT',
   email: 'maria@ufba.br',
-  phone_number: '71999999999',
   password: '',
   link_to_lattes: 'http://lattes.cnpq.br/1',
   has_admin_privileges: true
-}
+})
 
 describe('AuthService', () => {
   let userService: { findUserByEmailAndRole: ReturnType<typeof vi.fn> }
@@ -135,8 +134,6 @@ describe('AuthService', () => {
       )
     })
 
-    // O `sub` combina id e cargo porque cada cargo tem sua própria tabela e os
-    // ids se repetem entre elas: só o id não identifica o usuário.
     it('quando o cargo do usuário é ADVISOR, inclui o cargo no "sub" para desambiguar ids repetidos entre tabelas', async () => {
       await service.login({
         ...(LOGGED_USER as object),

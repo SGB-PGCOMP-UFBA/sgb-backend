@@ -1,22 +1,32 @@
 import { InternalServerErrorException } from '@nestjs/common'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  makeAdvisor,
+  makeAgency,
+  makeEnrollment,
+  makeScholarship,
+  makeStudent
+} from '../../core/testing/factories'
 import { ScholarShipFinalizerService } from './scholarship-finalizer.service'
 
 const HOJE = new Date('2026-06-30T00:00:00.000Z')
 
+/**
+ * Bolsa como `findAllEndingToday` devolve: com agência, matrícula, estudante e
+ * orientador carregados (as relações que a notificação lê). A bolsa termina no
+ * dia simulado pelos testes (`HOJE`).
+ */
 function buildScholarship(overrides: Record<string, unknown> = {}) {
   return {
-    id: 1,
-    status: 'ON_GOING',
-    scholarship_ends_at: new Date('2026-06-30T00:00:00.000Z'),
-    extension_ends_at: null,
-    agency: { id: 1, name: 'CAPES' },
-    enrollment: {
-      enrollment_number: '2024123456',
-      enrollment_program: 'MESTRADO',
-      student: { id: 10, role: 'STUDENT', name: 'Maria Souza' },
-      advisor: { id: 20, role: 'ADVISOR', name: 'Prof. Silva' }
-    },
+    ...makeScholarship({
+      id: 1,
+      scholarship_ends_at: HOJE,
+      agency: makeAgency(),
+      enrollment: makeEnrollment({
+        student: makeStudent({ id: 10, name: 'Maria Souza' }),
+        advisor: makeAdvisor({ id: 20, name: 'Prof. Silva' })
+      })
+    }),
     ...overrides
   } as never
 }

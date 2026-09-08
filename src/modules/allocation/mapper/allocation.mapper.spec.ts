@@ -1,40 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { Allocation } from '../entities/allocation.entity'
+import {
+  makeAllocation,
+  makeEnrollment,
+  makeScholarship,
+  makeScholarshipsForProgram
+} from '../../../core/testing/factories'
 import { AllocationMapper } from './allocation.mapper'
-
-function buildScholarship(
-  enrollmentId: number,
-  status: string,
-  program: string
-) {
-  return {
-    id: enrollmentId * 10,
-    enrollment_id: enrollmentId,
-    status,
-    salary: 2100,
-    enrollment: { id: enrollmentId, enrollment_program: program }
-  }
-}
-
-function buildAllocation(
-  scholarships: unknown[],
-  overrides: Record<string, unknown> = {}
-): Allocation {
-  return {
-    id: 1,
-    name: 'REMOTO',
-    masters_degree_awarded_scholarships: 10,
-    doctorate_degree_awarded_scholarships: 5,
-    created_at: new Date('2025-05-25'),
-    updated_at: new Date('2025-05-25'),
-    scholarships,
-    ...overrides
-  } as Allocation
-}
 
 describe('AllocationMapper.forFilter', () => {
   it('quando a alocação vira item de filtro, usa o nome como chave e como rótulo', () => {
-    expect(AllocationMapper.forFilter(buildAllocation([]))).toEqual({
+    expect(AllocationMapper.forFilter(makeAllocation({ id: 1 }))).toEqual({
       id: 1,
       key: 'REMOTO',
       value: 'REMOTO'
@@ -44,7 +19,7 @@ describe('AllocationMapper.forFilter', () => {
 
 describe('AllocationMapper.simplified', () => {
   it('quando a alocação é simplificada, não expõe as cotas de bolsas concedidas', () => {
-    const simplified = AllocationMapper.simplified(buildAllocation([]))
+    const simplified = AllocationMapper.simplified(makeAllocation())
 
     expect(Object.keys(simplified).sort()).toEqual([
       'created_at',
@@ -58,11 +33,12 @@ describe('AllocationMapper.simplified', () => {
 describe('AllocationMapper.detailed', () => {
   it('quando a alocação tem bolsas vigentes de mestrado e de doutorado, expõe as concedidas da alocação e conta as alocadas das bolsas', () => {
     const detailed = AllocationMapper.detailed(
-      buildAllocation([
-        buildScholarship(1, 'ON_GOING', 'MESTRADO'),
-        buildScholarship(2, 'ON_GOING', 'MESTRADO'),
-        buildScholarship(3, 'ON_GOING', 'DOUTORADO')
-      ])
+      makeAllocation({
+        scholarships: [
+          ...makeScholarshipsForProgram(2, 'MESTRADO'),
+          ...makeScholarshipsForProgram(1, 'DOUTORADO')
+        ]
+      })
     )
 
     expect(detailed.masters_degree_awarded_scholarships).toBe(10)
@@ -73,11 +49,11 @@ describe('AllocationMapper.detailed', () => {
 
   it('quando a alocação tem bolsa finalizada junto das vigentes, conta uma vaga por bolsa vigente', () => {
     const detailed = AllocationMapper.detailed(
-      buildAllocation([
-        buildScholarship(1, 'ON_GOING', 'MESTRADO'),
-        buildScholarship(2, 'ON_GOING', 'MESTRADO'),
-        buildScholarship(3, 'FINISHED', 'MESTRADO')
-      ])
+      makeAllocation({
+        scholarships: makeScholarshipsForProgram(3, 'MESTRADO', (index) =>
+          index === 2 ? { status: 'FINISHED' } : {}
+        )
+      })
     )
 
     expect(detailed.masters_degree_allocated_scholarships).toBe(2)
@@ -85,13 +61,10 @@ describe('AllocationMapper.detailed', () => {
 
   it('quando a cota cadastrada é igual ao número de bolsas vigentes, mantém as alocadas dentro das concedidas', () => {
     const detailed = AllocationMapper.detailed(
-      buildAllocation(
-        [
-          buildScholarship(1, 'ON_GOING', 'MESTRADO'),
-          buildScholarship(2, 'ON_GOING', 'MESTRADO')
-        ],
-        { masters_degree_awarded_scholarships: 2 }
-      )
+      makeAllocation({
+        masters_degree_awarded_scholarships: 2,
+        scholarships: makeScholarshipsForProgram(2, 'MESTRADO')
+      })
     )
 
     expect(detailed.masters_degree_allocated_scholarships).toBeLessThanOrEqual(
@@ -103,10 +76,11 @@ describe('AllocationMapper.detailed', () => {
     'quando a bolsa está num status que libera a alocação, não a conta como vaga ocupada (%s)',
     (status) => {
       const detailed = AllocationMapper.detailed(
-        buildAllocation([
-          buildScholarship(1, 'ON_GOING', 'MESTRADO'),
-          buildScholarship(2, status, 'MESTRADO')
-        ])
+        makeAllocation({
+          scholarships: makeScholarshipsForProgram(2, 'MESTRADO', (index) =>
+            index === 1 ? { status } : {}
+          )
+        })
       )
 
       expect(detailed.masters_degree_allocated_scholarships).toBe(1)
@@ -115,11 +89,12 @@ describe('AllocationMapper.detailed', () => {
 
   it('quando a alocação tem bolsas dos dois programas, separa a contagem de mestrado da de doutorado', () => {
     const detailed = AllocationMapper.detailed(
-      buildAllocation([
-        buildScholarship(1, 'ON_GOING', 'MESTRADO'),
-        buildScholarship(2, 'ON_GOING', 'DOUTORADO'),
-        buildScholarship(3, 'ON_GOING', 'DOUTORADO')
-      ])
+      makeAllocation({
+        scholarships: [
+          ...makeScholarshipsForProgram(1, 'MESTRADO'),
+          ...makeScholarshipsForProgram(2, 'DOUTORADO')
+        ]
+      })
     )
 
     expect(detailed.masters_degree_allocated_scholarships).toBe(1)
@@ -128,11 +103,16 @@ describe('AllocationMapper.detailed', () => {
 
   it('quando a alocação tem registros finalizados e vigentes, conta todos eles em scholarshipsSinceBeginning', () => {
     const detailed = AllocationMapper.detailed(
-      buildAllocation([
-        buildScholarship(1, 'ON_GOING', 'MESTRADO'),
-        buildScholarship(1, 'FINISHED', 'MESTRADO'),
-        buildScholarship(2, 'FINISHED', 'DOUTORADO')
-      ])
+      makeAllocation({
+        scholarships: [
+          makeScholarship(),
+          makeScholarship({ status: 'FINISHED' }),
+          makeScholarship({
+            status: 'FINISHED',
+            enrollment: makeEnrollment({ enrollment_program: 'DOUTORADO' })
+          })
+        ]
+      })
     )
 
     expect(detailed.scholarshipsSinceBeginning).toBe(3)
@@ -140,7 +120,7 @@ describe('AllocationMapper.detailed', () => {
   })
 
   it('quando a alocação não tem bolsa nenhuma, devolve zero em todas as contagens', () => {
-    const detailed = AllocationMapper.detailed(buildAllocation([]))
+    const detailed = AllocationMapper.detailed(makeAllocation())
 
     expect(detailed.scholarshipsSinceBeginning).toBe(0)
     expect(detailed.masters_degree_allocated_scholarships).toBe(0)
@@ -151,10 +131,11 @@ describe('AllocationMapper.detailed', () => {
 describe('AllocationMapper.detailedWithRelations', () => {
   it('quando a alocação é detalhada com relações, mantém as contagens e ainda lista as bolsas', () => {
     const withRelations = AllocationMapper.detailedWithRelations(
-      buildAllocation([
-        buildScholarship(1, 'ON_GOING', 'MESTRADO'),
-        buildScholarship(2, 'FINISHED', 'MESTRADO')
-      ])
+      makeAllocation({
+        scholarships: makeScholarshipsForProgram(2, 'MESTRADO', (index) =>
+          index === 1 ? { status: 'FINISHED' } : {}
+        )
+      })
     )
 
     expect(withRelations.masters_degree_allocated_scholarships).toBe(1)

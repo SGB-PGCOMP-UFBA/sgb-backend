@@ -1,38 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { Advisor } from '../entities/advisor.entity'
+import { makeAdvisor, makeEnrollment } from '../../../core/testing/factories'
 import { AdvisorMapper } from './advisor.mapper'
-
-function buildEnrollment(id: number) {
-  return {
-    id,
-    student_id: id,
-    advisor_id: 9,
-    enrollment_date: new Date('2024-03-01'),
-    enrollment_number: `20241234${id}`,
-    enrollment_program: 'MESTRADO',
-    defense_prediction_date: new Date('2026-03-01'),
-    created_at: new Date('2024-03-01'),
-    updated_at: new Date('2024-03-01')
-  }
-}
-
-function buildAdvisor(overrides: Partial<Advisor> = {}): Advisor {
-  return {
-    id: 9,
-    email: 'orientador@ufba.br',
-    tax_id: '12345678901',
-    phone_number: '71999999999',
-    name: 'Beatriz Rocha',
-    password: '$2a$10$hash-super-secreto',
-    role: 'ADVISOR',
-    status: 'ACTIVE',
-    has_admin_privileges: false,
-    created_at: new Date('2024-08-05'),
-    updated_at: new Date('2024-08-06'),
-    enrollments: [],
-    ...overrides
-  } as Advisor
-}
 
 describe('AdvisorMapper', () => {
   it.each([
@@ -43,7 +11,9 @@ describe('AdvisorMapper', () => {
   ] as const)(
     'quando o orientador é mapeado, omite a senha (%s)',
     (formato) => {
-      const saida = AdvisorMapper[formato](buildAdvisor())
+      const saida = AdvisorMapper[formato](
+        makeAdvisor({ password: '$2a$10$hash-super-secreto' })
+      )
 
       expect(saida).not.toHaveProperty('password')
       expect(JSON.stringify(saida)).not.toContain('hash-super-secreto')
@@ -53,7 +23,7 @@ describe('AdvisorMapper', () => {
   it.each([[true, 'ADVISOR_WITH_ADMIN_PRIVILEGES']])(
     'quando o orientador tem privilégio de admin, apresenta o papel ADVISOR_WITH_ADMIN_PRIVILEGES',
     (privilegio, papelEsperado) => {
-      const advisor = buildAdvisor({ has_admin_privileges: privilegio })
+      const advisor = makeAdvisor({ has_admin_privileges: privilegio })
 
       expect(AdvisorMapper.simplified(advisor).role).toBe(papelEsperado)
     }
@@ -62,7 +32,7 @@ describe('AdvisorMapper', () => {
   it.each([[false, 'ADVISOR']])(
     'quando o orientador não tem privilégio de admin, apresenta o papel ADVISOR',
     (privilegio, papelEsperado) => {
-      const advisor = buildAdvisor({ has_admin_privileges: privilegio })
+      const advisor = makeAdvisor({ has_admin_privileges: privilegio })
 
       expect(AdvisorMapper.simplified(advisor).role).toBe(papelEsperado)
     }
@@ -72,7 +42,7 @@ describe('AdvisorMapper', () => {
     'quando o CPF e o telefone estão ausentes, normaliza os dois para null (%s)',
     (vazio) => {
       const detailed = AdvisorMapper.detailed(
-        buildAdvisor({ tax_id: vazio as string, phone_number: vazio as string })
+        makeAdvisor({ tax_id: vazio as string, phone_number: vazio as string })
       )
 
       expect(detailed.tax_id).toBeNull()
@@ -81,8 +51,8 @@ describe('AdvisorMapper', () => {
   )
 
   it('quando a relação de orientações está carregada, conta as orientações', () => {
-    const advisor = buildAdvisor({
-      enrollments: [buildEnrollment(1), buildEnrollment(2)] as never
+    const advisor = makeAdvisor({
+      enrollments: makeEnrollment.list(2, (index) => ({ id: index + 1 }))
     })
 
     expect(AdvisorMapper.detailed(advisor).enrollmentsCount).toBe(2)
@@ -91,14 +61,22 @@ describe('AdvisorMapper', () => {
   it.each([[undefined], [null]])(
     'quando as orientações não foram carregadas, retorna contagem zero (%s)',
     (noRelation) => {
-      const advisor = buildAdvisor({ enrollments: noRelation as never })
+      const advisor = makeAdvisor({ enrollments: noRelation as never })
 
       expect(AdvisorMapper.detailed(advisor).enrollmentsCount).toBe(0)
     }
   )
 
   it('quando o orientador vira opção de filtro, usa o nome como chave e valor', () => {
-    expect(AdvisorMapper.forFilter(buildAdvisor())).toEqual({
+    expect(
+      AdvisorMapper.forFilter(
+        makeAdvisor({
+          id: 9,
+          name: 'Beatriz Rocha',
+          email: 'orientador@ufba.br'
+        })
+      )
+    ).toEqual({
       id: 9,
       key: 'Beatriz Rocha',
       value: 'Beatriz Rocha',
@@ -107,7 +85,9 @@ describe('AdvisorMapper', () => {
   })
 
   it('quando a relação está carregada, detalha as orientações do orientador', () => {
-    const advisor = buildAdvisor({ enrollments: [buildEnrollment(1)] as never })
+    const advisor = makeAdvisor({
+      enrollments: [makeEnrollment({ id: 1, enrollment_number: '202412341' })]
+    })
 
     const detalhado = AdvisorMapper.detailedWithRelations(advisor)
 

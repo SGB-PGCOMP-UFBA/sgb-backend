@@ -1,23 +1,20 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  makeAdvisor,
+  makeEnrollment,
+  makeStudent
+} from '../../../core/testing/factories'
+import {
   createQueryBuilderMock,
   createRepositoryMock
 } from '../../../core/testing/repository.mock'
 import { EnrollmentService } from './enrollment.service'
 
-const ADVISOR = { id: 10, email: 'orientadora@ufba.br' }
-const STUDENT = { id: 7, email: 'aluno@ufba.br' }
+const ADVISOR = makeAdvisor()
+const STUDENT = makeStudent()
 
-const ENROLLMENT = {
-  id: 42,
-  student_id: 7,
-  advisor_id: 10,
-  enrollment_number: '2024123456',
-  enrollment_program: 'MESTRADO',
-  enrollment_date: new Date('2024-03-01'),
-  defense_prediction_date: new Date('2026-03-01')
-}
+const ENROLLMENT = makeEnrollment()
 
 const VALID_DTO = {
   student_email: 'aluno@ufba.br',
@@ -28,6 +25,7 @@ const VALID_DTO = {
   defense_prediction_date: new Date('2026-03-01')
 } as never
 
+/** O `deleteAll` usa um query builder de DELETE, que o helper padrão não cobre. */
 function createDeleteQueryBuilderMock() {
   const queryBuilder: Record<string, unknown> = {}
   queryBuilder.delete = vi.fn(() => queryBuilder)
@@ -62,7 +60,6 @@ describe('EnrollmentService', () => {
         { enrollment_program: 'DOUTORADO' },
         { enrollment_program: 'MESTRADO' }
       ])
-
       expect(queryBuilder.distinct).toHaveBeenCalledWith(true)
       expect(queryBuilder.orderBy).toHaveBeenCalledWith(
         'enrollment.enrollment_program',
@@ -123,7 +120,7 @@ describe('EnrollmentService', () => {
 
   describe('verifyExistentByNumber', () => {
     it('quando consulta a matrícula pelo número, traz junto apenas as bolsas vigentes', async () => {
-      const queryBuilder = createQueryBuilderMock([ENROLLMENT])
+      const queryBuilder = createQueryBuilderMock([{ ...ENROLLMENT }])
       repository.createQueryBuilder.mockReturnValue(queryBuilder)
 
       await service.verifyExistentByNumber('2024123456')

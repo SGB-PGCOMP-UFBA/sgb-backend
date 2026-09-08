@@ -1,80 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { StatusEnum } from '../../../core/enums/StatusEnum'
-import { Scholarship } from '../entities/scholarship.entity'
+import {
+  makeAgency,
+  makeAllocation,
+  makeScholarship
+} from '../../../core/testing/factories'
 import { ScholarshipMapper } from './scholarship.mapper'
 
-function buildScholarship(
-  overrides: Record<string, unknown> = {}
-): Scholarship {
-  return {
-    id: 100,
-    enrollment_id: 42,
-    agency_id: 1,
-    allocation_id: 2,
-    status: 'ON_GOING',
-    scholarship_starts_at: new Date('2024-03-01'),
-    scholarship_ends_at: new Date('2026-02-28'),
-    extension_ends_at: null,
-    salary: 2100,
-    created_at: new Date('2024-03-01'),
-    updated_at: new Date('2024-03-05'),
-    ...overrides
-  } as Scholarship
-}
-
-const AGENCY = {
-  id: 1,
-  name: 'CAPES',
-  description: 'Agência federal',
-  masters_degree_awarded_scholarships: 13,
-  doctorate_degree_awarded_scholarships: 7,
-  created_at: new Date('2024-01-01'),
-  updated_at: new Date('2024-01-01')
-}
-
-const ALLOCATION = {
-  id: 2,
-  name: 'REMOTO',
-  masters_degree_awarded_scholarships: 50,
-  doctorate_degree_awarded_scholarships: 50,
-  created_at: new Date('2025-05-25'),
-  updated_at: new Date('2025-05-25')
-}
-
-const STUDENT = {
-  id: 7,
-  name: 'Aluno Teste',
-  email: 'aluno@ufba.br',
-  role: 'STUDENT',
-  created_at: new Date('2024-01-01'),
-  updated_at: new Date('2024-01-01')
-}
-
-const ADVISOR = {
-  id: 10,
-  name: 'Orientadora Teste',
-  email: 'orientadora@ufba.br',
-  role: 'ADVISOR',
-  status: 'ACTIVE',
-  has_admin_privileges: false,
-  created_at: new Date('2024-01-01'),
-  updated_at: new Date('2024-01-01')
-}
-
-const ENROLLMENT = {
-  id: 42,
-  student_id: 7,
-  advisor_id: 10,
-  enrollment_number: '2024123456',
-  enrollment_program: 'MESTRADO',
-  enrollment_date: new Date('2024-03-01'),
-  defense_prediction_date: new Date('2026-03-01'),
-  created_at: new Date('2024-03-01'),
-  updated_at: new Date('2024-03-01'),
-  student: STUDENT,
-  advisor: ADVISOR
-}
-
+/** Linha crua do relatório entre datas, como o `getRawMany` devolve. */
 function reportRow(
   agencyName: string,
   status: string,
@@ -106,21 +39,19 @@ describe('ScholarshipMapper.forFilter', () => {
   ])(
     'quando a bolsa tem um status conhecido, traduz o status para o rótulo exibido (%s)',
     (status, label) => {
-      expect(ScholarshipMapper.forFilter(buildScholarship({ status }))).toEqual(
-        {
-          key: status,
-          value: label
-        }
-      )
+      expect(ScholarshipMapper.forFilter(makeScholarship({ status }))).toEqual({
+        key: status,
+        value: label
+      })
     }
   )
 
   it('quando a bolsa está prorrogada, distingue o rótulo do de em andamento', () => {
     const onGoing = ScholarshipMapper.forFilter(
-      buildScholarship({ status: 'ON_GOING' })
+      makeScholarship({ status: 'ON_GOING' })
     )
     const extended = ScholarshipMapper.forFilter(
-      buildScholarship({ status: 'EXTENDED' })
+      makeScholarship({ status: 'EXTENDED' })
     )
 
     expect(extended.value).not.toBe(onGoing.value)
@@ -130,7 +61,7 @@ describe('ScholarshipMapper.forFilter', () => {
 
 describe('ScholarshipMapper.simplified', () => {
   it('quando a bolsa é simplificada, expõe só os vínculos e o status, sem valores nem vigência', () => {
-    const simplified = ScholarshipMapper.simplified(buildScholarship())
+    const simplified = ScholarshipMapper.simplified(makeScholarship())
 
     expect(Object.keys(simplified).sort()).toEqual([
       'agency_id',
@@ -145,7 +76,7 @@ describe('ScholarshipMapper.simplified', () => {
 
   it('quando a bolsa é simplificada, não expõe o salário', () => {
     const simplified = ScholarshipMapper.simplified(
-      buildScholarship()
+      makeScholarship()
     ) as Record<string, unknown>
 
     expect(simplified.salary).toBeUndefined()
@@ -154,7 +85,7 @@ describe('ScholarshipMapper.simplified', () => {
 
 describe('ScholarshipMapper.detailed', () => {
   it('quando a bolsa é detalhada, acrescenta vigência e salário sem perder os campos do simplified', () => {
-    const scholarship = buildScholarship({
+    const scholarship = makeScholarship({
       extension_ends_at: new Date('2026-08-31')
     })
 
@@ -173,25 +104,23 @@ describe('ScholarshipMapper.detailed', () => {
     })
   })
 
-  // As datas de vigência são colunas `date` no Postgres e chegam como string
-  // 'YYYY-MM-DD'; o mapper repassa o valor cru, sem normalizar nem aplicar fuso.
   it.each([
     ['string vinda do driver', '2024-03-01'],
     ['objeto Date', new Date('2024-03-01T00:00:00.000Z')]
   ])(
     'quando a data de início chega crua do banco, repassa o valor sem converter (%s)',
-    (_, value) => {
+    (_caso, valor) => {
       const detailed = ScholarshipMapper.detailed(
-        buildScholarship({ scholarship_starts_at: value })
+        makeScholarship({ scholarship_starts_at: valor as Date })
       )
 
-      expect(detailed.scholarship_starts_at).toBe(value)
+      expect(detailed.scholarship_starts_at).toBe(valor)
     }
   )
 
   it('quando a bolsa não foi prorrogada, mantém nula a data de prorrogação', () => {
     expect(
-      ScholarshipMapper.detailed(buildScholarship()).extension_ends_at
+      ScholarshipMapper.detailed(makeScholarship()).extension_ends_at
     ).toBeNull()
   })
 })
@@ -199,11 +128,7 @@ describe('ScholarshipMapper.detailed', () => {
 describe('ScholarshipMapper.detailedWithRelations', () => {
   it('quando a matrícula vem carregada, achata aluno e orientador a partir dela', () => {
     const withRelations = ScholarshipMapper.detailedWithRelations(
-      buildScholarship({
-        agency: AGENCY,
-        allocation: ALLOCATION,
-        enrollment: ENROLLMENT
-      })
+      makeScholarship({ agency: makeAgency(), allocation: makeAllocation() })
     )
 
     expect(withRelations.enrollment).toMatchObject({
@@ -217,28 +142,31 @@ describe('ScholarshipMapper.detailedWithRelations', () => {
   })
 
   it('quando a agência e a alocação vêm carregadas, embute as duas sem as cotas de vagas', () => {
+    const agency = makeAgency({ description: 'Agência federal' })
+    const allocation = makeAllocation()
+
     const withRelations = ScholarshipMapper.detailedWithRelations(
-      buildScholarship({ agency: AGENCY, allocation: ALLOCATION })
+      makeScholarship({ agency, allocation })
     )
 
     expect(withRelations.agency).toEqual({
       id: 1,
       name: 'CAPES',
       description: 'Agência federal',
-      created_at: AGENCY.created_at,
-      updated_at: AGENCY.updated_at
+      created_at: agency.created_at,
+      updated_at: agency.updated_at
     })
     expect(withRelations.allocation).toEqual({
       id: 2,
       name: 'REMOTO',
-      created_at: ALLOCATION.created_at,
-      updated_at: ALLOCATION.updated_at
+      created_at: allocation.created_at,
+      updated_at: allocation.updated_at
     })
   })
 
   it('quando nenhuma relação veio carregada, devolve null para cada uma delas', () => {
     const withRelations = ScholarshipMapper.detailedWithRelations(
-      buildScholarship({
+      makeScholarship({
         agency: undefined,
         allocation: undefined,
         enrollment: undefined
@@ -254,11 +182,10 @@ describe('ScholarshipMapper.detailedWithRelations', () => {
 
   it('quando a bolsa não tem alocação vinculada, ainda a lista com a agência preenchida', () => {
     const withRelations = ScholarshipMapper.detailedWithRelations(
-      buildScholarship({
+      makeScholarship({
         allocation_id: null,
         allocation: null,
-        agency: AGENCY,
-        enrollment: ENROLLMENT
+        agency: makeAgency()
       })
     )
 
@@ -270,11 +197,7 @@ describe('ScholarshipMapper.detailedWithRelations', () => {
 describe('ScholarshipMapper.detailedWithFullRelations', () => {
   it('quando a bolsa é detalhada dentro da matrícula, não repete matrícula, aluno nem orientador', () => {
     const withFullRelations = ScholarshipMapper.detailedWithFullRelations(
-      buildScholarship({
-        agency: AGENCY,
-        allocation: ALLOCATION,
-        enrollment: ENROLLMENT
-      })
+      makeScholarship({ agency: makeAgency(), allocation: makeAllocation() })
     )
 
     expect(Object.keys(withFullRelations).sort()).toEqual([
@@ -293,7 +216,7 @@ describe('ScholarshipMapper.detailedWithFullRelations', () => {
 
   it('quando agência e alocação não vieram carregadas, devolve null para as duas', () => {
     const withFullRelations = ScholarshipMapper.detailedWithFullRelations(
-      buildScholarship({ agency: undefined, allocation: undefined })
+      makeScholarship({ agency: undefined, allocation: undefined })
     )
 
     expect(withFullRelations.agency).toBeNull()

@@ -1,8 +1,22 @@
 import { BadRequestException } from '@nestjs/common'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  makeAdvisor,
+  makeAgency,
+  makeEnrollment,
+  makeScholarship,
+  makeStudent
+} from '../../../core/testing/factories'
 import { createRepositoryMock } from '../../../core/testing/repository.mock'
 import { DataManagerCsvService } from './data-manager-csv.service'
 
+/**
+ * O `import * as csvParser` do service só é chamável com o interop do tsc; sob
+ * o Vitest o namespace do módulo CJS não é uma função. Por isso a leitura do
+ * arquivo é dublada e os testes entram com as linhas já extraídas, exatamente
+ * no formato que o csv-parser entrega (cabeçalhos com espaço/barra viram
+ * underline e perdem o acento).
+ */
 function stubLinhas(
   service: DataManagerCsvService,
   linhas: Record<string, string>[]
@@ -15,6 +29,7 @@ function stubLinhas(
     .mockResolvedValue(linhas)
 }
 
+/** `File` do multer, sem tocar em disco. */
 function csvFile(mimetype = 'text/csv') {
   return { mimetype, buffer: Buffer.from('') } as never
 }
@@ -62,23 +77,25 @@ function linhaCapes(overrides: Record<string, string> = {}) {
   return { ...LINHA_CAPES, ...overrides }
 }
 
+/** Data local, construída como a util constrói, para independer do fuso. */
 function local(year: number, month: number, day: number) {
   return new Date(year, month - 1, day)
 }
 
 function bolsaDoBanco(overrides: Record<string, unknown> = {}) {
   return {
-    id: 7,
-    status: 'ON_GOING',
-    scholarship_starts_at: local(2026, 3, 1),
-    scholarship_ends_at: local(2028, 2, 28),
-    enrollment: {
-      student: {
-        name: 'MARIA DA SILVA',
-        email: 'maria@ufba.br',
-        tax_id: '12345678901'
-      }
-    },
+    ...makeScholarship({
+      id: 7,
+      scholarship_starts_at: local(2026, 3, 1),
+      scholarship_ends_at: local(2028, 2, 28),
+      enrollment: makeEnrollment({
+        student: makeStudent({
+          name: 'MARIA DA SILVA',
+          email: 'maria@ufba.br',
+          tax_id: '12345678901'
+        })
+      })
+    }),
     ...overrides
   }
 }
@@ -144,22 +161,6 @@ describe('DataManagerCsvService', () => {
       await expect(
         service.updateScholarshipsDataFromCsv(csvFile('application/pdf'))
       ).rejects.toBeInstanceOf(BadRequestException)
-    })
-
-    it('quando o arquivo é CSV, aceita a importação', async () => {
-      stubLinhas(service, [linhaImport()])
-
-      await expect(
-        service.importDataFromCsv(csvFile('text/csv'))
-      ).resolves.not.toThrow()
-    })
-
-    it('quando o arquivo é CSV, aceita a atualização de bolsas', async () => {
-      stubLinhas(service, [linhaCapes()])
-
-      await expect(
-        service.updateScholarshipsDataFromCsv(csvFile('text/csv'))
-      ).resolves.not.toThrow()
     })
   })
 
@@ -563,30 +564,29 @@ describe('DataManagerCsvService', () => {
   describe('exportDataToCsv', () => {
     function bolsa(overrides: Record<string, unknown> = {}) {
       return {
-        status: 'ON_GOING',
-        agency: { name: 'CAPES' },
-        created_at: new Date('2026-01-10T00:00:00Z'),
-        scholarship_starts_at: new Date('2026-03-01T00:00:00Z'),
-        scholarship_ends_at: new Date('2028-02-29T00:00:00Z'),
-        enrollment: {
-          enrollment_number: '2026123456',
-          enrollment_program: 'MESTRADO',
-          enrollment_date: new Date('2026-02-15T00:00:00Z'),
-          defense_prediction_date: new Date('2028-07-31T00:00:00Z'),
-          student: {
-            name: 'Maria da Silva',
-            email: 'maria@ufba.br',
-            phone_number: '71999991234',
-            link_to_lattes: 'http://lattes.cnpq.br/1234567890',
-            tax_id: '12345678901'
-          },
-          advisor: {
-            name: 'João Orientador',
-            email: 'joao@ufba.br',
-            tax_id: '98765432100',
-            phone_number: '71988887777'
-          }
-        },
+        ...makeScholarship({
+          agency: makeAgency(),
+          created_at: new Date('2026-01-10T00:00:00Z'),
+          scholarship_starts_at: new Date('2026-03-01T00:00:00Z'),
+          scholarship_ends_at: new Date('2028-02-29T00:00:00Z'),
+          enrollment: makeEnrollment({
+            enrollment_number: '2026123456',
+            enrollment_date: new Date('2026-02-15T00:00:00Z'),
+            defense_prediction_date: new Date('2028-07-31T00:00:00Z'),
+            student: makeStudent({
+              name: 'Maria da Silva',
+              email: 'maria@ufba.br',
+              phone_number: '71999991234',
+              link_to_lattes: 'http://lattes.cnpq.br/1234567890'
+            }),
+            advisor: makeAdvisor({
+              name: 'João Orientador',
+              email: 'joao@ufba.br',
+              tax_id: '98765432100',
+              phone_number: '71988887777'
+            })
+          })
+        }),
         ...overrides
       }
     }

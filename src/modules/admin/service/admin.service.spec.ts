@@ -4,12 +4,12 @@ import {
   NotFoundException
 } from '@nestjs/common'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { makeAdmin } from '../../../core/testing/factories'
 import { createRepositoryMock } from '../../../core/testing/repository.mock'
 import { comparePassword, hashPassword } from '../../../core/utils/bcrypt'
 import { constants } from '../../../core/utils/constants'
 import { CreateAdminDto } from '../dto/create-admin.dto'
 import { UpdateAdminDto } from '../dto/update-admin.dto'
-import { Admin } from '../entities/admin.entity'
 import { AdminService } from './admin.service'
 
 const CHAVE_VALIDA = 'chave-de-teste'
@@ -21,20 +21,6 @@ const CREATE_DTO: CreateAdminDto = {
   password: 'senha1',
   tax_id: '12345678901',
   phone_number: '71999999999'
-}
-
-function buildAdmin(overrides: Partial<Admin> = {}): Admin {
-  return {
-    id: 3,
-    name: 'Carlos Lima',
-    tax_id: '12345678901',
-    phone_number: '71999999999',
-    email: 'carlos@ufba.br',
-    password: '$2a$10$hash-antigo',
-    role: 'ADMIN',
-    status: 'ACTIVE',
-    ...overrides
-  } as Admin
 }
 
 describe('AdminService', () => {
@@ -112,7 +98,7 @@ describe('AdminService', () => {
   })
 
   describe('update', () => {
-    const ATUAL = buildAdmin()
+    const ATUAL = makeAdmin()
 
     it.each([
       [
@@ -135,7 +121,7 @@ describe('AdminService', () => {
       async (_campo, alteracao, mensagem) => {
         repository.findOneBy
           .mockResolvedValueOnce(ATUAL)
-          .mockResolvedValue(buildAdmin({ id: 99 }))
+          .mockResolvedValue(makeAdmin({ id: 99 }))
 
         const erro = await service
           .update({
@@ -203,7 +189,7 @@ describe('AdminService', () => {
 
   describe('resetPassword', () => {
     it('quando a senha é redefinida, grava a nova senha hasheada', async () => {
-      repository.findOne.mockResolvedValue(buildAdmin())
+      repository.findOne.mockResolvedValue(makeAdmin())
 
       await service.resetPassword('carlos@ufba.br', 'nova1')
 
@@ -228,7 +214,7 @@ describe('AdminService', () => {
   describe('updatePassword', () => {
     it('quando a senha atual não confere, recusa a troca', async () => {
       repository.findOne.mockResolvedValue(
-        buildAdmin({ password: await hashPassword('senha1') })
+        makeAdmin({ password: await hashPassword('senha1') })
       )
 
       const erro = await service
@@ -244,7 +230,7 @@ describe('AdminService', () => {
 
     it('quando a senha atual confere, troca a senha', async () => {
       repository.findOne.mockResolvedValue(
-        buildAdmin({ password: await hashPassword('senha1') })
+        makeAdmin({ password: await hashPassword('senha1') })
       )
 
       await service.updatePassword('carlos@ufba.br', 'senha1', 'nova1')

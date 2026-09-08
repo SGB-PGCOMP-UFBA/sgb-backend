@@ -2,6 +2,7 @@ import { ExecutionContext } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { RolesGuard } from './roles.guard'
 
+/** Contexto mínimo do Nest: o guard só usa o handler e o `request.user`. */
 function createContext(user: unknown) {
   return {
     getHandler: () => 'handler',

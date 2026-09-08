@@ -1,11 +1,11 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { makeStudent } from '../../../core/testing/factories'
 import { createRepositoryMock } from '../../../core/testing/repository.mock'
 import { comparePassword, hashPassword } from '../../../core/utils/bcrypt'
 import { constants } from '../../../core/utils/constants'
 import { CreateStudentDto } from '../dto/create-student.dto'
 import { UpdateStudentDto } from '../dto/update-student.dto'
-import { Student } from '../entities/student.entity'
 import { StudentService } from './student.service'
 
 const CREATE_DTO: CreateStudentDto = {
@@ -15,20 +15,6 @@ const CREATE_DTO: CreateStudentDto = {
   link_to_lattes: 'http://lattes.cnpq.br/1',
   tax_id: '12345678901',
   phone_number: '71999999999'
-}
-
-function buildStudent(overrides: Partial<Student> = {}): Student {
-  return {
-    id: 4,
-    email: 'ana@ufba.br',
-    tax_id: '12345678901',
-    phone_number: '71999999999',
-    name: 'Ana Souza',
-    link_to_lattes: 'http://lattes.cnpq.br/1',
-    password: '$2a$10$hash-antigo',
-    role: 'STUDENT',
-    ...overrides
-  } as Student
 }
 
 describe('StudentService', () => {
@@ -92,7 +78,7 @@ describe('StudentService', () => {
 
   describe('createOrReturnExistent', () => {
     it('quando o estudante já está cadastrado, devolve-o sem regravar nem renotificar', async () => {
-      const existente = buildStudent()
+      const existente = makeStudent()
       repository.findOneBy.mockResolvedValue(existente)
 
       await expect(service.createOrReturnExistent(CREATE_DTO)).resolves.toBe(
@@ -130,7 +116,7 @@ describe('StudentService', () => {
     })
 
     it('quando as relações não são pedidas, não carrega as relações pesadas', async () => {
-      repository.findOne.mockResolvedValue(buildStudent())
+      repository.findOne.mockResolvedValue(makeStudent())
 
       await service.findByEmail('ana@ufba.br')
 
@@ -141,7 +127,7 @@ describe('StudentService', () => {
     })
 
     it('quando as relações são pedidas, carrega matrículas, orientador e bolsas', async () => {
-      repository.findOne.mockResolvedValue(buildStudent())
+      repository.findOne.mockResolvedValue(makeStudent())
 
       await service.findByEmail('ana@ufba.br', true)
 
@@ -163,7 +149,7 @@ describe('StudentService', () => {
     })
 
     it('quando a senha é redefinida, grava a nova senha hasheada', async () => {
-      repository.findOne.mockResolvedValue(buildStudent())
+      repository.findOne.mockResolvedValue(makeStudent())
 
       await service.resetPassword('ana@ufba.br', 'nova1')
 
@@ -179,7 +165,7 @@ describe('StudentService', () => {
   describe('updatePassword', () => {
     it('quando a senha atual não confere, recusa a troca', async () => {
       repository.findOne.mockResolvedValue(
-        buildStudent({ password: await hashPassword('senha1') })
+        makeStudent({ password: await hashPassword('senha1') })
       )
 
       const erro = await service
@@ -195,7 +181,7 @@ describe('StudentService', () => {
 
     it('quando a senha atual confere, troca a senha', async () => {
       repository.findOne.mockResolvedValue(
-        buildStudent({ password: await hashPassword('senha1') })
+        makeStudent({ password: await hashPassword('senha1') })
       )
 
       await service.updatePassword('ana@ufba.br', 'senha1', 'nova1')
@@ -216,7 +202,7 @@ describe('StudentService', () => {
   })
 
   describe('update', () => {
-    const ATUAL = buildStudent()
+    const ATUAL = makeStudent({ name: 'Ana Souza', email: 'ana@ufba.br' })
 
     it.each([
       [
@@ -244,7 +230,7 @@ describe('StudentService', () => {
       async (_campo, alteracao, mensagem) => {
         repository.findOneBy
           .mockResolvedValueOnce(ATUAL)
-          .mockResolvedValue(buildStudent({ id: 99 }))
+          .mockResolvedValue(makeStudent({ id: 99 }))
 
         const erro = await service
           .update({

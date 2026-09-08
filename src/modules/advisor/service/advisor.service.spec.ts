@@ -1,5 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { makeAdvisor } from '../../../core/testing/factories'
 import { createRepositoryMock } from '../../../core/testing/repository.mock'
 import { comparePassword, hashPassword } from '../../../core/utils/bcrypt'
 import { constants } from '../../../core/utils/constants'
@@ -16,21 +17,6 @@ const CREATE_DTO: CreateAdvisorDto = {
   tax_id: '12345678901',
   phone_number: '71999999999',
   notify: false
-}
-
-function buildAdvisor(overrides: Partial<Advisor> = {}): Advisor {
-  return {
-    id: 9,
-    email: 'orientador@ufba.br',
-    tax_id: '12345678901',
-    phone_number: '71999999999',
-    name: 'Beatriz Rocha',
-    password: '$2a$10$hash-antigo',
-    role: 'ADVISOR',
-    status: 'ACTIVE',
-    has_admin_privileges: false,
-    ...overrides
-  } as Advisor
 }
 
 describe('AdvisorService', () => {
@@ -128,7 +114,7 @@ describe('AdvisorService', () => {
     ] as const)(
       'quando o orientador existe, retorna-o buscando pelo critério esperado (%s)',
       async (method, args, discretion) => {
-        const advisor = buildAdvisor()
+        const advisor = makeAdvisor()
         repository.findOneBy.mockResolvedValue(advisor)
 
         await expect(
@@ -140,7 +126,11 @@ describe('AdvisorService', () => {
   })
 
   describe('update', () => {
-    const actual = buildAdvisor()
+    const actual = makeAdvisor({
+      id: 9,
+      name: 'Beatriz Rocha',
+      email: 'orientador@ufba.br'
+    })
 
     it.each([
       [
@@ -163,7 +153,7 @@ describe('AdvisorService', () => {
       async (_, change, message) => {
         repository.findOneBy
           .mockResolvedValueOnce(actual)
-          .mockResolvedValue(buildAdvisor({ id: 99 }))
+          .mockResolvedValue(makeAdvisor({ id: 99 }))
 
         const erro = await service
           .update({
@@ -234,7 +224,7 @@ describe('AdvisorService', () => {
   describe('updatePassword', () => {
     it('quando a senha atual não confere, recusa a troca', async () => {
       repository.findOne.mockResolvedValue(
-        buildAdvisor({ password: await hashPassword('senha1') })
+        makeAdvisor({ password: await hashPassword('senha1') })
       )
 
       const erro = await service
@@ -250,7 +240,7 @@ describe('AdvisorService', () => {
 
     it('quando a senha atual confere, troca a senha', async () => {
       repository.findOne.mockResolvedValue(
-        buildAdvisor({ password: await hashPassword('senha1') })
+        makeAdvisor({ password: await hashPassword('senha1') })
       )
 
       await service.updatePassword('orientador@ufba.br', 'senha1', 'nova1')
@@ -272,15 +262,13 @@ describe('AdvisorService', () => {
   })
 
   describe('resetPassword', () => {
-    // A busca filtra tambem por has_admin_privileges: quem redefine a senha de
-    // um orientador comum nao alcanca um orientador com privilegio de admin.
     it.each([
       [undefined, false],
       [false, false]
     ])(
       'quando o privilégio de admin não é pedido, procura o orientador sem privilégio (%s → %s)',
       async (informado, esperado) => {
-        repository.findOne.mockResolvedValue(buildAdvisor())
+        repository.findOne.mockResolvedValue(makeAdvisor())
 
         await service.resetPassword(
           'orientador@ufba.br',
@@ -300,7 +288,7 @@ describe('AdvisorService', () => {
     it.each([[true, true]])(
       'quando o privilégio de admin é pedido, procura o orientador com privilégio (%s → %s)',
       async (informado, esperado) => {
-        repository.findOne.mockResolvedValue(buildAdvisor())
+        repository.findOne.mockResolvedValue(makeAdvisor())
 
         await service.resetPassword(
           'orientador@ufba.br',
@@ -318,7 +306,7 @@ describe('AdvisorService', () => {
     )
 
     it('quando a senha é redefinida, grava a nova senha hasheada', async () => {
-      repository.findOne.mockResolvedValue(buildAdvisor())
+      repository.findOne.mockResolvedValue(makeAdvisor())
 
       await service.resetPassword('orientador@ufba.br', 'nova1')
 
@@ -340,8 +328,6 @@ describe('AdvisorService', () => {
   })
 
   describe('grantAdminPrivileges', () => {
-    // Atencao: apesar do nome, o metodo ALTERNA o privilegio - chamar duas vezes
-    // devolve o orientador ao estado original.
     it.each([
       [false, true],
       [true, false]
@@ -349,7 +335,7 @@ describe('AdvisorService', () => {
       'quando o método é chamado, alterna o privilégio de administrador em vez de concedê-lo (%s → %s)',
       async (atual, esperado) => {
         repository.findOne.mockResolvedValue(
-          buildAdvisor({ has_admin_privileges: atual })
+          makeAdvisor({ has_admin_privileges: atual })
         )
 
         await service.grantAdminPrivileges(9)

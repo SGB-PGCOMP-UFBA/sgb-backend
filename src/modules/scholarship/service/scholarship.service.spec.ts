@@ -1,30 +1,26 @@
 import { BadRequestException } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  makeAgency,
+  makeAllocation,
+  makeEnrollment,
+  makeScholarship,
+  makeStudent
+} from '../../../core/testing/factories'
+import {
   createQueryBuilderMock,
   createRepositoryMock
 } from '../../../core/testing/repository.mock'
 import { ScholarshipService } from './scholarship.service'
 
-const AGENCY = {
-  id: 1,
-  name: 'CAPES',
-  masters_degree_awarded_scholarships: 13,
-  doctorate_degree_awarded_scholarships: 7
-}
+const AGENCY = makeAgency()
 
-const ALLOCATION = {
-  id: 5,
-  name: 'REMOTO',
+const ALLOCATION = makeAllocation({
   masters_degree_awarded_scholarships: 50,
   doctorate_degree_awarded_scholarships: 50
-}
+})
 
-const ENROLLMENT = {
-  id: 42,
-  enrollment_number: '2024123456',
-  enrollment_program: 'MESTRADO'
-}
+const ENROLLMENT = makeEnrollment()
 
 const VALID_DTO = {
   student_email: 'aluno@ufba.br',
@@ -35,6 +31,7 @@ const VALID_DTO = {
   scholarship_ends_at: new Date('2026-12-01')
 } as never
 
+/** O countAllocatedSlots devolve a contagem de bolsas vigentes. */
 function rowsForCount(total: number) {
   return Array.from({ length: total }, (_, index) => ({ id: index + 1 }))
 }
@@ -63,7 +60,7 @@ describe('ScholarshipService', () => {
         .mockResolvedValue(ENROLLMENT),
       findOneByIdAndStudentId: vi.fn().mockResolvedValue(ENROLLMENT)
     }
-    studentService = { findByEmail: vi.fn().mockResolvedValue({ id: 7 }) }
+    studentService = { findByEmail: vi.fn().mockResolvedValue(makeStudent()) }
 
     service = new ScholarshipService(
       repository,
@@ -74,6 +71,7 @@ describe('ScholarshipService', () => {
     )
   })
 
+  /** Todas as consultas de vaga devolvem a mesma quantidade de alocadas. */
   function withAllocatedSlots(total: number) {
     repository.createQueryBuilder.mockReturnValue(
       createQueryBuilderMock(rowsForCount(total))
@@ -114,10 +112,9 @@ describe('ScholarshipService', () => {
     })
 
     it('quando a agência não tem cota cadastrada, bloqueia a criação', async () => {
-      agencyService.findOneByName.mockResolvedValue({
-        ...AGENCY,
-        masters_degree_awarded_scholarships: 0
-      })
+      agencyService.findOneByName.mockResolvedValue(
+        makeAgency({ masters_degree_awarded_scholarships: 0 })
+      )
       withAllocatedSlots(0)
 
       await expect(service.create(VALID_DTO)).rejects.toThrow(
@@ -126,10 +123,10 @@ describe('ScholarshipService', () => {
     })
 
     it('quando a alocação está lotada e ainda há vaga na agência, bloqueia a criação e não salva', async () => {
-      allocationService.findOneByName.mockResolvedValue({
-        ...ALLOCATION,
-        masters_degree_awarded_scholarships: 2
-      })
+      allocationService.findOneByName.mockResolvedValue(
+        makeAllocation({ masters_degree_awarded_scholarships: 2 })
+      )
+
       repository.createQueryBuilder
         .mockReturnValueOnce(createQueryBuilderMock(rowsForCount(1)))
         .mockReturnValueOnce(createQueryBuilderMock(rowsForCount(2)))
@@ -213,13 +210,7 @@ describe('ScholarshipService', () => {
       scholarship_ends_at: new Date('2026-12-01')
     } as never
 
-    const EXISTING = {
-      id: 900,
-      enrollment_id: ENROLLMENT.id,
-      agency_id: AGENCY.id,
-      allocation_id: ALLOCATION.id,
-      status: 'ON_GOING'
-    }
+    const EXISTING = makeScholarship({ id: 900 })
 
     beforeEach(() => {
       repository.findOneBy
@@ -228,12 +219,13 @@ describe('ScholarshipService', () => {
     })
 
     it('quando a bolsa é movida para uma agência sem vaga, bloqueia a mudança e não salva', async () => {
-      agencyService.findOneById.mockResolvedValue({
-        ...AGENCY,
-        id: 2,
-        name: 'CNPQ',
-        masters_degree_awarded_scholarships: 1
-      })
+      agencyService.findOneById.mockResolvedValue(
+        makeAgency({
+          id: 2,
+          name: 'CNPQ',
+          masters_degree_awarded_scholarships: 1
+        })
+      )
       withAllocatedSlots(1)
 
       await expect(

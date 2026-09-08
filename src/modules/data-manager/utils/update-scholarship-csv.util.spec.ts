@@ -1,4 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  makeEnrollment,
+  makeScholarship,
+  makeStudent
+} from '../../../core/testing/factories'
 import { createRepositoryMock } from '../../../core/testing/repository.mock'
 import { ListUpdatesFromImport } from '../dto/list-updates.dto'
 import {
@@ -90,7 +95,6 @@ describe('UpdateScholarshipCsvUtil.processDataToUpdateFile', () => {
       expect(bolsa.agency).toBe('CAPES')
     })
 
-    // A CAPES só é reconhecida com as três colunas casando ao mesmo tempo.
     it.each([
       ['tipo', { Tipo_da_Bolsa: 'Bolsa de Outra Agência de Fomento' }],
       ['financiador', { Financiador: 'OUTRO FINANCIADOR' }],
@@ -160,7 +164,6 @@ describe('UpdateScholarshipCsvUtil.processDataToUpdateFile', () => {
         row({ Periodo_da_Bolsa: '01/12/2026 a 12/01/2027' })
       ])
 
-      // 01/12 é 1º de dezembro; 12/01 é 12 de janeiro.
       expect(bolsa.startsAt).toEqual(local(2026, 12, 1))
       expect(bolsa.endsAt).toEqual(local(2027, 1, 12))
     })
@@ -360,17 +363,18 @@ describe('UpdateScholarshipCsvUtil.discriminateScholarshipMatchesForUpdateForIns
 
   function match(overrides: Record<string, unknown> = {}) {
     return {
-      id: 7,
-      scholarship_starts_at: INICIO,
-      scholarship_ends_at: FIM,
-      status: 'ON_GOING',
-      enrollment: {
-        student: {
-          name: 'MARIA DA SILVA',
-          email: 'maria@ufba.br',
-          tax_id: '12345678901'
-        }
-      },
+      ...makeScholarship({
+        id: 7,
+        scholarship_starts_at: INICIO,
+        scholarship_ends_at: FIM,
+        enrollment: makeEnrollment({
+          student: makeStudent({
+            name: 'MARIA DA SILVA',
+            email: 'maria@ufba.br',
+            tax_id: '12345678901'
+          })
+        })
+      }),
       ...overrides
     } as never
   }
@@ -442,13 +446,13 @@ describe('UpdateScholarshipCsvUtil.discriminateScholarshipMatchesForUpdateForIns
       [processed({ student: { name: 'OUTRO NOME', tax_id: '99999999999' } })],
       [
         match({
-          enrollment: {
-            student: {
+          enrollment: makeEnrollment({
+            student: makeStudent({
               name: 'MARIA DA SILVA',
               email: 'maria@ufba.br',
               tax_id: '12345678901'
-            }
-          }
+            })
+          })
         })
       ]
     )
@@ -503,8 +507,6 @@ describe('UpdateScholarshipCsvUtil.discriminateScholarshipMatchesForUpdateForIns
   })
 
   it('quando a planilha prorroga uma bolsa encerrada, recalcula o status a partir das datas novas', () => {
-    // No banco a bolsa já terminou (FINISHED); a planilha prorroga o fim para
-    // o futuro, então ela volta a estar em curso.
     run(
       [processed({ startsAt: local(2024, 3, 1), endsAt: local(2028, 2, 29) })],
       [
@@ -539,20 +541,20 @@ describe('UpdateScholarshipCsvUtil.discriminateScholarshipMatchesForUpdateForIns
     expect(payload).not.toHaveProperty('status')
   })
 
-  it('quando a data do banco vem como string ISO, lê a data e não gera update', () => {
+  it('quando a data do banco vem como string do driver, lê a data e não gera update', () => {
     const resultado = run(
-      [processed({ startsAt: new Date('2026-03-01T00:00:00Z') })],
+      [processed()],
       [
         match({
-          scholarship_starts_at: '2026-03-01T00:00:00.000Z',
-          scholarship_ends_at: new Date('2028-02-29T00:00:00Z'),
-          enrollment: {
-            student: {
+          scholarship_starts_at: '2026-03-01',
+          scholarship_ends_at: '2028-02-29',
+          enrollment: makeEnrollment({
+            student: makeStudent({
               name: 'MARIA DA SILVA',
               email: 'maria@ufba.br',
               tax_id: '12345678901'
-            }
-          }
+            })
+          })
         })
       ]
     )

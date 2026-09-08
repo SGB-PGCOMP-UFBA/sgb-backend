@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { Scholarship } from '../entities/scholarship.entity'
+import {
+  makeAgency,
+  makeScholarship,
+  makeScholarshipsForProgram
+} from '../../../core/testing/factories'
 import {
   countAllocatedScholarshipsByProgram,
   getAwardedSlotsByProgram,
@@ -7,42 +11,26 @@ import {
   isActiveScholarship
 } from './scholarship-allocation.util'
 
-function buildScholarship(
-  enrollmentId: number,
-  status: string,
-  program: string
-): Scholarship {
-  return {
-    enrollment_id: enrollmentId,
-    status,
-    enrollment: { id: enrollmentId, enrollment_program: program }
-  } as Scholarship
-}
-
 describe('isActiveScholarship', () => {
   it('quando o status é ON_GOING ou EXTENDED, considera a bolsa vigente', () => {
-    expect(
-      isActiveScholarship(buildScholarship(1, 'ON_GOING', 'MESTRADO'))
-    ).toBe(true)
-    expect(
-      isActiveScholarship(buildScholarship(1, 'EXTENDED', 'MESTRADO'))
-    ).toBe(true)
+    expect(isActiveScholarship(makeScholarship())).toBe(true)
+    expect(isActiveScholarship(makeScholarship({ status: 'EXTENDED' }))).toBe(
+      true
+    )
   })
 
   it('quando o status é FINISHED, não considera a bolsa vigente', () => {
-    expect(
-      isActiveScholarship(buildScholarship(1, 'FINISHED', 'MESTRADO'))
-    ).toBe(false)
+    expect(isActiveScholarship(makeScholarship({ status: 'FINISHED' }))).toBe(
+      false
+    )
   })
 })
 
 describe('countAllocatedScholarshipsByProgram', () => {
   it('quando a lista tem bolsa finalizada, conta apenas as vigentes', () => {
-    const scholarships = [
-      buildScholarship(1, 'ON_GOING', 'MESTRADO'),
-      buildScholarship(2, 'ON_GOING', 'MESTRADO'),
-      buildScholarship(3, 'FINISHED', 'MESTRADO')
-    ]
+    const scholarships = makeScholarshipsForProgram(3, 'MESTRADO', (index) =>
+      index === 2 ? { status: 'FINISHED' } : {}
+    )
 
     expect(countAllocatedScholarshipsByProgram(scholarships, 'MESTRADO')).toBe(
       2
@@ -51,9 +39,8 @@ describe('countAllocatedScholarshipsByProgram', () => {
 
   it('quando a lista mistura os dois programas, conta apenas as bolsas do programa pedido', () => {
     const scholarships = [
-      buildScholarship(1, 'ON_GOING', 'MESTRADO'),
-      buildScholarship(2, 'ON_GOING', 'DOUTORADO'),
-      buildScholarship(3, 'ON_GOING', 'DOUTORADO')
+      ...makeScholarshipsForProgram(1, 'MESTRADO'),
+      ...makeScholarshipsForProgram(2, 'DOUTORADO')
     ]
 
     expect(countAllocatedScholarshipsByProgram(scholarships, 'MESTRADO')).toBe(
@@ -71,10 +58,7 @@ describe('countAllocatedScholarshipsByProgram', () => {
 })
 
 describe('getAwardedSlotsByProgram', () => {
-  const target = {
-    masters_degree_awarded_scholarships: 13,
-    doctorate_degree_awarded_scholarships: 7
-  }
+  const target = makeAgency()
 
   it('quando o programa tem cota cadastrada, devolve as vagas concedidas do programa', () => {
     expect(getAwardedSlotsByProgram(target, 'MESTRADO')).toBe(13)
@@ -96,7 +80,6 @@ describe('hasAvailableSlot', () => {
     expect(hasAvailableSlot({ awardedSlots: 2, allocatedSlots: 2 })).toBe(false)
   })
 
-  // O caso exato do print da issue: 14 alocadas para 13 concedidas.
   it('quando as alocadas já ultrapassaram as concedidas, bloqueia a vaga', () => {
     expect(hasAvailableSlot({ awardedSlots: 13, allocatedSlots: 14 })).toBe(
       false

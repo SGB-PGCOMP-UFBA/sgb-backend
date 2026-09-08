@@ -1,31 +1,11 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common'
 import { beforeEach, describe, expect, it } from 'vitest'
+import {
+  makeAllocation,
+  makeScholarshipsForProgram
+} from '../../../core/testing/factories'
 import { createRepositoryMock } from '../../../core/testing/repository.mock'
-import { Allocation } from '../entities/allocation.entity'
 import { AllocationService } from './allocation.service'
-
-function buildScholarship(
-  enrollmentId: number,
-  status: string,
-  program: string
-) {
-  return {
-    enrollment_id: enrollmentId,
-    status,
-    enrollment: { id: enrollmentId, enrollment_program: program }
-  }
-}
-
-function buildAllocation(overrides: Partial<Allocation> = {}): Allocation {
-  return {
-    id: 1,
-    name: 'REMOTO',
-    masters_degree_awarded_scholarships: 10,
-    doctorate_degree_awarded_scholarships: 5,
-    scholarships: [],
-    ...overrides
-  } as Allocation
-}
 
 describe('AllocationService', () => {
   let repository: ReturnType<typeof createRepositoryMock>
@@ -48,7 +28,7 @@ describe('AllocationService', () => {
     )
 
     it('quando o nome existe, devolve a alocação', async () => {
-      const allocation = buildAllocation()
+      const allocation = makeAllocation()
       repository.findOneBy.mockResolvedValue(allocation)
 
       await expect(service.findOneByName('REMOTO')).resolves.toBe(allocation)
@@ -58,12 +38,9 @@ describe('AllocationService', () => {
   describe('update', () => {
     it('quando a atualização reduz as concedidas abaixo das já alocadas, recusa a mudança e não salva', async () => {
       repository.findOne.mockResolvedValue(
-        buildAllocation({
-          scholarships: [
-            buildScholarship(1, 'ON_GOING', 'MESTRADO'),
-            buildScholarship(2, 'ON_GOING', 'MESTRADO')
-          ]
-        } as Partial<Allocation>)
+        makeAllocation({
+          scholarships: makeScholarshipsForProgram(2, 'MESTRADO')
+        })
       )
 
       await expect(
@@ -74,9 +51,9 @@ describe('AllocationService', () => {
 
     it('quando a atualização aumenta as concedidas, aceita a mudança e salva', async () => {
       repository.findOne.mockResolvedValue(
-        buildAllocation({
-          scholarships: [buildScholarship(1, 'ON_GOING', 'MESTRADO')]
-        } as Partial<Allocation>)
+        makeAllocation({
+          scholarships: makeScholarshipsForProgram(1, 'MESTRADO')
+        })
       )
 
       await service.update(1, {

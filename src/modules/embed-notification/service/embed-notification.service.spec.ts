@@ -10,6 +10,7 @@ const VALID_DTO = {
   description: 'Sua bolsa foi prorrogada por mais 6 meses.'
 } as never
 
+/** O `deleteAll` usa um query builder de DELETE, que o helper padrão não cobre. */
 function createDeleteQueryBuilderMock() {
   const queryBuilder: Record<string, unknown> = {}
   queryBuilder.delete = vi.fn(() => queryBuilder)
@@ -66,7 +67,6 @@ describe('EmbedNotificationService', () => {
         description: 'Sua bolsa foi prorrogada por mais 6 meses.'
       })
       expect(repository.save).toHaveBeenCalledWith(created)
-      // `consumed` não é enviado: o default da entidade é false.
       expect(repository.create).toHaveBeenCalledWith(
         expect.not.objectContaining({ consumed: expect.anything() })
       )
