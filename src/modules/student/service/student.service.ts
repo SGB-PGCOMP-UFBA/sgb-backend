@@ -6,12 +6,12 @@ import {
 } from '@nestjs/common'
 import { FindOneOptions, Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Student } from '../entities/student.entity'
-import { EmbedNotificationService } from '../../../modules/embed-notification/service/embed-notification.service'
-import { CreateStudentDto } from '../dto/create-student.dto'
-import { comparePassword, hashPassword } from '../../../core/utils/bcrypt'
-import { constants } from '../../../core/utils/constants'
-import { UpdateStudentDto } from '../dto/update-student.dto'
+import { Student } from '@/modules/student/entities/student.entity'
+import { EmbedNotificationService } from '@/modules/embed-notification/service/embed-notification.service'
+import { CreateStudentDto } from '@/modules/student/dto/create-student.dto'
+import { comparePassword, hashPassword } from '@/core/utils/bcrypt'
+import { constants } from '@/core/utils/constants'
+import { UpdateStudentDto } from '@/modules/student/dto/update-student.dto'
 
 @Injectable()
 export class StudentService {
@@ -102,7 +102,7 @@ export class StudentService {
       this.logger.log(constants.exceptionMessages.student.CREATION_COMPLETED)
 
       return newStudent
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         constants.exceptionMessages.student.CREATION_FAILED,
         error,
@@ -148,7 +148,7 @@ export class StudentService {
       this.logger.log(constants.exceptionMessages.student.CREATION_COMPLETED)
 
       return newStudent
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         constants.exceptionMessages.student.CREATION_FAILED,
         error,

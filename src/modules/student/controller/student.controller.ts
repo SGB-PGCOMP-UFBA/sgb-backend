@@ -12,14 +12,14 @@ import {
   ValidationPipe,
   UseGuards
 } from '@nestjs/common'
-import { CreateStudentDto } from '../dto/create-student.dto'
-import { StudentService } from '../service/student.service'
-import { StudentMapper } from '../mapper/student.mapper'
-import { UpdateStudentDto } from '../dto/update-student.dto'
-import { UpdateStudentPasswordDto } from '../dto/update-student-password.dto'
-import { Roles } from '../../../modules/auth/decorators/role.decorator'
-import { RolesGuard } from '../../../modules/auth/guards/roles.guard'
-import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
+import { CreateStudentDto } from '@/modules/student/dto/create-student.dto'
+import { StudentService } from '@/modules/student/service/student.service'
+import { StudentMapper } from '@/modules/student/mapper/student.mapper'
+import { UpdateStudentDto } from '@/modules/student/dto/update-student.dto'
+import { UpdateStudentPasswordDto } from '@/modules/student/dto/update-student-password.dto'
+import { Roles } from '@/modules/auth/decorators/role.decorator'
+import { RolesGuard } from '@/modules/auth/guards/roles.guard'
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard'
 
 @Controller('v1/student')
 export class StudentController {

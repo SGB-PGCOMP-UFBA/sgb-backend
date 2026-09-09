@@ -10,17 +10,17 @@ import {
   Delete,
   Headers
 } from '@nestjs/common'
-import * as moment from 'moment'
+import { format } from 'date-fns'
 import { Response } from 'express'
 import { File } from 'multer'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { DataManagerCsvService } from '../service/data-manager-csv.service'
-import { DataManagerJsonService } from '../service/data-manager-json.service'
-import { DataManagerPurgeService } from '../service/data-manager-purge.service'
-import { Roles } from '../../auth/decorators/role.decorator'
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
-import { RolesGuard } from '../../auth/guards/roles.guard'
-import { CreateStudentDto } from '../../student/dto/create-student.dto'
+import { DataManagerCsvService } from '@/modules/data-manager/service/data-manager-csv.service'
+import { DataManagerJsonService } from '@/modules/data-manager/service/data-manager-json.service'
+import { DataManagerPurgeService } from '@/modules/data-manager/service/data-manager-purge.service'
+import { Roles } from '@/modules/auth/decorators/role.decorator'
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard'
+import { RolesGuard } from '@/modules/auth/guards/roles.guard'
+import { CreateStudentDto } from '@/modules/student/dto/create-student.dto'
 import { CreateScholarshipDto } from '@/modules/scholarship/dto/create-scholarship.dto'
 import { CreateEnrollmentDto } from '@/modules/enrollment/dtos/create-enrollment.dto'
 
@@ -46,7 +46,7 @@ export class DataManagerController {
   async exportData(@Res() response: Response): Promise<void> {
     const buffer = await this.dataManagerCsvService.exportDataToCsv()
     const filename =
-      'backup_sgb_' + moment().format('DD-MM-yy hh:mm:ss') + '.csv'
+      'backup_sgb_' + format(new Date(), 'dd-MM-yyyy hh:mm:ss') + '.csv'
 
     response.set({
       'Content-Type': 'text/csv',

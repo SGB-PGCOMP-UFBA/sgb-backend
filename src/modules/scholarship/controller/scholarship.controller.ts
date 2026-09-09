@@ -13,15 +13,15 @@ import {
   Patch,
   UseGuards
 } from '@nestjs/common'
-import { ScholarshipService } from '../service/scholarship.service'
-import { ScholarshipMapper } from '../mapper/scholarship.mapper'
-import { ScholarshipFilters } from '../filters/IScholarshipFilters'
-import { CreateScholarshipDto } from '../dto/create-scholarship.dto'
-import { UpdateScholarshipDto } from '../dto/update-scholarship.dto'
-import { Roles } from '../../../modules/auth/decorators/role.decorator'
-import { RolesGuard } from '../../../modules/auth/guards/roles.guard'
-import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
-import { CountScholarshipsAsReportBetweenDatesDto } from '../dto/count-scholarship-courses-between-dates.dto'
+import { ScholarshipService } from '@/modules/scholarship/service/scholarship.service'
+import { ScholarshipMapper } from '@/modules/scholarship/mapper/scholarship.mapper'
+import { ScholarshipFilters } from '@/modules/scholarship/filters/IScholarshipFilters'
+import { CreateScholarshipDto } from '@/modules/scholarship/dto/create-scholarship.dto'
+import { UpdateScholarshipDto } from '@/modules/scholarship/dto/update-scholarship.dto'
+import { Roles } from '@/modules/auth/decorators/role.decorator'
+import { RolesGuard } from '@/modules/auth/guards/roles.guard'
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard'
+import { CountScholarshipsAsReportBetweenDatesDto } from '@/modules/scholarship/dto/count-scholarship-courses-between-dates.dto'
 
 @Controller('v1/scholarship')
 export class ScholarshipController {

@@ -1,6 +1,11 @@
-import moment from 'moment'
+import { format as formatWithPattern, isValid, parse } from 'date-fns'
 import { Enrollment } from '@/modules/enrollment/entities/enrollment.entity'
 import { constants } from './constants'
+
+enum ScholarshipTimeLimitInYears {
+  MESTRADO = 2,
+  DOUTORADO = 4
+}
 
 function getDatePlusDays(days: number): Date {
   const actualDate = new Date()
@@ -44,20 +49,28 @@ function today(): Date {
   now.setUTCHours(0, 0, 0, 0)
   return now
 }
-
 const allDateFormats = [
   'dd/MM/yyyy',
-  'DD-MMM-YYYY',
-  'YYYY-MM-DD',
-  'M/D/YYYY HH:mm:ss',
-  'YYYY-MM-DD HH:mm:ss'
+  'dd-MMM-yyyy',
+  'yyyy-MM-dd',
+  'M/d/yyyy HH:mm:ss',
+  'yyyy-MM-dd HH:mm:ss'
 ]
 
-export function parseDate(dateString, formats = allDateFormats) {
-  const parsedDate = moment(dateString, formats, new Date().toISOString())
+export function parseDate(
+  dateString: string,
+  formats: string[] = allDateFormats
+) {
+  if (!dateString) return null
 
-  if (parsedDate.isValid()) {
-    return parsedDate.format('YYYY-MM-DD')
+  const referenceDate = new Date()
+
+  for (const pattern of formats) {
+    const parsedDate = parse(String(dateString), pattern, referenceDate)
+
+    if (isValid(parsedDate)) {
+      return formatWithPattern(parsedDate, 'yyyy-MM-dd')
+    }
   }
 
   return null
@@ -85,7 +98,9 @@ function validateScholarshipDuration(
   }
 
   const scholarshipTimeLimitInYears =
-    enrollment.enrollment_program === 'MESTRADO' ? 2 : 4
+    enrollment.enrollment_program === 'MESTRADO'
+      ? ScholarshipTimeLimitInYears.MESTRADO
+      : ScholarshipTimeLimitInYears.DOUTORADO
   const limitDate = new Date(dates.referenceDate)
   limitDate.setFullYear(limitDate.getFullYear() + scholarshipTimeLimitInYears)
 

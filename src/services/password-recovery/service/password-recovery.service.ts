@@ -1,10 +1,10 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
-import { EmailService } from '../../../services/email-sending/service/email.service'
-import { AdvisorService } from '../../../modules/advisor/service/advisor.service'
-import { StudentService } from '../../../modules/student/service/student.service'
-import { AdminService } from '../../../modules/admin/service/admin.service'
-import { generateRandomNumber } from '../../../core/utils/string-utils'
-import { ResetPasswordRequestDto } from '../dtos/reset-password-request.dto'
+import { EmailService } from '@/services/email-sending/service/email.service'
+import { AdvisorService } from '@/modules/advisor/service/advisor.service'
+import { StudentService } from '@/modules/student/service/student.service'
+import { AdminService } from '@/modules/admin/service/admin.service'
+import { generateRandomNumber } from '@/core/utils/string-utils'
+import { ResetPasswordRequestDto } from '@/services/password-recovery/dtos/reset-password-request.dto'
 
 @Injectable()
 export class PasswordRecoveryService {

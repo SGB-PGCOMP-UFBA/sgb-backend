@@ -5,8 +5,8 @@ import {
   MaxLength,
   IsOptional
 } from 'class-validator'
-import { constants } from '../../../core/utils/constants'
-import { IsAcceptablePassword } from '../../../core/constraints/IsPasswordAcceptableConstraint'
+import { constants } from '@/core/utils/constants'
+import { IsAcceptablePassword } from '@/core/constraints/IsPasswordAcceptableConstraint'
 
 export class CreateStudentDto {
   @IsString({ message: constants.bodyValidationMessages.NAME_FORMAT_ERROR })

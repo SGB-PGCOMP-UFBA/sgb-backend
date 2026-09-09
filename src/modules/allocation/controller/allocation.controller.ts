@@ -10,13 +10,13 @@ import {
   HttpStatus,
   HttpCode
 } from '@nestjs/common'
-import { AllocationService } from '../service/allocation.service'
-import { CreateAllocationDto } from '../dto/create-allocation.dto'
-import { UpdateAllocationDto } from '../dto/update-allocation.dto'
-import { RolesGuard } from '../../../modules/auth/guards/roles.guard'
-import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
-import { Roles } from '../../../modules/auth/decorators/role.decorator'
-import { AllocationMapper } from '../mapper/allocation.mapper'
+import { AllocationService } from '@/modules/allocation/service/allocation.service'
+import { CreateAllocationDto } from '@/modules/allocation/dto/create-allocation.dto'
+import { UpdateAllocationDto } from '@/modules/allocation/dto/update-allocation.dto'
+import { RolesGuard } from '@/modules/auth/guards/roles.guard'
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard'
+import { Roles } from '@/modules/auth/decorators/role.decorator'
+import { AllocationMapper } from '@/modules/allocation/mapper/allocation.mapper'
 
 @Controller('v1/allocation')
 export class AllocationController {

@@ -1,5 +1,5 @@
-import { ResponseUserDto } from '../dtos/response-user.dto'
-import { User } from '../interfaces/user.interface'
+import { ResponseUserDto } from '@/modules/user/dtos/response-user.dto'
+import { User } from '@/modules/user/interfaces/user.interface'
 
 export function toResponseUserDto(user: User): ResponseUserDto {
   return new ResponseUserDto(

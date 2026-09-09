@@ -1,7 +1,7 @@
 import { IsString, IsEmail, MaxLength } from 'class-validator'
-import { IsPasswordMatching } from '../../../core/constraints/IsPasswordMatchingConstraint'
-import { IsAcceptablePassword } from '../../../core/constraints/IsPasswordAcceptableConstraint'
-import { constants } from '../../../core/utils/constants'
+import { IsPasswordMatching } from '@/core/constraints/IsPasswordMatchingConstraint'
+import { IsAcceptablePassword } from '@/core/constraints/IsPasswordAcceptableConstraint'
+import { constants } from '@/core/utils/constants'
 
 export class UpdateAdminPasswordDto {
   @IsString()

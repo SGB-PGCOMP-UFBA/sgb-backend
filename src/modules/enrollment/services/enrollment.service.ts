@@ -6,12 +6,12 @@ import {
   ConflictException,
   NotFoundException
 } from '@nestjs/common/exceptions'
-import { AdvisorService } from '../../../modules/advisor/service/advisor.service'
-import { StudentService } from '../../../modules/student/service/student.service'
-import { Enrollment } from '../entities/enrollment.entity'
-import { CreateEnrollmentDto } from '../dtos/create-enrollment.dto'
-import { constants } from '../../../core/utils/constants'
-import { UpdateEnrollmentDto } from '../dtos/update-enrollment.dto'
+import { AdvisorService } from '@/modules/advisor/service/advisor.service'
+import { StudentService } from '@/modules/student/service/student.service'
+import { Enrollment } from '@/modules/enrollment/entities/enrollment.entity'
+import { CreateEnrollmentDto } from '@/modules/enrollment/dtos/create-enrollment.dto'
+import { constants } from '@/core/utils/constants'
+import { UpdateEnrollmentDto } from '@/modules/enrollment/dtos/update-enrollment.dto'
 
 @Injectable()
 export class EnrollmentService {
@@ -129,7 +129,7 @@ export class EnrollmentService {
       this.logger.log(constants.exceptionMessages.enrollment.CREATION_COMPLETED)
 
       return newEnrollment
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         constants.exceptionMessages.enrollment.CREATION_FAILED,
         error,

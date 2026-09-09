@@ -6,12 +6,12 @@ import {
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
-import { Advisor } from '../entities/advisor.entity'
-import { comparePassword, hashPassword } from '../../../core/utils/bcrypt'
-import { CreateAdvisorDto } from '../dto/create-advisor.dto'
-import { UpdateAdvisorDto } from '../dto/update-advisor.dto'
-import { constants } from '../../../core/utils/constants'
-import { EmailService } from '../../../services/email-sending/service/email.service'
+import { Advisor } from '@/modules/advisor/entities/advisor.entity'
+import { comparePassword, hashPassword } from '@/core/utils/bcrypt'
+import { CreateAdvisorDto } from '@/modules/advisor/dto/create-advisor.dto'
+import { UpdateAdvisorDto } from '@/modules/advisor/dto/update-advisor.dto'
+import { constants } from '@/core/utils/constants'
+import { EmailService } from '@/services/email-sending/service/email.service'
 
 @Injectable()
 export class AdvisorService {

@@ -9,9 +9,9 @@ import {
   HttpStatus,
   Res
 } from '@nestjs/common'
-import { PendingScholarshipService } from '../service/pending-scholarship.service'
-import { CreatePendingScholarshipDto } from '../dto/create-pending-scholarship.dto'
-import { ApprovePendingScholarshipDto } from '../dto/approve-pending-scholarship.dto'
+import { PendingScholarshipService } from '@/modules/pending-scholarship/service/pending-scholarship.service'
+import { CreatePendingScholarshipDto } from '@/modules/pending-scholarship/dto/create-pending-scholarship.dto'
+import { ApprovePendingScholarshipDto } from '@/modules/pending-scholarship/dto/approve-pending-scholarship.dto'
 import { Response } from 'express'
 
 @Controller('v1/pending-scholarship')

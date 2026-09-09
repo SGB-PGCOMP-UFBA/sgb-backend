@@ -8,9 +8,9 @@ import {
   UpdateDateColumn,
   OneToMany
 } from 'typeorm'
-import { Advisor } from '../../advisor/entities/advisor.entity'
-import { Student } from '../../student/entities/student.entity'
-import { Scholarship } from '../../scholarship/entities/scholarship.entity'
+import { Advisor } from '@/modules/advisor/entities/advisor.entity'
+import { Student } from '@/modules/student/entities/student.entity'
+import { Scholarship } from '@/modules/scholarship/entities/scholarship.entity'
 
 @Entity('enrollment')
 export class Enrollment {

@@ -8,8 +8,8 @@ import {
   IsBoolean
 } from 'class-validator'
 import { Transform } from 'class-transformer'
-import { constants } from '../../../core/utils/constants'
-import { IsAcceptablePassword } from '../../../core/constraints/IsPasswordAcceptableConstraint'
+import { constants } from '@/core/utils/constants'
+import { IsAcceptablePassword } from '@/core/constraints/IsPasswordAcceptableConstraint'
 
 export class CreateAdvisorDto {
   @IsString()

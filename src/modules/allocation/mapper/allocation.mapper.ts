@@ -1,6 +1,6 @@
-import { ScholarshipMapper } from '../../scholarship/mapper/scholarship.mapper'
-import { countAllocatedScholarshipsByProgram } from '../../scholarship/utils/scholarship-allocation.util'
-import { Allocation } from '../entities/allocation.entity'
+import { ScholarshipMapper } from '@/modules/scholarship/mapper/scholarship.mapper'
+import { countAllocatedScholarshipsByProgram } from '@/modules/scholarship/utils/scholarship-allocation.util'
+import { Allocation } from '@/modules/allocation/entities/allocation.entity'
 
 export class AllocationMapper {
   static forFilter(allocation: Allocation) {

@@ -1,8 +1,8 @@
-import { Enrollment } from '../entities/enrollment.entity'
-import { AdvisorMapper } from '../../advisor/mapper/advisor.mapper'
-import { StudentMapper } from '../../student/mapper/student.mapper'
-import { ScholarshipMapper } from '../../scholarship/mapper/scholarship.mapper'
-import { ProgramEnum } from '../../../core/enums/ProgramEnum'
+import { Enrollment } from '@/modules/enrollment/entities/enrollment.entity'
+import { AdvisorMapper } from '@/modules/advisor/mapper/advisor.mapper'
+import { StudentMapper } from '@/modules/student/mapper/student.mapper'
+import { ScholarshipMapper } from '@/modules/scholarship/mapper/scholarship.mapper'
+import { ProgramEnum } from '@/core/enums/ProgramEnum'
 
 export class EnrollmentMapper {
   static forFilter(enrollment: Enrollment) {

@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { Scholarship } from '../../modules/scholarship/entities/scholarship.entity'
-import { ScholarshipService } from '../../modules/scholarship/service/scholarship.service'
-import { EmbedNotificationService } from '../../modules/embed-notification/service/embed-notification.service'
+import { Scholarship } from '@/modules/scholarship/entities/scholarship.entity'
+import { ScholarshipService } from '@/modules/scholarship/service/scholarship.service'
+import { EmbedNotificationService } from '@/modules/embed-notification/service/embed-notification.service'
 
 @Injectable()
 export class ScholarShipFinalizerService {

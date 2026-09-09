@@ -1,11 +1,11 @@
 import { Repository } from 'typeorm'
 import { Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Student } from '../../student/entities/student.entity'
-import { CreateUserDto } from '../dtos/create-user.dto'
-import { Advisor } from '../../advisor/entities/advisor.entity'
-import { Admin } from '../../admin/entities/admin.entity'
-import { constants } from '../../../core/utils/constants'
+import { Student } from '@/modules/student/entities/student.entity'
+import { CreateUserDto } from '@/modules/user/dtos/create-user.dto'
+import { Advisor } from '@/modules/advisor/entities/advisor.entity'
+import { Admin } from '@/modules/admin/entities/admin.entity'
+import { constants } from '@/core/utils/constants'
 
 export class UserService {
   private readonly logger = new Logger(UserService.name)

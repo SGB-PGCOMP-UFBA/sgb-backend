@@ -1,5 +1,15 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"],
-  "include": ["./src/**/*.ts", "./src/services/email-sending/templates/*.hbs"]
+  "exclude": [
+    "node_modules",
+    "test",
+    "dist",
+    "**/*spec.ts",
+    "src/core/testing/**",
+    "vitest.config.mts"
+  ],
+  "include": [
+    "./src/**/*.ts",
+    "./src/services/email-sending/templates/*.hbs"
+  ]
 }

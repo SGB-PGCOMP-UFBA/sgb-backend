@@ -10,13 +10,13 @@ import {
   HttpStatus,
   UseGuards
 } from '@nestjs/common'
-import { CreateAgencyDto } from '../dto/create-agency.dto'
-import { AgencyService } from '../service/agency.service'
-import { AgencyMapper } from '../mapper/agency.mapper'
-import { UpdateAgencyDto } from '../dto/update-agency.dto'
-import { RolesGuard } from '../../../modules/auth/guards/roles.guard'
-import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
-import { Roles } from '../../../modules/auth/decorators/role.decorator'
+import { CreateAgencyDto } from '@/modules/agency/dto/create-agency.dto'
+import { AgencyService } from '@/modules/agency/service/agency.service'
+import { AgencyMapper } from '@/modules/agency/mapper/agency.mapper'
+import { UpdateAgencyDto } from '@/modules/agency/dto/update-agency.dto'
+import { RolesGuard } from '@/modules/auth/guards/roles.guard'
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard'
+import { Roles } from '@/modules/auth/decorators/role.decorator'
 
 @Controller('v1/agency')
 export class AgencyController {

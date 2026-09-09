@@ -1,9 +1,9 @@
 import { ForbiddenException, Injectable, Logger } from '@nestjs/common'
-import { ScholarshipService } from '../../scholarship/service/scholarship.service'
-import { EnrollmentService } from '../../enrollment/services/enrollment.service'
-import { StudentService } from '../../student/service/student.service'
-import { EmbedNotificationService } from '../../embed-notification/service/embed-notification.service'
-import { constants } from '../../../core/utils/constants'
+import { ScholarshipService } from '@/modules/scholarship/service/scholarship.service'
+import { EnrollmentService } from '@/modules/enrollment/services/enrollment.service'
+import { StudentService } from '@/modules/student/service/student.service'
+import { EmbedNotificationService } from '@/modules/embed-notification/service/embed-notification.service'
+import { constants } from '@/core/utils/constants'
 
 @Injectable()
 export class DataManagerPurgeService {

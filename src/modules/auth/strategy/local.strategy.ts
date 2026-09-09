@@ -1,8 +1,8 @@
 import { Strategy } from 'passport-local'
 import { PassportStrategy } from '@nestjs/passport'
 import { Injectable } from '@nestjs/common'
-import { AuthService } from '../service/auth.service'
-import { ResponseUserDto } from '../../user/dtos/response-user.dto'
+import { AuthService } from '@/modules/auth/service/auth.service'
+import { ResponseUserDto } from '@/modules/user/dtos/response-user.dto'
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {

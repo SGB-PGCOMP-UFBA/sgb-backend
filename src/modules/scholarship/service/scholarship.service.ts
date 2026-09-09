@@ -15,26 +15,26 @@ import {
   Repository
 } from 'typeorm'
 import { paginate, IPaginationOptions } from 'nestjs-typeorm-paginate'
-import { PageDto } from '../../../core/pagination/page.dto'
-import { PageMetaDto } from '../../../core/pagination/page-meta.dto'
-import { Scholarship } from '../entities/scholarship.entity'
-import { constants } from '../../../core/utils/constants'
-import { ScholarshipMapper } from '../mapper/scholarship.mapper'
-import { ScholarshipFilters } from '../filters/IScholarshipFilters'
-import { StudentService } from '../../../modules/student/service/student.service'
-import { AgencyService } from '../../../modules/agency/service/agency.service'
-import { AllocationService } from '../../../modules/allocation/service/allocation.service'
-import { EnrollmentService } from '../../../modules/enrollment/services/enrollment.service'
-import { CreateScholarshipDto } from '../dto/create-scholarship.dto'
-import { UpdateScholarshipDto } from '../dto/update-scholarship.dto'
-import { validateScholarshipDuration } from '../../../core/utils/date-utils'
-import { CountScholarshipsAsReportBetweenDatesDto } from '../dto/count-scholarship-courses-between-dates.dto'
-import { ProgramEnum } from '../../../core/enums/ProgramEnum'
+import { PageDto } from '@/core/pagination/page.dto'
+import { PageMetaDto } from '@/core/pagination/page-meta.dto'
+import { Scholarship } from '@/modules/scholarship/entities/scholarship.entity'
+import { constants } from '@/core/utils/constants'
+import { ScholarshipMapper } from '@/modules/scholarship/mapper/scholarship.mapper'
+import { ScholarshipFilters } from '@/modules/scholarship/filters/IScholarshipFilters'
+import { StudentService } from '@/modules/student/service/student.service'
+import { AgencyService } from '@/modules/agency/service/agency.service'
+import { AllocationService } from '@/modules/allocation/service/allocation.service'
+import { EnrollmentService } from '@/modules/enrollment/services/enrollment.service'
+import { CreateScholarshipDto } from '@/modules/scholarship/dto/create-scholarship.dto'
+import { UpdateScholarshipDto } from '@/modules/scholarship/dto/update-scholarship.dto'
+import { validateScholarshipDuration } from '@/core/utils/date-utils'
+import { CountScholarshipsAsReportBetweenDatesDto } from '@/modules/scholarship/dto/count-scholarship-courses-between-dates.dto'
+import { ProgramEnum } from '@/core/enums/ProgramEnum'
 import {
   ACTIVE_SCHOLARSHIP_STATUSES,
   getAwardedSlotsByProgram,
   hasAvailableSlot
-} from '../utils/scholarship-allocation.util'
+} from '@/modules/scholarship/utils/scholarship-allocation.util'
 import { ProcessedScholarship } from '@/modules/data-manager/utils/update-scholarship-csv.util'
 
 interface QuotaTarget {
@@ -220,16 +220,15 @@ export class ScholarshipService {
     })
   }
 
-  private async listOccupiedSlots(params: {
+  private async countAllocatedSlots(params: {
     program: string
     agencyId?: number
     allocationId?: number
     excludingScholarshipId?: number
-  }): Promise<number[]> {
+  }): Promise<number> {
     const query = this.scholarshipRepository
       .createQueryBuilder('scholarship')
       .innerJoin('scholarship.enrollment', 'enrollment')
-      .select('DISTINCT scholarship.enrollment_id', 'enrollment_id')
       .where('scholarship.status IN (:...statuses)', {
         statuses: ACTIVE_SCHOLARSHIP_STATUSES
       })
@@ -255,9 +254,28 @@ export class ScholarshipService {
       })
     }
 
-    const rows = await query.getRawMany()
+    return await query.getCount()
+  }
 
-    return rows.map((row) => Number(row.enrollment_id))
+  private async assertEnrollmentHasNoActiveScholarship(
+    enrollmentId: number
+  ): Promise<void> {
+    const activeScholarships = await this.scholarshipRepository.count({
+      where: {
+        enrollment_id: enrollmentId,
+        status: In(ACTIVE_SCHOLARSHIP_STATUSES)
+      }
+    })
+
+    if (activeScholarships === 0) return
+
+    this.logger.warn(
+      constants.exceptionMessages.scholarship.ENROLLMENT_ALREADY_HAS_ACTIVE
+    )
+
+    throw new BadRequestException(
+      constants.exceptionMessages.scholarship.ENROLLMENT_ALREADY_HAS_ACTIVE
+    )
   }
 
   private async assertHasAvailableSlot(
@@ -267,20 +285,14 @@ export class ScholarshipService {
   ): Promise<void> {
     const awardedSlots = getAwardedSlotsByProgram(target, enrollment.program)
 
-    const occupiedSlots = await this.listOccupiedSlots({
+    const allocatedSlots = await this.countAllocatedSlots({
       program: enrollment.program,
       agencyId: target.type === 'agency' ? target.id : undefined,
       allocationId: target.type === 'allocation' ? target.id : undefined,
       excludingScholarshipId
     })
 
-    const isAvailable = hasAvailableSlot({
-      awardedSlots,
-      occupiedSlots,
-      enrollmentId: enrollment.id
-    })
-
-    if (isAvailable) return
+    if (hasAvailableSlot({ awardedSlots, allocatedSlots })) return
 
     const scope = target.type === 'agency' ? 'A agência' : 'A alocação'
     const program = ProgramEnum[enrollment.program] || enrollment.program
@@ -290,7 +302,7 @@ export class ScholarshipService {
           `${scope} ${target.name} não possui vagas de ${program} concedidas.`
         : `${constants.exceptionMessages.scholarship.NO_SLOTS_AVAILABLE} ` +
           `${scope} ${target.name} possui ${awardedSlots} vaga(s) de ${program} ` +
-          `concedida(s) e ${occupiedSlots.length} já alocada(s).`
+          `concedida(s) e ${allocatedSlots} já alocada(s).`
 
     this.logger.warn(message)
 
@@ -373,6 +385,8 @@ export class ScholarshipService {
       const status = dto.status || 'ON_GOING'
 
       if (ACTIVE_SCHOLARSHIP_STATUSES.includes(status)) {
+        await this.assertEnrollmentHasNoActiveScholarship(enrollment.id)
+
         await this.assertScholarshipFitsInAvailableSlots({
           agency: { ...agency, type: 'agency' },
           allocation: allocation ? { ...allocation, type: 'allocation' } : null,

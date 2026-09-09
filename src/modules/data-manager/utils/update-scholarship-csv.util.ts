@@ -1,8 +1,9 @@
+import { format } from 'date-fns'
 import { Scholarship } from '@/modules/scholarship/entities/scholarship.entity'
 import { Student } from '@/modules/student/entities/student.entity'
 import { StudentService } from '@/modules/student/service/student.service'
 import { Repository, UpdateResult } from 'typeorm'
-import { ListUpdatesFromImport } from '../dto/list-updates.dto'
+import { ListUpdatesFromImport } from '@/modules/data-manager/dto/list-updates.dto'
 
 export interface ScholarshipRow {
   Nome: string
@@ -58,6 +59,28 @@ export class UpdateScholarshipCsvUtil {
     if (isFapesb) return 'FAPESB'
 
     return 'OUTRAS'
+  }
+
+  /**
+   * Vigência de bolsa é dia de calendário, não instante. A planilha produz
+   * datas em horário local e a coluna `date` do Postgres chega como string
+   * 'YYYY-MM-DD'; comparar com `getTime()` fazia toda linha parecer alterada
+   * em qualquer servidor fora do UTC.
+   */
+  private static toCalendarDay(value: Date | string): string {
+    if (typeof value === 'string') return value.slice(0, 10)
+
+    return format(value, 'yyyy-MM-dd')
+  }
+
+  static isSameCalendarDay(
+    fromDatabase: Date | string,
+    fromSpreadsheet: Date | string
+  ): boolean {
+    return (
+      UpdateScholarshipCsvUtil.toCalendarDay(fromDatabase) ===
+      UpdateScholarshipCsvUtil.toCalendarDay(fromSpreadsheet)
+    )
   }
 
   private static processScholarshipPeriod(period: string): {
@@ -156,10 +179,14 @@ export class UpdateScholarshipCsvUtil {
       let endDate = new Date(match.scholarship_ends_at)
       const taxIdEquality =
         match.enrollment.student.tax_id === dataObject[index].student.tax_id
-      const startDateEquality =
-        startDate.getTime() === dataObject[index].startsAt.getTime()
-      const endDateEquality =
-        endDate.getTime() === dataObject[index].endsAt.getTime()
+      const startDateEquality = UpdateScholarshipCsvUtil.isSameCalendarDay(
+        match.scholarship_starts_at,
+        dataObject[index].startsAt
+      )
+      const endDateEquality = UpdateScholarshipCsvUtil.isSameCalendarDay(
+        match.scholarship_ends_at,
+        dataObject[index].endsAt
+      )
 
       if (taxIdEquality && startDateEquality && endDateEquality) return
 

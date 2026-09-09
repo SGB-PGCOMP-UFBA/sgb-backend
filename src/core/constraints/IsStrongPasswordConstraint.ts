@@ -12,12 +12,19 @@ export class IsStrongPasswordConstraint
 {
   validate(password: string, args: ValidationArguments) {
     if (typeof password !== 'string') return false
+    const hasLowerCase = /[a-z]/.test(password)
     const hasUpperCase = /[A-Z]/.test(password)
     const hasNumber = /\d/.test(password)
     const hasSpecialCharacter = /[!@#$%^&*(),.?":{}|<>]/.test(password)
     const isValidLength = password.length >= 6 && password.length <= 24
 
-    return hasUpperCase && hasNumber && hasSpecialCharacter && isValidLength
+    return (
+      hasLowerCase &&
+      hasUpperCase &&
+      hasNumber &&
+      hasSpecialCharacter &&
+      isValidLength
+    )
   }
 
   defaultMessage(args: ValidationArguments) {

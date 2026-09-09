@@ -12,7 +12,11 @@ export class IsPasswordAcceptableConstraint
 {
   validate(password: string, args: ValidationArguments) {
     if (typeof password !== 'string') return false
-    const isValidLength = password.length >= 4 && password.length <= 8
+
+    const trimmedPassword = password.trim()
+
+    const isValidLength =
+      trimmedPassword.length >= 4 && trimmedPassword.length <= 8
 
     return isValidLength
   }

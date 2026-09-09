@@ -1,6 +1,6 @@
-import { ScholarshipMapper } from '../../scholarship/mapper/scholarship.mapper'
-import { countAllocatedScholarshipsByProgram } from '../../scholarship/utils/scholarship-allocation.util'
-import { Agency } from '../entities/agency.entity'
+import { ScholarshipMapper } from '@/modules/scholarship/mapper/scholarship.mapper'
+import { countAllocatedScholarshipsByProgram } from '@/modules/scholarship/utils/scholarship-allocation.util'
+import { Agency } from '@/modules/agency/entities/agency.entity'
 
 export class AgencyMapper {
   static forFilter(agency: Agency) {

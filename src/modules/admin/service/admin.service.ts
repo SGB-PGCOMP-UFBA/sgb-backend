@@ -6,11 +6,11 @@ import {
   NotFoundException
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Admin } from '../entities/admin.entity'
-import { constants } from '../../../core/utils/constants'
-import { comparePassword, hashPassword } from '../../../core/utils/bcrypt'
-import { CreateAdminDto } from '../dto/create-admin.dto'
-import { UpdateAdminDto } from '../dto/update-admin.dto'
+import { Admin } from '@/modules/admin/entities/admin.entity'
+import { constants } from '@/core/utils/constants'
+import { comparePassword, hashPassword } from '@/core/utils/bcrypt'
+import { CreateAdminDto } from '@/modules/admin/dto/create-admin.dto'
+import { UpdateAdminDto } from '@/modules/admin/dto/update-admin.dto'
 
 @Injectable()
 export class AdminService {
@@ -19,7 +19,7 @@ export class AdminService {
   ) {}
 
   async create(key: string, dto: CreateAdminDto) {
-    if (key !== constants.api.API_KEY) {
+    if (!constants.api.API_KEY || key !== constants.api.API_KEY) {
       throw new ForbiddenException()
     }
 

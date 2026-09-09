@@ -5,11 +5,11 @@ import {
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
-import { CreateAgencyDto } from '../dto/create-agency.dto'
-import { Agency } from '../entities/agency.entity'
-import { UpdateAgencyDto } from '../dto/update-agency.dto'
-import { constants } from '../../../core/utils/constants'
-import { countAllocatedScholarshipsByProgram } from '../../scholarship/utils/scholarship-allocation.util'
+import { CreateAgencyDto } from '@/modules/agency/dto/create-agency.dto'
+import { Agency } from '@/modules/agency/entities/agency.entity'
+import { UpdateAgencyDto } from '@/modules/agency/dto/update-agency.dto'
+import { constants } from '@/core/utils/constants'
+import { countAllocatedScholarshipsByProgram } from '@/modules/scholarship/utils/scholarship-allocation.util'
 
 @Injectable()
 export class AgencyService {
