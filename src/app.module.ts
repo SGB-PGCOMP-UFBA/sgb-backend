@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { ScheduleModule } from '@nestjs/schedule'
 import { ConfigModule } from '@nestjs/config'
+import { validate } from '@/config/env.validation'
 import { MulterModule } from '@nestjs/platform-express'
 import { memoryStorage } from 'multer'
 import { DatabaseModule } from './core/database/database.module'
@@ -26,7 +27,8 @@ require('dotenv')
   imports: [
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
-      isGlobal: true
+      isGlobal: true,
+      validate
     }),
     MulterModule.register({
       storage: memoryStorage()
