@@ -1,36 +1,32 @@
 import { Module } from '@nestjs/common'
-import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MailerModule } from '@nestjs-modules/mailer'
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/adapters/handlebars.adapter'
 import { join } from 'path'
+import { env } from '@/config/env.validation'
 import { EmailService } from './service/email.service'
 
 @Module({
   imports: [
-    MailerModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        transport: {
-          host: configService.get('EMAIL_HOST'),
-          port: configService.get('EMAIL_PORT'),
-          auth: {
-            user: configService.get('EMAIL_USER'),
-            pass: configService.get('EMAIL_PASSWORD')
-          },
-          secure: false
+    MailerModule.forRoot({
+      transport: {
+        host: env.EMAIL_HOST,
+        port: env.EMAIL_PORT,
+        auth: {
+          user: env.EMAIL_USER,
+          pass: env.EMAIL_PASSWORD
         },
-        defaults: {
-          from: `No Reply <${configService.get('EMAIL_USER')}>`
-        },
-        template: {
-          dir: join(__dirname, './templates'),
-          adapter: new HandlebarsAdapter(),
-          options: {
-            strict: false
-          }
+        secure: false
+      },
+      defaults: {
+        from: `No Reply <${env.EMAIL_USER}>`
+      },
+      template: {
+        dir: join(__dirname, './templates'),
+        adapter: new HandlebarsAdapter(),
+        options: {
+          strict: false
         }
-      })
+      }
     })
   ],
   providers: [EmailService],

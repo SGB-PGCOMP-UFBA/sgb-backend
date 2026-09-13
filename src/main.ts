@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { HttpExceptionFilter } from './core/filters/HttpExceptionFilter'
 import { CustomValidationException } from './core/exceptions/CustomValidationException'
+import { env } from '@/config/env.validation'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -22,11 +23,11 @@ async function bootstrap() {
   )
 
   app.enableCors({
-    origin: process.env.CORS_ALLOWED_ORIGIN,
+    origin: env.CORS_ALLOWED_ORIGIN,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Accept, Authorization, x-api-key'
   })
 
-  await app.listen(process.env.PORT || 5001)
+  await app.listen(env.PORT)
 }
 bootstrap()

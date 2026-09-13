@@ -1,26 +1,21 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { ConfigModule, ConfigService } from '@nestjs/config'
+import { Mode, env } from '@/config/env.validation'
+
+const isProduction = env.MODE === Mode.PROD
 
 @Module({
   imports: [
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        autoLoadEntities: true,
-        type: 'postgres',
-        url: configService.get('DATABASE_URL'),
-        ssl: configService.get('MODE') === 'prod',
-        extra: {
-          ssl:
-            configService.get('MODE') === 'prod'
-              ? { rejectUnauthorized: false }
-              : false
-        },
-        entities: [`${__dirname}/../**/*.entity{.ts,.js}`],
-        synchronize: configService.get('MODE') === 'dev'
-      })
+    TypeOrmModule.forRoot({
+      autoLoadEntities: true,
+      type: 'postgres',
+      url: env.DATABASE_URL,
+      ssl: isProduction,
+      extra: {
+        ssl: isProduction ? { rejectUnauthorized: false } : false
+      },
+      entities: [`${__dirname}/../**/*.entity{.ts,.js}`],
+      synchronize: env.DB_SYNCHRONIZE
     })
   ]
 })

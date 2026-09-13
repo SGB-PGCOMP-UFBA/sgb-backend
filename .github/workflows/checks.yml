@@ -65,9 +65,17 @@ jobs:
       - name: "Build"
         run: npm run build
 
+      # O ormconfig importa o env validado, que exige o contrato completo da
+      # aplicação. Em vez de colocar segredos no GitHub, usamos o próprio
+      # .env.example: os valores já são placeholders versionados.
+      - name: "Prepare Env"
+        run: cp .env.example .env
+
       # O TypeORM não gera client, então não há equivalente ao `prisma generate`.
       # O que corresponde ao `prisma validate` é aplicar as migrations num banco
       # limpo: pega migration quebrada ou fora de ordem antes do merge.
+      # A DATABASE_URL abaixo vence o placeholder do .env porque o dotenv não
+      # sobrescreve o que já está no ambiente.
       - name: "Run Migrations"
         run: npm run db:migrate
         env:

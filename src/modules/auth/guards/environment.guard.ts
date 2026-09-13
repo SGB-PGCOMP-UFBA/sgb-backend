@@ -1,6 +1,9 @@
+import { EnvironmentEnum } from '@/config/env.validation'
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { Observable } from 'rxjs'
+
+const PERMITTED_ENVIRONMENTS = [EnvironmentEnum.DEV, EnvironmentEnum.TEST]
 
 @Injectable()
 export class EnvironmentGuard implements CanActivate {
@@ -9,9 +12,11 @@ export class EnvironmentGuard implements CanActivate {
   canActivate(
     context: ExecutionContext
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const isProduction =
-      this.configService.get<string>('NODE_ENV') === 'production'
+    const environment = this.configService
+      .get<string>('NODE_ENV')
+      ?.trim()
+      ?.toLowerCase() as EnvironmentEnum
 
-    return !isProduction
+    return PERMITTED_ENVIRONMENTS.includes(environment)
   }
 }
