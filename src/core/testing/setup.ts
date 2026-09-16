@@ -2,7 +2,6 @@ process.env.TZ = 'America/Sao_Paulo'
 
 const ENV_DE_TESTE = {
   NODE_ENV: 'test',
-  MODE: 'dev',
   PORT: '3333',
   DATABASE_URL: 'postgres://postgres:postgres@127.0.0.1:5432/sgb_test',
   DB_SYNCHRONIZE: 'false',
