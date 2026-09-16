@@ -18,19 +18,10 @@ export enum EnvironmentEnum {
   TEST = 'test'
 }
 
-export enum Mode {
-  DEV = 'dev',
-  PROD = 'prod'
-}
-
 export class EnvironmentVariables {
   @IsEnum(EnvironmentEnum)
   @IsNotEmpty()
   NODE_ENV: EnvironmentEnum
-
-  @IsEnum(Mode)
-  @IsNotEmpty()
-  MODE: Mode
 
   @IsNumber()
   @IsNotEmpty()

@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { Mode, env } from '@/config/env.validation'
+import { EnvironmentEnum, env } from '@/config/env.validation'
 
-const isProduction = env.MODE === Mode.PROD
+const isProduction = env.NODE_ENV === EnvironmentEnum.PROD
 
 @Module({
   imports: [

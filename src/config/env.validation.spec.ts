@@ -1,10 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { EnvironmentEnum } from '@/config/env.validation'
-import { Mode, validate } from './env.validation'
+import { EnvironmentEnum, validate } from './env.validation'
 
 const ENV_VALIDA: Record<string, string> = {
   NODE_ENV: 'development',
-  MODE: 'dev',
   PORT: '3333',
   DATABASE_URL: 'postgres://postgres:postgres@127.0.0.1:5432/sgb_db',
   CORS_ALLOWED_ORIGIN: '*',
@@ -26,7 +24,6 @@ describe('validate', () => {
     const config = validate(ENV_VALIDA)
 
     expect(config.NODE_ENV).toBe(EnvironmentEnum.DEV)
-    expect(config.MODE).toBe(Mode.DEV)
     expect(config.DATABASE_URL).toBe(ENV_VALIDA.DATABASE_URL)
   })
 
@@ -43,7 +40,6 @@ describe('validate', () => {
 
   it.each([
     ['NODE_ENV'],
-    ['MODE'],
     ['PORT'],
     ['DATABASE_URL'],
     ['CORS_ALLOWED_ORIGIN'],
@@ -71,13 +67,6 @@ describe('validate', () => {
       expect(() => validate({ ...ENV_VALIDA, NODE_ENV: nodeEnv })).toThrow(
         /NODE_ENV/
       )
-    }
-  )
-
-  it.each([['producao'], ['PROD'], ['development']])(
-    'quando MODE não é dev nem prod, recusa a configuração (%s)',
-    (mode) => {
-      expect(() => validate({ ...ENV_VALIDA, MODE: mode })).toThrow(/MODE/)
     }
   )
 
