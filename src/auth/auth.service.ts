@@ -1,0 +1,64 @@
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common'
+import { JwtService } from '@nestjs/jwt'
+import { comparePassword } from '@/common/utils/bcrypt.util'
+import { UserService } from '@/user/user.service'
+import { ResponseUserDto } from '@/user/dtos/response-user.dto'
+import { constants } from '@/common/utils/constants'
+
+@Injectable()
+export class AuthService {
+  constructor(
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService
+  ) {}
+
+  async validateUser(
+    email: string,
+    passwordInserted: string,
+    role: string
+  ): Promise<ResponseUserDto> {
+    const user = await this.userService.findUserByEmailAndRole(email, role)
+    if (!user) {
+      throw new HttpException(
+        constants.exceptionMessages.user.NOT_FOUND,
+        HttpStatus.NOT_FOUND
+      )
+    }
+
+    const validPassword = await comparePassword(passwordInserted, user.password)
+    if (!validPassword) {
+      throw new HttpException(
+        constants.exceptionMessages.user.WRONG_PASSWORD,
+        HttpStatus.UNAUTHORIZED
+      )
+    }
+
+    return new ResponseUserDto(
+      user.id,
+      user.tax_id,
+      user.name,
+      user.role,
+      user.email,
+      user.phone_number
+    )
+  }
+
+  async login(loggedUser: ResponseUserDto) {
+    const payload = {
+      authenticated_at: new Date().toISOString(),
+      role: loggedUser.role,
+      username: loggedUser.name,
+      sub: `${loggedUser.id}-${loggedUser.role}`
+    }
+
+    return {
+      access_token: this.jwtService.sign(payload),
+      id: loggedUser.id,
+      role: loggedUser.role,
+      tax_id: loggedUser.tax_id,
+      name: loggedUser.name,
+      email: loggedUser.email,
+      phone_number: loggedUser.phone_number
+    }
+  }
+}

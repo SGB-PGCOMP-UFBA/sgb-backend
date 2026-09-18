@@ -1,0 +1,23 @@
+import { Module } from '@nestjs/common'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { AgencyModule } from '@/agency/agency.module'
+import { EnrollmentModule } from '@/enrollment/enrollment.module'
+import { StudentModule } from '@/student/student.module'
+import { ScholarshipService } from './scholarship.service'
+import { ScholarshipController } from './scholarship.controller'
+import { Scholarship } from '@/scholarship/entities/scholarship.entity'
+import { AllocationModule } from '@/allocation/allocation.module'
+
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([Scholarship]),
+    EnrollmentModule,
+    AgencyModule,
+    AllocationModule,
+    StudentModule
+  ],
+  controllers: [ScholarshipController],
+  providers: [ScholarshipService],
+  exports: [ScholarshipService]
+})
+export class ScholarshipModule {}

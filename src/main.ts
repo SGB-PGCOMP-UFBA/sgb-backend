@@ -1,8 +1,8 @@
 import { ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
-import { HttpExceptionFilter } from '@/core/filters/http-exception.filter'
-import { CustomValidationException } from '@/core/exceptions/custom-validation.exception'
+import { HttpExceptionFilter } from '@/common/filters/http-exception.filter'
+import { CustomValidationException } from '@/common/exceptions/custom-validation.exception'
 import { env } from '@/config/env.validation'
 
 async function bootstrap() {

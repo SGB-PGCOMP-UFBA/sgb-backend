@@ -23,13 +23,13 @@
     "test": "vitest run",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
     "migration:generate": "npm run typeorm -- migration:generate -d src/config/ormconfig.ts",
-    "migration:create": "npm run typeorm migration:create -n ./src/core/database/migrations/<NAME>",
+    "migration:create": "npm run typeorm migration:create -n ./src/common/database/migrations/<NAME>",
     "migration:run": "npm run typeorm -- migration:run --d src/config/ormconfig.ts",
     "migration:revert": "npm run typeorm -- migration:revert --d src/config/ormconfig.ts",
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "copy-templates": "copyfiles --up 1 src/services/email-sending/templates/*.hbs ./dist"
+    "copy-templates": "copyfiles --up 1 src/email/templates/*.hbs ./dist"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "2.3.4",

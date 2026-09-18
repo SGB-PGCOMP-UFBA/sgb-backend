@@ -36,7 +36,7 @@ Proibido: `PascalCase.ts`, prefixo húngaro (`IFoo.ts`), sufixo no plural
 (`.utils.ts`) e sufixo com hífen (`date-utils.ts`).
 
 Exceções deliberadas, por serem referenciadas de fora do TypeScript:
-`main.ts`, `config/ormconfig.ts` (scripts npm) e `core/testing/setup.ts`
+`main.ts`, `config/ormconfig.ts` (scripts npm) e `common/testing/setup.ts`
 (`vitest.config.mts`). As migrations mantêm o nome gerado pelo TypeORM
 (`<timestamp>-<descricao>.ts`).
 
@@ -52,8 +52,8 @@ Exceções deliberadas, por serem referenciadas de fora do TypeScript:
 Se uma categoria tem **um** arquivo, ele fica na raiz da feature:
 
 ```
-✗ modules/agency/service/agency.service.ts
-✓ modules/agency/agency.service.ts
+✗ agency/service/agency.service.ts
+✓ agency/agency.service.ts
 ```
 
 Duas exceções, porque sempre crescem: `dtos/` e `entities/` mantêm a pasta
@@ -62,7 +62,7 @@ mesmo com um arquivo só.
 ### 2.3 Anatomia de uma feature
 
 ```
-modules/<feature>/
+<feature>/
   <feature>.module.ts
   <feature>.controller.ts
   <feature>.service.ts
@@ -86,7 +86,7 @@ O arquivo de teste mora **ao lado** do arquivo que testa, nunca numa pasta
 - **Mesma pasta: `./`.**
 
 ```ts
-✓ import { Scholarship } from '@/modules/scholarship/entities/scholarship.entity'
+✓ import { Scholarship } from '@/scholarship/entities/scholarship.entity'
 ✓ import { helper } from './pdf-reports.helper'
 ✗ import { Scholarship } from '../entities/scholarship.entity'
 ```
@@ -122,8 +122,8 @@ A regra 4 chega no passo 3 do refactor; até então valem 1, 2 e 3 para código 
 | Escopo                          | Lugar             |
 | ------------------------------- | ----------------- |
 | Usado por uma feature só        | dentro da feature |
-| Usado por duas ou mais features | `core/`           |
+| Usado por duas ou mais features | `common/`         |
 | Configuração / bootstrap        | `config/`         |
 
 Não crie uma segunda pasta de utilitários. Se é compartilhado, vai em
-`core/utils/`.
+`common/utils/`.
