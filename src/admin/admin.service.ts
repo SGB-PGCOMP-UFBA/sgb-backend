@@ -1,12 +1,11 @@
-import { Repository } from 'typeorm'
 import {
   BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException
 } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
 import { Admin } from '@/admin/entities/admin.entity'
+import { AdminRepository } from '@/admin/repositories/admin.repository'
 import { constants } from '@/common/utils/constants'
 import { comparePassword, hashPassword } from '@/common/utils/bcrypt.util'
 import { CreateAdminDto } from '@/admin/dtos/create-admin.dto'
@@ -14,9 +13,7 @@ import { UpdateAdminDto } from '@/admin/dtos/update-admin.dto'
 
 @Injectable()
 export class AdminService {
-  constructor(
-    @InjectRepository(Admin) private adminRepository: Repository<Admin>
-  ) {}
+  constructor(private readonly adminRepository: AdminRepository) {}
 
   async create(key: string, dto: CreateAdminDto) {
     if (!constants.api.API_KEY || key !== constants.api.API_KEY) {
@@ -25,13 +22,10 @@ export class AdminService {
 
     try {
       const passwordHash = await hashPassword(dto.password)
-      const newAdmin = this.adminRepository.create({
+      return await this.adminRepository.create({
         ...dto,
         password: passwordHash
       })
-
-      await this.adminRepository.save(newAdmin)
-      return newAdmin
     } catch (error) {
       throw new BadRequestException(
         constants.exceptionMessages.admin.CREATION_FAILED
@@ -40,15 +34,13 @@ export class AdminService {
   }
 
   async findAll(): Promise<Admin[]> {
-    return await this.adminRepository.find({
-      order: { name: 'ASC' }
-    })
+    return await this.adminRepository.findAllOrderedByName()
   }
 
   async update(dto: UpdateAdminDto) {
-    const adminFromDatabase = await this.adminRepository.findOneBy({
-      email: dto.current_email
-    })
+    const adminFromDatabase = await this.adminRepository.findByEmail(
+      dto.current_email
+    )
     if (!adminFromDatabase) {
       throw new NotFoundException(constants.exceptionMessages.admin.NOT_FOUND)
     }
@@ -56,15 +48,12 @@ export class AdminService {
     await this.validateUpdatingAdmin(dto, adminFromDatabase)
 
     try {
-      const updatedAdmin = await this.adminRepository.save({
-        id: adminFromDatabase.id,
+      return await this.adminRepository.update(adminFromDatabase.id, {
         name: dto.name || adminFromDatabase.name,
         email: dto.email || adminFromDatabase.email,
         tax_id: dto.tax_id,
         phone_number: dto.phone_number
       })
-
-      return updatedAdmin
     } catch (error) {
       throw new BadRequestException(
         constants.exceptionMessages.admin.UPDATE_FAILED
@@ -73,16 +62,14 @@ export class AdminService {
   }
 
   async resetPassword(email: string, password: string): Promise<void> {
-    const findAdmin = await this.adminRepository.findOne({
-      where: { email }
-    })
+    const findAdmin = await this.adminRepository.findByEmail(email)
 
     if (!findAdmin) {
       throw new NotFoundException(constants.exceptionMessages.admin.NOT_FOUND)
     }
 
     const passwordHash = await hashPassword(password)
-    await this.adminRepository.update({ email }, { password: passwordHash })
+    await this.adminRepository.updatePasswordByEmail(email, passwordHash)
   }
 
   async updatePassword(
@@ -90,9 +77,7 @@ export class AdminService {
     current_password: string,
     new_password: string
   ): Promise<void> {
-    const findAdmin = await this.adminRepository.findOne({
-      where: { email }
-    })
+    const findAdmin = await this.adminRepository.findByEmail(email)
 
     if (!findAdmin) {
       throw new NotFoundException(constants.exceptionMessages.admin.NOT_FOUND)
@@ -110,12 +95,12 @@ export class AdminService {
     }
 
     const passwordHash = await hashPassword(new_password)
-    await this.adminRepository.update({ email }, { password: passwordHash })
+    await this.adminRepository.updatePasswordByEmail(email, passwordHash)
   }
 
   async remove(id: number) {
-    const removed = await this.adminRepository.delete(id)
-    if (removed.affected === 1) {
+    const affected = await this.adminRepository.deleteById(id)
+    if (affected === 1) {
       return true
     }
 
@@ -124,10 +109,7 @@ export class AdminService {
 
   async validateUpdatingAdmin(dto: UpdateAdminDto, adminFromDatabase: Admin) {
     if (dto.tax_id && dto.tax_id !== adminFromDatabase.tax_id) {
-      const adminFromTaxId = await this.adminRepository.findOneBy({
-        tax_id: dto.tax_id
-      })
-      if (adminFromTaxId) {
+      if (await this.adminRepository.findByTaxId(dto.tax_id)) {
         throw new BadRequestException(
           constants.negotialValidationMessages.TAX_ID_ALREADY_REGISTERED
         )
@@ -135,10 +117,7 @@ export class AdminService {
     }
 
     if (dto.email && dto.email !== adminFromDatabase.email) {
-      const adminFromEmail = await this.adminRepository.findOneBy({
-        email: dto.email
-      })
-      if (adminFromEmail) {
+      if (await this.adminRepository.findByEmail(dto.email)) {
         throw new BadRequestException(
           constants.negotialValidationMessages.EMAIL_ALREADY_REGISTERED
         )
@@ -149,10 +128,7 @@ export class AdminService {
       dto.phone_number &&
       dto.phone_number !== adminFromDatabase.phone_number
     ) {
-      const adminFromPhoneNumber = await this.adminRepository.findOneBy({
-        phone_number: dto.phone_number
-      })
-      if (adminFromPhoneNumber) {
+      if (await this.adminRepository.findByPhoneNumber(dto.phone_number)) {
         throw new BadRequestException(
           constants.negotialValidationMessages.PHONE_NUMBER_ALREADY_REGISTERED
         )

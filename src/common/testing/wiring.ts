@@ -1,4 +1,5 @@
 import { Global, Module, Type } from '@nestjs/common'
+import { ConfigModule } from '@nestjs/config'
 import { MODULE_METADATA } from '@nestjs/common/constants'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { Test, TestingModule } from '@nestjs/testing'
@@ -31,7 +32,11 @@ export async function compileFeatureModule(
   class FakeDatabaseModule {}
 
   return await Test.createTestingModule({
-    imports: [FakeDatabaseModule, featureModule]
+    imports: [
+      ConfigModule.forRoot({ isGlobal: true }),
+      FakeDatabaseModule,
+      featureModule
+    ]
   }).compile()
 }
 

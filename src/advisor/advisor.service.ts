@@ -4,9 +4,8 @@ import {
   Logger,
   NotFoundException
 } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
 import { Advisor } from '@/advisor/entities/advisor.entity'
+import { AdvisorRepository } from '@/advisor/repositories/advisor.repository'
 import { comparePassword, hashPassword } from '@/common/utils/bcrypt.util'
 import { CreateAdvisorDto } from '@/advisor/dtos/create-advisor.dto'
 import { UpdateAdvisorDto } from '@/advisor/dtos/update-advisor.dto'
@@ -19,22 +18,15 @@ export class AdvisorService {
 
   constructor(
     private emailService: EmailService,
-    @InjectRepository(Advisor) private advisorRepository: Repository<Advisor>
+    private readonly advisorRepository: AdvisorRepository
   ) {}
 
   async findAll(): Promise<Advisor[]> {
-    return await this.advisorRepository.find({
-      relations: ['enrollments'],
-      order: { name: 'ASC' }
-    })
+    return await this.advisorRepository.findAllWithEnrollments()
   }
 
   async findAllForFilter(): Promise<Advisor[]> {
-    const advisors = await this.advisorRepository.find({
-      order: { name: 'ASC' }
-    })
-
-    return advisors
+    return await this.advisorRepository.findAllForFilter()
   }
 
   async create(dto: CreateAdvisorDto) {
@@ -42,12 +34,10 @@ export class AdvisorService {
 
     try {
       const passwordHash = await hashPassword(dto.password)
-      const newAdvisor = this.advisorRepository.create({
+      const newAdvisor = await this.advisorRepository.create({
         ...dto,
         password: passwordHash
       })
-
-      await this.advisorRepository.save(newAdvisor)
       this.logger.log(constants.exceptionMessages.advisor.CREATION_COMPLETED)
 
       if (dto.notify) {
@@ -74,9 +64,9 @@ export class AdvisorService {
   }
 
   async update(dto: UpdateAdvisorDto) {
-    const advisorFromDatabase = await this.advisorRepository.findOneBy({
-      email: dto.current_email
-    })
+    const advisorFromDatabase = await this.advisorRepository.findByEmail(
+      dto.current_email
+    )
     if (!advisorFromDatabase) {
       throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
     }
@@ -84,16 +74,13 @@ export class AdvisorService {
     await this.validateUpdatingAdvisor(dto, advisorFromDatabase)
 
     try {
-      const updatedAdvisor = await this.advisorRepository.save({
-        id: advisorFromDatabase.id,
+      return await this.advisorRepository.update(advisorFromDatabase.id, {
         name: dto.name || advisorFromDatabase.name,
         email: dto.email || advisorFromDatabase.email,
         status: dto.status || advisorFromDatabase.status,
         tax_id: dto.tax_id,
         phone_number: dto.phone_number
       })
-
-      return updatedAdvisor
     } catch (error) {
       throw new BadRequestException(
         constants.exceptionMessages.advisor.UPDATE_FAILED
@@ -102,7 +89,7 @@ export class AdvisorService {
   }
 
   async findOneById(id: number): Promise<Advisor> {
-    const advisor = await this.advisorRepository.findOneBy({ id })
+    const advisor = await this.advisorRepository.findById(id)
     if (!advisor) {
       throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
     }
@@ -111,7 +98,7 @@ export class AdvisorService {
   }
 
   async findOneByEmail(email: string): Promise<Advisor> {
-    const advisor = await this.advisorRepository.findOneBy({ email })
+    const advisor = await this.advisorRepository.findByEmail(email)
     if (!advisor) {
       throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
     }
@@ -120,7 +107,7 @@ export class AdvisorService {
   }
 
   async findOneByTaxId(tax_id: string): Promise<Advisor> {
-    const advisor = await this.advisorRepository.findOneBy({ tax_id })
+    const advisor = await this.advisorRepository.findByTaxId(tax_id)
     if (!advisor) {
       throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
     }
@@ -133,9 +120,7 @@ export class AdvisorService {
     current_password: string,
     new_password: string
   ): Promise<void> {
-    const findAdvisor = await this.advisorRepository.findOne({
-      where: { email }
-    })
+    const findAdvisor = await this.advisorRepository.findByEmail(email)
 
     if (!findAdvisor) {
       throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
@@ -153,7 +138,7 @@ export class AdvisorService {
     }
 
     const passwordHash = await hashPassword(new_password)
-    await this.advisorRepository.update({ email }, { password: passwordHash })
+    await this.advisorRepository.updatePasswordByEmail(email, passwordHash)
   }
 
   async resetPassword(
@@ -161,21 +146,23 @@ export class AdvisorService {
     password: string,
     has_admin_privileges = false
   ): Promise<void> {
-    const findAdvisor = await this.advisorRepository.findOne({
-      where: { email, has_admin_privileges }
-    })
+    const findAdvisor =
+      await this.advisorRepository.findByEmailAndAdminPrivileges(
+        email,
+        has_admin_privileges
+      )
 
     if (!findAdvisor) {
       throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
     }
 
     const passwordHash = await hashPassword(password)
-    await this.advisorRepository.update({ email }, { password: passwordHash })
+    await this.advisorRepository.updatePasswordByEmail(email, passwordHash)
   }
 
   async delete(id: number) {
-    const removed = await this.advisorRepository.delete(id)
-    if (removed.affected === 1) {
+    const affected = await this.advisorRepository.deleteById(id)
+    if (affected === 1) {
       return true
     }
 
@@ -183,17 +170,15 @@ export class AdvisorService {
   }
 
   async grantAdminPrivileges(id: number) {
-    const findAdvisor = await this.advisorRepository.findOne({
-      where: { id }
-    })
+    const findAdvisor = await this.advisorRepository.findById(id)
 
     if (!findAdvisor) {
       throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
     }
 
-    await this.advisorRepository.update(
-      { id },
-      { has_admin_privileges: !findAdvisor.has_admin_privileges }
+    await this.advisorRepository.setAdminPrivileges(
+      id,
+      !findAdvisor.has_admin_privileges
     )
   }
 
@@ -202,10 +187,7 @@ export class AdvisorService {
     advisorFromDatabase: Advisor
   ) {
     if (dto.tax_id && dto.tax_id !== advisorFromDatabase.tax_id) {
-      const advisorFromTaxId = await this.advisorRepository.findOneBy({
-        tax_id: dto.tax_id
-      })
-      if (advisorFromTaxId) {
+      if (await this.advisorRepository.findByTaxId(dto.tax_id)) {
         throw new BadRequestException(
           constants.negotialValidationMessages.TAX_ID_ALREADY_REGISTERED
         )
@@ -213,10 +195,7 @@ export class AdvisorService {
     }
 
     if (dto.email && dto.email !== advisorFromDatabase.email) {
-      const advisorFromEmail = await this.advisorRepository.findOneBy({
-        email: dto.email
-      })
-      if (advisorFromEmail) {
+      if (await this.advisorRepository.findByEmail(dto.email)) {
         throw new BadRequestException(
           constants.negotialValidationMessages.EMAIL_ALREADY_REGISTERED
         )
@@ -227,10 +206,7 @@ export class AdvisorService {
       dto.phone_number &&
       dto.phone_number !== advisorFromDatabase.phone_number
     ) {
-      const advisorFromPhoneNumber = await this.advisorRepository.findOneBy({
-        phone_number: dto.phone_number
-      })
-      if (advisorFromPhoneNumber) {
+      if (await this.advisorRepository.findByPhoneNumber(dto.phone_number)) {
         throw new BadRequestException(
           constants.negotialValidationMessages.PHONE_NUMBER_ALREADY_REGISTERED
         )

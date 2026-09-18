@@ -53,6 +53,7 @@ export function createRepositoryMock(overrides: Record<string, unknown> = {}) {
         return entity
       }
     ),
+    update: vi.fn().mockResolvedValue({ affected: 1 }),
     delete: vi.fn().mockResolvedValue({ affected: 1 }),
     createQueryBuilder: vi.fn(() => createQueryBuilderMock([])),
     query: vi.fn().mockResolvedValue([]),
