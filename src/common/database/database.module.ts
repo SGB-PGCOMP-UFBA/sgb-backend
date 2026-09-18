@@ -16,10 +16,20 @@ import { TypeOrmAllocationRepository } from '@/allocation/repositories/typeorm-a
 import { EmbedNotification } from '@/embed-notification/entities/embed-notification.entity'
 import { EmbedNotificationRepository } from '@/embed-notification/repositories/embed-notification.repository'
 import { TypeOrmEmbedNotificationRepository } from '@/embed-notification/repositories/typeorm-embed-notification.repository'
+import { Student } from '@/student/entities/student.entity'
+import { StudentRepository } from '@/student/repositories/student.repository'
+import { TypeOrmStudentRepository } from '@/student/repositories/typeorm-student.repository'
 
 const isProduction = env.NODE_ENV === EnvironmentEnum.PROD
 
-const entities = [Admin, Advisor, Agency, Allocation, EmbedNotification]
+const entities = [
+  Admin,
+  Advisor,
+  Agency,
+  Allocation,
+  EmbedNotification,
+  Student
+]
 
 const repositories = [
   { provide: AdminRepository, useClass: TypeOrmAdminRepository },
@@ -29,7 +39,8 @@ const repositories = [
   {
     provide: EmbedNotificationRepository,
     useClass: TypeOrmEmbedNotificationRepository
-  }
+  },
+  { provide: StudentRepository, useClass: TypeOrmStudentRepository }
 ]
 
 /**

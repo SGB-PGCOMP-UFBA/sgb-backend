@@ -1,22 +1,21 @@
-import { Repository } from 'typeorm'
-import { Logger, NotFoundException } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
+import { Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { AdminRepository } from '@/admin/repositories/admin.repository'
+import { AdvisorRepository } from '@/advisor/repositories/advisor.repository'
+import { StudentRepository } from '@/student/repositories/student.repository'
+import { Admin } from '@/admin/entities/admin.entity'
+import { Advisor } from '@/advisor/entities/advisor.entity'
 import { Student } from '@/student/entities/student.entity'
 import { CreateUserDto } from '@/user/dtos/create-user.dto'
-import { Advisor } from '@/advisor/entities/advisor.entity'
-import { Admin } from '@/admin/entities/admin.entity'
 import { constants } from '@/common/utils/constants'
 
+@Injectable()
 export class UserService {
   private readonly logger = new Logger(UserService.name)
 
   constructor(
-    @InjectRepository(Student)
-    private studentRepository: Repository<Student>,
-    @InjectRepository(Advisor)
-    private advisorRepository: Repository<Advisor>,
-    @InjectRepository(Admin)
-    private adminRepository: Repository<Admin>
+    private readonly studentRepository: StudentRepository,
+    private readonly advisorRepository: AdvisorRepository,
+    private readonly adminRepository: AdminRepository
   ) {}
 
   async findUserByEmailAndRole(
@@ -26,18 +25,19 @@ export class UserService {
     let user: Student | Advisor | Admin
 
     if (role === 'STUDENT') {
-      user = await this.studentRepository.findOne({ where: { email } })
+      user = await this.studentRepository.findByEmail(email)
     } else if (role === 'ADVISOR') {
-      user = await this.advisorRepository.findOne({ where: { email } })
+      user = await this.advisorRepository.findByEmail(email)
     } else if (role === 'ADMIN') {
-      user = await this.advisorRepository.findOne({
-        where: { email, has_admin_privileges: true }
-      })
+      user = await this.advisorRepository.findByEmailAndAdminPrivileges(
+        email,
+        true
+      )
 
       if (user) {
         user.role = 'ADVISOR_WITH_ADMIN_PRIVILEGES'
       } else {
-        user = await this.adminRepository.findOne({ where: { email } })
+        user = await this.adminRepository.findByEmail(email)
       }
     }
 
