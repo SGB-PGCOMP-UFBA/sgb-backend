@@ -5,15 +5,7 @@ import {
   InternalServerErrorException
 } from '@nestjs/common/exceptions'
 import { InjectRepository } from '@nestjs/typeorm'
-import {
-  FindManyOptions,
-  ILike,
-  In,
-  IsNull,
-  LessThanOrEqual,
-  Like,
-  Repository
-} from 'typeorm'
+import { IsNull, Repository } from 'typeorm'
 import { paginate, IPaginationOptions } from 'nestjs-typeorm-paginate'
 import { PageDto } from '@/core/pagination/page.dto'
 import { PageMetaDto } from '@/core/pagination/page-meta.dto'
@@ -31,10 +23,20 @@ import { validateScholarshipDuration } from '@/core/utils/date-utils'
 import { CountScholarshipsAsReportBetweenDatesDto } from '@/modules/scholarship/dto/count-scholarship-courses-between-dates.dto'
 import { ProgramEnum } from '@/core/enums/ProgramEnum'
 import {
-  ACTIVE_SCHOLARSHIP_STATUSES,
   getAwardedSlotsByProgram,
   hasAvailableSlot
 } from '@/modules/scholarship/utils/scholarship-allocation.util'
+import {
+  occupiesSlot,
+  occupiesSlotSql,
+  occupiesSlotWhere,
+  derivedStatusSql,
+  effectiveEndSql,
+  scholarshipStatusPredicateSql,
+  todayAsCalendarDay,
+  ScholarshipStatusEnum,
+  SCHOLARSHIP_STATUSES
+} from '@/modules/scholarship/utils/scholarship-status.util'
 import { ProcessedScholarship } from '@/modules/data-manager/utils/update-scholarship-csv.util'
 
 interface QuotaTarget {
@@ -84,91 +86,63 @@ export class ScholarshipService {
     })
   }
 
-  async findAllForFilter(): Promise<Scholarship[]> {
-    const distinctScholarshipsStatus = await this.scholarshipRepository
-      .createQueryBuilder('scholarship')
-      .select('scholarship.status', 'status')
-      .distinct(true)
-      .orderBy('scholarship.status', 'ASC')
-      .getRawMany()
-
-    return distinctScholarshipsStatus
+  async findAllForFilter(): Promise<{ status: string }[]> {
+    return SCHOLARSHIP_STATUSES.map((status) => ({ status }))
   }
 
   async findAllPaginated(
     paginateOptions: IPaginationOptions,
     filters: ScholarshipFilters
   ) {
-    const findOptions: FindManyOptions<Scholarship> = {
-      relations: [
-        'agency',
-        'allocation',
-        'enrollment',
-        'enrollment.student',
-        'enrollment.advisor'
-      ],
-      where: {},
-      order: {}
-    }
+    const query = this.scholarshipRepository
+      .createQueryBuilder('scholarship')
+      .leftJoinAndSelect('scholarship.agency', 'agency')
+      .leftJoinAndSelect('scholarship.allocation', 'allocation')
+      .leftJoinAndSelect('scholarship.enrollment', 'enrollment')
+      .leftJoinAndSelect('enrollment.student', 'student')
+      .leftJoinAndSelect('enrollment.advisor', 'advisor')
+      .setParameter('today', todayAsCalendarDay())
 
     if (filters?.scholarshipStatus && filters?.scholarshipStatus !== 'ALL') {
-      if (filters?.scholarshipStatus === 'ON_GOING') {
-        findOptions.where['status'] = In(['ON_GOING', 'EXTENDED'])
-      } else {
-        findOptions.where['status'] = Like(`%${filters.scholarshipStatus}%`)
+      const statusPredicate = scholarshipStatusPredicateSql(
+        filters.scholarshipStatus
+      )
+
+      if (statusPredicate) {
+        query.andWhere(statusPredicate)
       }
     }
     if (filters?.agencyName && filters?.agencyName !== 'ALL') {
-      findOptions.where['agency'] = {
-        name: Like(`%${filters.agencyName}%`)
-      }
+      query.andWhere('agency.name LIKE :agencyName', {
+        agencyName: `%${filters.agencyName}%`
+      })
     }
     if (filters?.allocationName && filters?.allocationName !== 'ALL') {
-      findOptions.where['allocation'] = {
-        name: Like(`%${filters.allocationName}%`)
-      }
+      query.andWhere('allocation.name LIKE :allocationName', {
+        allocationName: `%${filters.allocationName}%`
+      })
     }
     if (filters?.programName && filters?.programName !== 'ALL') {
-      findOptions.where['enrollment'] = {
-        enrollment_program: Like(`%${filters.programName}%`)
-      }
+      query.andWhere('enrollment.enrollment_program LIKE :programName', {
+        programName: `%${filters.programName}%`
+      })
     }
     if (filters?.advisorName && filters?.advisorName !== 'ALL') {
-      if (!findOptions.where['enrollment']) {
-        findOptions.where['enrollment'] = {}
-      }
-
-      findOptions.where['enrollment']['advisor'] = {
-        name: Like(`%${filters.advisorName}%`)
-      }
+      query.andWhere('advisor.name LIKE :advisorName', {
+        advisorName: `%${filters.advisorName}%`
+      })
     }
     if (filters?.studentName && filters?.studentName !== '') {
-      if (!findOptions.where['enrollment']) {
-        findOptions.where['enrollment'] = {}
-      }
-
-      findOptions.where['enrollment']['student'] = {
-        name: ILike(`%${filters.studentName}%`)
-      }
+      query.andWhere('student.name ILIKE :studentName', {
+        studentName: `%${filters.studentName}%`
+      })
     }
     if (filters?.orderBy && orderByMapping[filters.orderBy]) {
       const [table, field, order] = orderByMapping[filters.orderBy]
-      if (table === 'enrollment') {
-        findOptions.order[table] = {}
-        findOptions.order[table][field] = order
-      } else {
-        findOptions.order[field] = order
-      }
+      query.orderBy(`${table}.${field}`, order as 'ASC' | 'DESC')
     }
 
-    const scholarshipsPaginate = paginate<Scholarship>(
-      this.scholarshipRepository,
-      paginateOptions,
-      findOptions
-    )
-
-    const items = (await scholarshipsPaginate).items
-    const meta = (await scholarshipsPaginate).meta
+    const { items, meta } = await paginate<Scholarship>(query, paginateOptions)
 
     const itemsDto = items.map((scholarship) =>
       ScholarshipMapper.detailedWithRelations(scholarship)
@@ -186,38 +160,29 @@ export class ScholarshipService {
   }
 
   async findAllForNotification(): Promise<Scholarship[]> {
-    return await this.scholarshipRepository.find({
-      relations: [
-        'agency',
-        'enrollment',
-        'enrollment.student',
-        'enrollment.advisor'
-      ],
-      where: {
-        status: In(['ON_GOING', 'EXTENDED'])
-      }
-    })
+    return await this.scholarshipRepository
+      .createQueryBuilder('scholarship')
+      .leftJoinAndSelect('scholarship.agency', 'agency')
+      .leftJoinAndSelect('scholarship.enrollment', 'enrollment')
+      .leftJoinAndSelect('enrollment.student', 'student')
+      .leftJoinAndSelect('enrollment.advisor', 'advisor')
+      .where(occupiesSlotSql())
+      .setParameter('today', todayAsCalendarDay())
+      .getMany()
   }
 
-  async findAllEndingToday(): Promise<Scholarship[]> {
-    return await this.scholarshipRepository.find({
-      relations: [
-        'agency',
-        'enrollment',
-        'enrollment.student',
-        'enrollment.advisor'
-      ],
-      where: [
-        {
-          status: In(['ON_GOING']),
-          scholarship_ends_at: LessThanOrEqual(new Date())
-        },
-        {
-          status: In(['EXTENDED']),
-          extension_ends_at: LessThanOrEqual(new Date())
-        }
-      ]
-    })
+  async findAllEndingOn(
+    referenceDay: string = todayAsCalendarDay()
+  ): Promise<Scholarship[]> {
+    return await this.scholarshipRepository
+      .createQueryBuilder('scholarship')
+      .leftJoinAndSelect('scholarship.agency', 'agency')
+      .leftJoinAndSelect('scholarship.enrollment', 'enrollment')
+      .leftJoinAndSelect('enrollment.student', 'student')
+      .leftJoinAndSelect('enrollment.advisor', 'advisor')
+      .where(`${effectiveEndSql()} = CAST(:today AS date)`)
+      .setParameter('today', referenceDay)
+      .getMany()
   }
 
   private async countAllocatedSlots(params: {
@@ -229,9 +194,8 @@ export class ScholarshipService {
     const query = this.scholarshipRepository
       .createQueryBuilder('scholarship')
       .innerJoin('scholarship.enrollment', 'enrollment')
-      .where('scholarship.status IN (:...statuses)', {
-        statuses: ACTIVE_SCHOLARSHIP_STATUSES
-      })
+      .where(occupiesSlotSql())
+      .setParameter('today', todayAsCalendarDay())
       .andWhere('enrollment.enrollment_program = :program', {
         program: params.program
       })
@@ -261,10 +225,10 @@ export class ScholarshipService {
     enrollmentId: number
   ): Promise<void> {
     const activeScholarships = await this.scholarshipRepository.count({
-      where: {
+      where: occupiesSlotWhere().map((clause) => ({
         enrollment_id: enrollmentId,
-        status: In(ACTIVE_SCHOLARSHIP_STATUSES)
-      }
+        ...clause
+      }))
     })
 
     if (activeScholarships === 0) return
@@ -382,9 +346,13 @@ export class ScholarshipService {
         throw new BadRequestException(isValidEndDate.errorMessage)
       }
 
-      const status = dto.status || 'ON_GOING'
+      const willOccupySlot = occupiesSlot({
+        scholarship_starts_at: dto.scholarship_starts_at,
+        scholarship_ends_at: dto.scholarship_ends_at,
+        extension_ends_at: dto.extension_ends_at
+      })
 
-      if (ACTIVE_SCHOLARSHIP_STATUSES.includes(status)) {
+      if (willOccupySlot) {
         await this.assertEnrollmentHasNoActiveScholarship(enrollment.id)
 
         await this.assertScholarshipFitsInAvailableSlots({
@@ -401,7 +369,6 @@ export class ScholarshipService {
         scholarship_starts_at: dto.scholarship_starts_at,
         scholarship_ends_at: dto.scholarship_ends_at,
         extension_ends_at: dto.extension_ends_at,
-        status: status,
         salary: dto.salary
       })
 
@@ -503,9 +470,20 @@ export class ScholarshipService {
         throw new BadRequestException(isValidExtensionDate.errorMessage)
       }
 
-      const nextStatus = dto.status || scholarship.status
+      const nextExtensionEndsAt =
+        dto.extension_ends_at ?? scholarship.extension_ends_at
+      const nextStartsAt =
+        dto.scholarship_starts_at || scholarship.scholarship_starts_at
+      const nextEndsAt =
+        dto.scholarship_ends_at || scholarship.scholarship_ends_at
 
-      if (ACTIVE_SCHOLARSHIP_STATUSES.includes(nextStatus)) {
+      const willOccupySlot = occupiesSlot({
+        scholarship_starts_at: nextStartsAt,
+        scholarship_ends_at: nextEndsAt,
+        extension_ends_at: nextExtensionEndsAt
+      })
+
+      if (willOccupySlot) {
         const nextAgencyId = dto.agency_id || scholarship.agency_id
         const nextAllocationId = dto.allocation_id || scholarship.allocation_id
 
@@ -527,14 +505,11 @@ export class ScholarshipService {
       const updatedScholarship = await this.scholarshipRepository.save({
         id: scholarship.id,
         salary: dto.salary,
-        extension_ends_at: dto.extension_ends_at,
-        status: dto.status || scholarship.status,
+        extension_ends_at: nextExtensionEndsAt,
         agency_id: dto.agency_id || scholarship.agency_id,
         allocation_id: dto.allocation_id || scholarship.allocation_id,
-        scholarship_starts_at:
-          dto.scholarship_starts_at || scholarship.scholarship_starts_at,
-        scholarship_ends_at:
-          dto.scholarship_ends_at || scholarship.scholarship_ends_at
+        scholarship_starts_at: nextStartsAt,
+        scholarship_ends_at: nextEndsAt
       })
 
       return updatedScholarship
@@ -566,26 +541,6 @@ export class ScholarshipService {
     await this.scholarshipRepository.query(
       `ALTER SEQUENCE scholarship_id_seq RESTART WITH 1`
     )
-  }
-
-  async finishScholarship(id: number): Promise<void> {
-    try {
-      await this.scholarshipRepository.update(id, { status: 'FINISHED' })
-    } catch (error) {
-      throw new InternalServerErrorException(
-        constants.exceptionMessages.scholarship.FINISH_FAILED
-      )
-    }
-  }
-
-  async extendScholarship(id: number): Promise<void> {
-    try {
-      await this.scholarshipRepository.update(id, { status: 'EXTENDED' })
-    } catch (error) {
-      throw new InternalServerErrorException(
-        constants.exceptionMessages.scholarship.EXTEND_FAILED
-      )
-    }
   }
 
   async countScholarshipsGroupingByCourseAndYear() {
@@ -642,9 +597,8 @@ export class ScholarshipService {
         .createQueryBuilder('scholarship')
         .innerJoin('scholarship.agency', 'agency')
         .innerJoin('scholarship.enrollment', 'enrollment')
-        .where('scholarship.status IN (:...statuses)', {
-          statuses: ['ON_GOING', 'EXTENDED']
-        })
+        .where(scholarshipStatusPredicateSql(ScholarshipStatusEnum.ON_GOING))
+        .setParameter('today', todayAsCalendarDay())
         .andWhere('enrollment.enrollment_program = :course', {
           course: programName
         })
@@ -673,9 +627,8 @@ export class ScholarshipService {
         .createQueryBuilder('scholarship')
         .innerJoin('scholarship.agency', 'agency')
         .innerJoin('scholarship.enrollment', 'enrollment')
-        .where('scholarship.status IN (:...statuses)', {
-          statuses: ['FINISHED']
-        })
+        .where(scholarshipStatusPredicateSql(ScholarshipStatusEnum.FINISHED))
+        .setParameter('today', todayAsCalendarDay())
         .andWhere('enrollment.enrollment_program = :course', {
           course: programName
         })
@@ -702,11 +655,12 @@ export class ScholarshipService {
         .createQueryBuilder('scholarship')
         .innerJoin('scholarship.agency', 'agency')
         .where('agency.name = :name', { name: agencyName })
+        .setParameter('today', todayAsCalendarDay())
         .select([
-          'scholarship.status as status',
+          `${derivedStatusSql()} as status`,
           'COUNT(scholarship.id) as count'
         ])
-        .groupBy('scholarship.status')
+        .groupBy(derivedStatusSql())
         .getRawMany()
 
       return result
@@ -729,14 +683,15 @@ export class ScholarshipService {
           searchEnd: dto.end_period
         })
 
+        .setParameter('today', todayAsCalendarDay())
         .select([
           `agency.name AS agency_name`,
-          'scholarship.status AS status',
+          `${derivedStatusSql()} AS status`,
           `SUM(CASE WHEN enrollment.enrollment_program = 'MESTRADO' THEN 1 ELSE 0 END) AS masters_count`,
           `SUM(CASE WHEN enrollment.enrollment_program = 'DOUTORADO' THEN 1 ELSE 0 END) AS phd_count`
         ])
         .groupBy(`agency.name`)
-        .addGroupBy('scholarship.status')
+        .addGroupBy(derivedStatusSql())
 
       query.andWhere(
         'COALESCE(scholarship.extension_ends_at, scholarship.scholarship_ends_at) >= :searchStart',
@@ -770,14 +725,14 @@ export class ScholarshipService {
         .select('DISTINCT student.email', 'email')
 
       if (filters?.scholarshipStatus && filters?.scholarshipStatus !== 'ALL') {
-        if (filters?.scholarshipStatus === 'ON_GOING') {
-          query.andWhere('scholarship.status IN (:...statuses)', {
-            statuses: ['ON_GOING', 'EXTENDED']
-          })
-        } else {
-          query.andWhere('scholarship.status LIKE :status', {
-            status: `%${filters.scholarshipStatus}%`
-          })
+        const statusPredicate = scholarshipStatusPredicateSql(
+          filters.scholarshipStatus
+        )
+
+        if (statusPredicate) {
+          query
+            .andWhere(statusPredicate)
+            .setParameter('today', todayAsCalendarDay())
         }
       }
 
@@ -823,7 +778,7 @@ export class ScholarshipService {
         'scholarship.id',
         'scholarship.scholarship_starts_at',
         'scholarship.scholarship_ends_at',
-        'scholarship.status',
+        'scholarship.extension_ends_at',
         'student.id',
         'student.name',
         'student.tax_id',

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  finishedScholarship,
   makeAgency,
   makeScholarship,
   makeScholarshipsForProgram
@@ -25,7 +26,7 @@ describe('AgencyMapper.detailed', () => {
 
   it('quando a bolsa já foi finalizada, não a conta como vaga alocada', () => {
     const agency = makeAgency({
-      scholarships: [makeScholarship(), makeScholarship({ status: 'FINISHED' })]
+      scholarships: [makeScholarship(), makeScholarship(finishedScholarship())]
     })
 
     expect(
@@ -48,8 +49,8 @@ describe('AgencyMapper.detailed', () => {
     const agency = makeAgency({
       scholarships: [
         makeScholarship(),
-        makeScholarship({ status: 'FINISHED' }),
-        makeScholarship({ status: 'FINISHED', enrollment_id: 2 })
+        makeScholarship(finishedScholarship()),
+        makeScholarship({ ...finishedScholarship(), enrollment_id: 2 })
       ]
     })
 

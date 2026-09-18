@@ -1,8 +1,7 @@
 export const StatusEnum = {
   ALL: 'Todos',
-  ACTIVE: 'Ativo',
-  INACTIVE: 'Inativo',
-  FINISHED: 'Finalizado',
+  INACTIVE: 'Não iniciada',
   ON_GOING: 'Em andamento',
-  EXTENDED: 'Em andamento (prorrogado)'
+  EXTENDED: 'Em andamento (prorrogado)',
+  FINISHED: 'Finalizado'
 }

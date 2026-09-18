@@ -38,7 +38,7 @@ describe('ScholarshipMapper.forFilter', () => {
   ])(
     'quando a bolsa tem um status conhecido, traduz o status para o rótulo exibido (%s)',
     (status, label) => {
-      expect(ScholarshipMapper.forFilter(makeScholarship({ status }))).toEqual({
+      expect(ScholarshipMapper.forFilter({ status })).toEqual({
         key: status,
         value: label
       })
@@ -46,12 +46,8 @@ describe('ScholarshipMapper.forFilter', () => {
   )
 
   it('quando a bolsa está prorrogada, distingue o rótulo do de em andamento', () => {
-    const onGoing = ScholarshipMapper.forFilter(
-      makeScholarship({ status: 'ON_GOING' })
-    )
-    const extended = ScholarshipMapper.forFilter(
-      makeScholarship({ status: 'EXTENDED' })
-    )
+    const onGoing = ScholarshipMapper.forFilter({ status: 'ON_GOING' })
+    const extended = ScholarshipMapper.forFilter({ status: 'EXTENDED' })
 
     expect(extended.value).not.toBe(onGoing.value)
     expect(extended.value).toContain(onGoing.value)
@@ -339,7 +335,6 @@ describe('ScholarshipMapper.countAllScholarshipsGroupingBetweenDates', () => {
       scholarshipsTotal: 0,
       totalMasters: 0,
       totalPhd: 0,
-      activeCount: { masters: 0, phd: 0 },
       inactiveCount: { masters: 0, phd: 0 },
       finishedCount: { masters: 0, phd: 0 },
       onGoingCount: { masters: 0, phd: 0 },
@@ -374,7 +369,6 @@ describe('ScholarshipMapper.countAllScholarshipsGroupingBetweenDates', () => {
   })
 
   it.each([
-    ['ACTIVE', 'activeCount'],
     ['INACTIVE', 'inactiveCount'],
     ['FINISHED', 'finishedCount'],
     ['ON_GOING', 'onGoingCount'],

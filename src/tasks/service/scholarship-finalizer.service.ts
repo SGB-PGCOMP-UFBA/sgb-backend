@@ -14,32 +14,19 @@ export class ScholarShipFinalizerService {
   private readonly logger = new Logger(ScholarShipFinalizerService.name)
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
-  async notifyAlmostEndedScholarships() {
-    this.logger.log('Starting task to finalize scholarships that ends today.')
+  async notifyEndedScholarships() {
+    this.logger.log('Starting task to notify scholarships that end today.')
 
-    const [scholarships] = await Promise.all([
-      this.scholarshipService.findAllEndingToday()
-    ])
+    const scholarships = await this.scholarshipService.findAllEndingOn()
 
-    this.logger.log(
-      `[${scholarships.length}] scholarships found to be finalized today.`
-    )
+    this.logger.log(`[${scholarships.length}] scholarships found ending today.`)
 
     for (const scholarship of scholarships) {
-      if (
-        scholarship.status === 'ON_GOING' &&
-        !!scholarship.extension_ends_at
-      ) {
-        await this.scholarshipService.extendScholarship(scholarship.id)
-        continue
-      }
-
-      await this.scholarshipService.finishScholarship(scholarship.id)
       await this.notifyStudentAndAdvisor(scholarship)
-      this.logger.log(`Scholarship [${scholarship.id}] finished!`)
+      this.logger.log(`Scholarship [${scholarship.id}] ended!`)
     }
 
-    this.logger.log('Finish task to finalize scholarships that ends today.')
+    this.logger.log('Finish task to notify scholarships that end today.')
   }
 
   private async notifyStudentAndAdvisor(scholarship: Scholarship) {
@@ -47,15 +34,15 @@ export class ScholarShipFinalizerService {
       this.embedNotificationService.create({
         owner_id: scholarship.enrollment.student.id,
         owner_type: scholarship.enrollment.student.role,
-        title: `Sua bolsa ${scholarship.agency.name} expirou!`,
+        title: `Sua bolsa ${scholarship.agency.name} irá expirar hoje!`,
         description: `Procure seu orientador ou alguém da comissão de bolsas para mais informações.`
       }),
 
       this.embedNotificationService.create({
         owner_id: scholarship.enrollment.advisor.id,
         owner_type: scholarship.enrollment.advisor.role,
-        title: `A bolsa de ${scholarship.enrollment.student.name} expirou!`,
-        description: `A bolsa ${scholarship.agency.name} de ${scholarship.enrollment.enrollment_program} do estudante foi finalizada.`
+        title: `A bolsa de ${scholarship.enrollment.student.name} irá expirar hoje!`,
+        description: `A bolsa ${scholarship.agency.name} de ${scholarship.enrollment.enrollment_program} do estudante irá expirar hoje.`
       })
     ]
 

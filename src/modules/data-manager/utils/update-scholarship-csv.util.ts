@@ -4,6 +4,7 @@ import { Student } from '@/modules/student/entities/student.entity'
 import { StudentService } from '@/modules/student/service/student.service'
 import { Repository, UpdateResult } from 'typeorm'
 import { ListUpdatesFromImport } from '@/modules/data-manager/dto/list-updates.dto'
+import { isSameCalendarDay } from '@/modules/scholarship/utils/scholarship-status.util'
 
 export interface ScholarshipRow {
   Nome: string
@@ -61,26 +62,11 @@ export class UpdateScholarshipCsvUtil {
     return 'OUTRAS'
   }
 
-  /**
-   * Vigência de bolsa é dia de calendário, não instante. A planilha produz
-   * datas em horário local e a coluna `date` do Postgres chega como string
-   * 'YYYY-MM-DD'; comparar com `getTime()` fazia toda linha parecer alterada
-   * em qualquer servidor fora do UTC.
-   */
-  private static toCalendarDay(value: Date | string): string {
-    if (typeof value === 'string') return value.slice(0, 10)
-
-    return format(value, 'yyyy-MM-dd')
-  }
-
   static isSameCalendarDay(
     fromDatabase: Date | string,
     fromSpreadsheet: Date | string
   ): boolean {
-    return (
-      UpdateScholarshipCsvUtil.toCalendarDay(fromDatabase) ===
-      UpdateScholarshipCsvUtil.toCalendarDay(fromSpreadsheet)
-    )
+    return isSameCalendarDay(fromDatabase, fromSpreadsheet)
   }
 
   private static processScholarshipPeriod(period: string): {
@@ -144,23 +130,6 @@ export class UpdateScholarshipCsvUtil {
     return processedData
   }
 
-  // ACTIVE, INACTIVE, FINISHED, ON_GOING, EXTENDED
-  static defineStatus(
-    scholarshipStart: Date,
-    scholarshipEnd: Date,
-    currentStatus = ''
-  ): string {
-    const todayDate = new Date()
-
-    if (todayDate.getTime() > scholarshipEnd.getTime()) return 'FINISHED'
-    if (todayDate.getTime() > scholarshipStart.getTime()) {
-      if (currentStatus !== 'ON_GOING' && currentStatus !== 'EXTENDED')
-        return 'ON_GOING'
-      else return currentStatus
-    }
-    return 'INACTIVE'
-  }
-
   static discriminateScholarshipMatchesForUpdateForInsert(
     dataObject: ProcessedScholarship[],
     scholarshipMatches: Partial<Scholarship>[],
@@ -175,8 +144,6 @@ export class UpdateScholarshipCsvUtil {
     scholarshipMatches.forEach((match, index) => {
       if (!match) return newScholarshipsToAprove.push(dataObject[index])
 
-      let startDate = new Date(match.scholarship_starts_at)
-      let endDate = new Date(match.scholarship_ends_at)
       const taxIdEquality =
         match.enrollment.student.tax_id === dataObject[index].student.tax_id
       const startDateEquality = UpdateScholarshipCsvUtil.isSameCalendarDay(
@@ -215,24 +182,12 @@ export class UpdateScholarshipCsvUtil {
       if (!startDateEquality) {
         objScholarshipUpdate['scholarship_starts_at'] =
           dataObject[index].startsAt
-        startDate = dataObject[index].startsAt
         listOfUpdatedFields.push('Início da Bolsa')
       }
 
       if (!endDateEquality) {
         objScholarshipUpdate['scholarship_ends_at'] = dataObject[index].endsAt
-        endDate = dataObject[index].endsAt
         listOfUpdatedFields.push('Final da Bolsa')
-      }
-
-      const scholarshipStatus = this.defineStatus(
-        startDate,
-        endDate,
-        match.status
-      )
-      if (scholarshipStatus !== match.status) {
-        objScholarshipUpdate['status'] = scholarshipStatus
-        listOfUpdatedFields.push('Status da Bolsa')
       }
 
       scholarshipsToUpdatePromisses.push(

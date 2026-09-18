@@ -5,9 +5,10 @@ import { StudentMapper } from '@/modules/student/mapper/student.mapper'
 import { AdvisorMapper } from '@/modules/advisor/mapper/advisor.mapper'
 import { AllocationMapper } from '@/modules/allocation/mapper/allocation.mapper'
 import { StatusEnum } from '@/core/enums/StatusEnum'
+import { deriveScholarshipStatus } from '@/modules/scholarship/utils/scholarship-status.util'
 
 export class ScholarshipMapper {
-  static forFilter(scholarship: Scholarship) {
+  static forFilter(scholarship: { status: string }) {
     return {
       key: scholarship.status,
       value: StatusEnum[scholarship.status]
@@ -20,7 +21,7 @@ export class ScholarshipMapper {
       agency_id: scholarship.agency_id,
       allocation_id: scholarship.allocation_id,
       enrollment_id: scholarship.enrollment_id,
-      status: scholarship.status,
+      status: deriveScholarshipStatus(scholarship),
       created_at: scholarship.created_at,
       updated_at: scholarship.updated_at
     }
@@ -57,7 +58,7 @@ export class ScholarshipMapper {
 
     return {
       id: scholarship.id,
-      status: scholarship.status,
+      status: deriveScholarshipStatus(scholarship),
       scholarship_starts_at: scholarship.scholarship_starts_at,
       scholarship_ends_at: scholarship.scholarship_ends_at,
       extension_ends_at: scholarship.extension_ends_at,
@@ -83,7 +84,7 @@ export class ScholarshipMapper {
 
     return {
       id: scholarship.id,
-      status: scholarship.status,
+      status: deriveScholarshipStatus(scholarship),
       scholarship_starts_at: scholarship.scholarship_starts_at,
       scholarship_ends_at: scholarship.scholarship_ends_at,
       extension_ends_at: scholarship.extension_ends_at,
@@ -148,7 +149,6 @@ export class ScholarshipMapper {
       scholarshipsTotal: number
       totalMasters: number
       totalPhd: number
-      activeCount: DegreeCount
       inactiveCount: DegreeCount
       finishedCount: DegreeCount
       onGoingCount: DegreeCount
@@ -161,7 +161,6 @@ export class ScholarshipMapper {
     }
 
     const statusKeyMap: Record<string, string> = {
-      ACTIVE: 'activeCount',
       INACTIVE: 'inactiveCount',
       FINISHED: 'finishedCount',
       ON_GOING: 'onGoingCount',
@@ -178,7 +177,6 @@ export class ScholarshipMapper {
         scholarshipsTotal: 0,
         totalMasters: 0,
         totalPhd: 0,
-        activeCount: { masters: 0, phd: 0 },
         inactiveCount: { masters: 0, phd: 0 },
         finishedCount: { masters: 0, phd: 0 },
         onGoingCount: { masters: 0, phd: 0 },
@@ -188,7 +186,7 @@ export class ScholarshipMapper {
 
     const groupedData = counts.reduce((acc: AgencyScholarshipReport, row) => {
       const name = row.agency_name
-      const status = row.status // ACTIVE, INACTIVE, FINISHED, ON_GOING, EXTENDED
+      const status = row.status
 
       if (!acc[name]) {
         acc[name] = {
@@ -196,7 +194,6 @@ export class ScholarshipMapper {
           scholarshipsTotal: 0,
           totalMasters: 0,
           totalPhd: 0,
-          activeCount: { masters: 0, phd: 0 },
           inactiveCount: { masters: 0, phd: 0 },
           finishedCount: { masters: 0, phd: 0 },
           onGoingCount: { masters: 0, phd: 0 },

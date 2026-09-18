@@ -1,6 +1,9 @@
 import { BadRequestException } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  notStartedScholarship,
+  extendedScholarship,
+  daysFromToday,
   makeAgency,
   makeAllocation,
   makeEnrollment,
@@ -86,8 +89,7 @@ describe('ScholarshipService', () => {
         expect.objectContaining({
           agency_id: AGENCY.id,
           allocation_id: ALLOCATION.id,
-          enrollment_id: ENROLLMENT.id,
-          status: 'ON_GOING'
+          enrollment_id: ENROLLMENT.id
         })
       )
     })
@@ -154,17 +156,28 @@ describe('ScholarshipService', () => {
       expect(repository.save).toHaveBeenCalled()
     })
 
-    it('quando a bolsa é cadastrada já finalizada, não valida cota e salva', async () => {
+    it('quando a bolsa é cadastrada com o período já encerrado, não valida cota e salva', async () => {
       withAllocatedSlots(13)
 
       await service.create({
         ...(VALID_DTO as object),
-        status: 'FINISHED'
+        scholarship_starts_at: daysFromToday(-365),
+        scholarship_ends_at: daysFromToday(-1)
       } as never)
 
-      expect(repository.save).toHaveBeenCalledWith(
-        expect.objectContaining({ status: 'FINISHED' })
-      )
+      expect(repository.save).toHaveBeenCalled()
+    })
+
+    it('quando a bolsa é cadastrada para começar no futuro, valida cota mesmo sem ter começado', async () => {
+      withAllocatedSlots(13)
+
+      await expect(
+        service.create({
+          ...(VALID_DTO as object),
+          ...notStartedScholarship()
+        } as never)
+      ).rejects.toThrow(/já alocada/)
+      expect(repository.save).not.toHaveBeenCalled()
     })
 
     it('quando já existe bolsa com os mesmos dados, recusa a criação', async () => {
@@ -248,17 +261,33 @@ describe('ScholarshipService', () => {
       expect(repository.save).toHaveBeenCalled()
     })
 
-    it('quando a bolsa é finalizada, não valida cota e salva', async () => {
+    it('quando a bolsa passa a ter o período encerrado, não valida cota e salva', async () => {
       withAllocatedSlots(13)
 
       await service.update(900, {
         ...(UPDATE_DTO as object),
-        status: 'FINISHED'
+        scholarship_starts_at: daysFromToday(-365),
+        scholarship_ends_at: daysFromToday(-1)
       } as never)
 
       expect(agencyService.findOneById).not.toHaveBeenCalled()
+      expect(repository.save).toHaveBeenCalled()
+    })
+
+    it('quando o PATCH não informa a prorrogação, preserva a data que já estava gravada', async () => {
+      const extended = makeScholarship({ id: 900, ...extendedScholarship() })
+      repository.findOneBy
+        .mockReset()
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(extended)
+      withAllocatedSlots(0)
+
+      await service.update(900, UPDATE_DTO)
+
       expect(repository.save).toHaveBeenCalledWith(
-        expect.objectContaining({ status: 'FINISHED' })
+        expect.objectContaining({
+          extension_ends_at: extended.extension_ends_at
+        })
       )
     })
   })

@@ -353,7 +353,6 @@ describe('DataManagerCsvService', () => {
       expect(scholarshipService.create).toHaveBeenCalledWith({
         student_email: 'maria@ufba.br',
         enrollment_number: '2026123456',
-        status: 'ON_GOING',
         agency_name: 'CAPES',
         allocation_name: 'COTA',
         scholarship_starts_at: '2026-03-01',
@@ -383,7 +382,6 @@ describe('DataManagerCsvService', () => {
       ['alocacao'],
       ['data_inicio_bolsa'],
       ['data_fim_bolsa'],
-      ['status_da_bolsa'],
       ['matricula'],
       ['email_do_estudante']
     ])(
