@@ -7,9 +7,8 @@ import {
   NotFoundException
 } from '@nestjs/common'
 import { CreatePendingScholarshipDto } from '@/pending-scholarship/dtos/create-pending-scholarship.dto'
-import { InjectRepository } from '@nestjs/typeorm'
 import { PendingScholarship } from '@/pending-scholarship/entities/pending-scholarship.entity'
-import { Repository } from 'typeorm'
+import { PendingScholarshipRepository } from '@/pending-scholarship/repositories/pending-scholarship.repository'
 import { SearchPendingScholarshipDto } from '@/pending-scholarship/dtos/search-pending-scholarship.dto'
 import { StudentService } from '@/student/student.service'
 import { constants } from '@/common/utils/constants'
@@ -31,8 +30,7 @@ export class PendingScholarshipService {
   private readonly logger = new Logger(PendingScholarshipService.name)
 
   constructor(
-    @InjectRepository(PendingScholarship)
-    private readonly pendingScholarshipRepository: Repository<PendingScholarship>,
+    private readonly pendingScholarshipRepository: PendingScholarshipRepository,
     private readonly studentService: StudentService,
     private readonly advisorService: AdvisorService,
     private readonly enrollmentService: EnrollmentService,
@@ -49,36 +47,25 @@ export class PendingScholarshipService {
 
     if (existentPendingScholarship) return null
 
-    const newPendingScholarship = this.pendingScholarshipRepository.create(dto)
-    const pendingScholarship = await this.pendingScholarshipRepository.save(
-      newPendingScholarship
-    )
-    return pendingScholarship
+    return await this.pendingScholarshipRepository.create(dto)
   }
 
   async findAll(): Promise<PendingScholarship[]> {
-    return await this.pendingScholarshipRepository.find()
+    return await this.pendingScholarshipRepository.findAll()
   }
 
   async findOne(id: number) {
-    return await this.pendingScholarshipRepository.findOne({
-      where: { id }
-    })
+    return await this.pendingScholarshipRepository.findById(id)
   }
 
   async searchOne(dto: SearchPendingScholarshipDto) {
-    return await this.pendingScholarshipRepository.findOne({
-      where: {
-        ...dto,
-        scholarship_starts_at: new Date(dto.scholarship_starts_at),
-        scholarship_ends_at: new Date(dto.scholarship_ends_at)
-      }
-    })
+    return await this.pendingScholarshipRepository.findBySearchCriteria(dto)
   }
 
   async delete(id: number) {
-    const pendingScholarhsip =
-      await this.pendingScholarshipRepository.findOneBy({ id })
+    const pendingScholarhsip = await this.pendingScholarshipRepository.findById(
+      id
+    )
     if (!pendingScholarhsip)
       throw new NotFoundException(
         `Can't delete data: ${constants.exceptionMessages.pendingScholarship.NOT_FOUND}`
@@ -162,7 +149,7 @@ export class PendingScholarshipService {
       }
 
       await this.scholarshipService.create(createScholarshipDto)
-      await this.pendingScholarshipRepository.delete(pendingScholarhsip.id)
+      await this.pendingScholarshipRepository.deleteById(pendingScholarhsip.id)
 
       if (sendEmail)
         await this.emailService.sendEmailStudentAutomaticallyRegistered(

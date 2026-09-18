@@ -1,6 +1,4 @@
-import { Repository } from 'typeorm'
 import { Injectable, Logger } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
 import {
   BadRequestException,
   ConflictException,
@@ -10,43 +8,35 @@ import { AdvisorService } from '@/advisor/advisor.service'
 import { StudentService } from '@/student/student.service'
 import { Enrollment } from '@/enrollment/entities/enrollment.entity'
 import { CreateEnrollmentDto } from '@/enrollment/dtos/create-enrollment.dto'
+import {
+  EnrollmentProgramRow,
+  EnrollmentRepository
+} from '@/enrollment/repositories/enrollment.repository'
 import { constants } from '@/common/utils/constants'
 import { UpdateEnrollmentDto } from '@/enrollment/dtos/update-enrollment.dto'
-import {
-  occupiesSlotSql,
-  todayAsCalendarDay
-} from '@/scholarship/utils/scholarship-status.util'
 
 @Injectable()
 export class EnrollmentService {
   private readonly logger = new Logger(EnrollmentService.name)
 
   constructor(
-    @InjectRepository(Enrollment)
-    private enrollmentRepository: Repository<Enrollment>,
+    private readonly enrollmentRepository: EnrollmentRepository,
     private advisorService: AdvisorService,
     private studentService: StudentService
   ) {}
 
-  async findAllForFilter(): Promise<Enrollment[]> {
-    const distinctEnrollmentPrograms = await this.enrollmentRepository
-      .createQueryBuilder('enrollment')
-      .select('enrollment.enrollment_program', 'enrollment_program')
-      .distinct(true)
-      .orderBy('enrollment.enrollment_program', 'ASC')
-      .getRawMany()
-
-    return distinctEnrollmentPrograms
+  async findAllForFilter(): Promise<EnrollmentProgramRow[]> {
+    return await this.enrollmentRepository.findDistinctPrograms()
   }
 
   async findOneByIdAndStudentId(
     id: number,
     student_id: number
   ): Promise<Enrollment> {
-    const enrollment = await this.enrollmentRepository.findOneBy({
-      id: id,
-      student_id: student_id
-    })
+    const enrollment = await this.enrollmentRepository.findByIdAndStudentId(
+      id,
+      student_id
+    )
 
     if (!enrollment) {
       throw new NotFoundException(
@@ -63,10 +53,10 @@ export class EnrollmentService {
   ): Promise<Enrollment> {
     const student = await this.studentService.findByEmail(student_email)
 
-    const enrollment = await this.enrollmentRepository.findOneBy({
-      student_id: student.id,
+    const enrollment = await this.enrollmentRepository.findByStudentIdAndNumber(
+      student.id,
       enrollment_number
-    })
+    )
 
     if (!enrollment) {
       throw new NotFoundException(
@@ -78,38 +68,18 @@ export class EnrollmentService {
   }
 
   async verifyExistentByNumber(enrollment_number: string): Promise<Enrollment> {
-    const query = this.enrollmentRepository
-      .createQueryBuilder('enrollment')
-      .addSelect([
-        'scholarships.id',
-        'scholarships.scholarship_starts_at',
-        'scholarships.scholarship_ends_at',
-        'scholarships.extension_ends_at',
-        'student.email',
-        'student.name'
-      ])
-      .leftJoin(
-        'enrollment.scholarships',
-        'scholarships',
-        occupiesSlotSql('scholarships'),
-        { today: todayAsCalendarDay() }
-      )
-      .leftJoin('enrollment.student', 'student')
-      .where(`enrollment.enrollment_number = :enrollmentNumber`, {
-        enrollmentNumber: enrollment_number
-      })
-
-    const enrollment = await query.getOne()
-    return enrollment
+    return await this.enrollmentRepository.findByNumberWithActiveScholarships(
+      enrollment_number
+    )
   }
 
   async create(dto: CreateEnrollmentDto): Promise<Enrollment> {
     this.logger.log(constants.exceptionMessages.enrollment.CREATION_STARTED)
 
     try {
-      const existentEnollment = await this.enrollmentRepository.findOneBy({
-        enrollment_number: dto.enrollment_number
-      })
+      const existentEnollment = await this.enrollmentRepository.findByNumber(
+        dto.enrollment_number
+      )
       if (existentEnollment)
         throw new ConflictException(
           `Matrícula com código ${dto.enrollment_number} já existente no sistema`
@@ -121,7 +91,7 @@ export class EnrollmentService {
 
       const student = await this.studentService.findByEmail(dto.student_email)
 
-      const newEnrollment = this.enrollmentRepository.create({
+      const newEnrollment = await this.enrollmentRepository.create({
         student_id: student.id,
         advisor_id: advisor.id,
         enrollment_date: dto.enrollment_date,
@@ -129,8 +99,6 @@ export class EnrollmentService {
         enrollment_program: dto.enrollment_program,
         defense_prediction_date: dto.defense_prediction_date
       })
-
-      await this.enrollmentRepository.save(newEnrollment)
 
       this.logger.log(constants.exceptionMessages.enrollment.CREATION_COMPLETED)
 
@@ -159,10 +127,10 @@ export class EnrollmentService {
 
       const student = await this.studentService.findByEmail(dto.student_email)
 
-      const enrollment = await this.enrollmentRepository.findOneBy({
-        id: id,
-        student_id: student.id
-      })
+      const enrollment = await this.enrollmentRepository.findByIdAndStudentId(
+        id,
+        student.id
+      )
 
       if (!enrollment) {
         throw new NotFoundException(
@@ -170,8 +138,7 @@ export class EnrollmentService {
         )
       }
 
-      const updatedEnrollment = await this.enrollmentRepository.save({
-        id: enrollment.id,
+      return await this.enrollmentRepository.update(enrollment.id, {
         advisor_id: advisor.id,
         enrollment_date: dto.enrollment_date || enrollment.enrollment_date,
         enrollment_program:
@@ -181,8 +148,6 @@ export class EnrollmentService {
         defense_prediction_date:
           dto.defense_prediction_date || enrollment.defense_prediction_date
       })
-
-      return updatedEnrollment
     } catch (error) {
       throw new BadRequestException(
         constants.exceptionMessages.enrollment.UPDATE_FAILED
@@ -191,8 +156,8 @@ export class EnrollmentService {
   }
 
   async delete(id: number): Promise<boolean> {
-    const removed = await this.enrollmentRepository.delete(id)
-    if (removed.affected === 1) {
+    const affected = await this.enrollmentRepository.deleteById(id)
+    if (affected === 1) {
       return true
     }
 
@@ -203,9 +168,6 @@ export class EnrollmentService {
 
   async deleteAll() {
     this.logger.warn(constants.exceptionMessages.enrollment.DELETE_ALL_STARTED)
-    await this.enrollmentRepository.createQueryBuilder().delete().execute()
-    await this.enrollmentRepository.query(
-      `ALTER SEQUENCE enrollment_id_seq RESTART WITH 1`
-    )
+    await this.enrollmentRepository.deleteAllAndResetSequence()
   }
 }

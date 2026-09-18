@@ -1,11 +1,12 @@
 import { Enrollment } from '@/enrollment/entities/enrollment.entity'
+import { EnrollmentProgramRow } from '@/enrollment/repositories/enrollment.repository'
 import { AdvisorMapper } from '@/advisor/advisor.mapper'
 import { StudentMapper } from '@/student/student.mapper'
 import { ScholarshipMapper } from '@/scholarship/scholarship.mapper'
 import { ProgramEnum } from '@/common/enums/program.enum'
 
 export class EnrollmentMapper {
-  static forFilter(enrollment: Enrollment) {
+  static forFilter(enrollment: EnrollmentProgramRow) {
     return {
       key: enrollment.enrollment_program,
       value: ProgramEnum[enrollment.enrollment_program]

@@ -12,9 +12,20 @@ import {
   makeScholarship,
   makeStudent
 } from '@/common/testing/factories'
-import { createRepositoryMock } from '@/common/testing/repository.mock'
 import { Scholarship } from '@/scholarship/entities/scholarship.entity'
+import { PendingScholarshipRepository } from '@/pending-scholarship/repositories/pending-scholarship.repository'
 import { PendingScholarshipService } from './pending-scholarship.service'
+
+function createPendingScholarshipRepositoryMock() {
+  return {
+    findAll: vi.fn().mockResolvedValue([]),
+    findById: vi.fn().mockResolvedValue(null),
+    findBySearchCriteria: vi.fn().mockResolvedValue(null),
+    create: vi.fn(async (data: unknown) => data),
+    remove: vi.fn().mockResolvedValue(undefined),
+    deleteById: vi.fn().mockResolvedValue(1)
+  } satisfies Record<keyof PendingScholarshipRepository, unknown>
+}
 
 const PENDING = makePendingScholarship({
   id: 55,
@@ -47,7 +58,7 @@ const NEW_ENROLLMENT = makeEnrollment({ id: 90 })
 const DURANTE_A_BOLSA = new Date('2026-09-01T00:00:00.000Z')
 
 describe('PendingScholarshipService', () => {
-  let repository: ReturnType<typeof createRepositoryMock>
+  let repository: ReturnType<typeof createPendingScholarshipRepositoryMock>
   let studentService: any
   let advisorService: any
   let enrollmentService: any
@@ -63,9 +74,7 @@ describe('PendingScholarshipService', () => {
     vi.useFakeTimers()
     vi.setSystemTime(DURANTE_A_BOLSA)
 
-    repository = createRepositoryMock({
-      remove: vi.fn().mockResolvedValue(undefined)
-    })
+    repository = createPendingScholarshipRepositoryMock()
     studentService = {
       create: vi.fn().mockResolvedValue(NEW_STUDENT),
       update: vi.fn().mockResolvedValue(NEW_STUDENT)
@@ -84,7 +93,7 @@ describe('PendingScholarshipService', () => {
     response = { status: vi.fn().mockReturnThis(), send: vi.fn() }
 
     service = new PendingScholarshipService(
-      repository,
+      repository as unknown as PendingScholarshipRepository,
       studentService,
       advisorService,
       enrollmentService,
@@ -123,45 +132,41 @@ describe('PendingScholarshipService', () => {
     it('quando ainda não existe pendência igual, cadastra a bolsa pendente', async () => {
       await service.create(CREATE_DTO)
 
-      expect(repository.save).toHaveBeenCalledWith(
+      expect(repository.create).toHaveBeenCalledWith(
         expect.objectContaining({ tax_id: PENDING.tax_id, agency: 'CAPES' })
       )
     })
 
     it('quando já existe pendência com os mesmos dados, não duplica e devolve null', async () => {
-      repository.findOne.mockResolvedValue(PENDING)
+      repository.findBySearchCriteria.mockResolvedValue(PENDING)
 
       const resultado = await service.create(CREATE_DTO)
 
       expect(resultado).toBeNull()
-      expect(repository.save).not.toHaveBeenCalled()
+      expect(repository.create).not.toHaveBeenCalled()
     })
 
-    it('quando procura a duplicata, busca pelo conjunto de dados com as datas como Date', async () => {
+    it('quando procura a duplicata, repassa o conjunto de dados ao repositório', async () => {
       await service.create(CREATE_DTO)
 
-      expect(repository.findOne).toHaveBeenCalledWith({
-        where: expect.objectContaining({
+      expect(repository.findBySearchCriteria).toHaveBeenCalledWith(
+        expect.objectContaining({
           student_name: PENDING.student_name,
           tax_id: PENDING.tax_id,
-          agency: 'CAPES',
-          scholarship_starts_at: PENDING.scholarship_starts_at,
-          scholarship_ends_at: PENDING.scholarship_ends_at
+          agency: 'CAPES'
         })
-      })
+      )
     })
   })
 
   describe('delete', () => {
     it('quando a pendência não existe, recusa apagar', async () => {
-      repository.findOneBy.mockResolvedValue(null)
-
       await expect(service.delete(1)).rejects.toBeInstanceOf(NotFoundException)
       expect(repository.remove).not.toHaveBeenCalled()
     })
 
     it('quando a pendência existe, apaga o registro', async () => {
-      repository.findOneBy.mockResolvedValue(PENDING)
+      repository.findById.mockResolvedValue(PENDING)
 
       await service.delete(PENDING.id)
 
@@ -169,7 +174,7 @@ describe('PendingScholarshipService', () => {
     })
 
     it('quando o banco falha ao remover, converte a falha em erro interno', async () => {
-      repository.findOneBy.mockResolvedValue(PENDING)
+      repository.findById.mockResolvedValue(PENDING)
       repository.remove.mockRejectedValue(new Error('violação de FK'))
 
       await expect(service.delete(PENDING.id)).rejects.toBeInstanceOf(
@@ -180,11 +185,11 @@ describe('PendingScholarshipService', () => {
 
   describe('approve — aluno novo', () => {
     beforeEach(() => {
-      repository.findOne.mockResolvedValue({ ...PENDING })
+      repository.findById.mockResolvedValue({ ...PENDING })
     })
 
     it('quando a pendência não existe, recusa aprovar informando o id', async () => {
-      repository.findOne.mockResolvedValue(null)
+      repository.findById.mockResolvedValue(null)
 
       await expect(
         service.approve(APPROVE_DTO, response as never)
@@ -245,14 +250,14 @@ describe('PendingScholarshipService', () => {
       scholarshipService.create.mockImplementation(async () => {
         ordem.push('bolsa')
       })
-      repository.delete.mockImplementation(async () => {
+      repository.deleteById.mockImplementation(async () => {
         ordem.push('apaga-pendencia')
       })
 
       await service.approve(APPROVE_DTO, response as never)
 
       expect(ordem).toEqual(['bolsa', 'apaga-pendencia'])
-      expect(repository.delete).toHaveBeenCalledWith(PENDING.id)
+      expect(repository.deleteById).toHaveBeenCalledWith(PENDING.id)
     })
 
     it('quando cria um aluno novo, responde 201 com o nome e o e-mail dele', async () => {
@@ -310,7 +315,7 @@ describe('PendingScholarshipService', () => {
 
   describe('approve — matrícula já existente', () => {
     beforeEach(() => {
-      repository.findOne.mockResolvedValue({ ...PENDING })
+      repository.findById.mockResolvedValue({ ...PENDING })
     })
 
     it('quando a matrícula já tem bolsa ativa, recusa aprovar', async () => {
@@ -322,7 +327,7 @@ describe('PendingScholarshipService', () => {
         service.approve(APPROVE_DTO, response as never)
       ).rejects.toBeInstanceOf(ConflictException)
       expect(scholarshipService.create).not.toHaveBeenCalled()
-      expect(repository.delete).not.toHaveBeenCalled()
+      expect(repository.deleteById).not.toHaveBeenCalled()
     })
 
     it('quando a matrícula já existe sem bolsa, não cria aluno nem matrícula', async () => {
@@ -390,13 +395,13 @@ describe('PendingScholarshipService', () => {
 
   describe('approve — validação da agência', () => {
     beforeEach(() => {
-      repository.findOne.mockResolvedValue({ ...PENDING })
+      repository.findById.mockResolvedValue({ ...PENDING })
     })
 
     it.each([['CAPES'], ['CNPQ'], ['FAPESB'], ['OUTRAS']])(
       'quando a agência da pendência é conhecida, cria a bolsa com ela (%s)',
       async (agency) => {
-        repository.findOne.mockResolvedValue({ ...PENDING, agency })
+        repository.findById.mockResolvedValue({ ...PENDING, agency })
 
         await service.approve(APPROVE_DTO, response as never)
 
@@ -407,7 +412,7 @@ describe('PendingScholarshipService', () => {
     )
 
     it('quando a agência é a pseudo-agência ALL, aceita e cria a bolsa mesmo não sendo agência real', async () => {
-      repository.findOne.mockResolvedValue({ ...PENDING, agency: 'ALL' })
+      repository.findById.mockResolvedValue({ ...PENDING, agency: 'ALL' })
 
       await service.approve(APPROVE_DTO, response as never)
 
@@ -419,7 +424,7 @@ describe('PendingScholarshipService', () => {
     it.each([['CAPEs'], ['capes'], ['Todas'], ['FAPESP'], ['']])(
       'quando a agência é desconhecida, recusa antes de criar qualquer registro (%s)',
       async (agency) => {
-        repository.findOne.mockResolvedValue({ ...PENDING, agency })
+        repository.findById.mockResolvedValue({ ...PENDING, agency })
 
         await expect(
           service.approve(APPROVE_DTO, response as never)
@@ -432,7 +437,7 @@ describe('PendingScholarshipService', () => {
 
   describe('approve — propagação de erro', () => {
     beforeEach(() => {
-      repository.findOne.mockResolvedValue({ ...PENDING })
+      repository.findById.mockResolvedValue({ ...PENDING })
     })
 
     it.each([
@@ -484,7 +489,7 @@ describe('PendingScholarshipService', () => {
       await expect(
         service.approve(APPROVE_DTO, response as never)
       ).rejects.toBeInstanceOf(BadRequestException)
-      expect(repository.delete).not.toHaveBeenCalled()
+      expect(repository.deleteById).not.toHaveBeenCalled()
     })
 
     it('quando a bolsa é recusada por falta de vaga, deixa aluno e matrícula criados', async () => {
@@ -521,7 +526,7 @@ describe('PendingScholarshipService', () => {
 
       expect(resultado).toBe(falhaDeBanco)
       expect(response.status).not.toHaveBeenCalled()
-      expect(repository.delete).not.toHaveBeenCalled()
+      expect(repository.deleteById).not.toHaveBeenCalled()
     })
 
     it('quando o envio do e-mail estoura, devolve o erro em vez de lançar', async () => {
@@ -533,7 +538,7 @@ describe('PendingScholarshipService', () => {
       const resultado = await service.approve(APPROVE_DTO, response as never)
 
       expect(resultado).toBe(falhaSmtp)
-      expect(repository.delete).toHaveBeenCalledWith(PENDING.id)
+      expect(repository.deleteById).toHaveBeenCalledWith(PENDING.id)
     })
   })
 })

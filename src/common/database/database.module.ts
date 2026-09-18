@@ -19,6 +19,12 @@ import { TypeOrmEmbedNotificationRepository } from '@/embed-notification/reposit
 import { Student } from '@/student/entities/student.entity'
 import { StudentRepository } from '@/student/repositories/student.repository'
 import { TypeOrmStudentRepository } from '@/student/repositories/typeorm-student.repository'
+import { Enrollment } from '@/enrollment/entities/enrollment.entity'
+import { EnrollmentRepository } from '@/enrollment/repositories/enrollment.repository'
+import { TypeOrmEnrollmentRepository } from '@/enrollment/repositories/typeorm-enrollment.repository'
+import { PendingScholarship } from '@/pending-scholarship/entities/pending-scholarship.entity'
+import { PendingScholarshipRepository } from '@/pending-scholarship/repositories/pending-scholarship.repository'
+import { TypeOrmPendingScholarshipRepository } from '@/pending-scholarship/repositories/typeorm-pending-scholarship.repository'
 
 const isProduction = env.NODE_ENV === EnvironmentEnum.PROD
 
@@ -39,6 +45,11 @@ const repositories = [
   {
     provide: EmbedNotificationRepository,
     useClass: TypeOrmEmbedNotificationRepository
+  },
+  { provide: EnrollmentRepository, useClass: TypeOrmEnrollmentRepository },
+  {
+    provide: PendingScholarshipRepository,
+    useClass: TypeOrmPendingScholarshipRepository
   },
   { provide: StudentRepository, useClass: TypeOrmStudentRepository }
 ]
