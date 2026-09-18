@@ -2,11 +2,6 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { createRepositoryMock } from '@/common/testing/repository.mock'
 import { TypeOrmAgencyRepository } from './typeorm-agency.repository'
 
-/**
- * Aqui moram as asserções de formato de query: relações carregadas, ordenação
- * e critérios. Antes viviam no spec do service, que agora não conhece mais
- * TypeORM.
- */
 describe('TypeOrmAgencyRepository', () => {
   let typeorm: ReturnType<typeof createRepositoryMock>
   let repository: TypeOrmAgencyRepository

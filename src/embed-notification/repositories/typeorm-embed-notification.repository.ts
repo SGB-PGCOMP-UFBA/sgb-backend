@@ -5,7 +5,6 @@ import { EmbedNotification } from '@/embed-notification/entities/embed-notificat
 import { CreateEmbedNotificationDto } from '@/embed-notification/dtos/create-embed-notification.dto'
 import { EmbedNotificationRepository } from '@/embed-notification/repositories/embed-notification.repository'
 
-/** Teto de notificações pendentes devolvidas por dono. */
 const PENDING_LIMIT = 10
 
 @Injectable()

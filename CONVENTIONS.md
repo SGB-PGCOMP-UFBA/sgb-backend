@@ -117,7 +117,33 @@ Regras:
 
 A regra 4 chega no passo 3 do refactor; até então valem 1, 2 e 3 para código novo.
 
-## 5. Onde as coisas vão
+## 5. Comentários
+
+Código bom não precisa de narração. Não comente o que o nome já diz:
+
+```ts
+✗ /** Busca a agência pelo id. */
+  abstract findById(id: number): Promise<Agency | null>
+
+✗ // Cria o service
+  const service = new AgencyService(repository)
+```
+
+Comente só o que o código não consegue contar — e aí explique o **porquê**,
+não o quê:
+
+```ts
+✓ /**
+   * Recebe a entidade, e não o id, porque o save precisa levar as relações
+   * carregadas pelo findByIdWithScholarships.
+   */
+```
+
+O teste prático: se alguém pode ler o comentário e "corrigir" o código de
+volta para o jeito errado sem ele, o comentário se paga. Caso contrário,
+apague. Um nome melhor vale mais que um comentário.
+
+## 6. Onde as coisas vão
 
 | Escopo                          | Lugar             |
 | ------------------------------- | ----------------- |

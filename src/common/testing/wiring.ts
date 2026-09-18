@@ -8,12 +8,9 @@ import { DatabaseModule } from '@/common/database/database.module'
 type Binding = { provide: unknown; useClass: Type<unknown> }
 
 /**
- * Monta o módulo de uma feature no container do Nest, com os repositórios
- * expostos por um módulo global — a mesma forma do DatabaseModule real, mas
- * sem abrir conexão com o Postgres.
- *
- * Serve para cobrir o que os specs de service não cobrem: eles instanciam a
- * classe com `new` e por isso passam mesmo com a injeção quebrada.
+ * Os specs de service instanciam a classe com `new` e por isso passam mesmo
+ * com a injeção quebrada. Isto monta a feature no container de verdade,
+ * espelhando a forma do DatabaseModule sem abrir conexão com o Postgres.
  */
 export async function compileFeatureModule(
   featureModule: Type<unknown>,
@@ -38,10 +35,6 @@ export async function compileFeatureModule(
   }).compile()
 }
 
-/**
- * Confere que o DatabaseModule real amarra o repositório abstrato à
- * implementação concreta e o exporta para o resto da aplicação.
- */
 export function expectDatabaseModuleToBind(
   provide: unknown,
   useClass: Type<unknown>

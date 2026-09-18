@@ -7,10 +7,6 @@ import {
 import { AgencyRepository } from '@/agency/repositories/agency.repository'
 import { AgencyService } from './agency.service'
 
-/**
- * O `satisfies` garante cobertura: se um método novo entrar em
- * AgencyRepository e não for adicionado aqui, o typecheck quebra.
- */
 function createAgencyRepositoryMock() {
   return {
     findAllWithScholarships: vi.fn().mockResolvedValue([]),

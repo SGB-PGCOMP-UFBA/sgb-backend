@@ -13,13 +13,8 @@ import { TypeOrmEmbedNotificationRepository } from '@/embed-notification/reposit
 
 const isProduction = env.NODE_ENV === EnvironmentEnum.PROD
 
-/**
- * Entidades cujo repositório já foi extraído. A lista cresce a cada feature
- * migrada, e é ela que alimenta o autoLoadEntities.
- */
 const entities = [Agency, Allocation, EmbedNotification]
 
-/** Cada repositório abstrato amarrado à sua implementação concreta. */
 const repositories = [
   { provide: AgencyRepository, useClass: TypeOrmAgencyRepository },
   { provide: AllocationRepository, useClass: TypeOrmAllocationRepository },
@@ -30,11 +25,8 @@ const repositories = [
 ]
 
 /**
- * Registra a conexão e expõe os repositórios.
- *
- * É @Global de propósito: assim um service consegue depender do repositório de
- * outro domínio sem que o módulo dele precise importar o módulo do outro — que
- * é o que hoje obriga service a importar service.
+ * É @Global para que um service possa depender do repositório de outro
+ * domínio sem que o módulo dele importe o módulo do outro.
  */
 @Global()
 @Module({

@@ -7,10 +7,6 @@ import {
 import { AllocationRepository } from '@/allocation/repositories/allocation.repository'
 import { AllocationService } from './allocation.service'
 
-/**
- * O `satisfies` garante cobertura: se um método novo entrar em
- * AllocationRepository e não for adicionado aqui, o typecheck quebra.
- */
 function createAllocationRepositoryMock() {
   return {
     findAllWithScholarships: vi.fn().mockResolvedValue([]),
