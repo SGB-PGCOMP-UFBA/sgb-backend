@@ -12,7 +12,7 @@ import {
 import { QuadrennialReportDto } from '@/pdf-reports/dtos/quadrennial-report.dto'
 
 @Injectable()
-export class PdfReportService {
+export class PdfReportsService {
   constructor(private scholarshipService: ScholarshipService) {}
 
   _createRowsByStartingYear(scholarships) {

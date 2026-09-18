@@ -1,12 +1,12 @@
 import { Body, Controller, Get, Post, Res } from '@nestjs/common'
-import { PdfReportService } from './pdf-reports.service'
+import { PdfReportsService } from './pdf-reports.service'
 import { Response } from 'express'
 import { format } from 'date-fns'
 import { QuadrennialReportDto } from '@/pdf-reports/dtos/quadrennial-report.dto'
 
 @Controller('/v1/report')
-export class PdfReportController {
-  constructor(private readonly reportService: PdfReportService) {}
+export class PdfReportsController {
+  constructor(private readonly reportService: PdfReportsService) {}
 
   @Get('/generate-pdf')
   async generateReport(@Res() response: Response): Promise<void> {

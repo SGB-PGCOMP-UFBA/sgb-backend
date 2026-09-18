@@ -6,7 +6,7 @@ import {
   makeScholarship,
   makeStudent
 } from '@/common/testing/factories'
-import { ScholarShipFinalizerService } from './scholarship-finalizer.service'
+import { ScholarshipFinalizerService } from './scholarship-finalizer.service'
 
 const HOJE = new Date('2026-06-30T12:00:00.000Z')
 
@@ -25,12 +25,12 @@ function buildScholarship(overrides: Record<string, unknown> = {}) {
   } as never
 }
 
-describe('ScholarShipFinalizerService', () => {
+describe('ScholarshipFinalizerService', () => {
   let scholarshipService: {
     findAllEndingOn: ReturnType<typeof vi.fn>
   }
   let embedNotificationService: { create: ReturnType<typeof vi.fn> }
-  let service: ScholarShipFinalizerService
+  let service: ScholarshipFinalizerService
 
   beforeEach(() => {
     vi.useFakeTimers()
@@ -41,7 +41,7 @@ describe('ScholarShipFinalizerService', () => {
     }
     embedNotificationService = { create: vi.fn().mockResolvedValue(undefined) }
 
-    service = new ScholarShipFinalizerService(
+    service = new ScholarshipFinalizerService(
       scholarshipService as never,
       embedNotificationService as never
     )

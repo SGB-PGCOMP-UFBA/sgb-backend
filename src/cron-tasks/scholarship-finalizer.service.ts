@@ -5,13 +5,13 @@ import { ScholarshipService } from '@/scholarship/scholarship.service'
 import { EmbedNotificationService } from '@/embed-notification/embed-notification.service'
 
 @Injectable()
-export class ScholarShipFinalizerService {
+export class ScholarshipFinalizerService {
   constructor(
     private scholarshipService: ScholarshipService,
     private embedNotificationService: EmbedNotificationService
   ) {}
 
-  private readonly logger = new Logger(ScholarShipFinalizerService.name)
+  private readonly logger = new Logger(ScholarshipFinalizerService.name)
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async notifyEndedScholarships() {
