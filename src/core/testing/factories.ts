@@ -105,15 +105,44 @@ export const makeAllocation = defineFactory<Allocation>(() => ({
   scholarships: []
 }))
 
+export function daysFromToday(days: number): Date {
+  const date = new Date()
+  date.setHours(12, 0, 0, 0)
+  date.setDate(date.getDate() + days)
+
+  return date
+}
+
+export const notStartedScholarship = () => ({
+  scholarship_starts_at: daysFromToday(30),
+  scholarship_ends_at: daysFromToday(395),
+  extension_ends_at: null
+})
+
+export const activeScholarship = () => ({
+  scholarship_starts_at: daysFromToday(-365),
+  scholarship_ends_at: daysFromToday(365),
+  extension_ends_at: null
+})
+
+export const extendedScholarship = () => ({
+  scholarship_starts_at: daysFromToday(-730),
+  scholarship_ends_at: daysFromToday(-1),
+  extension_ends_at: daysFromToday(180)
+})
+
+export const finishedScholarship = () => ({
+  scholarship_starts_at: daysFromToday(-730),
+  scholarship_ends_at: daysFromToday(-1),
+  extension_ends_at: null
+})
+
 export const makeScholarship = defineFactory<Scholarship>(() => ({
   id: 100,
   enrollment_id: 42,
   agency_id: 1,
   allocation_id: 2,
-  status: 'ON_GOING',
-  scholarship_starts_at: new Date('2024-03-01T00:00:00.000Z'),
-  scholarship_ends_at: new Date('2026-02-28T00:00:00.000Z'),
-  extension_ends_at: null,
+  ...activeScholarship(),
   salary: 2100,
   created_at: CRIADO_EM,
   updated_at: CRIADO_EM,

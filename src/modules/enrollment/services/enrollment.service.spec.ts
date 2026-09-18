@@ -127,8 +127,8 @@ describe('EnrollmentService', () => {
       expect(queryBuilder.leftJoin).toHaveBeenCalledWith(
         'enrollment.scholarships',
         'scholarships',
-        'scholarships.status IN (:...statuses)',
-        { statuses: ['ON_GOING', 'EXTENDED'] }
+        expect.stringContaining('COALESCE'),
+        expect.objectContaining({ today: expect.any(String) })
       )
     })
 

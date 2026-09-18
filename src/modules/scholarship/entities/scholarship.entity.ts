@@ -37,9 +37,6 @@ export class Scholarship {
   @Column({ nullable: true })
   salary: number
 
-  @Column({ nullable: false, default: 'ON_GOING' })
-  status: string
-
   @CreateDateColumn()
   created_at: Date
 

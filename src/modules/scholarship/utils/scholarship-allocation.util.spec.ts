@@ -1,35 +1,20 @@
 import { describe, expect, it } from 'vitest'
 import {
+  finishedScholarship,
+  notStartedScholarship,
   makeAgency,
-  makeScholarship,
   makeScholarshipsForProgram
 } from '@/core/testing/factories'
 import {
   countAllocatedScholarshipsByProgram,
   getAwardedSlotsByProgram,
-  hasAvailableSlot,
-  isActiveScholarship
+  hasAvailableSlot
 } from './scholarship-allocation.util'
 
-describe('isActiveScholarship', () => {
-  it('quando o status é ON_GOING ou EXTENDED, considera a bolsa vigente', () => {
-    expect(isActiveScholarship(makeScholarship())).toBe(true)
-    expect(isActiveScholarship(makeScholarship({ status: 'EXTENDED' }))).toBe(
-      true
-    )
-  })
-
-  it('quando o status é FINISHED, não considera a bolsa vigente', () => {
-    expect(isActiveScholarship(makeScholarship({ status: 'FINISHED' }))).toBe(
-      false
-    )
-  })
-})
-
 describe('countAllocatedScholarshipsByProgram', () => {
-  it('quando a lista tem bolsa finalizada, conta apenas as vigentes', () => {
+  it('quando a lista tem bolsa finalizada, não conta a finalizada', () => {
     const scholarships = makeScholarshipsForProgram(3, 'MESTRADO', (index) =>
-      index === 2 ? { status: 'FINISHED' } : {}
+      index === 2 ? finishedScholarship() : {}
     )
 
     expect(countAllocatedScholarshipsByProgram(scholarships, 'MESTRADO')).toBe(
@@ -47,6 +32,16 @@ describe('countAllocatedScholarshipsByProgram', () => {
       1
     )
     expect(countAllocatedScholarshipsByProgram(scholarships, 'DOUTORADO')).toBe(
+      2
+    )
+  })
+
+  it('quando a bolsa ainda não começou, conta como vaga ocupada', () => {
+    const scholarships = makeScholarshipsForProgram(2, 'MESTRADO', (index) =>
+      index === 1 ? notStartedScholarship() : {}
+    )
+
+    expect(countAllocatedScholarshipsByProgram(scholarships, 'MESTRADO')).toBe(
       2
     )
   })

@@ -18,7 +18,6 @@ import { AdvisorService } from '@/modules/advisor/service/advisor.service'
 import { EnrollmentService } from '@/modules/enrollment/services/enrollment.service'
 import { CreateEnrollmentDto } from '@/modules/enrollment/dtos/create-enrollment.dto'
 import { CreateScholarshipDto } from '@/modules/scholarship/dto/create-scholarship.dto'
-import { UpdateScholarshipCsvUtil } from '@/modules/data-manager/utils/update-scholarship-csv.util'
 import { ApprovePendingScholarshipDto } from '@/modules/pending-scholarship/dto/approve-pending-scholarship.dto'
 import { ScholarshipService } from '@/modules/scholarship/service/scholarship.service'
 import { AgencyEnum } from '@/core/enums/AgencyEnum'
@@ -153,18 +152,13 @@ export class PendingScholarshipService {
         sendEmail = false
       }
 
-      const scholarshipStatus = UpdateScholarshipCsvUtil.defineStatus(
-        pendingScholarhsip.scholarship_starts_at,
-        pendingScholarhsip.scholarship_ends_at
-      )
       const createScholarshipDto: CreateScholarshipDto = {
         student_email: student.email,
         enrollment_number: enrollment.enrollment_number,
         agency_name: pendingScholarhsip.agency,
         allocation_name: 'REMOTO',
         scholarship_starts_at: pendingScholarhsip.scholarship_starts_at,
-        scholarship_ends_at: pendingScholarhsip.scholarship_ends_at,
-        status: scholarshipStatus
+        scholarship_ends_at: pendingScholarhsip.scholarship_ends_at
       }
 
       await this.scholarshipService.create(createScholarshipDto)

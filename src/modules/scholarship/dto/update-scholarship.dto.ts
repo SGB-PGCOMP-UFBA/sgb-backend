@@ -17,11 +17,6 @@ export class UpdateScholarshipDto {
   @IsEmail({}, { message: constants.bodyValidationMessages.EMAIL_FORMAT_ERROR })
   readonly student_email: string
 
-  @IsString()
-  @Transform(({ value }) => value.toUpperCase())
-  @IsIn(['ON_GOING', 'EXTENDED', 'FINISHED'])
-  readonly status: string
-
   @IsOptional()
   @IsString()
   readonly agency_id: number

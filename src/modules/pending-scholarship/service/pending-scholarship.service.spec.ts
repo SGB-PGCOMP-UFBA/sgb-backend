@@ -295,44 +295,17 @@ describe('PendingScholarshipService', () => {
       })
     })
 
-    it.each([['2026-01-01T00:00:00.000Z', 'INACTIVE']])(
-      'quando hoje é anterior ao início da bolsa, cria a bolsa com status INACTIVE (%s)',
-      async (hoje, esperado) => {
-        vi.setSystemTime(new Date(hoje))
+    it('quando aprova a pendência, cria a bolsa sem informar status', async () => {
+      await service.approve(APPROVE_DTO, response as never)
 
-        await service.approve(APPROVE_DTO, response as never)
+      const [dto] = scholarshipService.create.mock.calls[0]
 
-        expect(scholarshipService.create).toHaveBeenCalledWith(
-          expect.objectContaining({ status: esperado })
-        )
-      }
-    )
-
-    it.each([['2026-09-01T00:00:00.000Z', 'ON_GOING']])(
-      'quando hoje está dentro do período da bolsa, cria a bolsa com status ON_GOING (%s)',
-      async (hoje, esperado) => {
-        vi.setSystemTime(new Date(hoje))
-
-        await service.approve(APPROVE_DTO, response as never)
-
-        expect(scholarshipService.create).toHaveBeenCalledWith(
-          expect.objectContaining({ status: esperado })
-        )
-      }
-    )
-
-    it.each([['2029-01-01T00:00:00.000Z', 'FINISHED']])(
-      'quando hoje é posterior ao fim da bolsa, cria a bolsa com status FINISHED (%s)',
-      async (hoje, esperado) => {
-        vi.setSystemTime(new Date(hoje))
-
-        await service.approve(APPROVE_DTO, response as never)
-
-        expect(scholarshipService.create).toHaveBeenCalledWith(
-          expect.objectContaining({ status: esperado })
-        )
-      }
-    )
+      expect(dto).not.toHaveProperty('status')
+      expect(dto).toMatchObject({
+        scholarship_starts_at: PENDING.scholarship_starts_at,
+        scholarship_ends_at: PENDING.scholarship_ends_at
+      })
+    })
   })
 
   describe('approve — matrícula já existente', () => {
@@ -342,7 +315,7 @@ describe('PendingScholarshipService', () => {
 
     it('quando a matrícula já tem bolsa ativa, recusa aprovar', async () => {
       enrollmentService.verifyExistentByNumber.mockResolvedValue(
-        existentEnrollment([makeScholarship({ id: 1, status: 'ON_GOING' })])
+        existentEnrollment([makeScholarship({ id: 1 })])
       )
 
       await expect(

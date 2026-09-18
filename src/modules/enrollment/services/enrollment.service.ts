@@ -12,6 +12,10 @@ import { Enrollment } from '@/modules/enrollment/entities/enrollment.entity'
 import { CreateEnrollmentDto } from '@/modules/enrollment/dtos/create-enrollment.dto'
 import { constants } from '@/core/utils/constants'
 import { UpdateEnrollmentDto } from '@/modules/enrollment/dtos/update-enrollment.dto'
+import {
+  occupiesSlotSql,
+  todayAsCalendarDay
+} from '@/modules/scholarship/utils/scholarship-status.util'
 
 @Injectable()
 export class EnrollmentService {
@@ -78,15 +82,17 @@ export class EnrollmentService {
       .createQueryBuilder('enrollment')
       .addSelect([
         'scholarships.id',
-        'scholarships.status',
+        'scholarships.scholarship_starts_at',
+        'scholarships.scholarship_ends_at',
+        'scholarships.extension_ends_at',
         'student.email',
         'student.name'
       ])
       .leftJoin(
         'enrollment.scholarships',
         'scholarships',
-        'scholarships.status IN (:...statuses)',
-        { statuses: ['ON_GOING', 'EXTENDED'] }
+        occupiesSlotSql('scholarships'),
+        { today: todayAsCalendarDay() }
       )
       .leftJoin('enrollment.student', 'student')
       .where(`enrollment.enrollment_number = :enrollmentNumber`, {

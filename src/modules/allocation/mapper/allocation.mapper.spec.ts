@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
+  finishedScholarship,
+  notStartedScholarship,
   makeAllocation,
   makeEnrollment,
   makeScholarship,
@@ -51,7 +53,7 @@ describe('AllocationMapper.detailed', () => {
     const detailed = AllocationMapper.detailed(
       makeAllocation({
         scholarships: makeScholarshipsForProgram(3, 'MESTRADO', (index) =>
-          index === 2 ? { status: 'FINISHED' } : {}
+          index === 2 ? finishedScholarship() : {}
         )
       })
     )
@@ -72,20 +74,29 @@ describe('AllocationMapper.detailed', () => {
     )
   })
 
-  it.each([['FINISHED'], ['INACTIVE']])(
-    'quando a bolsa está num status que libera a alocação, não a conta como vaga ocupada (%s)',
-    (status) => {
-      const detailed = AllocationMapper.detailed(
-        makeAllocation({
-          scholarships: makeScholarshipsForProgram(2, 'MESTRADO', (index) =>
-            index === 1 ? { status } : {}
-          )
-        })
-      )
+  it('quando a bolsa já terminou, não a conta como vaga ocupada', () => {
+    const detailed = AllocationMapper.detailed(
+      makeAllocation({
+        scholarships: makeScholarshipsForProgram(2, 'MESTRADO', (index) =>
+          index === 1 ? finishedScholarship() : {}
+        )
+      })
+    )
 
-      expect(detailed.masters_degree_allocated_scholarships).toBe(1)
-    }
-  )
+    expect(detailed.masters_degree_allocated_scholarships).toBe(1)
+  })
+
+  it('quando a bolsa ainda não começou, conta como vaga ocupada', () => {
+    const detailed = AllocationMapper.detailed(
+      makeAllocation({
+        scholarships: makeScholarshipsForProgram(2, 'MESTRADO', (index) =>
+          index === 1 ? notStartedScholarship() : {}
+        )
+      })
+    )
+
+    expect(detailed.masters_degree_allocated_scholarships).toBe(2)
+  })
 
   it('quando a alocação tem bolsas dos dois programas, separa a contagem de mestrado da de doutorado', () => {
     const detailed = AllocationMapper.detailed(
@@ -106,9 +117,9 @@ describe('AllocationMapper.detailed', () => {
       makeAllocation({
         scholarships: [
           makeScholarship(),
-          makeScholarship({ status: 'FINISHED' }),
+          makeScholarship(finishedScholarship()),
           makeScholarship({
-            status: 'FINISHED',
+            ...finishedScholarship(),
             enrollment: makeEnrollment({ enrollment_program: 'DOUTORADO' })
           })
         ]
@@ -133,7 +144,7 @@ describe('AllocationMapper.detailedWithRelations', () => {
     const withRelations = AllocationMapper.detailedWithRelations(
       makeAllocation({
         scholarships: makeScholarshipsForProgram(2, 'MESTRADO', (index) =>
-          index === 1 ? { status: 'FINISHED' } : {}
+          index === 1 ? finishedScholarship() : {}
         )
       })
     )

@@ -249,97 +249,6 @@ describe('UpdateScholarshipCsvUtil.processDataToUpdateFile', () => {
   })
 })
 
-describe('UpdateScholarshipCsvUtil.defineStatus', () => {
-  beforeEach(() => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date('2026-06-15T12:00:00Z'))
-  })
-
-  afterEach(() => {
-    vi.useRealTimers()
-  })
-
-  it('quando a bolsa ainda não começou, marca como INACTIVE', () => {
-    const status = UpdateScholarshipCsvUtil.defineStatus(
-      new Date('2026-08-01T00:00:00Z'),
-      new Date('2028-07-31T00:00:00Z')
-    )
-
-    expect(status).toBe('INACTIVE')
-  })
-
-  it('quando a bolsa está em curso, marca como ON_GOING', () => {
-    const status = UpdateScholarshipCsvUtil.defineStatus(
-      new Date('2026-03-01T00:00:00Z'),
-      new Date('2028-02-29T00:00:00Z')
-    )
-
-    expect(status).toBe('ON_GOING')
-  })
-
-  it('quando o período da bolsa já passou, marca como FINISHED', () => {
-    const status = UpdateScholarshipCsvUtil.defineStatus(
-      new Date('2024-03-01T00:00:00Z'),
-      new Date('2026-02-28T00:00:00Z')
-    )
-
-    expect(status).toBe('FINISHED')
-  })
-
-  it('quando a bolsa em curso está como EXTENDED, preserva EXTENDED em vez de rebaixar para ON_GOING', () => {
-    const status = UpdateScholarshipCsvUtil.defineStatus(
-      new Date('2026-03-01T00:00:00Z'),
-      new Date('2028-02-29T00:00:00Z'),
-      'EXTENDED'
-    )
-
-    expect(status).toBe('EXTENDED')
-  })
-
-  it('quando a bolsa em curso já estava ON_GOING, mantém ON_GOING', () => {
-    const status = UpdateScholarshipCsvUtil.defineStatus(
-      new Date('2026-03-01T00:00:00Z'),
-      new Date('2028-02-29T00:00:00Z'),
-      'ON_GOING'
-    )
-
-    expect(status).toBe('ON_GOING')
-  })
-
-  it.each([['INACTIVE'], ['ACTIVE'], ['']])(
-    'quando a bolsa em curso estava com outro status, promove para ON_GOING (%s)',
-    (statusAtual) => {
-      const status = UpdateScholarshipCsvUtil.defineStatus(
-        new Date('2026-03-01T00:00:00Z'),
-        new Date('2028-02-29T00:00:00Z'),
-        statusAtual
-      )
-
-      expect(status).toBe('ON_GOING')
-    }
-  )
-
-  it('quando a bolsa EXTENDED já encerrou, marca como FINISHED', () => {
-    const status = UpdateScholarshipCsvUtil.defineStatus(
-      new Date('2024-03-01T00:00:00Z'),
-      new Date('2026-02-28T00:00:00Z'),
-      'EXTENDED'
-    )
-
-    expect(status).toBe('FINISHED')
-  })
-
-  it('quando a bolsa futura vem como EXTENDED do banco, marca como INACTIVE', () => {
-    const status = UpdateScholarshipCsvUtil.defineStatus(
-      new Date('2026-08-01T00:00:00Z'),
-      new Date('2028-07-31T00:00:00Z'),
-      'EXTENDED'
-    )
-
-    expect(status).toBe('INACTIVE')
-  })
-})
-
 describe('UpdateScholarshipCsvUtil.discriminateScholarshipMatchesForUpdateForInsert', () => {
   const INICIO = local(2026, 3, 1)
   const FIM = local(2028, 2, 29)
@@ -506,39 +415,26 @@ describe('UpdateScholarshipCsvUtil.discriminateScholarshipMatchesForUpdateForIns
     )
   })
 
-  it('quando a planilha prorroga uma bolsa encerrada, recalcula o status a partir das datas novas', () => {
+  it('quando a planilha estende o período de uma bolsa encerrada, grava a data nova e nenhum status', () => {
     run(
       [processed({ startsAt: local(2024, 3, 1), endsAt: local(2028, 2, 29) })],
       [
         match({
           scholarship_starts_at: local(2024, 3, 1),
-          scholarship_ends_at: local(2026, 2, 28),
-          status: 'FINISHED'
+          scholarship_ends_at: local(2026, 2, 28)
         })
       ]
     )
 
     const [, payload] = repository.update.mock.calls[0]
-    expect(payload.status).toBe('ON_GOING')
-    expect(listUpdates[0].description).toContain('Status da Bolsa')
+    expect(payload.scholarship_ends_at).toEqual(local(2028, 2, 29))
+    expect(payload).not.toHaveProperty('status')
   })
 
-  it('quando o status recalculado é igual ao do banco, não toca no status', () => {
+  it('quando a importação atualiza datas, não menciona status na lista de campos alterados', () => {
     run([processed({ endsAt: local(2028, 8, 31) })], [match()])
 
-    const [, payload] = repository.update.mock.calls[0]
-    expect(payload).not.toHaveProperty('status')
     expect(listUpdates[0].description).not.toContain('Status da Bolsa')
-  })
-
-  it('quando a bolsa em curso está como EXTENDED no banco, preserva EXTENDED ao recalcular o status', () => {
-    run(
-      [processed({ endsAt: local(2028, 8, 31) })],
-      [match({ status: 'EXTENDED' })]
-    )
-
-    const [, payload] = repository.update.mock.calls[0]
-    expect(payload).not.toHaveProperty('status')
   })
 
   it('quando a data do banco vem como string do driver, lê a data e não gera update', () => {

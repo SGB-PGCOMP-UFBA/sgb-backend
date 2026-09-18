@@ -37,12 +37,6 @@ export class CreateScholarshipDto {
   readonly scholarship_ends_at: Date
 
   @IsOptional()
-  @IsString()
-  @Transform(({ value }) => value?.toUpperCase())
-  @IsIn(['ON_GOING', 'EXTENDED', 'FINISHED'])
-  readonly status: string
-
-  @IsOptional()
   @Type(() => Date)
   @IsDate()
   readonly extension_ends_at?: Date

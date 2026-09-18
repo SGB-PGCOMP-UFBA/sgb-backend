@@ -338,7 +338,11 @@ export class PdfReportService {
 
       // Estrutura de dados
       const tableBody: any[][] = [
-        ['Ativas', agency.activeCount.masters, agency.activeCount.phd],
+        [
+          'Não iniciadas',
+          agency.inactiveCount.masters,
+          agency.inactiveCount.phd
+        ],
         ['Em Andamento', agency.onGoingCount.masters, agency.onGoingCount.phd],
         ['Prorrogadas', agency.extendedCount.masters, agency.extendedCount.phd],
         ['Concluídas', agency.finishedCount.masters, agency.finishedCount.phd],

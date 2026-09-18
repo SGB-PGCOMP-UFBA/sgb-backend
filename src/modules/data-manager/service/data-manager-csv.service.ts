@@ -16,6 +16,7 @@ import { Scholarship } from '@/modules/scholarship/entities/scholarship.entity'
 import { ListUpdatesFromImport } from '@/modules/data-manager/dto/list-updates.dto'
 import { PendingScholarshipService } from '@/modules/pending-scholarship/service/pending-scholarship.service'
 import { CreatePendingScholarshipDto } from '@/modules/pending-scholarship/dto/create-pending-scholarship.dto'
+import { deriveScholarshipStatus } from '@/modules/scholarship/utils/scholarship-status.util'
 
 @Injectable()
 export class DataManagerCsvService {
@@ -42,7 +43,7 @@ export class DataManagerCsvService {
         matricula: item.enrollment.enrollment_number?.trim(),
         curso: item.enrollment.enrollment_program?.trim(),
         agencia: item.agency.name?.trim(),
-        status_da_bolsa: item.status?.trim(),
+        status_da_bolsa: deriveScholarshipStatus(item),
         nome_do_orientador: item.enrollment.advisor.name?.trim(),
         email_do_orientador: item.enrollment.advisor.email?.trim(),
         cpf_do_orientador: item.enrollment.advisor.tax_id?.trim(),
@@ -144,7 +145,6 @@ export class DataManagerCsvService {
           enrollment_number: dto.enrollment_number,
           scholarship_start_date: dto.scholarship_starts_at,
           scholarship_end_date: dto.scholarship_ends_at,
-          scholarship_status: dto.status,
           description: `Não foi possível criar esta bolsa: ${error.message}.`
         })
       }
@@ -320,8 +320,7 @@ export class DataManagerCsvService {
       { key: 'agencia' },
       { key: 'alocacao' },
       { key: 'data_inicio_bolsa' },
-      { key: 'data_fim_bolsa' },
-      { key: 'status_da_bolsa' }
+      { key: 'data_fim_bolsa' }
     ]
 
     const missingFields = requiredFields
@@ -336,7 +335,6 @@ export class DataManagerCsvService {
         enrollment_number: item.matricula,
         scholarship_start_date: item.data_inicio_bolsa,
         scholarship_end_date: item.data_fim_bolsa,
-        scholarship_status: item.status_da_bolsa,
         description: `Não foi possível criar a bolsa, pois os seguintes campos obrigatórios não foram preenchidos: ${missingFields.join(
           ', '
         )}.`
@@ -347,7 +345,6 @@ export class DataManagerCsvService {
     return {
       student_email: item.email_do_estudante,
       enrollment_number: item.matricula,
-      status: item.status_da_bolsa,
       agency_name: item.agencia.toUpperCase() || 'OUTRAS',
       allocation_name: item.alocacao.toUpperCase(),
       scholarship_starts_at: parseDate(item.data_inicio_bolsa),
