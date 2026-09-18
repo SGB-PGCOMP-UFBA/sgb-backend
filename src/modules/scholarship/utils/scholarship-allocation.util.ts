@@ -1,8 +1,5 @@
 import { Scholarship } from '@/modules/scholarship/entities/scholarship.entity'
-import {
-  occupiesSlot,
-  todayAsCalendarDay
-} from '@/modules/scholarship/utils/scholarship-status.util'
+import { occupiesSlot, todayAsCalendarDay } from './scholarship-status.util'
 
 export function countAllocatedScholarshipsByProgram(
   scholarships: Scholarship[] = [],

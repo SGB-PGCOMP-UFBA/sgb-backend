@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { StudentController } from './controller/student.controller'
-import { StudentService } from './service/student.service'
-import { Student } from './entities/student.entity'
+import { StudentController } from './student.controller'
+import { StudentService } from './student.service'
+import { Student } from '@/modules/student/entities/student.entity'
 import { EmbedNotificationModule } from '@/modules/embed-notification/embed-notification.module'
 
 @Module({

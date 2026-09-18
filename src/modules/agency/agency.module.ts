@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { AgencyController } from './controller/agency.controller'
-import { AgencyService } from './service/agency.service'
-import { Agency } from './entities/agency.entity'
+import { AgencyController } from './agency.controller'
+import { AgencyService } from './agency.service'
+import { Agency } from '@/modules/agency/entities/agency.entity'
 
 @Module({
   imports: [TypeOrmModule.forFeature([Agency])],

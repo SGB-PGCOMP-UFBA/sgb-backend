@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { EmbedNotificationController } from './controller/embed-notification.controller'
-import { EmbedNotificationService } from './service/embed-notification.service'
-import { EmbedNotification } from './entity/embed-notification.entity'
+import { EmbedNotificationController } from './embed-notification.controller'
+import { EmbedNotificationService } from './embed-notification.service'
+import { EmbedNotification } from '@/modules/embed-notification/entities/embed-notification.entity'
 
 @Module({
   imports: [TypeOrmModule.forFeature([EmbedNotification])],

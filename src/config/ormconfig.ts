@@ -1,5 +1,5 @@
 import { DataSource } from 'typeorm'
-import { env } from '@/config/env.validation'
+import { env } from './env.validation'
 
 export const connectionSource = new DataSource({
   logging: false,

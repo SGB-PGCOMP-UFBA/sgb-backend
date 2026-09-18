@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm'
-import { User } from '@/modules/user/interfaces/user.interface'
+import { User } from '@/modules/user/user.interface'
 import { Enrollment } from '@/modules/enrollment/entities/enrollment.entity'
 
 @Entity('student')

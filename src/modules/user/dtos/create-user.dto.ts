@@ -1,5 +1,5 @@
 import { IsNumber, IsString, IsDate } from 'class-validator'
-import { User } from '@/modules/user/interfaces/user.interface'
+import { User } from '@/modules/user/user.interface'
 
 export class CreateUserDto {
   constructor(user: User) {

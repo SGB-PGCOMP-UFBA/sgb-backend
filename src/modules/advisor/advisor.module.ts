@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { AdvisorService } from './service/advisor.service'
-import { AdvisorController } from './controller/advisor.controller'
-import { Advisor } from './entities/advisor.entity'
+import { AdvisorService } from './advisor.service'
+import { AdvisorController } from './advisor.controller'
+import { Advisor } from '@/modules/advisor/entities/advisor.entity'
 import { EmailModule } from '@/services/email-sending/email.module'
 
 @Module({
