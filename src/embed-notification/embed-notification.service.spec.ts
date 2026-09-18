@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { createRepositoryMock } from '@/common/testing/repository.mock'
+import { EmbedNotificationRepository } from '@/embed-notification/repositories/embed-notification.repository'
 import { EmbedNotificationService } from './embed-notification.service'
 
 const VALID_DTO = {
@@ -10,43 +10,34 @@ const VALID_DTO = {
   description: 'Sua bolsa foi prorrogada por mais 6 meses.'
 } as never
 
-function createDeleteQueryBuilderMock() {
-  const queryBuilder: Record<string, unknown> = {}
-  queryBuilder.delete = vi.fn(() => queryBuilder)
-  queryBuilder.execute = vi.fn().mockResolvedValue({ affected: 5 })
-  return queryBuilder as any
+function createEmbedNotificationRepositoryMock() {
+  return {
+    findPendingByOwner: vi.fn().mockResolvedValue([]),
+    create: vi.fn(async (data: unknown) => data),
+    markAsConsumed: vi.fn(async (id: number) => ({ id, consumed: true })),
+    deleteById: vi.fn().mockResolvedValue(1),
+    deleteAllAndResetSequence: vi.fn().mockResolvedValue(undefined)
+  } satisfies Record<keyof EmbedNotificationRepository, unknown>
 }
 
 describe('EmbedNotificationService', () => {
-  let repository: ReturnType<typeof createRepositoryMock>
+  let repository: ReturnType<typeof createEmbedNotificationRepositoryMock>
   let service: EmbedNotificationService
 
   beforeEach(() => {
-    repository = createRepositoryMock()
-    service = new EmbedNotificationService(repository)
+    repository = createEmbedNotificationRepositoryMock()
+    service = new EmbedNotificationService(
+      repository as unknown as EmbedNotificationRepository
+    )
   })
 
   describe('findAllBy', () => {
-    it('quando busca as notificações do dono, traz só as não consumidas, as 10 mais recentes', async () => {
-      await service.findAllBy(7, 'STUDENT')
-
-      expect(repository.find).toHaveBeenCalledWith({
-        where: { owner_id: 7, owner_type: 'STUDENT', consumed: false },
-        order: { created_at: 'DESC' },
-        take: 10
-      })
-    })
-
     it.each([['ADMIN'], ['ADVISOR'], ['STUDENT']])(
-      'quando o tipo de dono é informado, filtra as notificações por ele (%s)',
+      'repassa dono e tipo de dono para o repositório (%s)',
       async (ownerType) => {
         await service.findAllBy(7, ownerType)
 
-        expect(repository.find).toHaveBeenCalledWith(
-          expect.objectContaining({
-            where: expect.objectContaining({ owner_type: ownerType })
-          })
-        )
+        expect(repository.findPendingByOwner).toHaveBeenCalledWith(7, ownerType)
       }
     )
 
@@ -57,22 +48,16 @@ describe('EmbedNotificationService', () => {
 
   describe('create', () => {
     it('quando o DTO é válido, cria a notificação com os dados dele e sem marcar consumed', async () => {
-      const created = await service.create(VALID_DTO)
+      await service.create(VALID_DTO)
 
-      expect(repository.create).toHaveBeenCalledWith({
-        owner_id: 7,
-        owner_type: 'STUDENT',
-        title: 'Bolsa prorrogada',
-        description: 'Sua bolsa foi prorrogada por mais 6 meses.'
-      })
-      expect(repository.save).toHaveBeenCalledWith(created)
+      expect(repository.create).toHaveBeenCalledWith(VALID_DTO)
       expect(repository.create).toHaveBeenCalledWith(
         expect.not.objectContaining({ consumed: expect.anything() })
       )
     })
 
     it('quando a persistência falha ao criar, traduz o erro em BadRequest', async () => {
-      repository.save.mockRejectedValue(new Error('conexão perdida'))
+      repository.create.mockRejectedValue(new Error('conexão perdida'))
 
       await expect(service.create(VALID_DTO)).rejects.toBeInstanceOf(
         BadRequestException
@@ -81,17 +66,14 @@ describe('EmbedNotificationService', () => {
   })
 
   describe('consume', () => {
-    it('quando a notificação é consumida, marca como lida sem tocar em título, descrição ou dono', async () => {
+    it('quando a notificação é consumida, pede ao repositório para marcá-la como lida', async () => {
       await service.consume(31)
 
-      expect(repository.save).toHaveBeenCalledWith({
-        id: 31,
-        consumed: true
-      })
+      expect(repository.markAsConsumed).toHaveBeenCalledWith(31)
     })
 
     it('quando a persistência falha ao consumir, traduz o erro em BadRequest', async () => {
-      repository.save.mockRejectedValue(new Error('conexão perdida'))
+      repository.markAsConsumed.mockRejectedValue(new Error('conexão perdida'))
 
       await expect(service.consume(31)).rejects.toBeInstanceOf(
         BadRequestException
@@ -102,28 +84,21 @@ describe('EmbedNotificationService', () => {
   describe('delete', () => {
     it('quando a notificação é removida, devolve true', async () => {
       await expect(service.delete(31)).resolves.toBe(true)
-      expect(repository.delete).toHaveBeenCalledWith(31)
+      expect(repository.deleteById).toHaveBeenCalledWith(31)
     })
 
     it('quando não há notificação para remover, devolve false', async () => {
-      repository.delete.mockResolvedValue({ affected: 0 })
+      repository.deleteById.mockResolvedValue(0)
 
       await expect(service.delete(999)).resolves.toBe(false)
     })
   })
 
   describe('deleteAll', () => {
-    it('quando apaga todas as notificações, reinicia a sequência de ids', async () => {
-      const queryBuilder = createDeleteQueryBuilderMock()
-      repository.createQueryBuilder.mockReturnValue(queryBuilder)
-
+    it('delega ao repositório a limpeza total', async () => {
       await service.deleteAll()
 
-      expect(queryBuilder.delete).toHaveBeenCalled()
-      expect(queryBuilder.execute).toHaveBeenCalled()
-      expect(repository.query).toHaveBeenCalledWith(
-        'ALTER SEQUENCE embed_notification_id_seq RESTART WITH 1'
-      )
+      expect(repository.deleteAllAndResetSequence).toHaveBeenCalled()
     })
   })
 })

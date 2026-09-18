@@ -3,27 +3,20 @@ import {
   Injectable,
   NotFoundException
 } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
 import { CreateAllocationDto } from '@/allocation/dtos/create-allocation.dto'
 import { UpdateAllocationDto } from '@/allocation/dtos/update-allocation.dto'
 import { Allocation } from '@/allocation/entities/allocation.entity'
+import { AllocationRepository } from '@/allocation/repositories/allocation.repository'
 import { constants } from '@/common/utils/constants'
 import { countAllocatedScholarshipsByProgram } from '@/scholarship/utils/scholarship-allocation.util'
 
 @Injectable()
 export class AllocationService {
-  constructor(
-    @InjectRepository(Allocation)
-    private readonly allocationRepository: Repository<Allocation>
-  ) {}
+  constructor(private readonly allocationRepository: AllocationRepository) {}
 
   async create(createAllocationDto: CreateAllocationDto): Promise<Allocation> {
     try {
-      const newAllocation =
-        this.allocationRepository.create(createAllocationDto)
-      await this.allocationRepository.save(newAllocation)
-      return newAllocation
+      return await this.allocationRepository.create(createAllocationDto)
     } catch (error) {
       throw new BadRequestException(
         constants.exceptionMessages.allocation.CREATION_FAILED
@@ -32,10 +25,7 @@ export class AllocationService {
   }
 
   async findAll(): Promise<Allocation[]> {
-    return await this.allocationRepository.find({
-      relations: { scholarships: { enrollment: true } },
-      order: { name: 'ASC' }
-    })
+    return await this.allocationRepository.findAllWithScholarships()
   }
 
   findOne(id: number) {
@@ -43,13 +33,11 @@ export class AllocationService {
   }
 
   async findAllForFilter(): Promise<Allocation[]> {
-    return await this.allocationRepository.find({
-      order: { name: 'ASC' }
-    })
+    return await this.allocationRepository.findAllForFilter()
   }
 
   async findOneById(id: number): Promise<Allocation> {
-    const allocation = await this.allocationRepository.findOneBy({ id })
+    const allocation = await this.allocationRepository.findById(id)
 
     if (!allocation) {
       throw new NotFoundException(
@@ -67,7 +55,7 @@ export class AllocationService {
       )
     }
 
-    const allocation = await this.allocationRepository.findOneBy({ name })
+    const allocation = await this.allocationRepository.findByName(name)
     if (!allocation) {
       throw new NotFoundException(
         constants.exceptionMessages.allocation.NOT_FOUND
@@ -81,10 +69,9 @@ export class AllocationService {
     id: number,
     updateAllocationDto: UpdateAllocationDto
   ): Promise<Allocation> {
-    const allocation = await this.allocationRepository.findOne({
-      where: { id },
-      relations: { scholarships: { enrollment: true } }
-    })
+    const allocation = await this.allocationRepository.findByIdWithScholarships(
+      id
+    )
     if (!allocation)
       throw new NotFoundException(
         constants.exceptionMessages.allocation.NOT_FOUND
@@ -98,11 +85,10 @@ export class AllocationService {
         allocation.doctorate_degree_awarded_scholarships
     )
 
-    const updatedAllocation = this.allocationRepository.merge(
+    return await this.allocationRepository.update(
       allocation,
       updateAllocationDto
     )
-    return await this.allocationRepository.save(updatedAllocation)
   }
 
   private assertAwardedSlotsAreNotBelowAllocated(
@@ -141,8 +127,8 @@ export class AllocationService {
   }
 
   async delete(id: number): Promise<boolean> {
-    const removedAllocation = await this.allocationRepository.delete(id)
-    if (removedAllocation.affected) return true
+    const affected = await this.allocationRepository.deleteById(id)
+    if (affected) return true
 
     throw new NotFoundException(
       constants.exceptionMessages.allocation.NOT_FOUND
