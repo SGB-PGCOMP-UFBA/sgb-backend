@@ -3,37 +3,27 @@ import {
   Injectable,
   NotFoundException
 } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
 import { CreateAgencyDto } from '@/agency/dtos/create-agency.dto'
 import { Agency } from '@/agency/entities/agency.entity'
 import { UpdateAgencyDto } from '@/agency/dtos/update-agency.dto'
+import { AgencyRepository } from '@/agency/repositories/agency.repository'
 import { constants } from '@/common/utils/constants'
 import { countAllocatedScholarshipsByProgram } from '@/scholarship/utils/scholarship-allocation.util'
 
 @Injectable()
 export class AgencyService {
-  constructor(
-    @InjectRepository(Agency) private agencyRepository: Repository<Agency>
-  ) {}
+  constructor(private readonly agencyRepository: AgencyRepository) {}
 
   async findAll(): Promise<Agency[]> {
-    return await this.agencyRepository.find({
-      relations: ['scholarships', 'scholarships.enrollment'],
-      order: { name: 'ASC' }
-    })
+    return await this.agencyRepository.findAllWithScholarships()
   }
 
   async findAllForFilter(): Promise<Agency[]> {
-    const agencys = await this.agencyRepository.find({
-      order: { name: 'ASC' }
-    })
-
-    return agencys
+    return await this.agencyRepository.findAllForFilter()
   }
 
   async findOneById(id: number): Promise<Agency> {
-    const agency = await this.agencyRepository.findOneBy({ id })
+    const agency = await this.agencyRepository.findById(id)
 
     if (!agency) {
       throw new NotFoundException(constants.exceptionMessages.agency.NOT_FOUND)
@@ -49,7 +39,7 @@ export class AgencyService {
       )
     }
 
-    const agency = await this.agencyRepository.findOneBy({ name })
+    const agency = await this.agencyRepository.findByName(name)
     if (!agency) {
       throw new NotFoundException(constants.exceptionMessages.agency.NOT_FOUND)
     }
@@ -59,10 +49,7 @@ export class AgencyService {
 
   async create(dto: CreateAgencyDto): Promise<Agency> {
     try {
-      const newAgency = this.agencyRepository.create({ ...dto })
-      await this.agencyRepository.save(newAgency)
-
-      return newAgency
+      return await this.agencyRepository.create(dto)
     } catch (error) {
       throw new BadRequestException(
         constants.exceptionMessages.agency.CREATION_FAILED
@@ -71,10 +58,7 @@ export class AgencyService {
   }
 
   async update(id: number, dto: UpdateAgencyDto) {
-    const agency = await this.agencyRepository.findOne({
-      where: { id: id },
-      relations: ['scholarships', 'scholarships.enrollment']
-    })
+    const agency = await this.agencyRepository.findByIdWithScholarships(id)
 
     if (!agency) {
       throw new NotFoundException(constants.exceptionMessages.agency.NOT_FOUND)
@@ -93,15 +77,12 @@ export class AgencyService {
       doctorateAwardedScholarships
     )
 
-    const updatedAgency = await this.agencyRepository.save({
-      id: agency.id,
+    return await this.agencyRepository.update(agency.id, {
       name: dto.name || agency.name,
       description: dto.description || agency.description,
       masters_degree_awarded_scholarships: mastersAwardedScholarships,
       doctorate_degree_awarded_scholarships: doctorateAwardedScholarships
     })
-
-    return updatedAgency
   }
 
   private assertAwardedSlotsAreNotBelowAllocated(
@@ -134,8 +115,8 @@ export class AgencyService {
   }
 
   async delete(id: number): Promise<boolean> {
-    const removed = await this.agencyRepository.delete(id)
-    if (removed.affected === 1) {
+    const affected = await this.agencyRepository.deleteById(id)
+    if (affected === 1) {
       return true
     }
 
