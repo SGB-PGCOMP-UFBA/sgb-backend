@@ -37,6 +37,7 @@ function createScholarshipRepositoryMock() {
     findPaginated: vi.fn().mockResolvedValue({ items: [], meta: {} }),
     findAllOccupyingSlot: vi.fn().mockResolvedValue([]),
     findAllEndingOn: vi.fn().mockResolvedValue([]),
+    findAllEndingBetween: vi.fn().mockResolvedValue([]),
     findByIdAndEnrollmentId: vi.fn().mockResolvedValue(null),
     findDuplicateForCreate: vi.fn().mockResolvedValue(null),
     findDuplicateForUpdate: vi.fn().mockResolvedValue(null),

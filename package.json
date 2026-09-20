@@ -29,7 +29,7 @@
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "copy-templates": "copyfiles --up 1 src/email/templates/*.hbs ./dist"
+    "copy-templates": "copyfiles --up 1 \"src/email/templates/**/*.hbs\" ./dist"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "2.3.4",

@@ -1,4 +1,11 @@
-import { format as formatWithPattern, isValid, parse } from 'date-fns'
+import {
+  endOfMonth,
+  format as formatWithPattern,
+  isValid,
+  parse,
+  startOfMonth
+} from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 import { Enrollment } from '@/enrollment/entities/enrollment.entity'
 import { constants } from './constants'
 
@@ -14,6 +21,19 @@ function getDatePlusDays(days: number): Date {
   actualDate.setUTCDate(actualDate.getUTCDate() + days)
 
   return actualDate
+}
+
+type CalendarDayRange = { startDay: string; endDay: string }
+
+function currentMonthRange(reference: Date = new Date()): CalendarDayRange {
+  return {
+    startDay: formatWithPattern(startOfMonth(reference), 'yyyy-MM-dd'),
+    endDay: formatWithPattern(endOfMonth(reference), 'yyyy-MM-dd')
+  }
+}
+
+function formatMonthLabel(reference: Date = new Date()): string {
+  return formatWithPattern(reference, "MMMM 'de' yyyy", { locale: ptBR })
 }
 
 function formatterDate(date: string) {
@@ -116,9 +136,13 @@ function validateScholarshipDuration(
 
 export {
   getDatePlusDays,
+  currentMonthRange,
+  formatMonthLabel,
   formatterDate,
   formatDate,
   formattedNow,
   today,
   validateScholarshipDuration
 }
+
+export type { CalendarDayRange }

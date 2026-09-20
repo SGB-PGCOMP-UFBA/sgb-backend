@@ -65,6 +65,10 @@ export abstract class ScholarshipRepository {
   ): Promise<Pagination<Scholarship>>
   abstract findAllOccupyingSlot(): Promise<Scholarship[]>
   abstract findAllEndingOn(referenceDay: string): Promise<Scholarship[]>
+  abstract findAllEndingBetween(
+    startDay: string,
+    endDay: string
+  ): Promise<Scholarship[]>
   abstract findByIdAndEnrollmentId(
     id: number,
     enrollmentId: number

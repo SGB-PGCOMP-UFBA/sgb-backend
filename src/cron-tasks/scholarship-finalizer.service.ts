@@ -3,6 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { Scholarship } from '@/scholarship/entities/scholarship.entity'
 import { ScholarshipService } from '@/scholarship/scholarship.service'
 import { EmbedNotificationService } from '@/embed-notification/embed-notification.service'
+import { CRON_TIME_ZONE } from './cron-tasks.constant'
 
 @Injectable()
 export class ScholarshipFinalizerService {
@@ -13,7 +14,7 @@ export class ScholarshipFinalizerService {
 
   private readonly logger = new Logger(ScholarshipFinalizerService.name)
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_DAY_AT_7AM, { timeZone: CRON_TIME_ZONE })
   async notifyEndedScholarships() {
     this.logger.log('Starting task to notify scholarships that end today.')
 

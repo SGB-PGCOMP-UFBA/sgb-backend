@@ -1,85 +1,9 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notificação de Expiração da Bolsa</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #e9f5ff;
-            margin: 0;
-            padding: 0;
-            color: #333;
-        }
-        .container {
-            max-width: 600px;
-            margin: 40px auto;
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-left: 6px solid #007BFF;
-        }
-        h1 {
-            color: #007BFF;
-            font-size: 28px;
-            text-align: left;
-            border-bottom: 2px solid #007BFF;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-        p {
-            line-height: 1.8;
-            font-size: 16px;
-        }
-        .highlight {
-            font-weight: bold;
-            color: #007BFF;
-        }
-        .button {
-            display: inline-block;
-            background-color: #007BFF;
-            color: white;
-            padding: 12px 25px;
-            margin-top: 20px;
-            text-align: center;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
-        }
-        .button:hover {
-            background-color: #0056b3;
-        }
-        .footer {
-            margin-top: 30px;
-            text-align: center;
-            color: #555;
-            font-size: 14px;
-        }
-        .footer a {
-            color: #007BFF;
-            text-decoration: none;
-        }
-        .footer a:hover {
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Notificação Importante</h1>
-        <p>Prezado(a) <span class="highlight">{{name}}</span>,</p>
+<h1>Notificação Importante</h1>
 
-        <p>Gostaríamos de informá-lo(a) que a sua bolsa no Programa de Pós-Graduação em Ciência da Computação na UFBA irá expirar em <span class="highlight">{{months}}</span> {{monthLabel}}.</p>
+<p>Prezado(a) <span class="highlight">{{name}}</span>,</p>
 
-        <p>Por favor, consulte mais informações no <span class="highlight">Sistema de Gerenciamento de Bolsas do PGCOMP - UFBA</span> e certifique-se de tomar as providências necessárias caso deseje renovar ou estender a duração da sua bolsa.</p>
+<p>A sua bolsa no Programa de Pós-Graduação em Ciência da Computação da UFBA vence no dia <span class="highlight">{{endsAt}}</span>, daqui a aproximadamente um mês.</p>
 
-        <p class="footer">Se precisar de mais informações, não hesite em entrar em contato com a coordenação do programa ou com o seu orientador.</p>
+<p>Consulte os detalhes no <span class="highlight">Sistema de Gerenciamento de Bolsas do PGCOMP - UFBA</span> e tome as providências necessárias caso deseje renovar ou estender a duração da sua bolsa.</p>
 
-        <p class="footer">Atenciosamente,<br>
-        Sistema de Gerenciamento de Bolsas - PGCOMP UFBA</p>
-    </div>
-</body>
-</html>
+<p class="note">Se precisar de mais informações, não hesite em entrar em contato com a coordenação do programa ou com o seu orientador.</p>

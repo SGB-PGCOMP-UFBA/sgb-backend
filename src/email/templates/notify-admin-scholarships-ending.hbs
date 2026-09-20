@@ -1,0 +1,49 @@
+<style>
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+    }
+    .data-table th {
+        background-color: #007BFF;
+        color: #ffffff;
+        text-align: left;
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+    .data-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #e0e6ed;
+        color: #292536;
+        font-size: 15px;
+    }
+</style>
+
+<h1>Bolsas encerrando em {{monthLabel}}</h1>
+
+<p>Prezado(a) <span class="highlight">{{name}}</span>,</p>
+
+<p>Neste mês, <span class="highlight">{{total}}</span> bolsa(s) chegam ao fim. Abaixo a relação com as respectivas datas de encerramento.</p>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Estudante</th>
+            <th>Agência</th>
+            <th>Programa</th>
+            <th>Vencimento</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each scholarships}}
+        <tr>
+            <td>{{studentName}}</td>
+            <td>{{agencyName}}</td>
+            <td>{{program}}</td>
+            <td>{{endsAt}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
+
+<p class="note">Os estudantes cuja bolsa vence em até um mês recebem um aviso automático por e-mail. Prorrogações precisam ser registradas no sistema para sair desta relação.</p>
