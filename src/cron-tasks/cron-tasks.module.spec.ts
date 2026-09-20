@@ -3,6 +3,7 @@ import { compileFeatureModule } from '@/common/testing/wiring'
 import { CronTasksModule } from '@/cron-tasks/cron-tasks.module'
 import { ScholarshipEndingReminderService } from '@/cron-tasks/scholarship-ending-reminder.service'
 import { ScholarshipFinalizerService } from '@/cron-tasks/scholarship-finalizer.service'
+import { ScholarshipMonthlyReportService } from '@/cron-tasks/scholarship-monthly-report.service'
 import { Admin } from '@/admin/entities/admin.entity'
 import { AdminRepository } from '@/admin/repositories/admin.repository'
 import { TypeOrmAdminRepository } from '@/admin/repositories/typeorm-admin.repository'
@@ -54,7 +55,7 @@ const BINDINGS = [
 ]
 
 describe('CronTasksModule', () => {
-  it('monta os dois crons no container', async () => {
+  it('monta os três crons no container', async () => {
     const moduleRef = await compileFeatureModule(
       CronTasksModule,
       ENTITIES,
@@ -66,6 +67,9 @@ describe('CronTasksModule', () => {
     )
     expect(moduleRef.get(ScholarshipEndingReminderService)).toBeInstanceOf(
       ScholarshipEndingReminderService
+    )
+    expect(moduleRef.get(ScholarshipMonthlyReportService)).toBeInstanceOf(
+      ScholarshipMonthlyReportService
     )
   })
 })

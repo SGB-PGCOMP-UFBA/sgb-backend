@@ -142,6 +142,19 @@ export class TypeOrmScholarshipRepository implements ScholarshipRepository {
       .getMany()
   }
 
+  async findAllEndingBetween(
+    startDay: string,
+    endDay: string
+  ): Promise<Scholarship[]> {
+    return await this.withRelationsQuery()
+      .where(
+        `${effectiveEndSql()} BETWEEN CAST(:startDay AS date) AND CAST(:endDay AS date)`
+      )
+      .setParameters({ startDay, endDay })
+      .orderBy(effectiveEndSql(), 'ASC')
+      .getMany()
+  }
+
   async findByIdAndEnrollmentId(
     id: number,
     enrollmentId: number

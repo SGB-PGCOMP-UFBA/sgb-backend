@@ -5,6 +5,7 @@ import { EmbedNotificationModule } from '@/embed-notification/embed-notification
 import { ScholarshipModule } from '@/scholarship/scholarship.module'
 import { ScholarshipEndingReminderService } from './scholarship-ending-reminder.service'
 import { ScholarshipFinalizerService } from './scholarship-finalizer.service'
+import { ScholarshipMonthlyReportService } from './scholarship-monthly-report.service'
 
 @Module({
   imports: [
@@ -13,6 +14,10 @@ import { ScholarshipFinalizerService } from './scholarship-finalizer.service'
     EmbedNotificationModule,
     ScholarshipModule
   ],
-  providers: [ScholarshipEndingReminderService, ScholarshipFinalizerService]
+  providers: [
+    ScholarshipEndingReminderService,
+    ScholarshipFinalizerService,
+    ScholarshipMonthlyReportService
+  ]
 })
 export class CronTasksModule {}
