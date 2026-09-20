@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gerenciamento de Bolsas - PGCOMP UFBA</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e9f5ff;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-left: 6px solid #007BFF;
+            text-align: left;
+        }
+        h1 {
+            color: #007BFF;
+            font-size: 28px;
+            text-align: center;
+            border-bottom: 2px solid #007BFF;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        p {
+            line-height: 1.8;
+            font-size: 16px;
+            color: #292536;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #007BFF;
+        }
+        .note {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #555;
+        }
+        .button {
+            display: inline-block;
+            background-color: #007BFF;
+            color: #ffffff;
+            padding: 12px 25px;
+            margin-top: 20px;
+            text-align: center;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+        }
+        .footer p {
+            font-size: 14px;
+            color: #555;
+        }
+        .footer .button {
+            color: #ffffff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <div class="container">
+            {{{body}}}
+
+            {{> footer}}
+        </div>
+    </center>
+</body>
+</html>

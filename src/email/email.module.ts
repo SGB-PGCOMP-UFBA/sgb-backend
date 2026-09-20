@@ -5,6 +5,8 @@ import { join } from 'path'
 import { env } from '@/config/env.validation'
 import { EmailService } from './email.service'
 
+const templatesDir = join(__dirname, './templates')
+
 @Module({
   imports: [
     MailerModule.forRoot({
@@ -21,10 +23,19 @@ import { EmailService } from './email.service'
         from: `No Reply <${env.EMAIL_USER}>`
       },
       template: {
-        dir: join(__dirname, './templates'),
+        dir: templatesDir,
         adapter: new HandlebarsAdapter(),
         options: {
           strict: false
+        }
+      },
+      options: {
+        layout: 'layout',
+        partials: {
+          dir: join(templatesDir, 'partials'),
+          options: {
+            strict: false
+          }
         }
       }
     })
