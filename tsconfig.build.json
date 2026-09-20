@@ -5,11 +5,11 @@
     "test",
     "dist",
     "**/*spec.ts",
-    "src/core/testing/**",
+    "src/common/testing/**",
     "vitest.config.mts"
   ],
   "include": [
     "./src/**/*.ts",
-    "./src/services/email-sending/templates/*.hbs"
+    "./src/email/templates/*.hbs"
   ]
 }

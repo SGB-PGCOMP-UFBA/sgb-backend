@@ -1,0 +1,65 @@
+import { Body, Controller, Get, Post, Res } from '@nestjs/common'
+import { PdfReportsService } from './pdf-reports.service'
+import { Response } from 'express'
+import { format } from 'date-fns'
+import { QuadrennialReportDto } from '@/pdf-reports/dtos/quadrennial-report.dto'
+
+@Controller('/v1/report')
+export class PdfReportsController {
+  constructor(private readonly reportService: PdfReportsService) {}
+
+  @Get('/generate-pdf')
+  async generateReport(@Res() response: Response): Promise<void> {
+    const arrayBuffer = await this.reportService.generatePDF()
+    const filename =
+      'RELATORIO_PGCOMP_SGB ' +
+      format(new Date(), 'dd-MM-yyyy hh:mm:ss') +
+      '.pdf'
+
+    const buffer = Buffer.from(arrayBuffer)
+
+    response.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename="' + filename + '"',
+      'Content-Length': buffer.length
+    })
+
+    response.send(buffer)
+  }
+
+  @Post('/quadrennial/pdf')
+  async generateQuadrennialPdf(
+    @Body() dto: QuadrennialReportDto,
+    @Res() response: Response
+  ): Promise<void> {
+    const buffer = await this.reportService.generateQuadrennialPDF(dto)
+    const filename = `RELATORIO_QUADRIENAL_${dto.startDate}_${
+      dto.endDate
+    }_${format(new Date(), 'dd-MM-yyyy hh:mm:ss')}.pdf`
+
+    response.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Content-Length': buffer.byteLength
+    })
+
+    response.send(Buffer.from(buffer))
+  }
+
+  // @Post('/quadrennial/xlsx')
+  // async generateQuadrennialXlsx(
+  //   @Body() dto: QuadrennialReportDto,
+  //   @Res() response: Response
+  // ): Promise<void> {
+  //   const buffer = await this.reportService.generateQuadrennialXLSX(dto)
+  //   const filename = `RELATORIO_QUADRIENAL_${dto.startDate}_${dto.endDate}.xlsx`
+
+  //   response.set({
+  //     'Content-Type':
+  //       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  //     'Content-Disposition': `attachment; filename="${filename}"`
+  //   })
+
+  //   response.send(buffer)
+  // }
+}

@@ -1,5 +1,5 @@
 import { DataSource } from 'typeorm'
-import { env } from '@/config/env.validation'
+import { env } from './env.validation'
 
 export const connectionSource = new DataSource({
   logging: false,
@@ -7,7 +7,7 @@ export const connectionSource = new DataSource({
   name: 'default',
   type: 'postgres',
   url: env.DATABASE_URL,
-  entities: ['dist/modules/**/**.entity{.ts,.js}'],
-  migrations: ['dist/core/database/migrations/**/*{.ts,.js}'],
-  subscribers: ['dist/core/database/migrations/**/*{.ts,.js}']
+  entities: ['dist/**/*.entity{.ts,.js}'],
+  migrations: ['dist/common/database/migrations/**/*{.ts,.js}'],
+  subscribers: ['dist/common/database/migrations/**/*{.ts,.js}']
 })

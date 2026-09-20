@@ -1,0 +1,87 @@
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  HttpCode,
+  Param,
+  HttpStatus,
+  UsePipes,
+  ValidationPipe,
+  UseGuards
+} from '@nestjs/common'
+import { CreateStudentDto } from '@/student/dtos/create-student.dto'
+import { StudentService } from './student.service'
+import { StudentMapper } from './student.mapper'
+import { UpdateStudentDto } from '@/student/dtos/update-student.dto'
+import { UpdateStudentPasswordDto } from '@/student/dtos/update-student-password.dto'
+import { Roles } from '@/auth/role.decorator'
+import { RolesGuard } from '@/auth/guards/roles.guard'
+import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard'
+
+@Controller('v1/student')
+export class StudentController {
+  constructor(private readonly studentsService: StudentService) {}
+
+  @Get()
+  @Roles('STUDENT', 'ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async findAll() {
+    const students = await this.studentsService.findAll()
+    return students.map((student) => StudentMapper.detailed(student))
+  }
+
+  @Get(':email')
+  @Roles('STUDENT', 'ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async findByEmail(@Param('email') email: string) {
+    const student = await this.studentsService.findByEmail(email, true)
+    return StudentMapper.detailedWithFullRelations(student)
+  }
+
+  @Get('/by-advisor/:advisorId')
+  @Roles('STUDENT', 'ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async findAllByAdvisorId(@Param('advisorId') advisorId: number) {
+    const students = await this.studentsService.findAllByAdvisorId(advisorId)
+    return students.map((student) =>
+      StudentMapper.detailedWithFullRelations(student)
+    )
+  }
+
+  @Post()
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async create(@Body() dto: CreateStudentDto) {
+    const student = await this.studentsService.create(dto)
+    return StudentMapper.simplified(student)
+  }
+
+  @Patch()
+  @Roles('STUDENT', 'ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async update(@Body() dto: UpdateStudentDto) {
+    const updatedStudent = await this.studentsService.update(dto)
+    return StudentMapper.detailed(updatedStudent)
+  }
+
+  @Patch('/update-password')
+  @Roles('STUDENT', 'ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async updatePassword(@Body() dto: UpdateStudentPasswordDto) {
+    return await this.studentsService.updatePassword(
+      dto.email,
+      dto.current_password,
+      dto.new_password
+    )
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async delete(@Param('id') id: string) {
+    return await this.studentsService.delete(+id)
+  }
+}

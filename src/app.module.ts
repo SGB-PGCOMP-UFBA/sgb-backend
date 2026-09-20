@@ -4,22 +4,21 @@ import { ConfigModule } from '@nestjs/config'
 import { validate } from '@/config/env.validation'
 import { MulterModule } from '@nestjs/platform-express'
 import { memoryStorage } from 'multer'
-import { DatabaseModule } from './core/database/database.module'
-import { StudentModule } from './modules/student/student.module'
-import { EmailModule } from './services/email-sending/email.module'
-import { AuthModule } from './modules/auth/auth.module'
-import { AdvisorModule } from './modules/advisor/advisor.module'
-import { ScholarshipModule } from './modules/scholarship/scholarship.module'
-import { AdminModule } from './modules/admin/admin.module'
-import { AgencyModule } from './modules/agency/agency.module'
-import { AllocationModule } from './modules/allocation/allocation.module'
-import { EmbedNotificationModule } from './modules/embed-notification/embed-notification.module'
-import { DataManagerModule } from './modules/data-manager/data-manager.module'
-import { NotificationModule } from './services/ending-scholarship-notification/notification.module'
-import { ReportModule } from './services/pdf-reports/reports.module'
-import { PasswordRecoveryModule } from './services/password-recovery/password-recovery.module'
-import { CronTasksModule } from './tasks/cron-tasks.module'
-import { PendingScholarshipModule } from './modules/pending-scholarship/pending-scholarship.module'
+import { DatabaseModule } from '@/common/database/database.module'
+import { StudentModule } from '@/student/student.module'
+import { EmailModule } from '@/email/email.module'
+import { AuthModule } from '@/auth/auth.module'
+import { AdvisorModule } from '@/advisor/advisor.module'
+import { ScholarshipModule } from '@/scholarship/scholarship.module'
+import { AdminModule } from '@/admin/admin.module'
+import { AgencyModule } from '@/agency/agency.module'
+import { AllocationModule } from '@/allocation/allocation.module'
+import { EmbedNotificationModule } from '@/embed-notification/embed-notification.module'
+import { DataManagerModule } from '@/data-manager/data-manager.module'
+import { PdfReportsModule } from '@/pdf-reports/pdf-reports.module'
+import { PasswordRecoveryModule } from '@/password-recovery/password-recovery.module'
+import { CronTasksModule } from '@/cron-tasks/cron-tasks.module'
+import { PendingScholarshipModule } from '@/pending-scholarship/pending-scholarship.module'
 
 require('dotenv')
 
@@ -35,8 +34,7 @@ require('dotenv')
     }),
     DatabaseModule,
     EmailModule,
-    NotificationModule,
-    ReportModule,
+    PdfReportsModule,
     AuthModule,
     AgencyModule,
     ScholarshipModule,
