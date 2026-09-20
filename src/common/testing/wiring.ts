@@ -40,6 +40,27 @@ export async function compileFeatureModule(
   }).compile()
 }
 
+/**
+ * A entidade precisa estar no forFeature do DatabaseModule, senão o
+ * @InjectRepository da implementação não tem provider e o app não sobe — sem
+ * que nenhum teste de service perceba.
+ */
+export function expectDatabaseModuleToRegisterEntity(
+  entity: Type<unknown>
+): void {
+  const imports =
+    Reflect.getMetadata(MODULE_METADATA.IMPORTS, DatabaseModule) ?? []
+  const token = getRepositoryToken(entity)
+  const registered = imports.some(
+    (imported: { providers?: { provide?: unknown }[] }) =>
+      (imported?.providers ?? []).some(
+        (provider) => provider?.provide === token
+      )
+  )
+
+  expect(registered).toBe(true)
+}
+
 export function expectDatabaseModuleToBind(
   provide: unknown,
   useClass: Type<unknown>

@@ -4,15 +4,14 @@ import {
   NotFoundException,
   InternalServerErrorException
 } from '@nestjs/common/exceptions'
-import { InjectRepository } from '@nestjs/typeorm'
-import { IsNull, Repository } from 'typeorm'
-import { paginate, IPaginationOptions } from 'nestjs-typeorm-paginate'
+import { IPaginationOptions } from 'nestjs-typeorm-paginate'
 import { PageDto } from '@/common/pagination/page.dto'
 import { PageMetaDto } from '@/common/pagination/page-meta.dto'
 import { Scholarship } from '@/scholarship/entities/scholarship.entity'
 import { constants } from '@/common/utils/constants'
 import { ScholarshipMapper } from './scholarship.mapper'
 import { ScholarshipFilters } from './scholarship-filters.interface'
+import { ScholarshipRepository } from '@/scholarship/repositories/scholarship.repository'
 import { StudentService } from '@/student/student.service'
 import { AgencyService } from '@/agency/agency.service'
 import { AllocationService } from '@/allocation/allocation.service'
@@ -28,12 +27,8 @@ import {
 } from '@/scholarship/utils/scholarship-allocation.util'
 import {
   occupiesSlot,
-  occupiesSlotSql,
-  occupiesSlotWhere,
-  derivedStatusSql,
-  effectiveEndSql,
-  scholarshipStatusPredicateSql,
   todayAsCalendarDay,
+  ScholarshipStatus,
   ScholarshipStatusEnum,
   SCHOLARSHIP_STATUSES
 } from '@/scholarship/utils/scholarship-status.util'
@@ -47,43 +42,20 @@ interface QuotaTarget {
   doctorate_degree_awarded_scholarships?: number
 }
 
-const orderByMapping = {
-  DAT_MATRICULA_ASC: ['enrollment', 'enrollment_date', 'ASC'],
-  DAT_MATRICULA_DESC: ['enrollment', 'enrollment_date', 'DESC'],
-  DAT_DEFESA_ASC: ['enrollment', 'defense_prediction_date', 'ASC'],
-  DAT_DEFESA_DESC: ['enrollment', 'defense_prediction_date', 'DESC'],
-  DAT_INICIO_ASC: ['scholarship', 'scholarship_starts_at', 'ASC'],
-  DAT_INICIO_DESC: ['scholarship', 'scholarship_starts_at', 'DESC'],
-  DAT_TERMINO_ASC: ['scholarship', 'scholarship_ends_at', 'ASC'],
-  DAT_TERMINO_DESC: ['scholarship', 'scholarship_ends_at', 'DESC']
-}
-
 @Injectable()
 export class ScholarshipService {
   private readonly logger = new Logger(ScholarshipService.name)
 
   constructor(
-    @InjectRepository(Scholarship)
-    private scholarshipRepository: Repository<Scholarship>,
+    private readonly scholarshipRepository: ScholarshipRepository,
     private agencyService: AgencyService,
     private allocationService: AllocationService,
     private enrollmentService: EnrollmentService,
     private studentService: StudentService
   ) {}
 
-  getRepository(): Repository<Scholarship> {
-    return this.scholarshipRepository
-  }
-
   async findAll(): Promise<Scholarship[]> {
-    return await this.scholarshipRepository.find({
-      relations: [
-        'agency',
-        'enrollment',
-        'enrollment.student',
-        'enrollment.advisor'
-      ]
-    })
+    return await this.scholarshipRepository.findAllWithRelations()
   }
 
   async findAllForFilter(): Promise<{ status: string }[]> {
@@ -94,55 +66,10 @@ export class ScholarshipService {
     paginateOptions: IPaginationOptions,
     filters: ScholarshipFilters
   ) {
-    const query = this.scholarshipRepository
-      .createQueryBuilder('scholarship')
-      .leftJoinAndSelect('scholarship.agency', 'agency')
-      .leftJoinAndSelect('scholarship.allocation', 'allocation')
-      .leftJoinAndSelect('scholarship.enrollment', 'enrollment')
-      .leftJoinAndSelect('enrollment.student', 'student')
-      .leftJoinAndSelect('enrollment.advisor', 'advisor')
-      .setParameter('today', todayAsCalendarDay())
-
-    if (filters?.scholarshipStatus && filters?.scholarshipStatus !== 'ALL') {
-      const statusPredicate = scholarshipStatusPredicateSql(
-        filters.scholarshipStatus
-      )
-
-      if (statusPredicate) {
-        query.andWhere(statusPredicate)
-      }
-    }
-    if (filters?.agencyName && filters?.agencyName !== 'ALL') {
-      query.andWhere('agency.name LIKE :agencyName', {
-        agencyName: `%${filters.agencyName}%`
-      })
-    }
-    if (filters?.allocationName && filters?.allocationName !== 'ALL') {
-      query.andWhere('allocation.name LIKE :allocationName', {
-        allocationName: `%${filters.allocationName}%`
-      })
-    }
-    if (filters?.programName && filters?.programName !== 'ALL') {
-      query.andWhere('enrollment.enrollment_program LIKE :programName', {
-        programName: `%${filters.programName}%`
-      })
-    }
-    if (filters?.advisorName && filters?.advisorName !== 'ALL') {
-      query.andWhere('advisor.name LIKE :advisorName', {
-        advisorName: `%${filters.advisorName}%`
-      })
-    }
-    if (filters?.studentName && filters?.studentName !== '') {
-      query.andWhere('student.name ILIKE :studentName', {
-        studentName: `%${filters.studentName}%`
-      })
-    }
-    if (filters?.orderBy && orderByMapping[filters.orderBy]) {
-      const [table, field, order] = orderByMapping[filters.orderBy]
-      query.orderBy(`${table}.${field}`, order as 'ASC' | 'DESC')
-    }
-
-    const { items, meta } = await paginate<Scholarship>(query, paginateOptions)
+    const { items, meta } = await this.scholarshipRepository.findPaginated(
+      filters,
+      paginateOptions
+    )
 
     const itemsDto = items.map((scholarship) =>
       ScholarshipMapper.detailedWithRelations(scholarship)
@@ -160,76 +87,22 @@ export class ScholarshipService {
   }
 
   async findAllForNotification(): Promise<Scholarship[]> {
-    return await this.scholarshipRepository
-      .createQueryBuilder('scholarship')
-      .leftJoinAndSelect('scholarship.agency', 'agency')
-      .leftJoinAndSelect('scholarship.enrollment', 'enrollment')
-      .leftJoinAndSelect('enrollment.student', 'student')
-      .leftJoinAndSelect('enrollment.advisor', 'advisor')
-      .where(occupiesSlotSql())
-      .setParameter('today', todayAsCalendarDay())
-      .getMany()
+    return await this.scholarshipRepository.findAllOccupyingSlot()
   }
 
   async findAllEndingOn(
     referenceDay: string = todayAsCalendarDay()
   ): Promise<Scholarship[]> {
-    return await this.scholarshipRepository
-      .createQueryBuilder('scholarship')
-      .leftJoinAndSelect('scholarship.agency', 'agency')
-      .leftJoinAndSelect('scholarship.enrollment', 'enrollment')
-      .leftJoinAndSelect('enrollment.student', 'student')
-      .leftJoinAndSelect('enrollment.advisor', 'advisor')
-      .where(`${effectiveEndSql()} = CAST(:today AS date)`)
-      .setParameter('today', referenceDay)
-      .getMany()
-  }
-
-  private async countAllocatedSlots(params: {
-    program: string
-    agencyId?: number
-    allocationId?: number
-    excludingScholarshipId?: number
-  }): Promise<number> {
-    const query = this.scholarshipRepository
-      .createQueryBuilder('scholarship')
-      .innerJoin('scholarship.enrollment', 'enrollment')
-      .where(occupiesSlotSql())
-      .setParameter('today', todayAsCalendarDay())
-      .andWhere('enrollment.enrollment_program = :program', {
-        program: params.program
-      })
-
-    if (params.agencyId) {
-      query.andWhere('scholarship.agency_id = :agencyId', {
-        agencyId: params.agencyId
-      })
-    }
-
-    if (params.allocationId) {
-      query.andWhere('scholarship.allocation_id = :allocationId', {
-        allocationId: params.allocationId
-      })
-    }
-
-    if (params.excludingScholarshipId) {
-      query.andWhere('scholarship.id != :excludingScholarshipId', {
-        excludingScholarshipId: params.excludingScholarshipId
-      })
-    }
-
-    return await query.getCount()
+    return await this.scholarshipRepository.findAllEndingOn(referenceDay)
   }
 
   private async assertEnrollmentHasNoActiveScholarship(
     enrollmentId: number
   ): Promise<void> {
-    const activeScholarships = await this.scholarshipRepository.count({
-      where: occupiesSlotWhere().map((clause) => ({
-        enrollment_id: enrollmentId,
-        ...clause
-      }))
-    })
+    const activeScholarships =
+      await this.scholarshipRepository.countOccupyingSlotByEnrollment(
+        enrollmentId
+      )
 
     if (activeScholarships === 0) return
 
@@ -249,12 +122,14 @@ export class ScholarshipService {
   ): Promise<void> {
     const awardedSlots = getAwardedSlotsByProgram(target, enrollment.program)
 
-    const allocatedSlots = await this.countAllocatedSlots({
-      program: enrollment.program,
-      agencyId: target.type === 'agency' ? target.id : undefined,
-      allocationId: target.type === 'allocation' ? target.id : undefined,
-      excludingScholarshipId
-    })
+    const allocatedSlots = await this.scholarshipRepository.countAllocatedSlots(
+      {
+        program: enrollment.program,
+        agencyId: target.type === 'agency' ? target.id : undefined,
+        allocationId: target.type === 'allocation' ? target.id : undefined,
+        excludingScholarshipId
+      }
+    )
 
     if (hasAvailableSlot({ awardedSlots, allocatedSlots })) return
 
@@ -314,14 +189,15 @@ export class ScholarshipService {
           dto.enrollment_number
         )
 
-      const scholarship = await this.scholarshipRepository.findOneBy({
-        enrollment_id: enrollment.id,
-        agency_id: agency.id,
-        allocation_id: allocation.id,
-        salary: dto.salary,
-        scholarship_starts_at: dto.scholarship_starts_at,
-        scholarship_ends_at: dto.scholarship_ends_at
-      })
+      const scholarship =
+        await this.scholarshipRepository.findDuplicateForCreate({
+          enrollment_id: enrollment.id,
+          agency_id: agency.id,
+          allocation_id: allocation.id,
+          salary: dto.salary,
+          scholarship_starts_at: dto.scholarship_starts_at,
+          scholarship_ends_at: dto.scholarship_ends_at
+        })
 
       if (scholarship) {
         this.logger.warn(
@@ -362,7 +238,7 @@ export class ScholarshipService {
         })
       }
 
-      const newScholarship = this.scholarshipRepository.create({
+      const newScholarship = await this.scholarshipRepository.create({
         agency_id: agency.id,
         allocation_id: allocation.id,
         enrollment_id: enrollment.id,
@@ -371,8 +247,6 @@ export class ScholarshipService {
         extension_ends_at: dto.extension_ends_at,
         salary: dto.salary
       })
-
-      await this.scholarshipRepository.save(newScholarship)
 
       this.logger.log(
         constants.exceptionMessages.scholarship.CREATION_COMPLETED
@@ -408,17 +282,16 @@ export class ScholarshipService {
         student.id
       )
 
-      const idempotencyScholarship = await this.scholarshipRepository.findOneBy(
-        {
+      const idempotencyScholarship =
+        await this.scholarshipRepository.findDuplicateForUpdate({
           enrollment_id: enrollment.id,
-          agency: { id: dto.agency_id },
-          allocation: { id: dto.allocation_id },
+          agency_id: dto.agency_id,
+          allocation_id: dto.allocation_id,
           salary: dto.salary,
           scholarship_starts_at: dto.scholarship_starts_at,
           scholarship_ends_at: dto.scholarship_ends_at,
-          extension_ends_at: dto.extension_ends_at ?? IsNull()
-        }
-      )
+          extension_ends_at: dto.extension_ends_at
+        })
 
       if (idempotencyScholarship) {
         this.logger.warn(
@@ -430,10 +303,11 @@ export class ScholarshipService {
         )
       }
 
-      const scholarship = await this.scholarshipRepository.findOneBy({
-        id: id,
-        enrollment_id: enrollment.id
-      })
+      const scholarship =
+        await this.scholarshipRepository.findByIdAndEnrollmentId(
+          id,
+          enrollment.id
+        )
 
       if (!scholarship) {
         throw new NotFoundException(
@@ -502,8 +376,7 @@ export class ScholarshipService {
         })
       }
 
-      const updatedScholarship = await this.scholarshipRepository.save({
-        id: scholarship.id,
+      return await this.scholarshipRepository.update(scholarship.id, {
         salary: dto.salary,
         extension_ends_at: nextExtensionEndsAt,
         agency_id: dto.agency_id || scholarship.agency_id,
@@ -511,8 +384,6 @@ export class ScholarshipService {
         scholarship_starts_at: nextStartsAt,
         scholarship_ends_at: nextEndsAt
       })
-
-      return updatedScholarship
     } catch (error: any) {
       throw new BadRequestException(
         error.message
@@ -525,8 +396,8 @@ export class ScholarshipService {
   }
 
   async delete(id: number): Promise<boolean> {
-    const removed = await this.scholarshipRepository.delete(id)
-    if (removed.affected === 1) {
+    const affected = await this.scholarshipRepository.deleteById(id)
+    if (affected === 1) {
       return true
     }
 
@@ -537,53 +408,22 @@ export class ScholarshipService {
 
   async deleteAll() {
     this.logger.warn(constants.exceptionMessages.scholarship.DELETE_ALL_STARTED)
-    await this.scholarshipRepository.createQueryBuilder().delete().execute()
-    await this.scholarshipRepository.query(
-      `ALTER SEQUENCE scholarship_id_seq RESTART WITH 1`
-    )
+    await this.scholarshipRepository.deleteAllAndResetSequence()
   }
 
   async countScholarshipsGroupingByCourseAndYear() {
-    try {
-      const result = await this.scholarshipRepository
-        .createQueryBuilder('scholarship')
-        .innerJoin('scholarship.enrollment', 'enrollment')
-        .select([
-          `TO_CHAR(scholarship.scholarship_starts_at, 'YYYY') AS year`,
-          `SUM(CASE WHEN enrollment.enrollment_program = 'MESTRADO' THEN 1 ELSE 0 END) AS masters_count`,
-          `SUM(CASE WHEN enrollment.enrollment_program = 'DOUTORADO' THEN 1 ELSE 0 END) AS phd_count`
-        ])
-        .groupBy(`TO_CHAR(scholarship.scholarship_starts_at, 'YYYY')`)
-        .orderBy(`TO_CHAR(scholarship.scholarship_starts_at, 'YYYY')`, 'ASC')
-        .getRawMany()
-
-      return result
-    } catch (error) {
-      throw new InternalServerErrorException(
-        constants.exceptionMessages.scholarship.COUNT_FAILED
-      )
-    }
+    return await this.countByProgramAndYear()
   }
 
   async countScholarshipsGroupingByCourseAndYearFilteringByAgencyName(
     agencyName: string
   ) {
-    try {
-      const result = await this.scholarshipRepository
-        .createQueryBuilder('scholarship')
-        .innerJoin('scholarship.enrollment', 'enrollment')
-        .innerJoin('scholarship.agency', 'agency')
-        .where('agency.name= :agencyName', { agencyName: agencyName })
-        .select([
-          `TO_CHAR(scholarship.scholarship_starts_at, 'YYYY') AS year`,
-          `SUM(CASE WHEN enrollment.enrollment_program = 'MESTRADO' THEN 1 ELSE 0 END) AS masters_count`,
-          `SUM(CASE WHEN enrollment.enrollment_program = 'DOUTORADO' THEN 1 ELSE 0 END) AS phd_count`
-        ])
-        .groupBy(`TO_CHAR(scholarship.scholarship_starts_at, 'YYYY')`)
-        .orderBy(`TO_CHAR(scholarship.scholarship_starts_at, 'YYYY')`, 'ASC')
-        .getRawMany()
+    return await this.countByProgramAndYear(agencyName)
+  }
 
-      return result
+  private async countByProgramAndYear(agencyName?: string) {
+    try {
+      return await this.scholarshipRepository.countByProgramAndYear(agencyName)
     } catch (error) {
       throw new InternalServerErrorException(
         constants.exceptionMessages.scholarship.COUNT_FAILED
@@ -592,56 +432,30 @@ export class ScholarshipService {
   }
 
   async countOnGoingScholarshipsGroupingByAgencyForCourse(programName: string) {
-    try {
-      const result = await this.scholarshipRepository
-        .createQueryBuilder('scholarship')
-        .innerJoin('scholarship.agency', 'agency')
-        .innerJoin('scholarship.enrollment', 'enrollment')
-        .where(scholarshipStatusPredicateSql(ScholarshipStatusEnum.ON_GOING))
-        .setParameter('today', todayAsCalendarDay())
-        .andWhere('enrollment.enrollment_program = :course', {
-          course: programName
-        })
-        .select([
-          'agency.name as agency_name',
-          'enrollment.enrollment_program as course_name',
-          'COUNT(scholarship.id) as count'
-        ])
-        .groupBy('agency.name, enrollment.enrollment_program')
-        .orderBy('agency.name', 'ASC')
-        .getRawMany()
-
-      return result
-    } catch (error) {
-      throw new InternalServerErrorException(
-        constants.exceptionMessages.scholarship.COUNT_FAILED
-      )
-    }
+    return await this.countByAgencyForProgramAndStatus(
+      programName,
+      ScholarshipStatusEnum.ON_GOING
+    )
   }
 
   async countFinishedScholarshipsGroupingByAgencyForCourse(
     programName: string
   ) {
-    try {
-      const result = await this.scholarshipRepository
-        .createQueryBuilder('scholarship')
-        .innerJoin('scholarship.agency', 'agency')
-        .innerJoin('scholarship.enrollment', 'enrollment')
-        .where(scholarshipStatusPredicateSql(ScholarshipStatusEnum.FINISHED))
-        .setParameter('today', todayAsCalendarDay())
-        .andWhere('enrollment.enrollment_program = :course', {
-          course: programName
-        })
-        .select([
-          'agency.name as agency_name',
-          'enrollment.enrollment_program as course_name',
-          'COUNT(scholarship.id) as count'
-        ])
-        .groupBy('agency.name, enrollment.enrollment_program')
-        .orderBy('agency.name', 'ASC')
-        .getRawMany()
+    return await this.countByAgencyForProgramAndStatus(
+      programName,
+      ScholarshipStatusEnum.FINISHED
+    )
+  }
 
-      return result
+  private async countByAgencyForProgramAndStatus(
+    programName: string,
+    status: ScholarshipStatus
+  ) {
+    try {
+      return await this.scholarshipRepository.countByAgencyForProgramAndStatus(
+        programName,
+        status
+      )
     } catch (error) {
       throw new InternalServerErrorException(
         constants.exceptionMessages.scholarship.COUNT_FAILED
@@ -651,19 +465,7 @@ export class ScholarshipService {
 
   async countScholarshipsGroupingByStatusForAgency(agencyName: string) {
     try {
-      const result = await this.scholarshipRepository
-        .createQueryBuilder('scholarship')
-        .innerJoin('scholarship.agency', 'agency')
-        .where('agency.name = :name', { name: agencyName })
-        .setParameter('today', todayAsCalendarDay())
-        .select([
-          `${derivedStatusSql()} as status`,
-          'COUNT(scholarship.id) as count'
-        ])
-        .groupBy(derivedStatusSql())
-        .getRawMany()
-
-      return result
+      return await this.scholarshipRepository.countByStatusForAgency(agencyName)
     } catch (error) {
       throw new InternalServerErrorException(
         constants.exceptionMessages.scholarship.COUNT_FAILED
@@ -675,36 +477,8 @@ export class ScholarshipService {
     dto: CountScholarshipsAsReportBetweenDatesDto
   ) {
     try {
-      const query = this.scholarshipRepository
-        .createQueryBuilder('scholarship')
-        .innerJoin('scholarship.enrollment', 'enrollment')
-        .innerJoin('scholarship.agency', 'agency')
-        .where('scholarship.scholarship_starts_at <= :searchEnd', {
-          searchEnd: dto.end_period
-        })
-
-        .setParameter('today', todayAsCalendarDay())
-        .select([
-          `agency.name AS agency_name`,
-          `${derivedStatusSql()} AS status`,
-          `SUM(CASE WHEN enrollment.enrollment_program = 'MESTRADO' THEN 1 ELSE 0 END) AS masters_count`,
-          `SUM(CASE WHEN enrollment.enrollment_program = 'DOUTORADO' THEN 1 ELSE 0 END) AS phd_count`
-        ])
-        .groupBy(`agency.name`)
-        .addGroupBy(derivedStatusSql())
-
-      query.andWhere(
-        'COALESCE(scholarship.extension_ends_at, scholarship.scholarship_ends_at) >= :searchStart',
-        {
-          searchStart: dto.start_period
-        }
-      )
-
-      const result = await query.getRawMany()
-
-      return result
+      return await this.scholarshipRepository.countAsReportBetweenDates(dto)
     } catch (error) {
-      console.error(error)
       throw new InternalServerErrorException(
         constants.exceptionMessages.scholarship.COUNT_FAILED
       )
@@ -715,56 +489,8 @@ export class ScholarshipService {
     filters: ScholarshipFilters
   ): Promise<string[]> {
     try {
-      const query = this.scholarshipRepository
-        .createQueryBuilder('scholarship')
-        .innerJoin('scholarship.enrollment', 'enrollment')
-        .innerJoin('enrollment.student', 'student')
-        .leftJoin('scholarship.agency', 'agency')
-        .leftJoin('scholarship.allocation', 'allocation')
-        .leftJoin('enrollment.advisor', 'advisor')
-        .select('DISTINCT student.email', 'email')
-
-      if (filters?.scholarshipStatus && filters?.scholarshipStatus !== 'ALL') {
-        const statusPredicate = scholarshipStatusPredicateSql(
-          filters.scholarshipStatus
-        )
-
-        if (statusPredicate) {
-          query
-            .andWhere(statusPredicate)
-            .setParameter('today', todayAsCalendarDay())
-        }
-      }
-
-      if (filters?.agencyName && filters?.agencyName !== 'ALL') {
-        query.andWhere('agency.name LIKE :agencyName', {
-          agencyName: `%${filters.agencyName}%`
-        })
-      }
-
-      if (filters?.allocationName && filters?.allocationName !== 'ALL') {
-        query.andWhere('allocation.name LIKE :allocationName', {
-          allocationName: `%${filters.allocationName}%`
-        })
-      }
-
-      if (filters?.programName && filters?.programName !== 'ALL') {
-        query.andWhere('enrollment.enrollment_program LIKE :programName', {
-          programName: `%${filters.programName}%`
-        })
-      }
-
-      if (filters?.advisorName && filters?.advisorName !== 'ALL') {
-        query.andWhere('advisor.name LIKE :advisorName', {
-          advisorName: `%${filters.advisorName}%`
-        })
-      }
-
-      const rawResults = await query.getRawMany()
-
-      return rawResults.map((row) => row.email)
+      return await this.scholarshipRepository.findDistinctStudentEmails(filters)
     } catch (error) {
-      console.error('Erro ao buscar e-mails:', error)
       throw new InternalServerErrorException('Falha ao gerar lista de e-mails.')
     }
   }
@@ -772,32 +498,10 @@ export class ScholarshipService {
   async findForUpdate(
     scholarship: ProcessedScholarship
   ): Promise<Partial<Scholarship>> {
-    const searchQuery = this.scholarshipRepository
-      .createQueryBuilder('scholarship')
-      .select([
-        'scholarship.id',
-        'scholarship.scholarship_starts_at',
-        'scholarship.scholarship_ends_at',
-        'scholarship.extension_ends_at',
-        'student.id',
-        'student.name',
-        'student.tax_id',
-        'student.email',
-        'agency.name',
-        'enrollment.enrollment_program'
-      ])
-      .leftJoin('scholarship.enrollment', 'enrollment')
-      .leftJoin('enrollment.student', 'student')
-      .leftJoin('scholarship.agency', 'agency')
-
-      .where('enrollment.enrollment_program = :program', {
-        program: scholarship.enrollment.enrollment_program
-      })
-      .andWhere('agency.name = :agency', { agency: scholarship.agency })
-      .andWhere('student.name ILike :studentName', {
-        studentName: `%${scholarship.student.name}%`
-      })
-
-    return searchQuery.getOne()
+    return await this.scholarshipRepository.findMatchForCsvUpdate({
+      program: scholarship.enrollment.enrollment_program,
+      agencyName: scholarship.agency,
+      studentName: scholarship.student.name
+    })
   }
 }

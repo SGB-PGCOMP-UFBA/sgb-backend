@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   compileFeatureModule,
-  expectDatabaseModuleToBind
+  expectDatabaseModuleToBind,
+  expectDatabaseModuleToRegisterEntity
 } from '@/common/testing/wiring'
 import { AdminModule } from '@/admin/admin.module'
 import { AdminService } from '@/admin/admin.service'
@@ -25,5 +26,6 @@ describe('AdminModule', () => {
 
   it('o DatabaseModule real amarra e exporta o AdminRepository', () => {
     expectDatabaseModuleToBind(AdminRepository, TypeOrmAdminRepository)
+    expectDatabaseModuleToRegisterEntity(Admin)
   })
 })

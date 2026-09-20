@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   compileFeatureModule,
-  expectDatabaseModuleToBind
+  expectDatabaseModuleToBind,
+  expectDatabaseModuleToRegisterEntity
 } from '@/common/testing/wiring'
 import { EmbedNotificationModule } from '@/embed-notification/embed-notification.module'
 import { EmbedNotificationService } from '@/embed-notification/embed-notification.service'
@@ -35,5 +36,6 @@ describe('EmbedNotificationModule', () => {
       EmbedNotificationRepository,
       TypeOrmEmbedNotificationRepository
     )
+    expectDatabaseModuleToRegisterEntity(EmbedNotification)
   })
 })

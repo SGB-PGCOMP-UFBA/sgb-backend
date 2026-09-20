@@ -4,7 +4,6 @@ import {
   makeScholarship,
   makeStudent
 } from '@/common/testing/factories'
-import { createRepositoryMock } from '@/common/testing/repository.mock'
 import { ListUpdatesFromImport } from '@/data-manager/dtos/list-updates.dto'
 import {
   ProcessedScholarship,
@@ -253,7 +252,7 @@ describe('UpdateScholarshipCsvUtil.discriminateScholarshipMatchesForUpdateForIns
   const INICIO = local(2026, 3, 1)
   const FIM = local(2028, 2, 29)
 
-  let repository: ReturnType<typeof createRepositoryMock>
+  let repository: { updateFields: ReturnType<typeof vi.fn> }
   let studentService: { update: ReturnType<typeof vi.fn> }
   let listUpdates: ListUpdatesFromImport[]
 
@@ -292,7 +291,7 @@ describe('UpdateScholarshipCsvUtil.discriminateScholarshipMatchesForUpdateForIns
     return UpdateScholarshipCsvUtil.discriminateScholarshipMatchesForUpdateForInsert(
       dataObject,
       matches as never,
-      repository,
+      repository as never,
       studentService as never,
       listUpdates
     )
@@ -301,9 +300,7 @@ describe('UpdateScholarshipCsvUtil.discriminateScholarshipMatchesForUpdateForIns
   beforeEach(() => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-06-15T12:00:00Z'))
-    repository = createRepositoryMock({
-      update: vi.fn().mockResolvedValue({ affected: 1 })
-    })
+    repository = { updateFields: vi.fn().mockResolvedValue(undefined) }
     studentService = { update: vi.fn().mockResolvedValue({}) }
     listUpdates = []
   })
@@ -318,7 +315,7 @@ describe('UpdateScholarshipCsvUtil.discriminateScholarshipMatchesForUpdateForIns
     const resultado = run([nova], [null])
 
     expect(resultado.newScholarshipsToAprove).toEqual([nova])
-    expect(repository.update).not.toHaveBeenCalled()
+    expect(repository.updateFields).not.toHaveBeenCalled()
     expect(studentService.update).not.toHaveBeenCalled()
     expect(listUpdates).toEqual([])
   })
@@ -329,7 +326,7 @@ describe('UpdateScholarshipCsvUtil.discriminateScholarshipMatchesForUpdateForIns
     expect(resultado.newScholarshipsToAprove).toEqual([])
     expect(resultado.scholarshipsToUpdatePromisses).toHaveLength(0)
     expect(resultado.studentsToUpdatePromisses).toHaveLength(0)
-    expect(repository.update).not.toHaveBeenCalled()
+    expect(repository.updateFields).not.toHaveBeenCalled()
     expect(listUpdates).toEqual([])
   })
 
@@ -376,8 +373,8 @@ describe('UpdateScholarshipCsvUtil.discriminateScholarshipMatchesForUpdateForIns
 
     run([processed({ startsAt: novoInicio })], [match()])
 
-    const [criterio, payload] = repository.update.mock.calls[0]
-    expect(criterio).toEqual({ id: 7 })
+    const [id, payload] = repository.updateFields.mock.calls[0]
+    expect(id).toBe(7)
     expect(payload.scholarship_starts_at).toEqual(novoInicio)
     expect(payload.scholarship_ends_at).toBeUndefined()
     expect(listUpdates[0].description).toContain('Início da Bolsa')
@@ -388,7 +385,7 @@ describe('UpdateScholarshipCsvUtil.discriminateScholarshipMatchesForUpdateForIns
 
     run([processed({ endsAt: novoFim })], [match()])
 
-    const [, payload] = repository.update.mock.calls[0]
+    const [, payload] = repository.updateFields.mock.calls[0]
     expect(payload.scholarship_ends_at).toEqual(novoFim)
     expect(payload.scholarship_starts_at).toBeUndefined()
     expect(listUpdates[0].description).toContain('Final da Bolsa')
@@ -426,7 +423,7 @@ describe('UpdateScholarshipCsvUtil.discriminateScholarshipMatchesForUpdateForIns
       ]
     )
 
-    const [, payload] = repository.update.mock.calls[0]
+    const [, payload] = repository.updateFields.mock.calls[0]
     expect(payload.scholarship_ends_at).toEqual(local(2028, 2, 29))
     expect(payload).not.toHaveProperty('status')
   })
@@ -473,8 +470,8 @@ describe('UpdateScholarshipCsvUtil.discriminateScholarshipMatchesForUpdateForIns
     )
 
     expect(resultado.newScholarshipsToAprove).toEqual([semMatch])
-    expect(repository.update).toHaveBeenCalledTimes(1)
-    expect(repository.update.mock.calls[0][0]).toEqual({ id: 99 })
+    expect(repository.updateFields).toHaveBeenCalledTimes(1)
+    expect(repository.updateFields.mock.calls[0][0]).toEqual(99)
   })
 
   it('quando vários registros mudaram, devolve uma promise de update de bolsa para cada um', () => {

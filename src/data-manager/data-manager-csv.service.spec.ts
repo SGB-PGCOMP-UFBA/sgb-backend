@@ -98,13 +98,13 @@ describe('DataManagerCsvService', () => {
   let scholarshipService: any
   let studentService: any
   let pendingScholarshipService: any
-  let scholarshipRepository: ReturnType<typeof createRepositoryMock>
+  let scholarshipRepository: { updateFields: ReturnType<typeof vi.fn> }
   let service: DataManagerCsvService
 
   beforeEach(() => {
-    scholarshipRepository = createRepositoryMock({
-      update: vi.fn().mockResolvedValue({ affected: 1 })
-    })
+    scholarshipRepository = {
+      updateFields: vi.fn().mockResolvedValue(undefined)
+    }
     enrollmentService = {
       create: vi.fn().mockResolvedValue({}),
       deleteAll: vi.fn().mockResolvedValue(undefined)
@@ -113,8 +113,7 @@ describe('DataManagerCsvService', () => {
       create: vi.fn().mockResolvedValue({}),
       deleteAll: vi.fn().mockResolvedValue(undefined),
       findAll: vi.fn().mockResolvedValue([]),
-      findForUpdate: vi.fn().mockResolvedValue(null),
-      getRepository: vi.fn(() => scholarshipRepository)
+      findForUpdate: vi.fn().mockResolvedValue(null)
     }
     studentService = {
       createOrReturnExistent: vi.fn().mockResolvedValue({}),
@@ -127,7 +126,8 @@ describe('DataManagerCsvService', () => {
       enrollmentService,
       scholarshipService,
       studentService,
-      pendingScholarshipService
+      pendingScholarshipService,
+      scholarshipRepository as never
     )
   })
 
@@ -716,7 +716,7 @@ describe('DataManagerCsvService', () => {
       const resultado = await service.updateScholarshipsDataFromCsv(csvFile())
 
       expect(pendingScholarshipService.create).not.toHaveBeenCalled()
-      expect(scholarshipRepository.update).not.toHaveBeenCalled()
+      expect(scholarshipRepository.updateFields).not.toHaveBeenCalled()
       expect(resultado.listUpdatesFromImport).toEqual([])
     })
 
@@ -728,8 +728,8 @@ describe('DataManagerCsvService', () => {
 
       const resultado = await service.updateScholarshipsDataFromCsv(csvFile())
 
-      expect(scholarshipRepository.update).toHaveBeenCalledWith(
-        { id: 7 },
+      expect(scholarshipRepository.updateFields).toHaveBeenCalledWith(
+        7,
         expect.objectContaining({ scholarship_ends_at: local(2028, 2, 28) })
       )
       expect(resultado.listUpdatesFromImport[0].description).toContain(

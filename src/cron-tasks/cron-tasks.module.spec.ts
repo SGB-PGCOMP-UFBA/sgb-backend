@@ -1,6 +1,8 @@
-import { Global, Module } from '@nestjs/common'
-import { TypeOrmModule } from '@nestjs/typeorm'
-import { EnvironmentEnum, env } from '@/config/env.validation'
+import { describe, expect, it } from 'vitest'
+import { compileFeatureModule } from '@/common/testing/wiring'
+import { CronTasksModule } from '@/cron-tasks/cron-tasks.module'
+import { ScholarshipEndingReminderService } from '@/cron-tasks/scholarship-ending-reminder.service'
+import { ScholarshipFinalizerService } from '@/cron-tasks/scholarship-finalizer.service'
 import { Admin } from '@/admin/entities/admin.entity'
 import { AdminRepository } from '@/admin/repositories/admin.repository'
 import { TypeOrmAdminRepository } from '@/admin/repositories/typeorm-admin.repository'
@@ -16,34 +18,28 @@ import { TypeOrmAllocationRepository } from '@/allocation/repositories/typeorm-a
 import { EmbedNotification } from '@/embed-notification/entities/embed-notification.entity'
 import { EmbedNotificationRepository } from '@/embed-notification/repositories/embed-notification.repository'
 import { TypeOrmEmbedNotificationRepository } from '@/embed-notification/repositories/typeorm-embed-notification.repository'
-import { Student } from '@/student/entities/student.entity'
-import { StudentRepository } from '@/student/repositories/student.repository'
-import { TypeOrmStudentRepository } from '@/student/repositories/typeorm-student.repository'
 import { Enrollment } from '@/enrollment/entities/enrollment.entity'
 import { EnrollmentRepository } from '@/enrollment/repositories/enrollment.repository'
 import { TypeOrmEnrollmentRepository } from '@/enrollment/repositories/typeorm-enrollment.repository'
-import { PendingScholarship } from '@/pending-scholarship/entities/pending-scholarship.entity'
-import { PendingScholarshipRepository } from '@/pending-scholarship/repositories/pending-scholarship.repository'
-import { TypeOrmPendingScholarshipRepository } from '@/pending-scholarship/repositories/typeorm-pending-scholarship.repository'
 import { Scholarship } from '@/scholarship/entities/scholarship.entity'
 import { ScholarshipRepository } from '@/scholarship/repositories/scholarship.repository'
 import { TypeOrmScholarshipRepository } from '@/scholarship/repositories/typeorm-scholarship.repository'
+import { Student } from '@/student/entities/student.entity'
+import { StudentRepository } from '@/student/repositories/student.repository'
+import { TypeOrmStudentRepository } from '@/student/repositories/typeorm-student.repository'
 
-const isProduction = env.NODE_ENV === EnvironmentEnum.PROD
-
-const entities = [
+const ENTITIES = [
   Admin,
   Advisor,
   Agency,
   Allocation,
   EmbedNotification,
   Enrollment,
-  PendingScholarship,
   Scholarship,
   Student
 ]
 
-const repositories = [
+const BINDINGS = [
   { provide: AdminRepository, useClass: TypeOrmAdminRepository },
   { provide: AdvisorRepository, useClass: TypeOrmAdvisorRepository },
   { provide: AgencyRepository, useClass: TypeOrmAgencyRepository },
@@ -53,34 +49,23 @@ const repositories = [
     useClass: TypeOrmEmbedNotificationRepository
   },
   { provide: EnrollmentRepository, useClass: TypeOrmEnrollmentRepository },
-  {
-    provide: PendingScholarshipRepository,
-    useClass: TypeOrmPendingScholarshipRepository
-  },
   { provide: ScholarshipRepository, useClass: TypeOrmScholarshipRepository },
   { provide: StudentRepository, useClass: TypeOrmStudentRepository }
 ]
 
-/**
- * É @Global para que um service possa depender do repositório de outro
- * domínio sem que o módulo dele importe o módulo do outro.
- */
-@Global()
-@Module({
-  imports: [
-    TypeOrmModule.forRoot({
-      autoLoadEntities: true,
-      type: 'postgres',
-      url: env.DATABASE_URL,
-      ssl: isProduction,
-      extra: {
-        ssl: isProduction ? { rejectUnauthorized: false } : false
-      },
-      synchronize: env.DB_SYNCHRONIZE
-    }),
-    TypeOrmModule.forFeature(entities)
-  ],
-  providers: repositories,
-  exports: repositories.map((repository) => repository.provide)
+describe('CronTasksModule', () => {
+  it('monta os dois crons no container', async () => {
+    const moduleRef = await compileFeatureModule(
+      CronTasksModule,
+      ENTITIES,
+      BINDINGS
+    )
+
+    expect(moduleRef.get(ScholarshipFinalizerService)).toBeInstanceOf(
+      ScholarshipFinalizerService
+    )
+    expect(moduleRef.get(ScholarshipEndingReminderService)).toBeInstanceOf(
+      ScholarshipEndingReminderService
+    )
+  })
 })
-export class DatabaseModule {}

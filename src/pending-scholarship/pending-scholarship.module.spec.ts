@@ -1,19 +1,18 @@
 import { describe, it } from 'vitest'
-import { expectDatabaseModuleToBind } from '@/common/testing/wiring'
+import {
+  expectDatabaseModuleToBind,
+  expectDatabaseModuleToRegisterEntity
+} from '@/common/testing/wiring'
+import { PendingScholarship } from '@/pending-scholarship/entities/pending-scholarship.entity'
 import { PendingScholarshipRepository } from '@/pending-scholarship/repositories/pending-scholarship.repository'
 import { TypeOrmPendingScholarshipRepository } from '@/pending-scholarship/repositories/typeorm-pending-scholarship.repository'
 
-/**
- * Sem o teste de montagem no container que as outras features têm: este módulo
- * importa o ScholarshipModule, que ainda faz TypeOrmModule.forFeature e por
- * isso exige a DataSource real. Volta a ser possível quando scholarship
- * ganhar repositório.
- */
 describe('PendingScholarshipModule', () => {
-  it('o DatabaseModule real amarra e exporta o PendingScholarshipRepository', () => {
+  it('o DatabaseModule real amarra o repositório e registra a entidade', () => {
     expectDatabaseModuleToBind(
       PendingScholarshipRepository,
       TypeOrmPendingScholarshipRepository
     )
+    expectDatabaseModuleToRegisterEntity(PendingScholarship)
   })
 })

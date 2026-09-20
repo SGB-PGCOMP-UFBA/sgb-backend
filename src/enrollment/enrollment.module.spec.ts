@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   compileFeatureModule,
-  expectDatabaseModuleToBind
+  expectDatabaseModuleToBind,
+  expectDatabaseModuleToRegisterEntity
 } from '@/common/testing/wiring'
 import { EnrollmentModule } from '@/enrollment/enrollment.module'
 import { EnrollmentService } from '@/enrollment/enrollment.service'
@@ -45,5 +46,6 @@ describe('EnrollmentModule', () => {
       EnrollmentRepository,
       TypeOrmEnrollmentRepository
     )
+    expectDatabaseModuleToRegisterEntity(Enrollment)
   })
 })

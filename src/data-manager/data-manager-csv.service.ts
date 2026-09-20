@@ -13,6 +13,7 @@ import { parseDate } from '@/common/utils/date.util'
 import { isNotEmpty } from '@/common/utils/string.util'
 import { UpdateScholarshipCsvUtil } from './update-scholarship-csv.util'
 import { Scholarship } from '@/scholarship/entities/scholarship.entity'
+import { ScholarshipRepository } from '@/scholarship/repositories/scholarship.repository'
 import { ListUpdatesFromImport } from '@/data-manager/dtos/list-updates.dto'
 import { PendingScholarshipService } from '@/pending-scholarship/pending-scholarship.service'
 import { CreatePendingScholarshipDto } from '@/pending-scholarship/dtos/create-pending-scholarship.dto'
@@ -26,7 +27,8 @@ export class DataManagerCsvService {
     private enrollmentService: EnrollmentService,
     private scholarshipService: ScholarshipService,
     private studentService: StudentService,
-    private readonly pendingScholarshipService: PendingScholarshipService
+    private readonly pendingScholarshipService: PendingScholarshipService,
+    private readonly scholarshipRepository: ScholarshipRepository
   ) {}
 
   async exportDataToCsv() {
@@ -389,7 +391,6 @@ export class DataManagerCsvService {
 
   async updateScholarshipsDataFromCsv(file: File) {
     const listUpdatesFromImport: ListUpdatesFromImport[] = []
-    const scholarshipRepository = this.scholarshipService.getRepository()
     const dataFile = await this.processImportedFile(file)
     const dataObject =
       UpdateScholarshipCsvUtil.processDataToUpdateFile(dataFile)
@@ -413,7 +414,7 @@ export class DataManagerCsvService {
       UpdateScholarshipCsvUtil.discriminateScholarshipMatchesForUpdateForInsert(
         dataObject,
         scholarshipMatches,
-        scholarshipRepository,
+        this.scholarshipRepository,
         this.studentService,
         listUpdatesFromImport
       )

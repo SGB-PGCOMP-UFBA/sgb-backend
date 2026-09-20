@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   compileFeatureModule,
-  expectDatabaseModuleToBind
+  expectDatabaseModuleToBind,
+  expectDatabaseModuleToRegisterEntity
 } from '@/common/testing/wiring'
 import { AllocationModule } from '@/allocation/allocation.module'
 import { AllocationService } from '@/allocation/allocation.service'
@@ -28,5 +29,6 @@ describe('AllocationModule', () => {
       AllocationRepository,
       TypeOrmAllocationRepository
     )
+    expectDatabaseModuleToRegisterEntity(Allocation)
   })
 })

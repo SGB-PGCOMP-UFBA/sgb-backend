@@ -10,10 +10,7 @@ import {
   makeScholarship,
   makeStudent
 } from '@/common/testing/factories'
-import {
-  createQueryBuilderMock,
-  createRepositoryMock
-} from '@/common/testing/repository.mock'
+import { ScholarshipRepository } from '@/scholarship/repositories/scholarship.repository'
 import { ScholarshipService } from './scholarship.service'
 
 const AGENCY = makeAgency()
@@ -34,12 +31,33 @@ const VALID_DTO = {
   scholarship_ends_at: new Date('2026-12-01')
 } as never
 
-function rowsForCount(total: number) {
-  return Array.from({ length: total }, (_, index) => ({ id: index + 1 }))
+function createScholarshipRepositoryMock() {
+  return {
+    findAllWithRelations: vi.fn().mockResolvedValue([]),
+    findPaginated: vi.fn().mockResolvedValue({ items: [], meta: {} }),
+    findAllOccupyingSlot: vi.fn().mockResolvedValue([]),
+    findAllEndingOn: vi.fn().mockResolvedValue([]),
+    findByIdAndEnrollmentId: vi.fn().mockResolvedValue(null),
+    findDuplicateForCreate: vi.fn().mockResolvedValue(null),
+    findDuplicateForUpdate: vi.fn().mockResolvedValue(null),
+    findMatchForCsvUpdate: vi.fn().mockResolvedValue(null),
+    findDistinctStudentEmails: vi.fn().mockResolvedValue([]),
+    countOccupyingSlotByEnrollment: vi.fn().mockResolvedValue(0),
+    countAllocatedSlots: vi.fn().mockResolvedValue(0),
+    countByProgramAndYear: vi.fn().mockResolvedValue([]),
+    countByAgencyForProgramAndStatus: vi.fn().mockResolvedValue([]),
+    countByStatusForAgency: vi.fn().mockResolvedValue([]),
+    countAsReportBetweenDates: vi.fn().mockResolvedValue([]),
+    create: vi.fn(async (data: unknown) => data),
+    update: vi.fn(async (_id: number, data: unknown) => data),
+    updateFields: vi.fn().mockResolvedValue(undefined),
+    deleteById: vi.fn().mockResolvedValue(1),
+    deleteAllAndResetSequence: vi.fn().mockResolvedValue(undefined)
+  } satisfies Record<keyof ScholarshipRepository, unknown>
 }
 
 describe('ScholarshipService', () => {
-  let repository: ReturnType<typeof createRepositoryMock>
+  let repository: ReturnType<typeof createScholarshipRepositoryMock>
   let agencyService: any
   let allocationService: any
   let enrollmentService: any
@@ -47,7 +65,7 @@ describe('ScholarshipService', () => {
   let service: ScholarshipService
 
   beforeEach(() => {
-    repository = createRepositoryMock()
+    repository = createScholarshipRepositoryMock()
     agencyService = {
       findOneByName: vi.fn().mockResolvedValue(AGENCY),
       findOneById: vi.fn().mockResolvedValue(AGENCY)
@@ -65,7 +83,7 @@ describe('ScholarshipService', () => {
     studentService = { findByEmail: vi.fn().mockResolvedValue(makeStudent()) }
 
     service = new ScholarshipService(
-      repository,
+      repository as unknown as ScholarshipRepository,
       agencyService,
       allocationService,
       enrollmentService,
@@ -74,9 +92,7 @@ describe('ScholarshipService', () => {
   })
 
   function withAllocatedSlots(total: number) {
-    repository.createQueryBuilder.mockReturnValue(
-      createQueryBuilderMock(rowsForCount(total))
-    )
+    repository.countAllocatedSlots.mockResolvedValue(total)
   }
 
   describe('create', () => {
@@ -85,7 +101,7 @@ describe('ScholarshipService', () => {
 
       await service.create(VALID_DTO)
 
-      expect(repository.save).toHaveBeenCalledWith(
+      expect(repository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           agency_id: AGENCY.id,
           allocation_id: ALLOCATION.id,
@@ -100,7 +116,7 @@ describe('ScholarshipService', () => {
       await expect(service.create(VALID_DTO)).rejects.toBeInstanceOf(
         BadRequestException
       )
-      expect(repository.save).not.toHaveBeenCalled()
+      expect(repository.create).not.toHaveBeenCalled()
     })
 
     it('quando a agência está lotada, explica no erro quantas vagas existem e quantas estão alocadas', async () => {
@@ -127,33 +143,33 @@ describe('ScholarshipService', () => {
         makeAllocation({ masters_degree_awarded_scholarships: 2 })
       )
 
-      repository.createQueryBuilder
-        .mockReturnValueOnce(createQueryBuilderMock(rowsForCount(1)))
-        .mockReturnValueOnce(createQueryBuilderMock(rowsForCount(2)))
+      repository.countAllocatedSlots
+        .mockResolvedValueOnce(1)
+        .mockResolvedValueOnce(2)
 
       await expect(service.create(VALID_DTO)).rejects.toThrow(
         /A alocação REMOTO/
       )
-      expect(repository.save).not.toHaveBeenCalled()
+      expect(repository.create).not.toHaveBeenCalled()
     })
 
     it('quando a matrícula já tem bolsa vigente, recusa cadastrar outra', async () => {
       withAllocatedSlots(3)
-      repository.count.mockResolvedValue(1)
+      repository.countOccupyingSlotByEnrollment.mockResolvedValue(1)
 
       await expect(service.create(VALID_DTO)).rejects.toThrow(
         /já possui uma bolsa vigente/
       )
-      expect(repository.save).not.toHaveBeenCalled()
+      expect(repository.create).not.toHaveBeenCalled()
     })
 
     it('quando a matrícula não tem bolsa vigente, deixa cadastrar', async () => {
       withAllocatedSlots(3)
-      repository.count.mockResolvedValue(0)
+      repository.countOccupyingSlotByEnrollment.mockResolvedValue(0)
 
       await service.create(VALID_DTO)
 
-      expect(repository.save).toHaveBeenCalled()
+      expect(repository.create).toHaveBeenCalled()
     })
 
     it('quando a bolsa é cadastrada com o período já encerrado, não valida cota e salva', async () => {
@@ -165,7 +181,7 @@ describe('ScholarshipService', () => {
         scholarship_ends_at: daysFromToday(-1)
       } as never)
 
-      expect(repository.save).toHaveBeenCalled()
+      expect(repository.create).toHaveBeenCalled()
     })
 
     it('quando a bolsa é cadastrada para começar no futuro, valida cota mesmo sem ter começado', async () => {
@@ -177,11 +193,11 @@ describe('ScholarshipService', () => {
           ...notStartedScholarship()
         } as never)
       ).rejects.toThrow(/já alocada/)
-      expect(repository.save).not.toHaveBeenCalled()
+      expect(repository.create).not.toHaveBeenCalled()
     })
 
     it('quando já existe bolsa com os mesmos dados, recusa a criação', async () => {
-      repository.findOneBy.mockResolvedValue({ id: 1 })
+      repository.findDuplicateForCreate.mockResolvedValue({ id: 1 })
 
       await expect(service.create(VALID_DTO)).rejects.toThrow(
         /Já existe uma bolsa/
@@ -197,7 +213,7 @@ describe('ScholarshipService', () => {
           scholarship_ends_at: new Date('2025-01-01')
         } as never)
       ).rejects.toBeInstanceOf(BadRequestException)
-      expect(repository.save).not.toHaveBeenCalled()
+      expect(repository.create).not.toHaveBeenCalled()
     })
 
     it('quando o mestrado passa de 2 anos de duração, recusa a criação', async () => {
@@ -224,9 +240,7 @@ describe('ScholarshipService', () => {
     const EXISTING = makeScholarship({ id: 900 })
 
     beforeEach(() => {
-      repository.findOneBy
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(EXISTING)
+      repository.findByIdAndEnrollmentId.mockResolvedValue(EXISTING)
     })
 
     it('quando a bolsa é movida para uma agência sem vaga, bloqueia a mudança e não salva', async () => {
@@ -245,20 +259,18 @@ describe('ScholarshipService', () => {
           agency_id: 2
         } as never)
       ).rejects.toThrow(/A agência CNPQ/)
-      expect(repository.save).not.toHaveBeenCalled()
+      expect(repository.update).not.toHaveBeenCalled()
     })
 
     it('quando a bolsa é atualizada, exclui a própria bolsa da contagem de vagas ocupadas', async () => {
-      const queryBuilder = createQueryBuilderMock(rowsForCount(2))
-      repository.createQueryBuilder.mockReturnValue(queryBuilder)
+      withAllocatedSlots(2)
 
       await service.update(900, UPDATE_DTO)
 
-      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
-        'scholarship.id != :excludingScholarshipId',
-        { excludingScholarshipId: EXISTING.id }
+      expect(repository.countAllocatedSlots).toHaveBeenCalledWith(
+        expect.objectContaining({ excludingScholarshipId: EXISTING.id })
       )
-      expect(repository.save).toHaveBeenCalled()
+      expect(repository.update).toHaveBeenCalled()
     })
 
     it('quando a bolsa passa a ter o período encerrado, não valida cota e salva', async () => {
@@ -271,24 +283,64 @@ describe('ScholarshipService', () => {
       } as never)
 
       expect(agencyService.findOneById).not.toHaveBeenCalled()
-      expect(repository.save).toHaveBeenCalled()
+      expect(repository.update).toHaveBeenCalled()
     })
 
     it('quando o PATCH não informa a prorrogação, preserva a data que já estava gravada', async () => {
       const extended = makeScholarship({ id: 900, ...extendedScholarship() })
-      repository.findOneBy
-        .mockReset()
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(extended)
+      repository.findByIdAndEnrollmentId.mockResolvedValue(extended)
       withAllocatedSlots(0)
 
       await service.update(900, UPDATE_DTO)
 
-      expect(repository.save).toHaveBeenCalledWith(
+      expect(repository.update).toHaveBeenCalledWith(
+        900,
         expect.objectContaining({
           extension_ends_at: extended.extension_ends_at
         })
       )
+    })
+
+    it('quando já existe bolsa idêntica, recusa a atualização', async () => {
+      repository.findDuplicateForUpdate.mockResolvedValue({ id: 1 })
+
+      await expect(service.update(900, UPDATE_DTO)).rejects.toThrow(
+        /Já existe uma bolsa/
+      )
+      expect(repository.update).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('relatórios', () => {
+    it('as duas contagens por ano usam a mesma consulta, com e sem filtro de agência', async () => {
+      await service.countScholarshipsGroupingByCourseAndYear()
+      await service.countScholarshipsGroupingByCourseAndYearFilteringByAgencyName(
+        'CAPES'
+      )
+
+      expect(repository.countByProgramAndYear).toHaveBeenNthCalledWith(
+        1,
+        undefined
+      )
+      expect(repository.countByProgramAndYear).toHaveBeenNthCalledWith(
+        2,
+        'CAPES'
+      )
+    })
+
+    it('as contagens por agência diferem apenas no status pedido', async () => {
+      await service.countOnGoingScholarshipsGroupingByAgencyForCourse(
+        'MESTRADO'
+      )
+      await service.countFinishedScholarshipsGroupingByAgencyForCourse(
+        'MESTRADO'
+      )
+
+      const [primeira, segunda] =
+        repository.countByAgencyForProgramAndStatus.mock.calls
+      expect(primeira[0]).toBe('MESTRADO')
+      expect(segunda[0]).toBe('MESTRADO')
+      expect(primeira[1]).not.toBe(segunda[1])
     })
   })
 })

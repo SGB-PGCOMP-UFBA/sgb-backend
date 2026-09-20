@@ -1,8 +1,8 @@
 import { format } from 'date-fns'
 import { Scholarship } from '@/scholarship/entities/scholarship.entity'
+import { ScholarshipRepository } from '@/scholarship/repositories/scholarship.repository'
 import { Student } from '@/student/entities/student.entity'
 import { StudentService } from '@/student/student.service'
-import { Repository, UpdateResult } from 'typeorm'
 import { ListUpdatesFromImport } from '@/data-manager/dtos/list-updates.dto'
 import { isSameCalendarDay } from '@/scholarship/utils/scholarship-status.util'
 
@@ -133,12 +133,12 @@ export class UpdateScholarshipCsvUtil {
   static discriminateScholarshipMatchesForUpdateForInsert(
     dataObject: ProcessedScholarship[],
     scholarshipMatches: Partial<Scholarship>[],
-    scholarshipRepository: Repository<Scholarship>,
+    scholarshipRepository: ScholarshipRepository,
     studentService: StudentService,
     listUpdatesFromImport: ListUpdatesFromImport[]
   ) {
     const studentsToUpdatePromisses: Promise<Student>[] = []
-    const scholarshipsToUpdatePromisses: Promise<UpdateResult>[] = []
+    const scholarshipsToUpdatePromisses: Promise<void>[] = []
     const newScholarshipsToAprove: ProcessedScholarship[] = []
 
     scholarshipMatches.forEach((match, index) => {
@@ -191,8 +191,8 @@ export class UpdateScholarshipCsvUtil {
       }
 
       scholarshipsToUpdatePromisses.push(
-        scholarshipRepository.update(
-          { id: objScholarshipUpdate.id },
+        scholarshipRepository.updateFields(
+          objScholarshipUpdate.id,
           objScholarshipUpdate
         )
       )

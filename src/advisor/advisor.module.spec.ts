@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   compileFeatureModule,
-  expectDatabaseModuleToBind
+  expectDatabaseModuleToBind,
+  expectDatabaseModuleToRegisterEntity
 } from '@/common/testing/wiring'
 import { AdvisorModule } from '@/advisor/advisor.module'
 import { AdvisorService } from '@/advisor/advisor.service'
@@ -25,5 +26,6 @@ describe('AdvisorModule', () => {
 
   it('o DatabaseModule real amarra e exporta o AdvisorRepository', () => {
     expectDatabaseModuleToBind(AdvisorRepository, TypeOrmAdvisorRepository)
+    expectDatabaseModuleToRegisterEntity(Advisor)
   })
 })
