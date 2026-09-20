@@ -9,7 +9,7 @@ import { Admin } from '@/admin/entities/admin.entity'
 import { getDatePlusDays } from '@/common/utils/date.util'
 
 @Injectable()
-export class NotificationService {
+export class ScholarshipEndingReminderService {
   constructor(
     private adminService: AdminService,
     private emailService: EmailService,
@@ -17,7 +17,7 @@ export class NotificationService {
     private scholarshipService: ScholarshipService
   ) {}
 
-  private readonly logger = new Logger(NotificationService.name)
+  private readonly logger = new Logger(ScholarshipEndingReminderService.name)
 
   private readonly notificationDates = [
     { days: 365, months: 12 },

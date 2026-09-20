@@ -15,7 +15,6 @@ import { AgencyModule } from '@/agency/agency.module'
 import { AllocationModule } from '@/allocation/allocation.module'
 import { EmbedNotificationModule } from '@/embed-notification/embed-notification.module'
 import { DataManagerModule } from '@/data-manager/data-manager.module'
-import { NotificationModule } from '@/notification/notification.module'
 import { PdfReportsModule } from '@/pdf-reports/pdf-reports.module'
 import { PasswordRecoveryModule } from '@/password-recovery/password-recovery.module'
 import { CronTasksModule } from '@/cron-tasks/cron-tasks.module'
@@ -35,7 +34,6 @@ require('dotenv')
     }),
     DatabaseModule,
     EmailModule,
-    NotificationModule,
     PdfReportsModule,
     AuthModule,
     AgencyModule,
