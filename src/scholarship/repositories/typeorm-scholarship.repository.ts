@@ -10,6 +10,7 @@ import { Scholarship } from '@/scholarship/entities/scholarship.entity'
 import { ScholarshipFilters } from '@/scholarship/scholarship-filters.interface'
 import { CountScholarshipsAsReportBetweenDatesDto } from '@/scholarship/dtos/count-scholarship-courses-between-dates.dto'
 import {
+  ScholarshipBetweenDatesRow,
   AgencyProgramCountRow,
   AgencyStatusCountRow,
   CsvMatchCriteria,
@@ -210,6 +211,31 @@ export class TypeOrmScholarshipRepository implements ScholarshipRepository {
         studentName: `%${criteria.studentName}%`
       })
       .getOne()
+  }
+
+  async findAllBetween(
+    startDay: string,
+    endDay: string
+  ): Promise<ScholarshipBetweenDatesRow[]> {
+    return await this.repository
+      .createQueryBuilder('scholarship')
+      .innerJoin('scholarship.enrollment', 'enrollment')
+      .innerJoin('enrollment.student', 'student')
+      .innerJoin('scholarship.agency', 'agency')
+      .select([
+        'student.name AS student_name',
+        'enrollment.enrollment_number AS enrollment_number',
+        'agency.name AS agency_name',
+        'enrollment.enrollment_program AS enrollment_program',
+        'scholarship.scholarship_starts_at AS scholarship_starts_at',
+        'scholarship.scholarship_ends_at AS scholarship_ends_at',
+        'scholarship.extension_ends_at AS extension_ends_at'
+      ])
+      .where('scholarship.scholarship_starts_at <= CAST(:endDay AS date)')
+      .andWhere(`${effectiveEndSql()} >= CAST(:startDay AS date)`)
+      .setParameters({ startDay, endDay })
+      .orderBy('student.name', 'ASC')
+      .getRawMany()
   }
 
   async findDistinctStudentEmails(

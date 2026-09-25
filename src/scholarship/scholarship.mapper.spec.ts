@@ -480,3 +480,50 @@ describe('ScholarshipMapper.copyFilteredScholarshipsStudentsEmails', () => {
     }
   )
 })
+
+describe('ScholarshipMapper.scholarshipsBetweenDates', () => {
+  it('devolve o JSON da integração externa sem o preenchimento de espaços do char(15) e com o programa legível', () => {
+    const [result] = ScholarshipMapper.scholarshipsBetweenDates([
+      {
+        student_name: 'Adriano Barbosa de Jesus',
+        enrollment_number: '2023102480     ',
+        agency_name: 'CAPES',
+        enrollment_program: 'MESTRADO',
+        scholarship_starts_at: null,
+        scholarship_ends_at: null,
+        extension_ends_at: null
+      }
+    ])
+
+    expect(result).toEqual({
+      student_name: 'Adriano Barbosa de Jesus',
+      enrollment_number: '2023102480',
+      agency_name: 'CAPES',
+      program: 'Mestrado',
+      scholarship_starts_at: null,
+      scholarship_ends_at: null,
+      extension_ends_at: null
+    })
+  })
+
+  it('devolve as datas da bolsa como YYYY-MM-DD, venham do banco como Date ou como texto', () => {
+    const [result] = ScholarshipMapper.scholarshipsBetweenDates([
+      {
+        student_name: 'Fred',
+        enrollment_number: '111',
+        agency_name: 'CAPES',
+        enrollment_program: 'DOUTORADO',
+        scholarship_starts_at: new Date(2024, 2, 1),
+        scholarship_ends_at: '2026-02-28',
+        extension_ends_at: null
+      }
+    ])
+
+    expect(result).toMatchObject({
+      program: 'Doutorado',
+      scholarship_starts_at: '2024-03-01',
+      scholarship_ends_at: '2026-02-28',
+      extension_ends_at: null
+    })
+  })
+})
