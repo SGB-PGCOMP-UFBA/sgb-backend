@@ -2,7 +2,7 @@ import { ValidationArguments } from 'class-validator'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { IsCalendarDayConstraint } from './is-calendar-day.constraint'
 
-const ARGS = { property: 'start_period' } as ValidationArguments
+const ARGS = { property: 'date' } as ValidationArguments
 
 describe('IsCalendarDayConstraint', () => {
   let constraint: IsCalendarDayConstraint
@@ -43,7 +43,7 @@ describe('IsCalendarDayConstraint', () => {
 
   it('quando a mensagem padrão é pedida, cita o campo e o formato esperado', () => {
     expect(constraint.defaultMessage(ARGS)).toBe(
-      'start_period must be a valid date in the YYYY-MM-DD format'
+      'date must be a valid date in the YYYY-MM-DD format'
     )
   })
 })
