@@ -139,26 +139,66 @@ describe('TypeOrmScholarshipRepository', () => {
     }
   )
 
-  describe('findAllBetween', () => {
-    it('traz toda bolsa que esteve no período: começa até o fim dele e termina, com prorrogação, depois do início', async () => {
-      await repository.findAllBetween('2024-01-01', '2024-12-31')
-
-      expect(queryBuilder.where).toHaveBeenCalledWith(
-        expect.stringContaining(
-          'scholarship_starts_at <= CAST(:endDay AS date)'
-        )
-      )
-      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
-        expect.stringMatching(/COALESCE.*>= CAST\(:startDay AS date\)/)
-      )
-      expect(queryBuilder.setParameters).toHaveBeenCalledWith({
+  describe('findAllForReport', () => {
+    it('com o período completo, traz toda bolsa que esteve nele: começa até o fim e termina, com prorrogação, depois do início', async () => {
+      await repository.findAllForReport({
         startDay: '2024-01-01',
         endDay: '2024-12-31'
       })
+
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        'scholarship.scholarship_starts_at <= CAST(:endDay AS date)',
+        { endDay: '2024-12-31' }
+      )
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        expect.stringMatching(/COALESCE.*>= CAST\(:startDay AS date\)/),
+        { startDay: '2024-01-01' }
+      )
+    })
+
+    it('sem nenhum filtro, traz todas as bolsas, desde a primeira até a mais recente', async () => {
+      await repository.findAllForReport({})
+
+      expect(queryBuilder.andWhere).not.toHaveBeenCalled()
+      expect(queryBuilder.where).not.toHaveBeenCalled()
+    })
+
+    it('sem start_period, não limita o início: traz as bolsas desde a primeira até o fim informado', async () => {
+      await repository.findAllForReport({ endDay: '2024-12-31' })
+
+      expect(queryBuilder.andWhere).toHaveBeenCalledTimes(1)
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        expect.stringContaining(':endDay'),
+        { endDay: '2024-12-31' }
+      )
+    })
+
+    it('sem end_period, não limita o fim: traz as bolsas do início informado até a mais recente', async () => {
+      await repository.findAllForReport({ startDay: '2024-01-01' })
+
+      expect(queryBuilder.andWhere).toHaveBeenCalledTimes(1)
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        expect.stringContaining(':startDay'),
+        { startDay: '2024-01-01' }
+      )
+    })
+
+    it('com a matrícula, filtra as bolsas dela', async () => {
+      await repository.findAllForReport({ enrollmentNumber: '2023102480' })
+
+      expect(queryBuilder.andWhere).toHaveBeenCalledTimes(1)
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        'enrollment.enrollment_number = :enrollmentNumber',
+        { enrollmentNumber: '2023102480' }
+      )
     })
 
     it('não filtra pelo status de hoje, então inclui as bolsas já finalizadas ou ainda não iniciadas', async () => {
-      await repository.findAllBetween('2020-01-01', '2020-12-31')
+      await repository.findAllForReport({
+        startDay: '2020-01-01',
+        endDay: '2020-12-31',
+        enrollmentNumber: '2023102480'
+      })
 
       expect(queryBuilder.setParameter).not.toHaveBeenCalledWith(
         'today',
@@ -167,7 +207,7 @@ describe('TypeOrmScholarshipRepository', () => {
     })
 
     it('seleciona só os campos do JSON da integração externa (nome, matrícula, agência, programa e datas da bolsa), ordenados pelo nome do aluno', async () => {
-      await repository.findAllBetween('2024-01-01', '2024-12-31')
+      await repository.findAllForReport({})
 
       expect(queryBuilder.select).toHaveBeenCalledWith([
         'student.name AS student_name',

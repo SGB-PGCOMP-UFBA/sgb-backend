@@ -6,7 +6,7 @@ import { AdvisorMapper } from '@/advisor/advisor.mapper'
 import { AllocationMapper } from '@/allocation/allocation.mapper'
 import { StatusEnum } from '@/common/enums/status.enum'
 import { ProgramEnum } from '@/common/enums/program.enum'
-import { ScholarshipBetweenDatesRow } from '@/scholarship/repositories/scholarship.repository'
+import { ScholarshipReportRow } from '@/scholarship/repositories/scholarship.repository'
 import {
   deriveScholarshipStatus,
   toCalendarDay
@@ -236,7 +236,7 @@ export class ScholarshipMapper {
     )
   }
 
-  static scholarshipsBetweenDates(rows: ScholarshipBetweenDatesRow[]) {
+  static scholarshipsForReport(rows: ScholarshipReportRow[]) {
     return rows.map((row) => ({
       student_name: row.student_name?.trim(),
       enrollment_number: row.enrollment_number?.trim(),

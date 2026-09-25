@@ -21,7 +21,7 @@ import { CreateScholarshipDto } from '@/scholarship/dtos/create-scholarship.dto'
 import { UpdateScholarshipDto } from '@/scholarship/dtos/update-scholarship.dto'
 import { validateScholarshipDuration } from '@/common/utils/date.util'
 import { CountScholarshipsAsReportBetweenDatesDto } from '@/scholarship/dtos/count-scholarship-courses-between-dates.dto'
-import { FindScholarshipsBetweenDatesDto } from '@/scholarship/dtos/find-scholarships-between-dates.dto'
+import { FindScholarshipsForReportDto } from '@/scholarship/dtos/find-scholarships-for-report.dto'
 import { ProgramEnum } from '@/common/enums/program.enum'
 import {
   getAwardedSlotsByProgram,
@@ -487,24 +487,27 @@ export class ScholarshipService {
     }
   }
 
-  async findScholarshipsBetweenDates(dto: FindScholarshipsBetweenDatesDto) {
-    const startDay = parse(dto.start_period, 'yyyy-MM-dd', new Date())
-    const endDay = parse(dto.end_period, 'yyyy-MM-dd', new Date())
+  async findScholarshipsForReport(dto: FindScholarshipsForReportDto) {
+    if (dto.start_period && dto.end_period) {
+      const startDay = parse(dto.start_period, 'yyyy-MM-dd', new Date())
+      const endDay = parse(dto.end_period, 'yyyy-MM-dd', new Date())
 
-    if (!isBefore(startDay, endDay)) {
-      throw new BadRequestException(
-        'O parâmetro start_period deve ser menor que end_period.'
-      )
+      if (!isBefore(startDay, endDay)) {
+        throw new BadRequestException(
+          'O parâmetro start_period deve ser menor que end_period.'
+        )
+      }
     }
 
     try {
-      return await this.scholarshipRepository.findAllBetween(
-        dto.start_period,
-        dto.end_period
-      )
+      return await this.scholarshipRepository.findAllForReport({
+        startDay: dto.start_period,
+        endDay: dto.end_period,
+        enrollmentNumber: dto.enrollment_number
+      })
     } catch (error) {
       throw new InternalServerErrorException(
-        'Falha ao gerar a lista de bolsas do período.'
+        'Falha ao gerar a lista de bolsas.'
       )
     }
   }

@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "author": "Hérson Reis Rezende dos Santos (herson.reis@ufba.br)",
+  "contributors": [
+    "Guilherme Vitória (guilherme.lordelo@ufba.br)"
+  ],
   "private": true,
   "license": "GPL-3.0",
   "engines": {

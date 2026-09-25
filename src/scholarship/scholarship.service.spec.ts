@@ -12,6 +12,7 @@ import {
 } from '@/common/testing/factories'
 import { ScholarshipRepository } from '@/scholarship/repositories/scholarship.repository'
 import { ScholarshipService } from './scholarship.service'
+import { FindScholarshipsForReportDto } from '@/scholarship/dtos/find-scholarships-for-report.dto'
 
 const AGENCY = makeAgency()
 
@@ -42,7 +43,7 @@ function createScholarshipRepositoryMock() {
     findDuplicateForCreate: vi.fn().mockResolvedValue(null),
     findDuplicateForUpdate: vi.fn().mockResolvedValue(null),
     findMatchForCsvUpdate: vi.fn().mockResolvedValue(null),
-    findAllBetween: vi.fn().mockResolvedValue([]),
+    findAllForReport: vi.fn().mockResolvedValue([]),
     findDistinctStudentEmails: vi.fn().mockResolvedValue([]),
     countOccupyingSlotByEnrollment: vi.fn().mockResolvedValue(0),
     countAllocatedSlots: vi.fn().mockResolvedValue(0),
@@ -346,18 +347,34 @@ describe('ScholarshipService', () => {
     })
   })
 
-  describe('findScholarshipsBetweenDates', () => {
-    it('para a integração externa, busca todas as bolsas do período entre os dias informados', async () => {
-      await service.findScholarshipsBetweenDates({
+  describe('findScholarshipsForReport', () => {
+    it('para a integração externa, repassa os filtros informados ao repositório', async () => {
+      await service.findScholarshipsForReport({
         start_period: '2024-01-01',
-        end_period: '2024-12-31'
+        end_period: '2024-12-31',
+        enrollment_number: '2023102480'
       })
 
-      expect(repository.findAllBetween).toHaveBeenCalledWith(
-        '2024-01-01',
-        '2024-12-31'
-      )
+      expect(repository.findAllForReport).toHaveBeenCalledWith({
+        startDay: '2024-01-01',
+        endDay: '2024-12-31',
+        enrollmentNumber: '2023102480'
+      })
     })
+
+    it.each<[FindScholarshipsForReportDto, string]>([
+      [{}, 'sem nenhum filtro'],
+      [{ start_period: '2024-12-31' }, 'só o início'],
+      [{ end_period: '2024-01-01' }, 'só o fim'],
+      [{ enrollment_number: '2023102480' }, 'só a matrícula']
+    ])(
+      'sem o período completo, não compara as datas e consulta o banco (%o, %s)',
+      async (dto) => {
+        await service.findScholarshipsForReport(dto)
+
+        expect(repository.findAllForReport).toHaveBeenCalledTimes(1)
+      }
+    )
 
     it.each([
       ['2024-12-31', '2024-01-01', 'data final antes da inicial'],
@@ -366,13 +383,13 @@ describe('ScholarshipService', () => {
       'quando start_period não é menor que end_period, rejeita sem consultar o banco (%s, %s: %s)',
       async (start_period, end_period) => {
         await expect(
-          service.findScholarshipsBetweenDates({
+          service.findScholarshipsForReport({
             start_period,
             end_period
           })
         ).rejects.toBeInstanceOf(BadRequestException)
 
-        expect(repository.findAllBetween).not.toHaveBeenCalled()
+        expect(repository.findAllForReport).not.toHaveBeenCalled()
       }
     )
   })
