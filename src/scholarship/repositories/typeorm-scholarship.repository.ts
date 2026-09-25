@@ -10,7 +10,8 @@ import { Scholarship } from '@/scholarship/entities/scholarship.entity'
 import { ScholarshipFilters } from '@/scholarship/scholarship-filters.interface'
 import { CountScholarshipsAsReportBetweenDatesDto } from '@/scholarship/dtos/count-scholarship-courses-between-dates.dto'
 import {
-  ScholarshipBetweenDatesRow,
+  ScholarshipReportCriteria,
+  ScholarshipReportRow,
   AgencyProgramCountRow,
   AgencyStatusCountRow,
   CsvMatchCriteria,
@@ -213,11 +214,10 @@ export class TypeOrmScholarshipRepository implements ScholarshipRepository {
       .getOne()
   }
 
-  async findAllBetween(
-    startDay: string,
-    endDay: string
-  ): Promise<ScholarshipBetweenDatesRow[]> {
-    return await this.repository
+  async findAllForReport(
+    criteria: ScholarshipReportCriteria
+  ): Promise<ScholarshipReportRow[]> {
+    const query = this.repository
       .createQueryBuilder('scholarship')
       .innerJoin('scholarship.enrollment', 'enrollment')
       .innerJoin('enrollment.student', 'student')
@@ -231,11 +231,28 @@ export class TypeOrmScholarshipRepository implements ScholarshipRepository {
         'scholarship.scholarship_ends_at AS scholarship_ends_at',
         'scholarship.extension_ends_at AS extension_ends_at'
       ])
-      .where('scholarship.scholarship_starts_at <= CAST(:endDay AS date)')
-      .andWhere(`${effectiveEndSql()} >= CAST(:startDay AS date)`)
-      .setParameters({ startDay, endDay })
       .orderBy('student.name', 'ASC')
-      .getRawMany()
+
+    if (criteria.endDay) {
+      query.andWhere(
+        'scholarship.scholarship_starts_at <= CAST(:endDay AS date)',
+        { endDay: criteria.endDay }
+      )
+    }
+
+    if (criteria.startDay) {
+      query.andWhere(`${effectiveEndSql()} >= CAST(:startDay AS date)`, {
+        startDay: criteria.startDay
+      })
+    }
+
+    if (criteria.enrollmentNumber) {
+      query.andWhere('enrollment.enrollment_number = :enrollmentNumber', {
+        enrollmentNumber: criteria.enrollmentNumber
+      })
+    }
+
+    return await query.getRawMany()
   }
 
   async findDistinctStudentEmails(

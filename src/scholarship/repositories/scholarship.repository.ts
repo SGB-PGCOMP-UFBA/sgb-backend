@@ -25,7 +25,13 @@ export type AgencyStatusCountRow = {
   phd_count: string
 }
 
-export type ScholarshipBetweenDatesRow = {
+export type ScholarshipReportCriteria = {
+  startDay?: string
+  endDay?: string
+  enrollmentNumber?: string
+}
+
+export type ScholarshipReportRow = {
   student_name: string
   enrollment_number: string
   agency_name: string
@@ -92,10 +98,9 @@ export abstract class ScholarshipRepository {
   abstract findMatchForCsvUpdate(
     criteria: CsvMatchCriteria
   ): Promise<Partial<Scholarship> | null>
-  abstract findAllBetween(
-    startDay: string,
-    endDay: string
-  ): Promise<ScholarshipBetweenDatesRow[]>
+  abstract findAllForReport(
+    criteria: ScholarshipReportCriteria
+  ): Promise<ScholarshipReportRow[]>
   abstract findDistinctStudentEmails(
     filters: ScholarshipFilters
   ): Promise<string[]>

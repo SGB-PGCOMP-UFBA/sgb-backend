@@ -22,7 +22,7 @@ import { Roles } from '@/auth/role.decorator'
 import { RolesGuard } from '@/auth/guards/roles.guard'
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard'
 import { CountScholarshipsAsReportBetweenDatesDto } from '@/scholarship/dtos/count-scholarship-courses-between-dates.dto'
-import { FindScholarshipsBetweenDatesDto } from '@/scholarship/dtos/find-scholarships-between-dates.dto'
+import { FindScholarshipsForReportDto } from '@/scholarship/dtos/find-scholarships-for-report.dto'
 
 @Controller('v1/scholarship')
 export class ScholarshipController {
@@ -149,12 +149,10 @@ export class ScholarshipController {
   @Get('/report/between-dates')
   @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  async findScholarshipsBetweenDates(
-    @Query() dto: FindScholarshipsBetweenDatesDto
-  ) {
-    const rows = await this.scholarshipService.findScholarshipsBetweenDates(dto)
+  async findScholarshipsForReport(@Query() dto: FindScholarshipsForReportDto) {
+    const rows = await this.scholarshipService.findScholarshipsForReport(dto)
 
-    return ScholarshipMapper.scholarshipsBetweenDates(rows)
+    return ScholarshipMapper.scholarshipsForReport(rows)
   }
 
   @Get('/filtered-students-emails')

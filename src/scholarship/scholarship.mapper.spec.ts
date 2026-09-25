@@ -481,9 +481,9 @@ describe('ScholarshipMapper.copyFilteredScholarshipsStudentsEmails', () => {
   )
 })
 
-describe('ScholarshipMapper.scholarshipsBetweenDates', () => {
+describe('ScholarshipMapper.scholarshipsForReport', () => {
   it('devolve o JSON da integração externa sem o preenchimento de espaços do char(15) e com o programa legível', () => {
-    const [result] = ScholarshipMapper.scholarshipsBetweenDates([
+    const [result] = ScholarshipMapper.scholarshipsForReport([
       {
         student_name: 'Adriano Barbosa de Jesus',
         enrollment_number: '2023102480     ',
@@ -507,7 +507,7 @@ describe('ScholarshipMapper.scholarshipsBetweenDates', () => {
   })
 
   it('devolve as datas da bolsa como YYYY-MM-DD, venham do banco como Date ou como texto', () => {
-    const [result] = ScholarshipMapper.scholarshipsBetweenDates([
+    const [result] = ScholarshipMapper.scholarshipsForReport([
       {
         student_name: 'Fred',
         enrollment_number: '111',
