@@ -5,7 +5,12 @@ import { StudentMapper } from '@/student/student.mapper'
 import { AdvisorMapper } from '@/advisor/advisor.mapper'
 import { AllocationMapper } from '@/allocation/allocation.mapper'
 import { StatusEnum } from '@/common/enums/status.enum'
-import { deriveScholarshipStatus } from '@/scholarship/utils/scholarship-status.util'
+import { ProgramEnum } from '@/common/enums/program.enum'
+import { ScholarshipBetweenDatesRow } from '@/scholarship/repositories/scholarship.repository'
+import {
+  deriveScholarshipStatus,
+  toCalendarDay
+} from '@/scholarship/utils/scholarship-status.util'
 
 export class ScholarshipMapper {
   static forFilter(scholarship: { status: string }) {
@@ -229,6 +234,28 @@ export class ScholarshipMapper {
         return posA - posB
       }
     )
+  }
+
+  static scholarshipsBetweenDates(rows: ScholarshipBetweenDatesRow[]) {
+    return rows.map((row) => ({
+      student_name: row.student_name?.trim(),
+      enrollment_number: row.enrollment_number?.trim(),
+      agency_name: row.agency_name?.trim(),
+      program: ProgramEnum[row.enrollment_program] ?? row.enrollment_program,
+      scholarship_starts_at: ScholarshipMapper.calendarDayOrNull(
+        row.scholarship_starts_at
+      ),
+      scholarship_ends_at: ScholarshipMapper.calendarDayOrNull(
+        row.scholarship_ends_at
+      ),
+      extension_ends_at: ScholarshipMapper.calendarDayOrNull(
+        row.extension_ends_at
+      )
+    }))
+  }
+
+  private static calendarDayOrNull(value: Date | string | null) {
+    return value ? toCalendarDay(value) : null
   }
 
   static copyFilteredScholarshipsStudentsEmails(emailsArray: string[]) {

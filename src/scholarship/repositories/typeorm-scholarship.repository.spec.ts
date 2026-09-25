@@ -139,6 +139,49 @@ describe('TypeOrmScholarshipRepository', () => {
     }
   )
 
+  describe('findAllBetween', () => {
+    it('traz toda bolsa que esteve no período: começa até o fim dele e termina, com prorrogação, depois do início', async () => {
+      await repository.findAllBetween('2024-01-01', '2024-12-31')
+
+      expect(queryBuilder.where).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'scholarship_starts_at <= CAST(:endDay AS date)'
+        )
+      )
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        expect.stringMatching(/COALESCE.*>= CAST\(:startDay AS date\)/)
+      )
+      expect(queryBuilder.setParameters).toHaveBeenCalledWith({
+        startDay: '2024-01-01',
+        endDay: '2024-12-31'
+      })
+    })
+
+    it('não filtra pelo status de hoje, então inclui as bolsas já finalizadas ou ainda não iniciadas', async () => {
+      await repository.findAllBetween('2020-01-01', '2020-12-31')
+
+      expect(queryBuilder.setParameter).not.toHaveBeenCalledWith(
+        'today',
+        expect.anything()
+      )
+    })
+
+    it('seleciona só os campos do JSON da integração externa (nome, matrícula, agência, programa e datas da bolsa), ordenados pelo nome do aluno', async () => {
+      await repository.findAllBetween('2024-01-01', '2024-12-31')
+
+      expect(queryBuilder.select).toHaveBeenCalledWith([
+        'student.name AS student_name',
+        'enrollment.enrollment_number AS enrollment_number',
+        'agency.name AS agency_name',
+        'enrollment.enrollment_program AS enrollment_program',
+        'scholarship.scholarship_starts_at AS scholarship_starts_at',
+        'scholarship.scholarship_ends_at AS scholarship_ends_at',
+        'scholarship.extension_ends_at AS extension_ends_at'
+      ])
+      expect(queryBuilder.orderBy).toHaveBeenCalledWith('student.name', 'ASC')
+    })
+  })
+
   describe('findDistinctStudentEmails', () => {
     it('devolve só a coluna de e-mail, sem repetir', async () => {
       typeorm.createQueryBuilder.mockReturnValue(

@@ -25,6 +25,16 @@ export type AgencyStatusCountRow = {
   phd_count: string
 }
 
+export type ScholarshipBetweenDatesRow = {
+  student_name: string
+  enrollment_number: string
+  agency_name: string
+  enrollment_program: string
+  scholarship_starts_at: Date | string | null
+  scholarship_ends_at: Date | string | null
+  extension_ends_at: Date | string | null
+}
+
 export type SlotCountParams = {
   program: string
   agencyId?: number
@@ -82,6 +92,10 @@ export abstract class ScholarshipRepository {
   abstract findMatchForCsvUpdate(
     criteria: CsvMatchCriteria
   ): Promise<Partial<Scholarship> | null>
+  abstract findAllBetween(
+    startDay: string,
+    endDay: string
+  ): Promise<ScholarshipBetweenDatesRow[]>
   abstract findDistinctStudentEmails(
     filters: ScholarshipFilters
   ): Promise<string[]>
@@ -103,10 +117,6 @@ export abstract class ScholarshipRepository {
   abstract create(data: Partial<Scholarship>): Promise<Scholarship>
   abstract update(id: number, data: Partial<Scholarship>): Promise<Scholarship>
 
-  /**
-   * UPDATE direto, sem carregar a entidade: não dispara cascata nem subscriber,
-   * ao contrário do `update` acima, que é save.
-   */
   abstract updateFields(
     id: number,
     changes: Partial<Scholarship>

@@ -42,6 +42,7 @@ function createScholarshipRepositoryMock() {
     findDuplicateForCreate: vi.fn().mockResolvedValue(null),
     findDuplicateForUpdate: vi.fn().mockResolvedValue(null),
     findMatchForCsvUpdate: vi.fn().mockResolvedValue(null),
+    findAllBetween: vi.fn().mockResolvedValue([]),
     findDistinctStudentEmails: vi.fn().mockResolvedValue([]),
     countOccupyingSlotByEnrollment: vi.fn().mockResolvedValue(0),
     countAllocatedSlots: vi.fn().mockResolvedValue(0),
@@ -343,5 +344,36 @@ describe('ScholarshipService', () => {
       expect(segunda[0]).toBe('MESTRADO')
       expect(primeira[1]).not.toBe(segunda[1])
     })
+  })
+
+  describe('findScholarshipsBetweenDates', () => {
+    it('para a integração externa, busca todas as bolsas do período entre os dias informados', async () => {
+      await service.findScholarshipsBetweenDates({
+        start_period: '2024-01-01',
+        end_period: '2024-12-31'
+      })
+
+      expect(repository.findAllBetween).toHaveBeenCalledWith(
+        '2024-01-01',
+        '2024-12-31'
+      )
+    })
+
+    it.each([
+      ['2024-12-31', '2024-01-01', 'data final antes da inicial'],
+      ['2024-06-01', '2024-06-01', 'datas iguais']
+    ])(
+      'quando start_period não é menor que end_period, rejeita sem consultar o banco (%s, %s: %s)',
+      async (start_period, end_period) => {
+        await expect(
+          service.findScholarshipsBetweenDates({
+            start_period,
+            end_period
+          })
+        ).rejects.toBeInstanceOf(BadRequestException)
+
+        expect(repository.findAllBetween).not.toHaveBeenCalled()
+      }
+    )
   })
 })
