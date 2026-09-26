@@ -22,6 +22,7 @@ const CREATE_DTO: CreateAdvisorDto = {
 function createAdvisorRepositoryMock() {
   return {
     findAllWithEnrollments: vi.fn().mockResolvedValue([]),
+    search: vi.fn().mockResolvedValue([]),
     findAllForFilter: vi.fn().mockResolvedValue([]),
     findById: vi.fn().mockResolvedValue(null),
     findByEmail: vi.fn().mockResolvedValue(null),

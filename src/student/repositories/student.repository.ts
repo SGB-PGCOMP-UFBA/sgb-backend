@@ -1,8 +1,10 @@
 import { Student } from '@/student/entities/student.entity'
 import { CreateStudentDto } from '@/student/dtos/create-student.dto'
+import { UserSearchFilters } from '@/common/interfaces/user-search-filters.interface'
 
 export abstract class StudentRepository {
   abstract findAllWithEnrollments(): Promise<Student[]>
+  abstract search(filters: UserSearchFilters): Promise<Student[]>
   abstract findAllByAdvisorId(advisorId: number): Promise<Student[]>
   abstract findByEmail(email: string): Promise<Student | null>
   abstract findByEmailWithEnrollments(email: string): Promise<Student | null>

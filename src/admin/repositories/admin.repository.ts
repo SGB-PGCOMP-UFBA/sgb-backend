@@ -1,8 +1,10 @@
 import { Admin } from '@/admin/entities/admin.entity'
 import { CreateAdminDto } from '@/admin/dtos/create-admin.dto'
+import { UserSearchFilters } from '@/common/interfaces/user-search-filters.interface'
 
 export abstract class AdminRepository {
   abstract findAllOrderedByName(): Promise<Admin[]>
+  abstract search(filters: UserSearchFilters): Promise<Admin[]>
   abstract findByEmail(email: string): Promise<Admin | null>
   abstract findByTaxId(taxId: string): Promise<Admin | null>
   abstract findByPhoneNumber(phoneNumber: string): Promise<Admin | null>

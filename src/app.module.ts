@@ -19,6 +19,7 @@ import { PdfReportsModule } from '@/pdf-reports/pdf-reports.module'
 import { PasswordRecoveryModule } from '@/password-recovery/password-recovery.module'
 import { CronTasksModule } from '@/cron-tasks/cron-tasks.module'
 import { PendingScholarshipModule } from '@/pending-scholarship/pending-scholarship.module'
+import { UserModule } from '@/user/user.module'
 
 require('dotenv')
 
@@ -46,7 +47,8 @@ require('dotenv')
     DataManagerModule,
     CronTasksModule,
     AllocationModule,
-    PendingScholarshipModule
+    PendingScholarshipModule,
+    UserModule
   ],
   controllers: [],
   providers: []

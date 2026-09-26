@@ -4,6 +4,8 @@ import { Repository } from 'typeorm'
 import { Admin } from '@/admin/entities/admin.entity'
 import { CreateAdminDto } from '@/admin/dtos/create-admin.dto'
 import { AdminRepository } from '@/admin/repositories/admin.repository'
+import { UserSearchFilters } from '@/common/interfaces/user-search-filters.interface'
+import { userSearchWhere } from '@/common/utils/user-search.util'
 
 @Injectable()
 export class TypeOrmAdminRepository implements AdminRepository {
@@ -11,6 +13,13 @@ export class TypeOrmAdminRepository implements AdminRepository {
     @InjectRepository(Admin)
     private readonly repository: Repository<Admin>
   ) {}
+
+  async search(filters: UserSearchFilters): Promise<Admin[]> {
+    return await this.repository.find({
+      where: userSearchWhere(filters),
+      order: { name: 'ASC' }
+    })
+  }
 
   async findAllOrderedByName(): Promise<Admin[]> {
     return await this.repository.find({ order: { name: 'ASC' } })

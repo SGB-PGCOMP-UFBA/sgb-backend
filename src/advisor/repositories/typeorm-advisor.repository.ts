@@ -4,6 +4,8 @@ import { Repository } from 'typeorm'
 import { Advisor } from '@/advisor/entities/advisor.entity'
 import { CreateAdvisorDto } from '@/advisor/dtos/create-advisor.dto'
 import { AdvisorRepository } from '@/advisor/repositories/advisor.repository'
+import { UserSearchFilters } from '@/common/interfaces/user-search-filters.interface'
+import { userSearchWhere } from '@/common/utils/user-search.util'
 
 @Injectable()
 export class TypeOrmAdvisorRepository implements AdvisorRepository {
@@ -11,6 +13,13 @@ export class TypeOrmAdvisorRepository implements AdvisorRepository {
     @InjectRepository(Advisor)
     private readonly repository: Repository<Advisor>
   ) {}
+
+  async search(filters: UserSearchFilters): Promise<Advisor[]> {
+    return await this.repository.find({
+      where: userSearchWhere(filters),
+      order: { name: 'ASC' }
+    })
+  }
 
   async findAllWithEnrollments(): Promise<Advisor[]> {
     return await this.repository.find({

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { ILike } from 'typeorm'
 import { createRepositoryMock } from '@/common/testing/repository.mock'
 import { TypeOrmStudentRepository } from './typeorm-student.repository'
 
@@ -23,6 +24,15 @@ describe('TypeOrmStudentRepository', () => {
   beforeEach(() => {
     typeorm = createRepositoryMock()
     repository = new TypeOrmStudentRepository(typeorm)
+  })
+
+  it('search filtra por nome e e-mail e ordena pelo nome', async () => {
+    await repository.search({ name: 'ana', email: 'ufba' })
+
+    expect(typeorm.find).toHaveBeenCalledWith({
+      where: { name: ILike('%ana%'), email: ILike('%ufba%') },
+      order: { name: 'ASC' }
+    })
   })
 
   it('findAllWithEnrollments carrega matrículas, orientador, bolsas e agência', async () => {
