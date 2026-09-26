@@ -72,30 +72,6 @@ export class StudentService {
     }
   }
 
-  async createOrReturnExistent(dto: CreateStudentDto): Promise<Student> {
-    this.logger.log(constants.exceptionMessages.student.CREATION_STARTED)
-
-    const studentExists = await this.studentRepository.findByEmail(dto.email)
-
-    if (studentExists) {
-      this.logger.log(constants.exceptionMessages.student.ALREADY_REGISTERED)
-      return studentExists
-    }
-
-    try {
-      return await this.registerAndNotify(dto)
-    } catch (error: any) {
-      this.logger.error(
-        constants.exceptionMessages.student.CREATION_FAILED,
-        error,
-        `Student Email: ${dto.email}`
-      )
-      throw new BadRequestException(
-        error.message || constants.exceptionMessages.student.CREATION_FAILED
-      )
-    }
-  }
-
   private async registerAndNotify(dto: CreateStudentDto): Promise<Student> {
     const passwordHash = await hashPassword(dto.password)
     const newStudent = await this.studentRepository.create({
@@ -225,10 +201,5 @@ export class StudentService {
         )
       }
     }
-  }
-
-  async deleteAll() {
-    this.logger.warn(constants.exceptionMessages.student.DELETE_ALL_STARTED)
-    await this.studentRepository.deleteAllAndResetSequence()
   }
 }

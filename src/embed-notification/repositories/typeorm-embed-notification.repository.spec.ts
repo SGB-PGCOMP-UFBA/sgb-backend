@@ -34,19 +34,6 @@ describe('TypeOrmEmbedNotificationRepository', () => {
     expect(typeorm.save).toHaveBeenCalledWith({ id: 31, consumed: true })
   })
 
-  it('deleteAllAndResetSequence apaga tudo e reinicia a sequência de ids', async () => {
-    const queryBuilder = createDeleteQueryBuilderMock()
-    typeorm.createQueryBuilder.mockReturnValue(queryBuilder)
-
-    await repository.deleteAllAndResetSequence()
-
-    expect(queryBuilder.delete).toHaveBeenCalled()
-    expect(queryBuilder.execute).toHaveBeenCalled()
-    expect(typeorm.query).toHaveBeenCalledWith(
-      'ALTER SEQUENCE embed_notification_id_seq RESTART WITH 1'
-    )
-  })
-
   it('deleteById devolve a quantidade de linhas removidas', async () => {
     typeorm.delete.mockResolvedValue({ affected: 1 })
 

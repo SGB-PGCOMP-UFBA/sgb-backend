@@ -15,8 +15,7 @@ function createEmbedNotificationRepositoryMock() {
     findPendingByOwner: vi.fn().mockResolvedValue([]),
     create: vi.fn(async (data: unknown) => data),
     markAsConsumed: vi.fn(async (id: number) => ({ id, consumed: true })),
-    deleteById: vi.fn().mockResolvedValue(1),
-    deleteAllAndResetSequence: vi.fn().mockResolvedValue(undefined)
+    deleteById: vi.fn().mockResolvedValue(1)
   } satisfies Record<keyof EmbedNotificationRepository, unknown>
 }
 
@@ -91,14 +90,6 @@ describe('EmbedNotificationService', () => {
       repository.deleteById.mockResolvedValue(0)
 
       await expect(service.delete(999)).resolves.toBe(false)
-    })
-  })
-
-  describe('deleteAll', () => {
-    it('delega ao repositório a limpeza total', async () => {
-      await service.deleteAll()
-
-      expect(repository.deleteAllAndResetSequence).toHaveBeenCalled()
     })
   })
 })

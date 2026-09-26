@@ -165,9 +165,4 @@ export class EnrollmentService {
       constants.exceptionMessages.enrollment.NOT_FOUND
     )
   }
-
-  async deleteAll() {
-    this.logger.warn(constants.exceptionMessages.enrollment.DELETE_ALL_STARTED)
-    await this.enrollmentRepository.deleteAllAndResetSequence()
-  }
 }

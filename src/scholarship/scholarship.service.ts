@@ -34,7 +34,6 @@ import {
   ScholarshipStatusEnum,
   SCHOLARSHIP_STATUSES
 } from '@/scholarship/utils/scholarship-status.util'
-import { ProcessedScholarship } from '@/data-manager/update-scholarship-csv.util'
 
 interface QuotaTarget {
   type: 'agency' | 'allocation'
@@ -408,11 +407,6 @@ export class ScholarshipService {
     )
   }
 
-  async deleteAll() {
-    this.logger.warn(constants.exceptionMessages.scholarship.DELETE_ALL_STARTED)
-    await this.scholarshipRepository.deleteAllAndResetSequence()
-  }
-
   async countScholarshipsGroupingByCourseAndYear() {
     return await this.countByProgramAndYear()
   }
@@ -520,15 +514,5 @@ export class ScholarshipService {
     } catch (error) {
       throw new InternalServerErrorException('Falha ao gerar lista de e-mails.')
     }
-  }
-
-  async findForUpdate(
-    scholarship: ProcessedScholarship
-  ): Promise<Partial<Scholarship>> {
-    return await this.scholarshipRepository.findMatchForCsvUpdate({
-      program: scholarship.enrollment.enrollment_program,
-      agencyName: scholarship.agency,
-      studentName: scholarship.student.name
-    })
   }
 }

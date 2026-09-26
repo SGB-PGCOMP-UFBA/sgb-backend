@@ -67,12 +67,6 @@ export type DuplicateUpdateCriteria = {
   extension_ends_at?: Date
 }
 
-export type CsvMatchCriteria = {
-  program: string
-  agencyName: string
-  studentName: string
-}
-
 export abstract class ScholarshipRepository {
   abstract findAllWithRelations(): Promise<Scholarship[]>
   abstract findPaginated(
@@ -95,9 +89,6 @@ export abstract class ScholarshipRepository {
   abstract findDuplicateForUpdate(
     criteria: DuplicateUpdateCriteria
   ): Promise<Scholarship | null>
-  abstract findMatchForCsvUpdate(
-    criteria: CsvMatchCriteria
-  ): Promise<Partial<Scholarship> | null>
   abstract findAllForReport(
     criteria: ScholarshipReportCriteria
   ): Promise<ScholarshipReportRow[]>
@@ -128,5 +119,4 @@ export abstract class ScholarshipRepository {
   ): Promise<void>
 
   abstract deleteById(id: number): Promise<number>
-  abstract deleteAllAndResetSequence(): Promise<void>
 }

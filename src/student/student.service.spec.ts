@@ -30,8 +30,7 @@ function createStudentRepositoryMock() {
     create: vi.fn(async (data: object) => ({ ...data, id: 4 })),
     update: vi.fn(async (_id: number, data: unknown) => data),
     updatePasswordByEmail: vi.fn().mockResolvedValue(undefined),
-    deleteById: vi.fn().mockResolvedValue(1),
-    deleteAllAndResetSequence: vi.fn().mockResolvedValue(undefined)
+    deleteById: vi.fn().mockResolvedValue(1)
   } satisfies Record<keyof StudentRepository, unknown>
 }
 
@@ -87,42 +86,6 @@ describe('StudentService', () => {
 
       expect(erro).toBeInstanceOf(BadRequestException)
       expect(erro.message).toBe('connection terminated')
-    })
-  })
-
-  describe('createOrReturnExistent', () => {
-    it('quando o estudante já está cadastrado, devolve-o sem regravar nem renotificar', async () => {
-      const existente = makeStudent()
-      repository.findByEmail.mockResolvedValue(existente)
-
-      await expect(service.createOrReturnExistent(CREATE_DTO)).resolves.toBe(
-        existente
-      )
-      expect(repository.create).not.toHaveBeenCalled()
-      expect(embedNotificationService.create).not.toHaveBeenCalled()
-    })
-
-    it('quando o e-mail ainda não existe, cadastra e notifica o estudante', async () => {
-      await service.createOrReturnExistent(CREATE_DTO)
-
-      expect(repository.create).toHaveBeenCalledTimes(1)
-      expect(embedNotificationService.create).toHaveBeenCalledTimes(1)
-    })
-
-    it('quando procura duplicidade, busca apenas pelo e-mail informado', async () => {
-      await service.createOrReturnExistent(CREATE_DTO)
-
-      expect(repository.findByEmail).toHaveBeenCalledWith('ana@ufba.br')
-    })
-
-    it('quando a gravação falha, não traduz a violação de unicidade como o create faz', async () => {
-      repository.create.mockRejectedValue(
-        new Error('duplicate key value violates unique constraint')
-      )
-
-      await expect(service.createOrReturnExistent(CREATE_DTO)).rejects.toThrow(
-        'duplicate key value violates unique constraint'
-      )
     })
   })
 
@@ -332,14 +295,6 @@ describe('StudentService', () => {
       await expect(service.delete(404)).rejects.toBeInstanceOf(
         NotFoundException
       )
-    })
-  })
-
-  describe('deleteAll', () => {
-    it('delega ao repositório a limpeza total', async () => {
-      await service.deleteAll()
-
-      expect(repository.deleteAllAndResetSequence).toHaveBeenCalled()
     })
   })
 })

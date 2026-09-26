@@ -8,7 +8,7 @@ import { effectiveEndDay } from '@/scholarship/utils/scholarship-status.util'
 import {
   currentMonthRange,
   formatMonthLabel,
-  formatterDate
+  formatDate
 } from '@/common/utils/date.util'
 import {
   CRON_TIME_ZONE,
@@ -75,6 +75,6 @@ function toReportRow(scholarship: Scholarship) {
     studentName: scholarship.enrollment.student.name,
     agencyName: scholarship.agency.name,
     program: scholarship.enrollment.enrollment_program,
-    endsAt: formatterDate(effectiveEndDay(scholarship))
+    endsAt: formatDate(effectiveEndDay(scholarship))
   }
 }

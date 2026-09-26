@@ -34,13 +34,6 @@ export function todayAsCalendarDay(): string {
   return toCalendarDay(new Date())
 }
 
-export function isSameCalendarDay(
-  first: Date | string,
-  second: Date | string
-): boolean {
-  return toCalendarDay(first) === toCalendarDay(second)
-}
-
 export function effectiveEndDay(period: ScholarshipPeriod): string {
   return toCalendarDay(period.extension_ends_at ?? period.scholarship_ends_at)
 }

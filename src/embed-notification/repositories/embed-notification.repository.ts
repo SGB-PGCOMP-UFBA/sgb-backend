@@ -9,5 +9,4 @@ export abstract class EmbedNotificationRepository {
   abstract create(data: CreateEmbedNotificationDto): Promise<EmbedNotification>
   abstract markAsConsumed(id: number): Promise<EmbedNotification>
   abstract deleteById(id: number): Promise<number>
-  abstract deleteAllAndResetSequence(): Promise<void>
 }

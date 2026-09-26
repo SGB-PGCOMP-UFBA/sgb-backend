@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { compileFeatureModule } from '@/common/testing/wiring'
 import { CronTasksModule } from '@/cron-tasks/cron-tasks.module'
-import { ScholarshipEndingReminderService } from '@/cron-tasks/scholarship-ending-reminder.service'
 import { ScholarshipFinalizerService } from '@/cron-tasks/scholarship-finalizer.service'
 import { ScholarshipMonthlyReportService } from '@/cron-tasks/scholarship-monthly-report.service'
 import { Admin } from '@/admin/entities/admin.entity'
@@ -64,9 +63,6 @@ describe('CronTasksModule', () => {
 
     expect(moduleRef.get(ScholarshipFinalizerService)).toBeInstanceOf(
       ScholarshipFinalizerService
-    )
-    expect(moduleRef.get(ScholarshipEndingReminderService)).toBeInstanceOf(
-      ScholarshipEndingReminderService
     )
     expect(moduleRef.get(ScholarshipMonthlyReportService)).toBeInstanceOf(
       ScholarshipMonthlyReportService

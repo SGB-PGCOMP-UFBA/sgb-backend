@@ -1,8 +1,7 @@
 import {
   endOfMonth,
   format as formatWithPattern,
-  isValid,
-  parse,
+  parseISO,
   startOfMonth
 } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -36,21 +35,18 @@ function formatMonthLabel(reference: Date = new Date()): string {
   return formatWithPattern(reference, "MMMM 'de' yyyy", { locale: ptBR })
 }
 
-function formatterDate(date: string) {
-  const arrayDate = date.split('-')
-  return arrayDate[2] + '/' + arrayDate[1] + '/' + arrayDate[0]
-}
-
-function formatDate(date: Date) {
+/**
+ * Formata uma data como dd/MM/yyyy. Texto `yyyy-MM-dd` (o dia de calendário
+ * que vem do banco) é lido como meia-noite local, para não voltar um dia.
+ */
+function formatDate(date: Date | string | null | undefined): string {
   if (date == null) {
     return 'Sem previsão'
   }
-  const day = date.getDate().toString()
-  const dayFormatted = day.length == 1 ? '0' + day : day
-  const month = (date.getMonth() + 1).toString()
-  const monthFormatted = month.length == 1 ? '0' + month : month
-  const year = date.getFullYear()
-  return dayFormatted + '/' + monthFormatted + '/' + year
+
+  const value = typeof date === 'string' ? parseISO(date) : date
+
+  return formatWithPattern(value, 'dd/MM/yyyy', { locale: ptBR })
 }
 
 function formattedNow() {
@@ -68,32 +64,6 @@ function today(): Date {
   const now = new Date()
   now.setUTCHours(0, 0, 0, 0)
   return now
-}
-const allDateFormats = [
-  'dd/MM/yyyy',
-  'dd-MMM-yyyy',
-  'yyyy-MM-dd',
-  'M/d/yyyy HH:mm:ss',
-  'yyyy-MM-dd HH:mm:ss'
-]
-
-export function parseDate(
-  dateString: string,
-  formats: string[] = allDateFormats
-) {
-  if (!dateString) return null
-
-  const referenceDate = new Date()
-
-  for (const pattern of formats) {
-    const parsedDate = parse(String(dateString), pattern, referenceDate)
-
-    if (isValid(parsedDate)) {
-      return formatWithPattern(parsedDate, 'yyyy-MM-dd')
-    }
-  }
-
-  return null
 }
 
 function validateScholarshipDuration(
@@ -138,7 +108,6 @@ export {
   getDatePlusDays,
   currentMonthRange,
   formatMonthLabel,
-  formatterDate,
   formatDate,
   formattedNow,
   today,

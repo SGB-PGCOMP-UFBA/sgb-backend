@@ -2,8 +2,6 @@ import { Module } from '@nestjs/common'
 import { ScheduleModule } from '@nestjs/schedule'
 import { ConfigModule } from '@nestjs/config'
 import { validate } from '@/config/env.validation'
-import { MulterModule } from '@nestjs/platform-express'
-import { memoryStorage } from 'multer'
 import { DatabaseModule } from '@/common/database/database.module'
 import { StudentModule } from '@/student/student.module'
 import { EmailModule } from '@/email/email.module'
@@ -14,7 +12,6 @@ import { AdminModule } from '@/admin/admin.module'
 import { AgencyModule } from '@/agency/agency.module'
 import { AllocationModule } from '@/allocation/allocation.module'
 import { EmbedNotificationModule } from '@/embed-notification/embed-notification.module'
-import { DataManagerModule } from '@/data-manager/data-manager.module'
 import { PdfReportsModule } from '@/pdf-reports/pdf-reports.module'
 import { PasswordRecoveryModule } from '@/password-recovery/password-recovery.module'
 import { CronTasksModule } from '@/cron-tasks/cron-tasks.module'
@@ -30,9 +27,6 @@ require('dotenv')
       isGlobal: true,
       validate
     }),
-    MulterModule.register({
-      storage: memoryStorage()
-    }),
     DatabaseModule,
     EmailModule,
     PdfReportsModule,
@@ -44,7 +38,6 @@ require('dotenv')
     AdvisorModule,
     EmbedNotificationModule,
     PasswordRecoveryModule,
-    DataManagerModule,
     CronTasksModule,
     AllocationModule,
     PendingScholarshipModule,
