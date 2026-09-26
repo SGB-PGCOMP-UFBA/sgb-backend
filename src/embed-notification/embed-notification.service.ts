@@ -56,11 +56,4 @@ export class EmbedNotificationService {
     const affected = await this.embedNotificationRepository.deleteById(id)
     return affected === 1
   }
-
-  async deleteAll() {
-    this.logger.warn(
-      constants.exceptionMessages.notification.DELETE_ALL_STARTED
-    )
-    await this.embedNotificationRepository.deleteAllAndResetSequence()
-  }
 }

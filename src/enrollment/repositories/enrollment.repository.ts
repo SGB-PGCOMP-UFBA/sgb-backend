@@ -25,5 +25,4 @@ export abstract class EnrollmentRepository {
   abstract create(data: Partial<Enrollment>): Promise<Enrollment>
   abstract update(id: number, data: Partial<Enrollment>): Promise<Enrollment>
   abstract deleteById(id: number): Promise<number>
-  abstract deleteAllAndResetSequence(): Promise<void>
 }

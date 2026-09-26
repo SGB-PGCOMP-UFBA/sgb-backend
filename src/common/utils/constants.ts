@@ -43,84 +43,75 @@ const constants = {
   },
   exceptionMessages: {
     admin: {
-      CREATION_FAILED: "Cant't create admin.",
-      UPDATE_FAILED: "Cant't update admin.",
-      NOT_FOUND: 'Admin not found.',
-      WRONG_PASSWORD: 'Invalid password.'
+      CREATION_FAILED: 'Não foi possível cadastrar o administrador.',
+      UPDATE_FAILED: 'Não foi possível atualizar o administrador.',
+      NOT_FOUND: 'Administrador não encontrado.',
+      WRONG_PASSWORD: 'Senha inválida.'
     },
     advisor: {
       CREATION_STARTED:
-        'The process of inserting a new advisor has been started.',
+        'O processo de cadastro de um novo orientador foi iniciado.',
       CREATION_COMPLETED:
-        'The process of inserting a new advisor has been completed.',
-      CREATION_FAILED: "Cant't create advisor.",
-      UPDATE_FAILED: "Cant't update advisor.",
-      NOT_FOUND: 'Advisor not found.'
+        'O processo de cadastro de um novo orientador foi concluído.',
+      CREATION_FAILED: 'Não foi possível cadastrar o orientador.',
+      UPDATE_FAILED: 'Não foi possível atualizar o orientador.',
+      NOT_FOUND: 'Orientador não encontrado.'
     },
     article: {
-      CREATION_FAILED: "Cant't create article.",
-      NOT_FOUND: 'Article not found.'
+      CREATION_FAILED: 'Não foi possível cadastrar o artigo.',
+      NOT_FOUND: 'Artigo não encontrado.'
     },
     agency: {
-      CREATION_FAILED: "Cant't create agency.",
-      NOT_FOUND: 'Agency not found.',
+      CREATION_FAILED: 'Não foi possível cadastrar a agência.',
+      NOT_FOUND: 'Agência não encontrada.',
       NAME_IS_REQUIRED: 'A agência de fomento é obrigatória.',
       AWARDED_BELOW_ALLOCATED:
         'A quantidade de bolsas concedidas pela agência não pode ser menor que a quantidade já alocada.'
     },
     allocation: {
-      CREATION_FAILED: "Cant't create allocation.",
-      NOT_FOUND: 'Allocation not found.',
+      CREATION_FAILED: 'Não foi possível cadastrar a alocação.',
+      NOT_FOUND: 'Alocação não encontrada.',
       NAME_IS_REQUIRED: 'A alocação é obrigatória.',
       AWARDED_BELOW_ALLOCATED:
         'A quantidade de bolsas concedidas para a alocação não pode ser menor que a quantidade já alocada.'
     },
     notification: {
       CREATION_COMPLETED:
-        'The process of inserting a new notification has been completed.',
-      CREATION_FAILED: "Cant't create notification.",
-      UPDATE_FAILED: "Cant't update notification.",
-      DELETE_ALL_STARTED:
-        'The process of deleting all notifications has been started.'
+        'O processo de cadastro de uma nova notificação foi concluído.',
+      CREATION_FAILED: 'Não foi possível cadastrar a notificação.',
+      UPDATE_FAILED: 'Não foi possível atualizar a notificação.'
     },
     student: {
-      ALREADY_REGISTERED: 'This student is already registered.',
       CREATION_STARTED:
-        'The process of inserting a new student has been started.',
+        'O processo de cadastro de um novo estudante foi iniciado.',
       CREATION_COMPLETED:
-        'The process of inserting a new student has been completed.',
-      CREATION_FAILED: "Cant't create student.",
-      UPDATE_FAILED: "Cant't update student.",
-      NOT_FOUND: 'Student not found.',
-      COUNT_BY_SCHOLARSHIP_FAILED: 'Failed to count students by scholarship.',
-      DELETE_ALL_STARTED:
-        'The process of deleting all students has been started.'
+        'O processo de cadastro de um novo estudante foi concluído.',
+      CREATION_FAILED: 'Não foi possível cadastrar o estudante.',
+      UPDATE_FAILED: 'Não foi possível atualizar o estudante.',
+      NOT_FOUND: 'Estudante não encontrado.',
+      COUNT_BY_SCHOLARSHIP_FAILED: 'Falha ao contar os estudantes por bolsa.'
     },
     enrollment: {
       CREATION_STARTED:
-        'The process of inserting a new enrollment has been started.',
+        'O processo de cadastro de uma nova matrícula foi iniciado.',
       CREATION_COMPLETED:
-        'The process of inserting a new enrollment has been completed.',
-      CREATION_FAILED: "Cant't create enrollment.",
-      UPDATE_FAILED: "Cant't update enrollment.",
-      DEACTIVATE_FAILED: "Can't deactivate this enrollment.",
-      NOT_FOUND: 'Enrollment not found.',
-      DELETE_ALL_STARTED:
-        'The process of deleting all enrollments has been started.'
+        'O processo de cadastro de uma nova matrícula foi concluído.',
+      CREATION_FAILED: 'Não foi possível cadastrar a matrícula.',
+      UPDATE_FAILED: 'Não foi possível atualizar a matrícula.',
+      DEACTIVATE_FAILED: 'Não foi possível desativar esta matrícula.',
+      NOT_FOUND: 'Matrícula não encontrada.'
     },
     scholarship: {
       CREATION_STARTED:
-        'The process of inserting a new scholarship has been started.',
+        'O processo de cadastro de uma nova bolsa foi iniciado.',
       CREATION_COMPLETED:
-        'The process of inserting a new scholarship has been completed.',
-      CREATION_FAILED: "Cant't create scholarship.",
-      UPDATE_FAILED: "Cant't update scholarship.",
-      FINISH_FAILED: "Can't finish this scholarship.",
-      EXTEND_FAILED: "Can't extend this scholarship.",
-      NOT_FOUND: 'Scholarship not found.',
-      COUNT_FAILED: 'Failed to count scholarships.',
-      DELETE_ALL_STARTED:
-        'The process of deleting all scholarships has been started.',
+        'O processo de cadastro de uma nova bolsa foi concluído.',
+      CREATION_FAILED: 'Não foi possível cadastrar a bolsa.',
+      UPDATE_FAILED: 'Não foi possível atualizar a bolsa.',
+      FINISH_FAILED: 'Não foi possível finalizar esta bolsa.',
+      EXTEND_FAILED: 'Não foi possível prorrogar esta bolsa.',
+      NOT_FOUND: 'Bolsa não encontrada.',
+      COUNT_FAILED: 'Falha ao contar as bolsas.',
       ALREADY_REGISTERED:
         'Já existe uma bolsa cadastrada com os mesmos detalhes informados.',
       NO_SLOTS_AVAILABLE: 'Não há vagas disponíveis para esta bolsa.',
@@ -130,32 +121,27 @@ const constants = {
         'Não há vagas concedidas cadastradas para esta bolsa.'
     },
     pendingScholarship: {
-      APROVE_NOT_FOUND: 'Pending scholarship not found to approve.',
-      NOT_FOUND: 'Pending scholarship not found.',
-      DELETE_FAILED: 'Could not delete. Database error.'
+      APROVE_NOT_FOUND: 'Bolsa pendente não encontrada para aprovação.',
+      NOT_FOUND: 'Bolsa pendente não encontrada.',
+      DELETE_FAILED: 'Não foi possível excluir. Erro no banco de dados.'
     },
     user: {
-      SOMETHING_WRONG: 'Something went wrong.',
-      NOT_FOUND: 'User not found.',
-      WRONG_PASSWORD: 'Invalid password.'
+      SOMETHING_WRONG: 'Algo deu errado.',
+      NOT_FOUND: 'Usuário não encontrado.',
+      WRONG_PASSWORD: 'Senha inválida.'
     },
     token: {
-      EXPIRED_ERROR: 'This token has expired, please try again!'
-    },
-    dataManager: {
-      IMPORT_FAILED: "Can't import scholarships from CSV file.",
-      EXPORT_FAILED: "Can't export scholarships to CSV file.",
-      INVALID_FILE: 'Only CSV files are allowed.',
-      PROCESS_FAILED: 'Error processing the CSV file.',
-      PROCESS_COMPLETED: 'CSV file processed successfully.',
-      DELETE_FAILED: 'Failed to delete data.'
+      EXPIRED_ERROR: 'Este token expirou, tente novamente!'
     },
     dates: {
-      END_DATE_SMALLER: "End date can't be smaller than the start date",
-      END_DATE_EXCEEDED: "End date can't exceed the estimated limit",
+      END_DATE_SMALLER:
+        'A data de término não pode ser anterior à data de início.',
+      END_DATE_EXCEEDED:
+        'A data de término não pode ultrapassar o limite estimado.',
       EXTENSION_DATE_SMALLER:
-        "Extension date can't be smaller than the end date",
-      EXTENSION_DATE_EXCEEDED: "Extension date can't exceed the 6 months limit"
+        'A data de prorrogação não pode ser anterior à data de término.',
+      EXTENSION_DATE_EXCEEDED:
+        'A data de prorrogação não pode ultrapassar o limite de 6 meses.'
     }
   }
 }

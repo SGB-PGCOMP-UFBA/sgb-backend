@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { parseDate, validateScholarshipDuration } from './date.util'
+import { formatDate, validateScholarshipDuration } from './date.util'
+import { constants } from './constants'
 
 const MESTRADO = { enrollment_program: 'MESTRADO' }
 const DOUTORADO = { enrollment_program: 'DOUTORADO' }
@@ -27,7 +28,9 @@ describe('validateScholarshipDuration', () => {
     )
 
     expect(result.isValid).toBe(false)
-    expect(result.errorMessage).toMatch(/exceed/)
+    expect(result.errorMessage).toBe(
+      constants.exceptionMessages.dates.END_DATE_EXCEEDED
+    )
   })
 
   it('quando o término do doutorado cabe no limite de 4 anos, aceita a duração', () => {
@@ -52,7 +55,9 @@ describe('validateScholarshipDuration', () => {
     )
 
     expect(result.isValid).toBe(false)
-    expect(result.errorMessage).toMatch(/exceed/)
+    expect(result.errorMessage).toBe(
+      constants.exceptionMessages.dates.END_DATE_EXCEEDED
+    )
   })
 
   it('quando a mesma duração é avaliada para doutorado, aceita o que o mestrado recusa', () => {
@@ -75,7 +80,9 @@ describe('validateScholarshipDuration', () => {
     )
 
     expect(result.isValid).toBe(false)
-    expect(result.errorMessage).toMatch(/smaller/)
+    expect(result.errorMessage).toBe(
+      constants.exceptionMessages.dates.END_DATE_SMALLER
+    )
   })
 
   it('quando a validação é de prorrogação, usa a mensagem específica de prorrogação', () => {
@@ -88,34 +95,25 @@ describe('validateScholarshipDuration', () => {
       true
     )
 
-    expect(result.errorMessage).toMatch(/Extension/)
+    expect(result.errorMessage).toBe(
+      constants.exceptionMessages.dates.EXTENSION_DATE_SMALLER
+    )
   })
 })
 
-describe('parseDate', () => {
-  it.each([
-    ['15/03/2026', '2026-03-15'],
-    ['01/12/2026', '2026-12-01'],
-    ['31/12/2025', '2025-12-31']
-  ])(
-    'quando a data está no formato brasileiro, converte para o formato ISO (%s → %s)',
-    (entrada, esperado) => {
-      expect(parseDate(entrada)).toBe(esperado)
+describe('formatDate', () => {
+  it('formata o dia de calendário vindo do banco sem voltar um dia', () => {
+    expect(formatDate('2026-09-26')).toBe('26/09/2026')
+  })
+
+  it('formata um Date pelo dia local', () => {
+    expect(formatDate(new Date(2026, 0, 5))).toBe('05/01/2026')
+  })
+
+  it.each([[null], [undefined]])(
+    'sem data (%s), informa que não há previsão',
+    (value) => {
+      expect(formatDate(value)).toBe('Sem previsão')
     }
   )
-
-  it('quando a data é ambígua entre dia e mês, lê o primeiro número como dia', () => {
-    expect(parseDate('01/12/2026')).toBe('2026-12-01')
-  })
-
-  it('quando a data vem nos demais formatos da planilha, converte para o formato ISO', () => {
-    expect(parseDate('2026-03-15')).toBe('2026-03-15')
-    expect(parseDate('15-Mar-2026')).toBe('2026-03-15')
-    expect(parseDate('3/15/2026 10:00:00')).toBe('2026-03-15')
-  })
-
-  it('quando a data é inválida, retorna null', () => {
-    expect(parseDate('não é data')).toBeNull()
-    expect(parseDate('')).toBeNull()
-  })
 })
