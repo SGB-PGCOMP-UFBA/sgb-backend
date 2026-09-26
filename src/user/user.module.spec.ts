@@ -5,6 +5,7 @@ import {
 } from '@/common/testing/wiring'
 import { UserModule } from '@/user/user.module'
 import { UserService } from '@/user/user.service'
+import { UserController } from '@/user/user.controller'
 import { Admin } from '@/admin/entities/admin.entity'
 import { AdminRepository } from '@/admin/repositories/admin.repository'
 import { TypeOrmAdminRepository } from '@/admin/repositories/typeorm-admin.repository'
@@ -28,6 +29,7 @@ describe('UserModule', () => {
     )
 
     expect(moduleRef.get(UserService)).toBeInstanceOf(UserService)
+    expect(moduleRef.get(UserController)).toBeInstanceOf(UserController)
   })
 
   it('o DatabaseModule real amarra e exporta os três repositórios', () => {

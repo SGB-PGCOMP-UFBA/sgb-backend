@@ -26,6 +26,7 @@ const CREATE_DTO: CreateAdminDto = {
 function createAdminRepositoryMock() {
   return {
     findAllOrderedByName: vi.fn().mockResolvedValue([]),
+    search: vi.fn().mockResolvedValue([]),
     findByEmail: vi.fn().mockResolvedValue(null),
     findByTaxId: vi.fn().mockResolvedValue(null),
     findByPhoneNumber: vi.fn().mockResolvedValue(null),

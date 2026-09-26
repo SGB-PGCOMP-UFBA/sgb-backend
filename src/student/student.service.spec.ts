@@ -20,6 +20,7 @@ const CREATE_DTO: CreateStudentDto = {
 function createStudentRepositoryMock() {
   return {
     findAllWithEnrollments: vi.fn().mockResolvedValue([]),
+    search: vi.fn().mockResolvedValue([]),
     findAllByAdvisorId: vi.fn().mockResolvedValue([]),
     findByEmail: vi.fn().mockResolvedValue(null),
     findByEmailWithEnrollments: vi.fn().mockResolvedValue(null),

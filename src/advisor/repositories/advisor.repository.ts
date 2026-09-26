@@ -1,8 +1,10 @@
 import { Advisor } from '@/advisor/entities/advisor.entity'
 import { CreateAdvisorDto } from '@/advisor/dtos/create-advisor.dto'
+import { UserSearchFilters } from '@/common/interfaces/user-search-filters.interface'
 
 export abstract class AdvisorRepository {
   abstract findAllWithEnrollments(): Promise<Advisor[]>
+  abstract search(filters: UserSearchFilters): Promise<Advisor[]>
   abstract findAllForFilter(): Promise<Advisor[]>
   abstract findById(id: number): Promise<Advisor | null>
   abstract findByEmail(email: string): Promise<Advisor | null>

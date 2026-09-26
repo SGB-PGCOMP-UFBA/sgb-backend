@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
+import { ILike } from 'typeorm'
 import { createRepositoryMock } from '@/common/testing/repository.mock'
 import { TypeOrmAdvisorRepository } from './typeorm-advisor.repository'
 
@@ -9,6 +10,15 @@ describe('TypeOrmAdvisorRepository', () => {
   beforeEach(() => {
     typeorm = createRepositoryMock()
     repository = new TypeOrmAdvisorRepository(typeorm)
+  })
+
+  it('search filtra por nome e e-mail e ordena pelo nome', async () => {
+    await repository.search({ name: 'ana', email: 'ufba' })
+
+    expect(typeorm.find).toHaveBeenCalledWith({
+      where: { name: ILike('%ana%'), email: ILike('%ufba%') },
+      order: { name: 'ASC' }
+    })
   })
 
   it('findAllWithEnrollments carrega as orientações, ordenadas por nome', async () => {

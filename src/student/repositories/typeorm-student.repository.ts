@@ -4,6 +4,8 @@ import { Repository } from 'typeorm'
 import { Student } from '@/student/entities/student.entity'
 import { CreateStudentDto } from '@/student/dtos/create-student.dto'
 import { StudentRepository } from '@/student/repositories/student.repository'
+import { UserSearchFilters } from '@/common/interfaces/user-search-filters.interface'
+import { userSearchWhere } from '@/common/utils/user-search.util'
 
 const WITH_ENROLLMENTS = [
   'enrollments',
@@ -23,6 +25,13 @@ export class TypeOrmStudentRepository implements StudentRepository {
     @InjectRepository(Student)
     private readonly repository: Repository<Student>
   ) {}
+
+  async search(filters: UserSearchFilters): Promise<Student[]> {
+    return await this.repository.find({
+      where: userSearchWhere(filters),
+      order: { name: 'ASC' }
+    })
+  }
 
   async findAllWithEnrollments(): Promise<Student[]> {
     return await this.repository.find({ relations: WITH_ENROLLMENTS })
