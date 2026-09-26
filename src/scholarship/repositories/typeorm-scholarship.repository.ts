@@ -278,12 +278,6 @@ export class TypeOrmScholarshipRepository implements ScholarshipRepository {
       })
     }
 
-    if (params.allocationId) {
-      query.andWhere('scholarship.allocation_id = :allocationId', {
-        allocationId: params.allocationId
-      })
-    }
-
     if (params.excludingScholarshipId) {
       query.andWhere('scholarship.id != :excludingScholarshipId', {
         excludingScholarshipId: params.excludingScholarshipId

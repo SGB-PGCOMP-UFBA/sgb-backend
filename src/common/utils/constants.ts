@@ -71,9 +71,7 @@ const constants = {
     allocation: {
       CREATION_FAILED: 'Não foi possível cadastrar a alocação.',
       NOT_FOUND: 'Alocação não encontrada.',
-      NAME_IS_REQUIRED: 'A alocação é obrigatória.',
-      AWARDED_BELOW_ALLOCATED:
-        'A quantidade de bolsas concedidas para a alocação não pode ser menor que a quantidade já alocada.'
+      NAME_IS_REQUIRED: 'A alocação é obrigatória.'
     },
     notification: {
       CREATION_COMPLETED:

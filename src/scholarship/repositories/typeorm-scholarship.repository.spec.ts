@@ -85,16 +85,13 @@ describe('TypeOrmScholarshipRepository', () => {
       )
     })
 
-    it('sem agência nem alocação, não filtra por nenhuma das duas', async () => {
+    it('sem agência, não filtra por agência', async () => {
       await repository.countAllocatedSlots({ program: 'MESTRADO' })
 
       const criterios = queryBuilder.andWhere.mock.calls.map(
         (call: unknown[]) => call[0]
       )
       expect(criterios).not.toContain('scholarship.agency_id = :agencyId')
-      expect(criterios).not.toContain(
-        'scholarship.allocation_id = :allocationId'
-      )
     })
   })
 

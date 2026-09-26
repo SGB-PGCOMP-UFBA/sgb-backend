@@ -1,9 +1,6 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common'
+import { NotFoundException } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import {
-  makeAllocation,
-  makeScholarshipsForProgram
-} from '@/common/testing/factories'
+import { makeAllocation } from '@/common/testing/factories'
 import { AllocationRepository } from '@/allocation/repositories/allocation.repository'
 import { AllocationService } from './allocation.service'
 
@@ -51,34 +48,15 @@ describe('AllocationService', () => {
   })
 
   describe('update', () => {
-    it('quando a atualização reduz as concedidas abaixo das já alocadas, recusa a mudança e não salva', async () => {
-      repository.findByIdWithScholarships.mockResolvedValue(
-        makeAllocation({
-          scholarships: makeScholarshipsForProgram(2, 'MESTRADO')
-        })
-      )
+    it('quando a alocação existe, salva as mudanças', async () => {
+      const allocation = makeAllocation()
+      repository.findByIdWithScholarships.mockResolvedValue(allocation)
 
-      await expect(
-        service.update(1, { masters_degree_awarded_scholarships: 1 } as never)
-      ).rejects.toBeInstanceOf(BadRequestException)
-      expect(repository.update).not.toHaveBeenCalled()
-    })
+      await service.update(1, { name: 'PRESENCIAL' })
 
-    it('quando a atualização aumenta as concedidas, aceita a mudança e salva', async () => {
-      repository.findByIdWithScholarships.mockResolvedValue(
-        makeAllocation({
-          scholarships: makeScholarshipsForProgram(1, 'MESTRADO')
-        })
-      )
-
-      await service.update(1, {
-        masters_degree_awarded_scholarships: 20
-      } as never)
-
-      expect(repository.update).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({ masters_degree_awarded_scholarships: 20 })
-      )
+      expect(repository.update).toHaveBeenCalledWith(allocation, {
+        name: 'PRESENCIAL'
+      })
     })
 
     it('quando a alocação não existe, lança NotFound', async () => {

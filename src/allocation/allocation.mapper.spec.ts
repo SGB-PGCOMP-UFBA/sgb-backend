@@ -33,7 +33,7 @@ describe('AllocationMapper.simplified', () => {
 })
 
 describe('AllocationMapper.detailed', () => {
-  it('quando a alocação tem bolsas vigentes de mestrado e de doutorado, expõe as concedidas da alocação e conta as alocadas das bolsas', () => {
+  it('quando a alocação tem bolsas vigentes de mestrado e de doutorado, conta as alocadas das bolsas', () => {
     const detailed = AllocationMapper.detailed(
       makeAllocation({
         scholarships: [
@@ -43,9 +43,7 @@ describe('AllocationMapper.detailed', () => {
       })
     )
 
-    expect(detailed.masters_degree_awarded_scholarships).toBe(10)
     expect(detailed.masters_degree_allocated_scholarships).toBe(2)
-    expect(detailed.doctorate_degree_awarded_scholarships).toBe(5)
     expect(detailed.doctorate_degree_allocated_scholarships).toBe(1)
   })
 
@@ -59,19 +57,6 @@ describe('AllocationMapper.detailed', () => {
     )
 
     expect(detailed.masters_degree_allocated_scholarships).toBe(2)
-  })
-
-  it('quando a cota cadastrada é igual ao número de bolsas vigentes, mantém as alocadas dentro das concedidas', () => {
-    const detailed = AllocationMapper.detailed(
-      makeAllocation({
-        masters_degree_awarded_scholarships: 2,
-        scholarships: makeScholarshipsForProgram(2, 'MESTRADO')
-      })
-    )
-
-    expect(detailed.masters_degree_allocated_scholarships).toBeLessThanOrEqual(
-      detailed.masters_degree_awarded_scholarships
-    )
   })
 
   it('quando a bolsa já terminou, não a conta como vaga ocupada', () => {

@@ -98,8 +98,6 @@ export const makeAgency = defineFactory<Agency>(() => ({
 export const makeAllocation = defineFactory<Allocation>(() => ({
   id: 2,
   name: 'REMOTO',
-  masters_degree_awarded_scholarships: 10,
-  doctorate_degree_awarded_scholarships: 5,
   created_at: CRIADO_EM,
   updated_at: CRIADO_EM,
   scholarships: []

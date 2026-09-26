@@ -26,15 +26,11 @@ export class AllocationMapper {
     return {
       ...simplified,
       scholarshipsSinceBeginning: allocation.scholarships.length,
-      masters_degree_awarded_scholarships:
-        allocation.masters_degree_awarded_scholarships,
       masters_degree_allocated_scholarships:
         countAllocatedScholarshipsByProgram(
           allocation.scholarships,
           'MESTRADO'
         ),
-      doctorate_degree_awarded_scholarships:
-        allocation.doctorate_degree_awarded_scholarships,
       doctorate_degree_allocated_scholarships:
         countAllocatedScholarshipsByProgram(
           allocation.scholarships,
