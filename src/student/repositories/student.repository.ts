@@ -18,5 +18,4 @@ export abstract class StudentRepository {
     passwordHash: string
   ): Promise<void>
   abstract deleteById(id: number): Promise<number>
-  abstract deleteAllAndResetSequence(): Promise<void>
 }

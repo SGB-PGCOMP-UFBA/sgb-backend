@@ -14,7 +14,6 @@ import {
   ScholarshipReportRow,
   AgencyProgramCountRow,
   AgencyStatusCountRow,
-  CsvMatchCriteria,
   DuplicateCreateCriteria,
   DuplicateUpdateCriteria,
   ScholarshipRepository,
@@ -182,36 +181,6 @@ export class TypeOrmScholarshipRepository implements ScholarshipRepository {
       scholarship_ends_at: criteria.scholarship_ends_at,
       extension_ends_at: criteria.extension_ends_at ?? IsNull()
     })
-  }
-
-  async findMatchForCsvUpdate(
-    criteria: CsvMatchCriteria
-  ): Promise<Partial<Scholarship> | null> {
-    return await this.repository
-      .createQueryBuilder('scholarship')
-      .select([
-        'scholarship.id',
-        'scholarship.scholarship_starts_at',
-        'scholarship.scholarship_ends_at',
-        'scholarship.extension_ends_at',
-        'student.id',
-        'student.name',
-        'student.tax_id',
-        'student.email',
-        'agency.name',
-        'enrollment.enrollment_program'
-      ])
-      .leftJoin('scholarship.enrollment', 'enrollment')
-      .leftJoin('enrollment.student', 'student')
-      .leftJoin('scholarship.agency', 'agency')
-      .where('enrollment.enrollment_program = :program', {
-        program: criteria.program
-      })
-      .andWhere('agency.name = :agency', { agency: criteria.agencyName })
-      .andWhere('student.name ILike :studentName', {
-        studentName: `%${criteria.studentName}%`
-      })
-      .getOne()
   }
 
   async findAllForReport(
@@ -425,12 +394,5 @@ export class TypeOrmScholarshipRepository implements ScholarshipRepository {
   async deleteById(id: number): Promise<number> {
     const removed = await this.repository.delete(id)
     return removed.affected ?? 0
-  }
-
-  async deleteAllAndResetSequence(): Promise<void> {
-    await this.repository.createQueryBuilder().delete().execute()
-    await this.repository.query(
-      `ALTER SEQUENCE scholarship_id_seq RESTART WITH 1`
-    )
   }
 }

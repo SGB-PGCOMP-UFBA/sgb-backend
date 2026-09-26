@@ -88,19 +88,6 @@ describe('TypeOrmEnrollmentRepository', () => {
     expect(typeorm.save).toHaveBeenCalledWith({ id: 42, advisor_id: 99 })
   })
 
-  it('deleteAllAndResetSequence apaga tudo e reinicia a sequência de ids', async () => {
-    const queryBuilder = createDeleteQueryBuilderMock()
-    typeorm.createQueryBuilder.mockReturnValue(queryBuilder)
-
-    await repository.deleteAllAndResetSequence()
-
-    expect(queryBuilder.delete).toHaveBeenCalled()
-    expect(queryBuilder.execute).toHaveBeenCalled()
-    expect(typeorm.query).toHaveBeenCalledWith(
-      'ALTER SEQUENCE enrollment_id_seq RESTART WITH 1'
-    )
-  })
-
   it('deleteById devolve a quantidade de linhas removidas', async () => {
     typeorm.delete.mockResolvedValue({ affected: 1 })
 

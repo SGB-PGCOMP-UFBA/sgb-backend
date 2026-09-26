@@ -269,18 +269,6 @@ describe('TypeOrmScholarshipRepository', () => {
     expect(typeorm.save).not.toHaveBeenCalled()
   })
 
-  it('deleteAllAndResetSequence apaga tudo e reinicia a sequência de ids', async () => {
-    const deleteQueryBuilder = createDeleteQueryBuilderMock()
-    typeorm.createQueryBuilder.mockReturnValue(deleteQueryBuilder)
-
-    await repository.deleteAllAndResetSequence()
-
-    expect(deleteQueryBuilder.delete).toHaveBeenCalled()
-    expect(typeorm.query).toHaveBeenCalledWith(
-      'ALTER SEQUENCE scholarship_id_seq RESTART WITH 1'
-    )
-  })
-
   it('deleteById devolve a quantidade de linhas removidas', async () => {
     typeorm.delete.mockResolvedValue({ affected: 1 })
 

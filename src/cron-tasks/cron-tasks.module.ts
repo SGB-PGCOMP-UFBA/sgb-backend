@@ -3,7 +3,6 @@ import { AdminModule } from '@/admin/admin.module'
 import { EmailModule } from '@/email/email.module'
 import { EmbedNotificationModule } from '@/embed-notification/embed-notification.module'
 import { ScholarshipModule } from '@/scholarship/scholarship.module'
-import { ScholarshipEndingReminderService } from './scholarship-ending-reminder.service'
 import { ScholarshipFinalizerService } from './scholarship-finalizer.service'
 import { ScholarshipMonthlyReportService } from './scholarship-monthly-report.service'
 
@@ -14,10 +13,6 @@ import { ScholarshipMonthlyReportService } from './scholarship-monthly-report.se
     EmbedNotificationModule,
     ScholarshipModule
   ],
-  providers: [
-    ScholarshipEndingReminderService,
-    ScholarshipFinalizerService,
-    ScholarshipMonthlyReportService
-  ]
+  providers: [ScholarshipFinalizerService, ScholarshipMonthlyReportService]
 })
 export class CronTasksModule {}

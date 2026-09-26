@@ -86,9 +86,4 @@ export class TypeOrmStudentRepository implements StudentRepository {
     const removed = await this.repository.delete(id)
     return removed.affected ?? 0
   }
-
-  async deleteAllAndResetSequence(): Promise<void> {
-    await this.repository.createQueryBuilder().delete().execute()
-    await this.repository.query(`ALTER SEQUENCE student_id_seq RESTART WITH 1`)
-  }
 }

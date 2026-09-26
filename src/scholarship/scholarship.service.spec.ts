@@ -42,7 +42,6 @@ function createScholarshipRepositoryMock() {
     findByIdAndEnrollmentId: vi.fn().mockResolvedValue(null),
     findDuplicateForCreate: vi.fn().mockResolvedValue(null),
     findDuplicateForUpdate: vi.fn().mockResolvedValue(null),
-    findMatchForCsvUpdate: vi.fn().mockResolvedValue(null),
     findAllForReport: vi.fn().mockResolvedValue([]),
     findDistinctStudentEmails: vi.fn().mockResolvedValue([]),
     countOccupyingSlotByEnrollment: vi.fn().mockResolvedValue(0),
@@ -54,8 +53,7 @@ function createScholarshipRepositoryMock() {
     create: vi.fn(async (data: unknown) => data),
     update: vi.fn(async (_id: number, data: unknown) => data),
     updateFields: vi.fn().mockResolvedValue(undefined),
-    deleteById: vi.fn().mockResolvedValue(1),
-    deleteAllAndResetSequence: vi.fn().mockResolvedValue(undefined)
+    deleteById: vi.fn().mockResolvedValue(1)
   } satisfies Record<keyof ScholarshipRepository, unknown>
 }
 
