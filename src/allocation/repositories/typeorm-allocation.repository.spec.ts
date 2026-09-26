@@ -47,15 +47,13 @@ describe('TypeOrmAllocationRepository', () => {
   it('update aplica as mudanças sobre a entidade carregada antes de salvar', async () => {
     const allocation = makeAllocation()
 
-    await repository.update(allocation, {
-      masters_degree_awarded_scholarships: 20
-    })
+    await repository.update(allocation, { name: 'PRESENCIAL' })
 
     expect(typeorm.merge).toHaveBeenCalledWith(allocation, {
-      masters_degree_awarded_scholarships: 20
+      name: 'PRESENCIAL'
     })
     expect(typeorm.save).toHaveBeenCalledWith(
-      expect.objectContaining({ masters_degree_awarded_scholarships: 20 })
+      expect.objectContaining({ name: 'PRESENCIAL' })
     )
   })
 

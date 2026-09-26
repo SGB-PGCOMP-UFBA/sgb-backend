@@ -8,7 +8,6 @@ import { UpdateAllocationDto } from '@/allocation/dtos/update-allocation.dto'
 import { Allocation } from '@/allocation/entities/allocation.entity'
 import { AllocationRepository } from '@/allocation/repositories/allocation.repository'
 import { constants } from '@/common/utils/constants'
-import { countAllocatedScholarshipsByProgram } from '@/scholarship/utils/scholarship-allocation.util'
 
 @Injectable()
 export class AllocationService {
@@ -77,53 +76,10 @@ export class AllocationService {
         constants.exceptionMessages.allocation.NOT_FOUND
       )
 
-    this.assertAwardedSlotsAreNotBelowAllocated(
-      allocation,
-      updateAllocationDto.masters_degree_awarded_scholarships ??
-        allocation.masters_degree_awarded_scholarships,
-      updateAllocationDto.doctorate_degree_awarded_scholarships ??
-        allocation.doctorate_degree_awarded_scholarships
-    )
-
     return await this.allocationRepository.update(
       allocation,
       updateAllocationDto
     )
-  }
-
-  private assertAwardedSlotsAreNotBelowAllocated(
-    allocation: Allocation,
-    mastersAwardedScholarships: number,
-    doctorateAwardedScholarships: number
-  ): void {
-    const mastersAllocated = countAllocatedScholarshipsByProgram(
-      allocation.scholarships,
-      'MESTRADO'
-    )
-    const doctorateAllocated = countAllocatedScholarshipsByProgram(
-      allocation.scholarships,
-      'DOUTORADO'
-    )
-
-    if (
-      mastersAwardedScholarships > 0 &&
-      mastersAwardedScholarships < mastersAllocated
-    ) {
-      throw new BadRequestException(
-        `${constants.exceptionMessages.allocation.AWARDED_BELOW_ALLOCATED} ` +
-          `Mestrado: ${mastersAllocated} vaga(s) alocada(s).`
-      )
-    }
-
-    if (
-      doctorateAwardedScholarships > 0 &&
-      doctorateAwardedScholarships < doctorateAllocated
-    ) {
-      throw new BadRequestException(
-        `${constants.exceptionMessages.allocation.AWARDED_BELOW_ALLOCATED} ` +
-          `Doutorado: ${doctorateAllocated} vaga(s) alocada(s).`
-      )
-    }
   }
 
   async delete(id: number): Promise<boolean> {

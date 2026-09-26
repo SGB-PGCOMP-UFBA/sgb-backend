@@ -44,7 +44,6 @@ export type ScholarshipReportRow = {
 export type SlotCountParams = {
   program: string
   agencyId?: number
-  allocationId?: number
   excludingScholarshipId?: number
 }
 

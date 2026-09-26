@@ -35,8 +35,7 @@ import {
   SCHOLARSHIP_STATUSES
 } from '@/scholarship/utils/scholarship-status.util'
 
-interface QuotaTarget {
-  type: 'agency' | 'allocation'
+interface AgencyQuota {
   id: number
   name: string
   masters_degree_awarded_scholarships?: number
@@ -116,65 +115,36 @@ export class ScholarshipService {
     )
   }
 
-  private async assertHasAvailableSlot(
-    target: QuotaTarget,
-    enrollment: { id: number; program: string },
+  private async assertAgencyHasAvailableSlot(
+    agency: AgencyQuota,
+    enrollment: { enrollment_program: string },
     excludingScholarshipId?: number
   ): Promise<void> {
-    const awardedSlots = getAwardedSlotsByProgram(target, enrollment.program)
+    const program = enrollment.enrollment_program
+    const awardedSlots = getAwardedSlotsByProgram(agency, program)
 
     const allocatedSlots = await this.scholarshipRepository.countAllocatedSlots(
       {
-        program: enrollment.program,
-        agencyId: target.type === 'agency' ? target.id : undefined,
-        allocationId: target.type === 'allocation' ? target.id : undefined,
+        program,
+        agencyId: agency.id,
         excludingScholarshipId
       }
     )
 
     if (hasAvailableSlot({ awardedSlots, allocatedSlots })) return
 
-    const scope = target.type === 'agency' ? 'A agência' : 'A alocação'
-    const program = ProgramEnum[enrollment.program] || enrollment.program
+    const programLabel = ProgramEnum[program] || program
     const message =
       awardedSlots <= 0
         ? `${constants.exceptionMessages.scholarship.QUOTA_NOT_CONFIGURED} ` +
-          `${scope} ${target.name} não possui vagas de ${program} concedidas.`
+          `A agência ${agency.name} não possui vagas de ${programLabel} concedidas.`
         : `${constants.exceptionMessages.scholarship.NO_SLOTS_AVAILABLE} ` +
-          `${scope} ${target.name} possui ${awardedSlots} vaga(s) de ${program} ` +
+          `A agência ${agency.name} possui ${awardedSlots} vaga(s) de ${programLabel} ` +
           `concedida(s) e ${allocatedSlots} já alocada(s).`
 
     this.logger.warn(message)
 
     throw new BadRequestException(message)
-  }
-
-  private async assertScholarshipFitsInAvailableSlots(params: {
-    agency?: QuotaTarget | null
-    allocation?: QuotaTarget | null
-    enrollment: { id: number; enrollment_program: string }
-    excludingScholarshipId?: number
-  }): Promise<void> {
-    const enrollment = {
-      id: params.enrollment.id,
-      program: params.enrollment.enrollment_program
-    }
-
-    if (params.agency) {
-      await this.assertHasAvailableSlot(
-        { ...params.agency, type: 'agency' },
-        enrollment,
-        params.excludingScholarshipId
-      )
-    }
-
-    if (params.allocation) {
-      await this.assertHasAvailableSlot(
-        { ...params.allocation, type: 'allocation' },
-        enrollment,
-        params.excludingScholarshipId
-      )
-    }
   }
 
   async create(dto: CreateScholarshipDto): Promise<Scholarship> {
@@ -232,11 +202,7 @@ export class ScholarshipService {
       if (willOccupySlot) {
         await this.assertEnrollmentHasNoActiveScholarship(enrollment.id)
 
-        await this.assertScholarshipFitsInAvailableSlots({
-          agency: { ...agency, type: 'agency' },
-          allocation: allocation ? { ...allocation, type: 'allocation' } : null,
-          enrollment
-        })
+        await this.assertAgencyHasAvailableSlot(agency, enrollment)
       }
 
       const newScholarship = await this.scholarshipRepository.create({
@@ -359,22 +325,15 @@ export class ScholarshipService {
       })
 
       if (willOccupySlot) {
-        const nextAgencyId = dto.agency_id || scholarship.agency_id
-        const nextAllocationId = dto.allocation_id || scholarship.allocation_id
+        const nextAgency = await this.agencyService.findOneById(
+          dto.agency_id || scholarship.agency_id
+        )
 
-        const nextAgency = await this.agencyService.findOneById(nextAgencyId)
-        const nextAllocation = nextAllocationId
-          ? await this.allocationService.findOneById(nextAllocationId)
-          : null
-
-        await this.assertScholarshipFitsInAvailableSlots({
-          agency: nextAgency ? { ...nextAgency, type: 'agency' } : null,
-          allocation: nextAllocation
-            ? { ...nextAllocation, type: 'allocation' }
-            : null,
+        await this.assertAgencyHasAvailableSlot(
+          nextAgency,
           enrollment,
-          excludingScholarshipId: scholarship.id
-        })
+          scholarship.id
+        )
       }
 
       return await this.scholarshipRepository.update(scholarship.id, {

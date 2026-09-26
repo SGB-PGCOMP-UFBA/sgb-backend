@@ -16,10 +16,7 @@ import { FindScholarshipsForReportDto } from '@/scholarship/dtos/find-scholarshi
 
 const AGENCY = makeAgency()
 
-const ALLOCATION = makeAllocation({
-  masters_degree_awarded_scholarships: 50,
-  doctorate_degree_awarded_scholarships: 50
-})
+const ALLOCATION = makeAllocation()
 
 const ENROLLMENT = makeEnrollment()
 
@@ -137,21 +134,6 @@ describe('ScholarshipService', () => {
       await expect(service.create(VALID_DTO)).rejects.toThrow(
         /não possui vagas de Mestrado concedidas/
       )
-    })
-
-    it('quando a alocação está lotada e ainda há vaga na agência, bloqueia a criação e não salva', async () => {
-      allocationService.findOneByName.mockResolvedValue(
-        makeAllocation({ masters_degree_awarded_scholarships: 2 })
-      )
-
-      repository.countAllocatedSlots
-        .mockResolvedValueOnce(1)
-        .mockResolvedValueOnce(2)
-
-      await expect(service.create(VALID_DTO)).rejects.toThrow(
-        /A alocação REMOTO/
-      )
-      expect(repository.create).not.toHaveBeenCalled()
     })
 
     it('quando a matrícula já tem bolsa vigente, recusa cadastrar outra', async () => {
