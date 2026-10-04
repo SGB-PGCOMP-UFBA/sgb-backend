@@ -7,7 +7,8 @@ import {
   HEADERS_FOR_SCHOLARSHIPS_ENDING_CURRENT_YEAR,
   getFirstAndLastNameFromCompleteName,
   getScholarshipsSplitedByStartingYear,
-  getScholarshipsSplitedByEndingYear
+  getScholarshipsSplitedByEndingYear,
+  describeReportPeriod
 } from './pdf-reports.helper'
 import { QuadrennialReportDto } from '@/pdf-reports/dtos/quadrennial-report.dto'
 
@@ -301,7 +302,9 @@ export class PdfReportsService {
     currentY += 8
     doc.setFontSize(11).setFont('times', 'normal')
     doc.text(
-      `Período: ${dto.startDate} até ${dto.endDate}`,
+      `Período: ${
+        describeReportPeriod(dto.startDate, dto.endDate) ?? 'completo'
+      }`,
       docWidth / 2,
       currentY,
       {
@@ -339,9 +342,9 @@ export class PdfReportsService {
       // Estrutura de dados
       const tableBody: any[][] = [
         [
-          'Não iniciadas',
-          agency.inactiveCount.masters,
-          agency.inactiveCount.phd
+          'Ativas no período',
+          agency.activeCount.masters,
+          agency.activeCount.phd
         ],
         ['Em Andamento', agency.onGoingCount.masters, agency.onGoingCount.phd],
         ['Prorrogadas', agency.extendedCount.masters, agency.extendedCount.phd],

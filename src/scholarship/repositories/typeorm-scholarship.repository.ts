@@ -28,8 +28,8 @@ import {
   effectiveEndSql,
   scholarshipStatusPredicateSql,
   todayAsCalendarDay,
-  ScholarshipStatus,
-  ScholarshipStatusEnum
+  toCalendarDay,
+  ScholarshipStatus
 } from '@/scholarship/utils/scholarship-status.util'
 
 const WITH_RELATIONS = [
@@ -350,14 +350,16 @@ export class TypeOrmScholarshipRepository implements ScholarshipRepository {
   async countAsReportBetweenDates(
     dto: CountScholarshipsAsReportBetweenDatesDto
   ): Promise<AgencyStatusCountRow[]> {
-    return await this.repository
+    const today = todayAsCalendarDay()
+    const periodEndDay = dto.end_period ? toCalendarDay(dto.end_period) : today
+    const referenceDay = periodEndDay < today ? periodEndDay : today
+
+    const query = this.repository
       .createQueryBuilder('scholarship')
       .innerJoin('scholarship.enrollment', 'enrollment')
       .innerJoin('scholarship.agency', 'agency')
-      .where('scholarship.scholarship_starts_at <= :searchEnd', {
-        searchEnd: dto.end_period
-      })
-      .setParameter('today', todayAsCalendarDay())
+      .where('scholarship.scholarship_starts_at <= CAST(:today AS date)')
+      .setParameter('today', referenceDay)
       .select([
         `agency.name AS agency_name`,
         `${derivedStatusSql()} AS status`,
@@ -366,11 +368,14 @@ export class TypeOrmScholarshipRepository implements ScholarshipRepository {
       ])
       .groupBy(`agency.name`)
       .addGroupBy(derivedStatusSql())
-      .andWhere(
-        'COALESCE(scholarship.extension_ends_at, scholarship.scholarship_ends_at) >= :searchStart',
-        { searchStart: dto.start_period }
-      )
-      .getRawMany()
+
+    if (dto.start_period) {
+      query.andWhere(`${effectiveEndSql()} >= CAST(:searchStart AS date)`, {
+        searchStart: toCalendarDay(dto.start_period)
+      })
+    }
+
+    return await query.getRawMany()
   }
 
   async create(data: Partial<Scholarship>): Promise<Scholarship> {

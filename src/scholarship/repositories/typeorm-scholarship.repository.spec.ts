@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   createQueryBuilderMock,
   createRepositoryMock
@@ -6,13 +6,6 @@ import {
 import { ScholarshipStatusEnum } from '@/scholarship/utils/scholarship-status.util'
 import { ScholarshipFilters } from '@/scholarship/scholarship-filters.interface'
 import { TypeOrmScholarshipRepository } from './typeorm-scholarship.repository'
-
-function createDeleteQueryBuilderMock() {
-  const queryBuilder: Record<string, ReturnType<typeof vi.fn>> = {}
-  queryBuilder.delete = vi.fn(() => queryBuilder)
-  queryBuilder.execute = vi.fn().mockResolvedValue({ affected: 9 })
-  return queryBuilder
-}
 
 describe('TypeOrmScholarshipRepository', () => {
   let typeorm: ReturnType<typeof createRepositoryMock>
@@ -135,6 +128,89 @@ describe('TypeOrmScholarshipRepository', () => {
       )
     }
   )
+
+  describe('countAsReportBetweenDates', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date(2026, 9, 3, 12))
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('quando o período já terminou, deriva o status no último dia do período', async () => {
+      await repository.countAsReportBetweenDates({
+        start_period: new Date(2021, 0, 1),
+        end_period: new Date(2024, 11, 31)
+      })
+
+      expect(queryBuilder.setParameter).toHaveBeenCalledWith(
+        'today',
+        '2024-12-31'
+      )
+    })
+
+    it('quando o período ainda não terminou, deriva o status em hoje', async () => {
+      await repository.countAsReportBetweenDates({
+        start_period: new Date(2023, 0, 1),
+        end_period: new Date(2026, 11, 31)
+      })
+
+      expect(queryBuilder.setParameter).toHaveBeenCalledWith(
+        'today',
+        '2026-10-03'
+      )
+    })
+
+    it('traz só bolsas já iniciadas no dia de referência e que terminam, com prorrogação, depois do início do período', async () => {
+      await repository.countAsReportBetweenDates({
+        start_period: new Date(2023, 0, 1),
+        end_period: new Date(2026, 11, 31)
+      })
+
+      expect(queryBuilder.where).toHaveBeenCalledWith(
+        'scholarship.scholarship_starts_at <= CAST(:today AS date)'
+      )
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        expect.stringMatching(/COALESCE.*>= CAST\(:searchStart AS date\)/),
+        { searchStart: '2023-01-01' }
+      )
+    })
+  })
+
+  describe('countAsReportBetweenDates sem datas', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date(2026, 9, 3, 12))
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('sem datas, considera o período completo: deriva o status em hoje e não limita o início', async () => {
+      await repository.countAsReportBetweenDates({})
+
+      expect(queryBuilder.setParameter).toHaveBeenCalledWith(
+        'today',
+        '2026-10-03'
+      )
+      expect(queryBuilder.andWhere).not.toHaveBeenCalled()
+    })
+
+    it('só com o fim, deriva o status no fim e não limita o início', async () => {
+      await repository.countAsReportBetweenDates({
+        end_period: new Date(2024, 11, 31)
+      })
+
+      expect(queryBuilder.setParameter).toHaveBeenCalledWith(
+        'today',
+        '2024-12-31'
+      )
+      expect(queryBuilder.andWhere).not.toHaveBeenCalled()
+    })
+  })
 
   describe('findAllForReport', () => {
     it('com o período completo, traz toda bolsa que esteve nele: começa até o fim e termina, com prorrogação, depois do início', async () => {
