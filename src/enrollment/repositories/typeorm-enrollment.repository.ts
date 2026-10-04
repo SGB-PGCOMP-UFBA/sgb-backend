@@ -6,10 +6,6 @@ import {
   EnrollmentProgramRow,
   EnrollmentRepository
 } from '@/enrollment/repositories/enrollment.repository'
-import {
-  occupiesSlotSql,
-  todayAsCalendarDay
-} from '@/scholarship/utils/scholarship-status.util'
 
 @Injectable()
 export class TypeOrmEnrollmentRepository implements EnrollmentRepository {
@@ -48,32 +44,6 @@ export class TypeOrmEnrollmentRepository implements EnrollmentRepository {
     return await this.repository.findOneBy({
       enrollment_number: enrollmentNumber
     })
-  }
-
-  async findByNumberWithActiveScholarships(
-    enrollmentNumber: string
-  ): Promise<Enrollment | null> {
-    return await this.repository
-      .createQueryBuilder('enrollment')
-      .addSelect([
-        'scholarships.id',
-        'scholarships.scholarship_starts_at',
-        'scholarships.scholarship_ends_at',
-        'scholarships.extension_ends_at',
-        'student.email',
-        'student.name'
-      ])
-      .leftJoin(
-        'enrollment.scholarships',
-        'scholarships',
-        occupiesSlotSql('scholarships'),
-        { today: todayAsCalendarDay() }
-      )
-      .leftJoin('enrollment.student', 'student')
-      .where(`enrollment.enrollment_number = :enrollmentNumber`, {
-        enrollmentNumber
-      })
-      .getOne()
   }
 
   async create(data: Partial<Enrollment>): Promise<Enrollment> {

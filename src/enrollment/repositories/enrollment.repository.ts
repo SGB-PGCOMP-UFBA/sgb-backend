@@ -14,14 +14,6 @@ export abstract class EnrollmentRepository {
   ): Promise<Enrollment | null>
   abstract findByNumber(enrollmentNumber: string): Promise<Enrollment | null>
 
-  /**
-   * Traz a matrícula com apenas as bolsas que ocupam vaga hoje, mais os campos
-   * de estudante usados na aprovação de bolsa pendente.
-   */
-  abstract findByNumberWithActiveScholarships(
-    enrollmentNumber: string
-  ): Promise<Enrollment | null>
-
   abstract create(data: Partial<Enrollment>): Promise<Enrollment>
   abstract update(id: number, data: Partial<Enrollment>): Promise<Enrollment>
   abstract deleteById(id: number): Promise<number>

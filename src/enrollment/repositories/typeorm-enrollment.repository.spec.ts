@@ -64,24 +64,6 @@ describe('TypeOrmEnrollmentRepository', () => {
     })
   })
 
-  it('findByNumberWithActiveScholarships junta apenas as bolsas que ocupam vaga hoje', async () => {
-    const queryBuilder = createQueryBuilderMock([])
-    typeorm.createQueryBuilder.mockReturnValue(queryBuilder)
-
-    await repository.findByNumberWithActiveScholarships('2024123456')
-
-    expect(queryBuilder.leftJoin).toHaveBeenCalledWith(
-      'enrollment.scholarships',
-      'scholarships',
-      expect.stringContaining('COALESCE'),
-      expect.objectContaining({ today: expect.any(String) })
-    )
-    expect(queryBuilder.leftJoin).toHaveBeenCalledWith(
-      'enrollment.student',
-      'student'
-    )
-  })
-
   it('update persiste as mudanças junto do id', async () => {
     await repository.update(42, { advisor_id: 99 })
 

@@ -15,7 +15,6 @@ import { EmbedNotificationModule } from '@/embed-notification/embed-notification
 import { PdfReportsModule } from '@/pdf-reports/pdf-reports.module'
 import { PasswordRecoveryModule } from '@/password-recovery/password-recovery.module'
 import { CronTasksModule } from '@/cron-tasks/cron-tasks.module'
-import { PendingScholarshipModule } from '@/pending-scholarship/pending-scholarship.module'
 import { UserModule } from '@/user/user.module'
 
 require('dotenv')
@@ -40,7 +39,6 @@ require('dotenv')
     PasswordRecoveryModule,
     CronTasksModule,
     AllocationModule,
-    PendingScholarshipModule,
     UserModule
   ],
   controllers: [],
