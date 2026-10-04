@@ -123,3 +123,14 @@ export const HEADERS_FOR_SCHOLARSHIPS_ENDING_CURRENT_YEAR = [
     padding: 0
   }
 ]
+
+export function describeReportPeriod(
+  startDate?: string,
+  endDate?: string
+): string | null {
+  if (startDate && endDate) return `de ${startDate} a ${endDate}`
+  if (startDate) return `a partir de ${startDate}`
+  if (endDate) return `até ${endDate}`
+
+  return null
+}

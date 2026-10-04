@@ -154,7 +154,7 @@ export class ScholarshipMapper {
       scholarshipsTotal: number
       totalMasters: number
       totalPhd: number
-      inactiveCount: DegreeCount
+      activeCount: DegreeCount
       finishedCount: DegreeCount
       onGoingCount: DegreeCount
       extendedCount: DegreeCount
@@ -166,7 +166,6 @@ export class ScholarshipMapper {
     }
 
     const statusKeyMap: Record<string, string> = {
-      INACTIVE: 'inactiveCount',
       FINISHED: 'finishedCount',
       ON_GOING: 'onGoingCount',
       EXTENDED: 'extendedCount'
@@ -182,7 +181,7 @@ export class ScholarshipMapper {
         scholarshipsTotal: 0,
         totalMasters: 0,
         totalPhd: 0,
-        inactiveCount: { masters: 0, phd: 0 },
+        activeCount: { masters: 0, phd: 0 },
         finishedCount: { masters: 0, phd: 0 },
         onGoingCount: { masters: 0, phd: 0 },
         extendedCount: { masters: 0, phd: 0 }
@@ -199,7 +198,7 @@ export class ScholarshipMapper {
           scholarshipsTotal: 0,
           totalMasters: 0,
           totalPhd: 0,
-          inactiveCount: { masters: 0, phd: 0 },
+          activeCount: { masters: 0, phd: 0 },
           finishedCount: { masters: 0, phd: 0 },
           onGoingCount: { masters: 0, phd: 0 },
           extendedCount: { masters: 0, phd: 0 }
@@ -212,6 +211,8 @@ export class ScholarshipMapper {
       acc[name].scholarshipsTotal += mCount + pCount
       acc[name].totalMasters += mCount
       acc[name].totalPhd += pCount
+      acc[name].activeCount.masters += mCount
+      acc[name].activeCount.phd += pCount
 
       const targetKey = statusKeyMap[status]
 

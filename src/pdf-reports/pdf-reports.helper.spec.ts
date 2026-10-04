@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  describeReportPeriod,
   getFirstAndLastNameFromCompleteName,
   getScholarshipsSplitedByEndingYear,
   getScholarshipsSplitedByStartingYear
@@ -113,4 +114,18 @@ describe('getScholarshipsSplitedByEndingYear', () => {
 
     expect(Object.keys(agrupado)).toEqual(['2026'])
   })
+})
+
+describe('describeReportPeriod', () => {
+  it.each([
+    ['01/01/2023', '31/12/2026', 'de 01/01/2023 a 31/12/2026'],
+    ['01/01/2023', undefined, 'a partir de 01/01/2023'],
+    [undefined, '31/12/2026', 'até 31/12/2026'],
+    [undefined, undefined, null]
+  ])(
+    'quando recebe início %s e fim %s, descreve o período como %s',
+    (startDate, endDate, expected) => {
+      expect(describeReportPeriod(startDate, endDate)).toBe(expected)
+    }
+  )
 })

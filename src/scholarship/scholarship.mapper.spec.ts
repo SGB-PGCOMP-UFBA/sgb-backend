@@ -335,7 +335,7 @@ describe('ScholarshipMapper.countAllScholarshipsGroupingBetweenDates', () => {
       scholarshipsTotal: 0,
       totalMasters: 0,
       totalPhd: 0,
-      inactiveCount: { masters: 0, phd: 0 },
+      activeCount: { masters: 0, phd: 0 },
       finishedCount: { masters: 0, phd: 0 },
       onGoingCount: { masters: 0, phd: 0 },
       extendedCount: { masters: 0, phd: 0 }
@@ -369,7 +369,6 @@ describe('ScholarshipMapper.countAllScholarshipsGroupingBetweenDates', () => {
   })
 
   it.each([
-    ['INACTIVE', 'inactiveCount'],
     ['FINISHED', 'finishedCount'],
     ['ON_GOING', 'onGoingCount'],
     ['EXTENDED', 'extendedCount']
@@ -423,6 +422,27 @@ describe('ScholarshipMapper.countAllScholarshipsGroupingBetweenDates', () => {
 
     expect(capes.scholarshipsTotal).toBe(capes.totalMasters + capes.totalPhd)
     expect(capes.scholarshipsTotal).toBe(15)
+  })
+
+  it('quando a agência tem bolsas em vários status, conta todas como ativas no período', () => {
+    const report = ScholarshipMapper.countAllScholarshipsGroupingBetweenDates([
+      reportRow('CAPES', 'ON_GOING', 2, 1),
+      reportRow('CAPES', 'EXTENDED', 1, 1),
+      reportRow('CAPES', 'FINISHED', 3, 0)
+    ])
+    const capes = findAgency(report, 'CAPES')
+
+    expect(capes.activeCount).toEqual({ masters: 6, phd: 2 })
+  })
+
+  it('quando chega uma linha com status INACTIVE, conta como ativa mas não cria balde de inativas', () => {
+    const report = ScholarshipMapper.countAllScholarshipsGroupingBetweenDates([
+      reportRow('CNPQ', 'INACTIVE', 1, 1)
+    ])
+    const cnpq = findAgency(report, 'CNPQ')
+
+    expect(cnpq).not.toHaveProperty('inactiveCount')
+    expect(cnpq.activeCount).toEqual({ masters: 1, phd: 1 })
   })
 
   it('quando há linhas de agências diferentes, não deixa uma contaminar os números da outra', () => {

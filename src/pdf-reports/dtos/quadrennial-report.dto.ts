@@ -5,7 +5,8 @@ import {
   IsNumber,
   ValidateNested,
   Min,
-  IsObject
+  IsObject,
+  IsOptional
 } from 'class-validator'
 import { Type } from 'class-transformer'
 
@@ -44,11 +45,6 @@ class AgencyReportDto {
   @IsObject()
   @ValidateNested()
   @Type(() => DegreeCountDto)
-  inactiveCount: DegreeCountDto
-
-  @IsObject()
-  @ValidateNested()
-  @Type(() => DegreeCountDto)
   finishedCount: DegreeCountDto
 
   @IsObject()
@@ -63,13 +59,15 @@ class AgencyReportDto {
 }
 
 export class QuadrennialReportDto {
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
-  startDate: string
+  startDate?: string
 
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
-  endDate: string
+  endDate?: string
 
   @IsArray()
   @ValidateNested({ each: true })
