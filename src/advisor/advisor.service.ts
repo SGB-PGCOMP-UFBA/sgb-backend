@@ -141,21 +141,7 @@ export class AdvisorService {
     await this.advisorRepository.updatePasswordByEmail(email, passwordHash)
   }
 
-  async resetPassword(
-    email: string,
-    password: string,
-    has_admin_privileges = false
-  ): Promise<void> {
-    const findAdvisor =
-      await this.advisorRepository.findByEmailAndAdminPrivileges(
-        email,
-        has_admin_privileges
-      )
-
-    if (!findAdvisor) {
-      throw new NotFoundException(constants.exceptionMessages.advisor.NOT_FOUND)
-    }
-
+  async setPasswordByEmail(email: string, password: string): Promise<void> {
     const passwordHash = await hashPassword(password)
     await this.advisorRepository.updatePasswordByEmail(email, passwordHash)
   }

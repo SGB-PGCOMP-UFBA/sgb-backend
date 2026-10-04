@@ -117,23 +117,15 @@ describe('StudentService', () => {
     })
   })
 
-  describe('resetPassword', () => {
-    it('quando o e-mail não existe, lança NotFound e não altera nada', async () => {
-      await expect(
-        service.resetPassword('inexistente@ufba.br', 'nova1')
-      ).rejects.toBeInstanceOf(NotFoundException)
-      expect(repository.updatePasswordByEmail).not.toHaveBeenCalled()
-    })
-
-    it('quando a senha é redefinida, grava a nova senha hasheada', async () => {
-      repository.findByEmail.mockResolvedValue(makeStudent())
-
-      await service.resetPassword('ana@ufba.br', 'nova1')
+  describe('setPasswordByEmail', () => {
+    it('grava a nova senha hasheada pelo e-mail, sem buscar a conta', async () => {
+      await service.setPasswordByEmail('ana@ufba.br', 'nova1')
 
       const [email, hash] = repository.updatePasswordByEmail.mock.calls[0]
       expect(email).toBe('ana@ufba.br')
       expect(hash).not.toBe('nova1')
       await expect(comparePassword('nova1', hash)).resolves.toBe(true)
+      expect(repository.findByEmail).not.toHaveBeenCalled()
     })
   })
 

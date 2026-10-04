@@ -1,27 +1,46 @@
-import { InternalServerErrorException, NotFoundException } from '@nestjs/common'
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException
+} from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { PasswordRecoveryService } from './password-recovery.service'
 
 const EMAIL = 'usuario@ufba.br'
+const NOT_FOUND_MESSAGE =
+  'O usuário não foi encontrado ou possui um cargo diferente.'
+
+type Mock = ReturnType<typeof vi.fn>
 
 describe('PasswordRecoveryService', () => {
-  let emailService: { sendEmail: ReturnType<typeof vi.fn> }
-  let advisorService: { resetPassword: ReturnType<typeof vi.fn> }
-  let studentService: { resetPassword: ReturnType<typeof vi.fn> }
-  let adminService: { resetPassword: ReturnType<typeof vi.fn> }
+  let emailService: { sendEmail: Mock }
+  let advisorService: { setPasswordByEmail: Mock }
+  let studentService: { setPasswordByEmail: Mock }
+  let adminService: { setPasswordByEmail: Mock }
+  let userService: { findUserByEmailAndRole: Mock }
   let service: PasswordRecoveryService
 
   beforeEach(() => {
     emailService = { sendEmail: vi.fn().mockResolvedValue(undefined) }
-    advisorService = { resetPassword: vi.fn().mockResolvedValue(undefined) }
-    studentService = { resetPassword: vi.fn().mockResolvedValue(undefined) }
-    adminService = { resetPassword: vi.fn().mockResolvedValue(undefined) }
+    advisorService = {
+      setPasswordByEmail: vi.fn().mockResolvedValue(undefined)
+    }
+    studentService = {
+      setPasswordByEmail: vi.fn().mockResolvedValue(undefined)
+    }
+    adminService = { setPasswordByEmail: vi.fn().mockResolvedValue(undefined) }
+    userService = {
+      findUserByEmailAndRole: vi.fn(async (_email: string, role: string) => ({
+        role
+      }))
+    }
 
     service = new PasswordRecoveryService(
       emailService as never,
       advisorService as never,
       studentService as never,
-      adminService as never
+      adminService as never,
+      userService as never
     )
   })
 
@@ -29,168 +48,176 @@ describe('PasswordRecoveryService', () => {
     return { email: EMAIL, role } as never
   }
 
-  describe('roteamento por cargo', () => {
-    it('quando o cargo é STUDENT, reseta a senha do estudante', async () => {
-      await service.resetPassword(request('STUDENT'))
+  function savedPasswords() {
+    return [studentService, advisorService, adminService].flatMap(
+      (mock) => mock.setPasswordByEmail.mock.calls
+    )
+  }
 
-      expect(studentService.resetPassword).toHaveBeenCalledTimes(1)
-      expect(advisorService.resetPassword).not.toHaveBeenCalled()
-      expect(adminService.resetPassword).not.toHaveBeenCalled()
+  describe('qual conta tem a senha trocada', () => {
+    it.each([
+      ['STUDENT', () => studentService],
+      ['ADVISOR', () => advisorService]
+    ])(
+      'quando o cargo é %s, confirma a conta pela busca do login e troca a senha nela',
+      async (role, target) => {
+        await service.resetPassword(request(role))
+
+        expect(userService.findUserByEmailAndRole).toHaveBeenCalledWith(
+          EMAIL,
+          role
+        )
+        expect(target().setPasswordByEmail).toHaveBeenCalledWith(
+          EMAIL,
+          expect.any(String)
+        )
+        expect(savedPasswords()).toHaveLength(1)
+      }
+    )
+
+    it('quando o cargo é ADMIN e o login resolve um orientador com privilégio, troca a senha do orientador', async () => {
+      userService.findUserByEmailAndRole.mockResolvedValue({
+        role: 'ADVISOR_WITH_ADMIN_PRIVILEGES'
+      })
+
+      await service.resetPassword(request('ADMIN'))
+
+      expect(advisorService.setPasswordByEmail).toHaveBeenCalledTimes(1)
+      expect(adminService.setPasswordByEmail).not.toHaveBeenCalled()
     })
 
-    it('quando o cargo é ADVISOR, reseta a senha do orientador comum', async () => {
-      await service.resetPassword(request('ADVISOR'))
+    it('quando o cargo é ADMIN e o login resolve a tabela admin, troca a senha do admin', async () => {
+      await service.resetPassword(request('ADMIN'))
 
-      expect(advisorService.resetPassword).toHaveBeenCalledWith(
-        EMAIL,
-        expect.any(String)
-      )
+      expect(adminService.setPasswordByEmail).toHaveBeenCalledTimes(1)
+      expect(advisorService.setPasswordByEmail).not.toHaveBeenCalled()
     })
 
-    it('quando o cargo é ADVISOR_WITH_ADMIN_PRIVILEGES, reseta a senha com privilégio de admin', async () => {
+    it('quando o cargo é ADVISOR_WITH_ADMIN_PRIVILEGES, troca a senha do orientador com privilégio', async () => {
+      userService.findUserByEmailAndRole.mockResolvedValue({
+        role: 'ADVISOR_WITH_ADMIN_PRIVILEGES'
+      })
+
       await service.resetPassword(request('ADVISOR_WITH_ADMIN_PRIVILEGES'))
 
-      expect(advisorService.resetPassword).toHaveBeenCalledWith(
+      expect(userService.findUserByEmailAndRole).toHaveBeenCalledWith(
         EMAIL,
-        expect.any(String),
-        true
+        'ADMIN'
       )
+      expect(advisorService.setPasswordByEmail).toHaveBeenCalledTimes(1)
     })
 
-    it('quando o cargo é ADMIN, reseta a senha do admin', async () => {
-      await service.resetPassword(request('ADMIN'))
-
-      expect(adminService.resetPassword).toHaveBeenCalledTimes(1)
-    })
-  })
-
-  describe('cargos que existem em mais de uma tabela', () => {
-    it('quando o orientador comum não existe, tenta o orientador com privilégio de admin', async () => {
-      advisorService.resetPassword
-        .mockRejectedValueOnce(new NotFoundException('Advisor not found.'))
-        .mockResolvedValueOnce(undefined)
-
-      await service.resetPassword(request('ADVISOR'))
-
-      expect(advisorService.resetPassword).toHaveBeenNthCalledWith(
-        2,
-        EMAIL,
-        expect.any(String),
-        true
-      )
-      expect(emailService.sendEmail).toHaveBeenCalledTimes(1)
-    })
-
-    it('quando não há admin com o e-mail, cai para o orientador com privilégio de admin', async () => {
-      adminService.resetPassword.mockRejectedValue(
-        new NotFoundException('Admin not found.')
-      )
-
-      await service.resetPassword(request('ADMIN'))
-
-      expect(advisorService.resetPassword).toHaveBeenCalledWith(
-        EMAIL,
-        expect.any(String),
-        true
-      )
-    })
-
-    it('quando há uma segunda tentativa, usa a mesma senha da primeira e do e-mail', async () => {
-      advisorService.resetPassword
-        .mockRejectedValueOnce(new NotFoundException('Advisor not found.'))
-        .mockResolvedValueOnce(undefined)
-
-      await service.resetPassword(request('ADVISOR'))
-
-      const primeiraSenha = advisorService.resetPassword.mock.calls[0][1]
-      const segundaSenha = advisorService.resetPassword.mock.calls[1][1]
-      const senhaDoEmail =
-        emailService.sendEmail.mock.calls[0][0].context.newPassword
-
-      expect(segundaSenha).toBe(primeiraSenha)
-      expect(senhaDoEmail).toBe(primeiraSenha)
-    })
-  })
-
-  describe('e-mail com a nova senha', () => {
-    it('quando o reset dá certo, envia a nova senha para o e-mail informado com o template de reset', async () => {
-      await service.resetPassword(request('STUDENT'))
-
-      expect(emailService.sendEmail).toHaveBeenCalledWith(
-        expect.objectContaining({
-          to: EMAIL,
-          template: 'reset-password-request'
-        })
-      )
-    })
-
-    it('quando gera a senha temporária, usa apenas 4 dígitos numéricos', async () => {
-      await service.resetPassword(request('STUDENT'))
-
-      const senhaEnviada = studentService.resetPassword.mock.calls[0][1]
-
-      expect(senhaEnviada).toMatch(/^\d{4}$/)
-    })
-
-    it('quando há vários pedidos, gera uma senha diferente a cada um', async () => {
-      const senhas = new Set<string>()
-
-      for (let i = 0; i < 20; i++) {
-        studentService.resetPassword.mockClear()
-        await service.resetPassword(request('STUDENT'))
-        senhas.add(studentService.resetPassword.mock.calls[0][1])
-      }
-
-      expect(senhas.size).toBeGreaterThan(1)
-    })
-
-    it('quando o reset falhou, não envia e-mail', async () => {
-      studentService.resetPassword.mockRejectedValue(
-        new NotFoundException('Student not found.')
-      )
-
+    it('quando o cargo é ADVISOR_WITH_ADMIN_PRIVILEGES mas a conta é da tabela admin, devolve não encontrado', async () => {
       await expect(
-        service.resetPassword(request('STUDENT'))
-      ).rejects.toBeInstanceOf(NotFoundException)
+        service.resetPassword(request('ADVISOR_WITH_ADMIN_PRIVILEGES'))
+      ).rejects.toThrow(NOT_FOUND_MESSAGE)
+      expect(savedPasswords()).toHaveLength(0)
       expect(emailService.sendEmail).not.toHaveBeenCalled()
     })
   })
 
-  describe('tratamento de erro', () => {
-    it('quando o usuário não existe naquele cargo, devolve mensagem genérica', async () => {
-      studentService.resetPassword.mockRejectedValue(
-        new NotFoundException('Student not found.')
-      )
+  describe('ordem: e-mail antes de gravar a senha', () => {
+    it('envia o e-mail antes de gravar, com a mesma senha que é gravada', async () => {
+      await service.resetPassword(request('STUDENT'))
 
-      await expect(service.resetPassword(request('STUDENT'))).rejects.toThrow(
-        'O usuário não foi encontrado ou possui um cargo diferente.'
+      const [senhaGravada] =
+        studentService.setPasswordByEmail.mock.calls[0].slice(1)
+      const envio = emailService.sendEmail.mock.invocationCallOrder[0]
+      const gravacao =
+        studentService.setPasswordByEmail.mock.invocationCallOrder[0]
+
+      expect(envio).toBeLessThan(gravacao)
+      expect(emailService.sendEmail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: EMAIL,
+          template: 'reset-password-request',
+          context: { newPassword: senhaGravada }
+        }),
+        { throwOnError: true }
       )
     })
+
+    it('quando o envio do e-mail falha, propaga o erro e não grava nenhuma senha', async () => {
+      const erro = new Error('SMTP fora do ar')
+      emailService.sendEmail.mockRejectedValue(erro)
+
+      await expect(service.resetPassword(request('STUDENT'))).rejects.toBe(erro)
+      expect(savedPasswords()).toHaveLength(0)
+    })
+
+    it('quando a gravação da senha falha depois do envio, propaga o erro', async () => {
+      const erro = new InternalServerErrorException('Banco fora do ar')
+      adminService.setPasswordByEmail.mockRejectedValue(erro)
+
+      await expect(service.resetPassword(request('ADMIN'))).rejects.toBe(erro)
+      expect(advisorService.setPasswordByEmail).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('senha temporária', () => {
+    it('usa apenas 4 dígitos numéricos', async () => {
+      await service.resetPassword(request('STUDENT'))
+
+      const senha = studentService.setPasswordByEmail.mock.calls[0][1]
+
+      expect(senha).toMatch(/^\d{4}$/)
+    })
+
+    it('gera uma senha diferente a cada pedido', async () => {
+      const senhas = new Set<string>()
+
+      for (let i = 0; i < 20; i++) {
+        studentService.setPasswordByEmail.mockClear()
+        await service.resetPassword(request('STUDENT'))
+        senhas.add(studentService.setPasswordByEmail.mock.calls[0][1])
+      }
+
+      expect(senhas.size).toBeGreaterThan(1)
+    })
+  })
+
+  describe('tratamento de erro', () => {
+    it.each([['STUDENT'], ['ADVISOR'], ['ADMIN']])(
+      'quando a conta não existe (%s), devolve a mensagem genérica sem enviar e-mail nem gravar',
+      async (role) => {
+        userService.findUserByEmailAndRole.mockRejectedValue(
+          new NotFoundException('Usuário não encontrado.')
+        )
+
+        await expect(service.resetPassword(request(role))).rejects.toThrow(
+          NOT_FOUND_MESSAGE
+        )
+        expect(emailService.sendEmail).not.toHaveBeenCalled()
+        expect(savedPasswords()).toHaveLength(0)
+      }
+    )
 
     it.each([
       [new InternalServerErrorException('Banco fora do ar')],
       [new Error('conexão perdida')]
     ])(
-      'quando o erro do reset não é NotFound, engole o erro e finge sucesso (%s)',
+      'quando a busca da conta falha por outro motivo, propaga o erro sem enviar e-mail nem gravar (%s)',
       async (erro) => {
-        studentService.resetPassword.mockRejectedValue(erro)
+        userService.findUserByEmailAndRole.mockRejectedValue(erro)
 
-        await expect(
-          service.resetPassword(request('STUDENT'))
-        ).resolves.toBeUndefined()
+        await expect(service.resetPassword(request('ADVISOR'))).rejects.toBe(
+          erro
+        )
         expect(emailService.sendEmail).not.toHaveBeenCalled()
+        expect(savedPasswords()).toHaveLength(0)
       }
     )
 
     it.each([['ADMINISTRADOR'], ['student'], [''], ['SECRETARY']])(
-      'quando o cargo é desconhecido, não reseta nada mas envia o e-mail (%s)',
+      'quando o cargo é desconhecido, falha com BadRequest sem buscar, enviar e-mail nem gravar (%s)',
       async (role) => {
-        await service.resetPassword(request(role))
+        await expect(
+          service.resetPassword(request(role))
+        ).rejects.toBeInstanceOf(BadRequestException)
 
-        expect(studentService.resetPassword).not.toHaveBeenCalled()
-        expect(advisorService.resetPassword).not.toHaveBeenCalled()
-        expect(adminService.resetPassword).not.toHaveBeenCalled()
-        expect(emailService.sendEmail).toHaveBeenCalledTimes(1)
+        expect(userService.findUserByEmailAndRole).not.toHaveBeenCalled()
+        expect(emailService.sendEmail).not.toHaveBeenCalled()
+        expect(savedPasswords()).toHaveLength(0)
       }
     )
   })

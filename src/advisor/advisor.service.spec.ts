@@ -294,48 +294,15 @@ describe('AdvisorService', () => {
     })
   })
 
-  describe('resetPassword', () => {
-    it.each([
-      [undefined, false],
-      [false, false],
-      [true, true]
-    ])(
-      'procura o orientador pelo privilégio de admin pedido (%s → %s)',
-      async (informado, esperado) => {
-        repository.findByEmailAndAdminPrivileges.mockResolvedValue(
-          makeAdvisor()
-        )
+  describe('setPasswordByEmail', () => {
+    it('grava a nova senha hasheada pelo e-mail, sem buscar a conta', async () => {
+      await service.setPasswordByEmail('orientador@ufba.br', 'nova1')
 
-        await service.resetPassword(
-          'orientador@ufba.br',
-          'nova1',
-          informado as boolean
-        )
-
-        expect(repository.findByEmailAndAdminPrivileges).toHaveBeenCalledWith(
-          'orientador@ufba.br',
-          esperado
-        )
-      }
-    )
-
-    it('quando a senha é redefinida, grava a nova senha hasheada', async () => {
-      repository.findByEmailAndAdminPrivileges.mockResolvedValue(makeAdvisor())
-
-      await service.resetPassword('orientador@ufba.br', 'nova1')
-
-      const [, hash] = repository.updatePasswordByEmail.mock.calls[0]
+      const [email, hash] = repository.updatePasswordByEmail.mock.calls[0]
+      expect(email).toBe('orientador@ufba.br')
       expect(hash).not.toBe('nova1')
       await expect(comparePassword('nova1', hash)).resolves.toBe(true)
-    })
-
-    it('quando não encontra o orientador, lança NotFound e não altera nada', async () => {
-      repository.findByEmailAndAdminPrivileges.mockResolvedValue(null)
-
-      await expect(
-        service.resetPassword('sumiu@ufba.br', 'nova1')
-      ).rejects.toBeInstanceOf(NotFoundException)
-      expect(repository.updatePasswordByEmail).not.toHaveBeenCalled()
+      expect(repository.findByEmail).not.toHaveBeenCalled()
     })
   })
 

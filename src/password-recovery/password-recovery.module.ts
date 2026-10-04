@@ -8,12 +8,14 @@ import { EmailModule } from '@/email/email.module'
 import { StudentModule } from '@/student/student.module'
 import { AdvisorModule } from '@/advisor/advisor.module'
 import { AdminModule } from '@/admin/admin.module'
+import { UserModule } from '@/user/user.module'
 
 @Module({
   imports: [
     AdminModule,
     AdvisorModule,
     StudentModule,
+    UserModule,
     EmailModule,
     ConfigModule,
     JwtModule.register({

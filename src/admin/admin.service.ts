@@ -61,13 +61,7 @@ export class AdminService {
     }
   }
 
-  async resetPassword(email: string, password: string): Promise<void> {
-    const findAdmin = await this.adminRepository.findByEmail(email)
-
-    if (!findAdmin) {
-      throw new NotFoundException(constants.exceptionMessages.admin.NOT_FOUND)
-    }
-
+  async setPasswordByEmail(email: string, password: string): Promise<void> {
     const passwordHash = await hashPassword(password)
     await this.adminRepository.updatePasswordByEmail(email, passwordHash)
   }
