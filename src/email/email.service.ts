@@ -3,18 +3,27 @@ import { Injectable, Logger } from '@nestjs/common'
 import { MailerService } from '@nestjs-modules/mailer'
 import { EmailDto } from '@/email/dtos/email.dto'
 
+export interface SendEmailOptions {
+  throwOnError?: boolean
+}
+
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name)
 
   constructor(private mailerService: MailerService) {}
 
-  async sendEmail(dto: EmailDto) {
+  async sendEmail(
+    dto: EmailDto,
+    { throwOnError = false }: SendEmailOptions = {}
+  ) {
     try {
       this.logger.log(`Sending e-mail to ${dto.to}.`)
       await this.mailerService.sendMail(dto)
     } catch (error) {
       this.logger.error(`Error sending e-mail to ${dto.to}.`, error)
+
+      if (throwOnError) throw error
     }
   }
 }

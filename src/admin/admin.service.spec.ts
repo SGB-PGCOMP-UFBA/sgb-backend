@@ -217,25 +217,15 @@ describe('AdminService', () => {
     })
   })
 
-  describe('resetPassword', () => {
-    it('quando a senha é redefinida, grava a nova senha hasheada', async () => {
-      repository.findByEmail.mockResolvedValue(makeAdmin())
-
-      await service.resetPassword('carlos@ufba.br', 'nova1')
+  describe('setPasswordByEmail', () => {
+    it('grava a nova senha hasheada pelo e-mail, sem buscar a conta', async () => {
+      await service.setPasswordByEmail('carlos@ufba.br', 'nova1')
 
       const [email, hash] = repository.updatePasswordByEmail.mock.calls[0]
       expect(email).toBe('carlos@ufba.br')
       expect(hash).not.toBe('nova1')
       await expect(comparePassword('nova1', hash)).resolves.toBe(true)
-    })
-
-    it('quando o e-mail não existe, lança NotFound e não altera nada', async () => {
-      repository.findByEmail.mockResolvedValue(null)
-
-      await expect(
-        service.resetPassword('sumiu@ufba.br', 'nova1')
-      ).rejects.toBeInstanceOf(NotFoundException)
-      expect(repository.updatePasswordByEmail).not.toHaveBeenCalled()
+      expect(repository.findByEmail).not.toHaveBeenCalled()
     })
   })
 

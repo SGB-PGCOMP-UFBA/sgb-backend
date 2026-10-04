@@ -23,13 +23,16 @@ const constants = {
       'O link digitado para o currículo lattes possui um formato inválido.',
     TAX_ID_FORMAT_ERROR: 'O CPF digitado possui um formato inválido.',
     EMAIL_FORMAT_ERROR: 'O e-mail digitado possui um formato inválido.',
+    EMAIL_IS_REQUIRED: 'O e-mail é obrigatório.',
     ENROLLMENT_NUMBER_FORMAT_ERROR:
       'Insira um número de matrícula válido com 9 ou 10 dígitos.',
     PASSWORD_IS_WEAK:
       'A senha deve conter pelo menos 6 caracteres, incluindo 1 número, 1 letra maiúscula e 1 caracter especial.',
     PASSWORD_IS_NOT_ACCEPTABLE: 'A senha deve ter entre 4 e 8 caracteres.',
     PASSWORD_NOT_MATCHING: 'A senha e o confirmar senha são diferentes.',
-    CURRENT_PASSWORD_NOT_MATCHING: 'Sua senha atual está incorreta.'
+    CURRENT_PASSWORD_NOT_MATCHING: 'Sua senha atual está incorreta.',
+    ROLE_IS_REQUIRED: 'O papel do usuário é obrigatório.',
+    ROLE_IS_INVALID: 'O papel do usuário é inválido.'
   },
   negotialValidationMessages: {
     ENROLLMENT_NUMBER_ALREADY_REGISTERED:

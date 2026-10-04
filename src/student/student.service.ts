@@ -89,13 +89,7 @@ export class StudentService {
     return newStudent
   }
 
-  async resetPassword(email: string, password: string): Promise<void> {
-    const findStudent = await this.studentRepository.findByEmail(email)
-
-    if (!findStudent) {
-      throw new NotFoundException(constants.exceptionMessages.student.NOT_FOUND)
-    }
-
+  async setPasswordByEmail(email: string, password: string): Promise<void> {
     const passwordHash = await hashPassword(password)
     await this.studentRepository.updatePasswordByEmail(email, passwordHash)
   }
