@@ -22,9 +22,6 @@ import { TypeOrmStudentRepository } from '@/student/repositories/typeorm-student
 import { Enrollment } from '@/enrollment/entities/enrollment.entity'
 import { EnrollmentRepository } from '@/enrollment/repositories/enrollment.repository'
 import { TypeOrmEnrollmentRepository } from '@/enrollment/repositories/typeorm-enrollment.repository'
-import { PendingScholarship } from '@/pending-scholarship/entities/pending-scholarship.entity'
-import { PendingScholarshipRepository } from '@/pending-scholarship/repositories/pending-scholarship.repository'
-import { TypeOrmPendingScholarshipRepository } from '@/pending-scholarship/repositories/typeorm-pending-scholarship.repository'
 import { Scholarship } from '@/scholarship/entities/scholarship.entity'
 import { ScholarshipRepository } from '@/scholarship/repositories/scholarship.repository'
 import { TypeOrmScholarshipRepository } from '@/scholarship/repositories/typeorm-scholarship.repository'
@@ -38,7 +35,6 @@ const entities = [
   Allocation,
   EmbedNotification,
   Enrollment,
-  PendingScholarship,
   Scholarship,
   Student
 ]
@@ -53,10 +49,6 @@ const repositories = [
     useClass: TypeOrmEmbedNotificationRepository
   },
   { provide: EnrollmentRepository, useClass: TypeOrmEnrollmentRepository },
-  {
-    provide: PendingScholarshipRepository,
-    useClass: TypeOrmPendingScholarshipRepository
-  },
   { provide: ScholarshipRepository, useClass: TypeOrmScholarshipRepository },
   { provide: StudentRepository, useClass: TypeOrmStudentRepository }
 ]

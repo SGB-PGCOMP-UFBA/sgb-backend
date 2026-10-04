@@ -67,12 +67,6 @@ export class EnrollmentService {
     return enrollment
   }
 
-  async verifyExistentByNumber(enrollment_number: string): Promise<Enrollment> {
-    return await this.enrollmentRepository.findByNumberWithActiveScholarships(
-      enrollment_number
-    )
-  }
-
   async create(dto: CreateEnrollmentDto): Promise<Enrollment> {
     this.logger.log(constants.exceptionMessages.enrollment.CREATION_STARTED)
 

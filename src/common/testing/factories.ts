@@ -4,7 +4,6 @@ import { Agency } from '@/agency/entities/agency.entity'
 import { Allocation } from '@/allocation/entities/allocation.entity'
 import { EmbedNotification } from '@/embed-notification/entities/embed-notification.entity'
 import { Enrollment } from '@/enrollment/entities/enrollment.entity'
-import { PendingScholarship } from '@/pending-scholarship/entities/pending-scholarship.entity'
 import { Scholarship } from '@/scholarship/entities/scholarship.entity'
 import { Student } from '@/student/entities/student.entity'
 
@@ -172,18 +171,6 @@ export const makeEmbedNotification = defineFactory<EmbedNotification>(() => ({
   title: 'Sua bolsa CAPES expirou!',
   description: 'Procure seu orientador para mais informações.',
   consumed: false,
-  created_at: CRIADO_EM,
-  updated_at: CRIADO_EM
-}))
-
-export const makePendingScholarship = defineFactory<PendingScholarship>(() => ({
-  id: 8,
-  student_name: 'Aluno Teste',
-  tax_id: '12345678901',
-  enrollment_program: 'MESTRADO',
-  agency: 'CAPES',
-  scholarship_starts_at: new Date('2026-01-01T00:00:00.000Z'),
-  scholarship_ends_at: new Date('2026-12-01T00:00:00.000Z'),
   created_at: CRIADO_EM,
   updated_at: CRIADO_EM
 }))

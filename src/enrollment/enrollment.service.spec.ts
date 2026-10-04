@@ -28,7 +28,6 @@ function createEnrollmentRepositoryMock() {
     findByIdAndStudentId: vi.fn().mockResolvedValue(null),
     findByStudentIdAndNumber: vi.fn().mockResolvedValue(null),
     findByNumber: vi.fn().mockResolvedValue(null),
-    findByNumberWithActiveScholarships: vi.fn().mockResolvedValue(null),
     create: vi.fn(async (data: unknown) => data),
     update: vi.fn(async (_id: number, data: unknown) => data),
     deleteById: vi.fn().mockResolvedValue(1)
@@ -106,26 +105,6 @@ describe('EnrollmentService', () => {
           '0000000000'
         )
       ).rejects.toBeInstanceOf(NotFoundException)
-    })
-  })
-
-  describe('verifyExistentByNumber', () => {
-    it('quando consulta a matrícula pelo número, delega à busca que filtra bolsas vigentes', async () => {
-      repository.findByNumberWithActiveScholarships.mockResolvedValue(
-        ENROLLMENT
-      )
-
-      await service.verifyExistentByNumber('2024123456')
-
-      expect(
-        repository.findByNumberWithActiveScholarships
-      ).toHaveBeenCalledWith('2024123456')
-    })
-
-    it('quando a matrícula não existe, devolve null sem lançar exceção', async () => {
-      await expect(
-        service.verifyExistentByNumber('0000000000')
-      ).resolves.toBeNull()
     })
   })
 

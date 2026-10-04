@@ -118,11 +118,6 @@ const constants = {
       QUOTA_NOT_CONFIGURED:
         'Não há vagas concedidas cadastradas para esta bolsa.'
     },
-    pendingScholarship: {
-      APROVE_NOT_FOUND: 'Bolsa pendente não encontrada para aprovação.',
-      NOT_FOUND: 'Bolsa pendente não encontrada.',
-      DELETE_FAILED: 'Não foi possível excluir. Erro no banco de dados.'
-    },
     user: {
       SOMETHING_WRONG: 'Algo deu errado.',
       NOT_FOUND: 'Usuário não encontrado.',
