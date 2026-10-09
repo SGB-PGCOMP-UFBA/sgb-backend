@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { ILike } from 'typeorm'
 import { createRepositoryMock } from '@/common/testing/repository.mock'
 import { TypeOrmStudentRepository } from './typeorm-student.repository'
@@ -9,13 +9,6 @@ const WITH_ENROLLMENTS = [
   'enrollments.scholarships',
   'enrollments.scholarships.agency'
 ]
-
-function createDeleteQueryBuilderMock() {
-  const queryBuilder: Record<string, ReturnType<typeof vi.fn>> = {}
-  queryBuilder.delete = vi.fn(() => queryBuilder)
-  queryBuilder.execute = vi.fn().mockResolvedValue({ affected: 5 })
-  return queryBuilder
-}
 
 describe('TypeOrmStudentRepository', () => {
   let typeorm: ReturnType<typeof createRepositoryMock>
@@ -99,6 +92,12 @@ describe('TypeOrmStudentRepository', () => {
       { email: 'ana@ufba.br' },
       { password: 'hash' }
     )
+  })
+
+  it('updatePasswordById altera só a senha, filtrando pelo id', async () => {
+    await repository.updatePasswordById(7, 'hash')
+
+    expect(typeorm.update).toHaveBeenCalledWith({ id: 7 }, { password: 'hash' })
   })
 
   it('deleteById devolve a quantidade de linhas removidas', async () => {

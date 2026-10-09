@@ -72,6 +72,10 @@ export class TypeOrmAdvisorRepository implements AdvisorRepository {
     await this.repository.update({ email }, { password: passwordHash })
   }
 
+  async updatePasswordById(id: number, passwordHash: string): Promise<void> {
+    await this.repository.update({ id }, { password: passwordHash })
+  }
+
   async setAdminPrivileges(
     id: number,
     hasAdminPrivileges: boolean

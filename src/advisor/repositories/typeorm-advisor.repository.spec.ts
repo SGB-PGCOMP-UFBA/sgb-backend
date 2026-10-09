@@ -82,6 +82,12 @@ describe('TypeOrmAdvisorRepository', () => {
     )
   })
 
+  it('updatePasswordById altera só a senha, filtrando pelo id', async () => {
+    await repository.updatePasswordById(7, 'hash')
+
+    expect(typeorm.update).toHaveBeenCalledWith({ id: 7 }, { password: 'hash' })
+  })
+
   it.each([[true], [false]])(
     'setAdminPrivileges grava o valor pedido, sem alternar (%s)',
     async (hasAdminPrivileges) => {

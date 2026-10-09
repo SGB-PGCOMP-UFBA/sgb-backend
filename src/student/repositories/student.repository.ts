@@ -17,5 +17,6 @@ export abstract class StudentRepository {
     email: string,
     passwordHash: string
   ): Promise<void>
+  abstract updatePasswordById(id: number, passwordHash: string): Promise<void>
   abstract deleteById(id: number): Promise<number>
 }

@@ -52,6 +52,10 @@ export class TypeOrmAdminRepository implements AdminRepository {
     await this.repository.update({ email }, { password: passwordHash })
   }
 
+  async updatePasswordById(id: number, passwordHash: string): Promise<void> {
+    await this.repository.update({ id }, { password: passwordHash })
+  }
+
   async deleteById(id: number): Promise<number> {
     const removed = await this.repository.delete(id)
     return removed.affected ?? 0

@@ -1,224 +1,346 @@
-import {
-  BadRequestException,
-  InternalServerErrorException,
-  NotFoundException
-} from '@nestjs/common'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { BadRequestException, HttpException, HttpStatus } from '@nestjs/common'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { comparePassword, hashPassword } from '@/common/utils/bcrypt.util'
+import { constants } from '@/common/utils/constants'
 import { PasswordRecoveryService } from './password-recovery.service'
 
 const EMAIL = 'usuario@ufba.br'
-const NOT_FOUND_MESSAGE =
-  'O usuário não foi encontrado ou possui um cargo diferente.'
+const NOW = new Date('2026-10-08T12:00:00Z')
+const MINUTE = 60 * 1000
+const messages = constants.exceptionMessages.passwordRecovery
 
 type Mock = ReturnType<typeof vi.fn>
 
 describe('PasswordRecoveryService', () => {
   let emailService: { sendEmail: Mock }
-  let advisorService: { setPasswordByEmail: Mock }
-  let studentService: { setPasswordByEmail: Mock }
-  let adminService: { setPasswordByEmail: Mock }
-  let userService: { findUserByEmailAndRole: Mock }
+  let verificationCodeRepository: Record<
+    | 'findLatestByAccount'
+    | 'create'
+    | 'deleteByAccount'
+    | 'incrementAttempts'
+    | 'markAsUsed',
+    Mock
+  >
+  let studentRepository: { findByEmail: Mock; updatePasswordById: Mock }
+  let advisorRepository: {
+    findByEmail: Mock
+    findByEmailAndAdminPrivileges: Mock
+    updatePasswordById: Mock
+  }
+  let adminRepository: { findByEmail: Mock; updatePasswordById: Mock }
   let service: PasswordRecoveryService
 
   beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(NOW)
+
     emailService = { sendEmail: vi.fn().mockResolvedValue(undefined) }
-    advisorService = {
-      setPasswordByEmail: vi.fn().mockResolvedValue(undefined)
+    verificationCodeRepository = {
+      findLatestByAccount: vi.fn().mockResolvedValue(null),
+      create: vi.fn(async (data: object) => ({ id: 1, ...data })),
+      deleteByAccount: vi.fn().mockResolvedValue(undefined),
+      incrementAttempts: vi.fn().mockResolvedValue(undefined),
+      markAsUsed: vi.fn().mockResolvedValue(undefined)
     }
-    studentService = {
-      setPasswordByEmail: vi.fn().mockResolvedValue(undefined)
+    studentRepository = {
+      findByEmail: vi.fn().mockResolvedValue({ id: 10 }),
+      updatePasswordById: vi.fn().mockResolvedValue(undefined)
     }
-    adminService = { setPasswordByEmail: vi.fn().mockResolvedValue(undefined) }
-    userService = {
-      findUserByEmailAndRole: vi.fn(async (_email: string, role: string) => ({
-        role
-      }))
+    advisorRepository = {
+      findByEmail: vi.fn().mockResolvedValue({ id: 20 }),
+      findByEmailAndAdminPrivileges: vi.fn().mockResolvedValue(null),
+      updatePasswordById: vi.fn().mockResolvedValue(undefined)
+    }
+    adminRepository = {
+      findByEmail: vi.fn().mockResolvedValue({ id: 30 }),
+      updatePasswordById: vi.fn().mockResolvedValue(undefined)
     }
 
     service = new PasswordRecoveryService(
       emailService as never,
-      advisorService as never,
-      studentService as never,
-      adminService as never,
-      userService as never
+      verificationCodeRepository as never,
+      studentRepository as never,
+      advisorRepository as never,
+      adminRepository as never
     )
   })
 
-  function request(role: string) {
-    return { email: EMAIL, role } as never
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  function request(role = 'STUDENT', extra: object = {}) {
+    return { email: EMAIL, role, ...extra } as never
   }
 
-  function savedPasswords() {
-    return [studentService, advisorService, adminService].flatMap(
-      (mock) => mock.setPasswordByEmail.mock.calls
+  function sentEmail() {
+    return emailService.sendEmail.mock.calls[0][0]
+  }
+
+  async function storedCode(code: string, overrides: object = {}) {
+    return {
+      id: 5,
+      account_id: 10,
+      account_table: 'STUDENT',
+      code_hash: await hashPassword(code),
+      expires_at: new Date(NOW.getTime() + 10 * MINUTE),
+      attempts: 0,
+      used_at: null,
+      created_at: new Date(NOW.getTime() - 5 * MINUTE),
+      ...overrides
+    }
+  }
+
+  function passwordUpdates() {
+    return [studentRepository, advisorRepository, adminRepository].flatMap(
+      (repository) => repository.updatePasswordById.mock.calls
     )
   }
 
-  describe('qual conta tem a senha trocada', () => {
-    it.each([
-      ['STUDENT', () => studentService],
-      ['ADVISOR', () => advisorService]
-    ])(
-      'quando o cargo é %s, confirma a conta pela busca do login e troca a senha nela',
-      async (role, target) => {
-        await service.resetPassword(request(role))
+  describe('sendCode', () => {
+    it('envia um código de 6 dígitos e grava só o hash, válido por 15 minutos', async () => {
+      await service.sendCode(request())
 
-        expect(userService.findUserByEmailAndRole).toHaveBeenCalledWith(
-          EMAIL,
-          role
-        )
-        expect(target().setPasswordByEmail).toHaveBeenCalledWith(
-          EMAIL,
-          expect.any(String)
-        )
-        expect(savedPasswords()).toHaveLength(1)
-      }
-    )
+      const { to, template, context } = sentEmail()
+      expect(to).toBe(EMAIL)
+      expect(template).toBe('reset-password-code')
+      expect(context.code).toMatch(/^\d{6}$/)
+      expect(context.expiresInMinutes).toBe(15)
 
-    it('quando o cargo é ADMIN e o login resolve um orientador com privilégio, troca a senha do orientador', async () => {
-      userService.findUserByEmailAndRole.mockResolvedValue({
-        role: 'ADVISOR_WITH_ADMIN_PRIVILEGES'
+      const [saved] = verificationCodeRepository.create.mock.calls[0]
+      expect(saved).toMatchObject({
+        account_id: 10,
+        account_table: 'STUDENT',
+        expires_at: new Date(NOW.getTime() + 15 * MINUTE)
       })
-
-      await service.resetPassword(request('ADMIN'))
-
-      expect(advisorService.setPasswordByEmail).toHaveBeenCalledTimes(1)
-      expect(adminService.setPasswordByEmail).not.toHaveBeenCalled()
-    })
-
-    it('quando o cargo é ADMIN e o login resolve a tabela admin, troca a senha do admin', async () => {
-      await service.resetPassword(request('ADMIN'))
-
-      expect(adminService.setPasswordByEmail).toHaveBeenCalledTimes(1)
-      expect(advisorService.setPasswordByEmail).not.toHaveBeenCalled()
-    })
-
-    it('quando o cargo é ADVISOR_WITH_ADMIN_PRIVILEGES, troca a senha do orientador com privilégio', async () => {
-      userService.findUserByEmailAndRole.mockResolvedValue({
-        role: 'ADVISOR_WITH_ADMIN_PRIVILEGES'
-      })
-
-      await service.resetPassword(request('ADVISOR_WITH_ADMIN_PRIVILEGES'))
-
-      expect(userService.findUserByEmailAndRole).toHaveBeenCalledWith(
-        EMAIL,
-        'ADMIN'
-      )
-      expect(advisorService.setPasswordByEmail).toHaveBeenCalledTimes(1)
-    })
-
-    it('quando o cargo é ADVISOR_WITH_ADMIN_PRIVILEGES mas a conta é da tabela admin, devolve não encontrado', async () => {
+      expect(saved.code_hash).not.toBe(context.code)
       await expect(
-        service.resetPassword(request('ADVISOR_WITH_ADMIN_PRIVILEGES'))
-      ).rejects.toThrow(NOT_FOUND_MESSAGE)
-      expect(savedPasswords()).toHaveLength(0)
-      expect(emailService.sendEmail).not.toHaveBeenCalled()
+        comparePassword(context.code, saved.code_hash)
+      ).resolves.toBe(true)
     })
-  })
 
-  describe('ordem: e-mail antes de gravar a senha', () => {
-    it('envia o e-mail antes de gravar, com a mesma senha que é gravada', async () => {
-      await service.resetPassword(request('STUDENT'))
+    it('não gera nem grava senha nova na conta', async () => {
+      await service.sendCode(request())
 
-      const [senhaGravada] =
-        studentService.setPasswordByEmail.mock.calls[0].slice(1)
-      const envio = emailService.sendEmail.mock.invocationCallOrder[0]
-      const gravacao =
-        studentService.setPasswordByEmail.mock.invocationCallOrder[0]
+      expect(sentEmail().context).not.toHaveProperty('newPassword')
+      expect(passwordUpdates()).toEqual([])
+    })
 
-      expect(envio).toBeLessThan(gravacao)
-      expect(emailService.sendEmail).toHaveBeenCalledWith(
-        expect.objectContaining({
-          to: EMAIL,
-          template: 'reset-password-request',
-          context: { newPassword: senhaGravada }
-        }),
-        { throwOnError: true }
+    it('apaga o código pendente da conta antes de gravar o novo', async () => {
+      await service.sendCode(request())
+
+      expect(verificationCodeRepository.deleteByAccount).toHaveBeenCalledWith(
+        'STUDENT',
+        10
+      )
+      expect(
+        verificationCodeRepository.deleteByAccount.mock.invocationCallOrder[0]
+      ).toBeLessThan(
+        verificationCodeRepository.create.mock.invocationCallOrder[0]
       )
     })
 
-    it('quando o envio do e-mail falha, propaga o erro e não grava nenhuma senha', async () => {
-      const erro = new Error('SMTP fora do ar')
-      emailService.sendEmail.mockRejectedValue(erro)
-
-      await expect(service.resetPassword(request('STUDENT'))).rejects.toBe(erro)
-      expect(savedPasswords()).toHaveLength(0)
-    })
-
-    it('quando a gravação da senha falha depois do envio, propaga o erro', async () => {
-      const erro = new InternalServerErrorException('Banco fora do ar')
-      adminService.setPasswordByEmail.mockRejectedValue(erro)
-
-      await expect(service.resetPassword(request('ADMIN'))).rejects.toBe(erro)
-      expect(advisorService.setPasswordByEmail).not.toHaveBeenCalled()
-    })
-  })
-
-  describe('senha temporária', () => {
-    it('usa apenas 4 dígitos numéricos', async () => {
-      await service.resetPassword(request('STUDENT'))
-
-      const senha = studentService.setPasswordByEmail.mock.calls[0][1]
-
-      expect(senha).toMatch(/^\d{4}$/)
-    })
-
-    it('gera uma senha diferente a cada pedido', async () => {
-      const senhas = new Set<string>()
-
-      for (let i = 0; i < 20; i++) {
-        studentService.setPasswordByEmail.mockClear()
-        await service.resetPassword(request('STUDENT'))
-        senhas.add(studentService.setPasswordByEmail.mock.calls[0][1])
-      }
-
-      expect(senhas.size).toBeGreaterThan(1)
-    })
-  })
-
-  describe('tratamento de erro', () => {
-    it.each([['STUDENT'], ['ADVISOR'], ['ADMIN']])(
-      'quando a conta não existe (%s), devolve a mensagem genérica sem enviar e-mail nem gravar',
-      async (role) => {
-        userService.findUserByEmailAndRole.mockRejectedValue(
-          new NotFoundException('Usuário não encontrado.')
+    it.each([
+      ['STUDENT', false, 'STUDENT', 10],
+      ['ADVISOR', false, 'ADVISOR', 20],
+      ['ADVISOR_WITH_ADMIN_PRIVILEGES', true, 'ADVISOR', 21],
+      ['ADMIN', true, 'ADVISOR', 21],
+      ['ADMIN', false, 'ADMIN', 30]
+    ])(
+      'vincula o código à conta certa (%s, orientador admin: %s)',
+      async (role, isAdvisorAdmin, table, id) => {
+        advisorRepository.findByEmailAndAdminPrivileges.mockResolvedValue(
+          isAdvisorAdmin ? { id: 21 } : null
         )
 
-        await expect(service.resetPassword(request(role))).rejects.toThrow(
-          NOT_FOUND_MESSAGE
+        await service.sendCode(request(role))
+
+        expect(verificationCodeRepository.create).toHaveBeenCalledWith(
+          expect.objectContaining({ account_table: table, account_id: id })
         )
-        expect(emailService.sendEmail).not.toHaveBeenCalled()
-        expect(savedPasswords()).toHaveLength(0)
       }
     )
 
     it.each([
-      [new InternalServerErrorException('Banco fora do ar')],
-      [new Error('conexão perdida')]
+      ['STUDENT', () => studentRepository.findByEmail],
+      ['ADVISOR', () => advisorRepository.findByEmail],
+      [
+        'ADVISOR_WITH_ADMIN_PRIVILEGES',
+        () => advisorRepository.findByEmailAndAdminPrivileges
+      ],
+      ['ADMIN', () => adminRepository.findByEmail]
     ])(
-      'quando a busca da conta falha por outro motivo, propaga o erro sem enviar e-mail nem gravar (%s)',
-      async (erro) => {
-        userService.findUserByEmailAndRole.mockRejectedValue(erro)
+      'quando a conta não existe, responde sem erro e sem enviar nada (%s)',
+      async (role, lookup) => {
+        lookup().mockResolvedValue(null)
 
-        await expect(service.resetPassword(request('ADVISOR'))).rejects.toBe(
-          erro
+        await expect(service.sendCode(request(role))).resolves.toBeUndefined()
+
+        expect(emailService.sendEmail).not.toHaveBeenCalled()
+        expect(verificationCodeRepository.create).not.toHaveBeenCalled()
+      }
+    )
+
+    it('quando o último envio foi há menos de 1 minuto, recusa com 429', async () => {
+      verificationCodeRepository.findLatestByAccount.mockResolvedValue(
+        await storedCode('123456', {
+          created_at: new Date(NOW.getTime() - 30 * 1000)
+        })
+      )
+
+      const error = await service.sendCode(request()).catch((e) => e)
+
+      expect(error).toBeInstanceOf(HttpException)
+      expect(error.getStatus()).toBe(HttpStatus.TOO_MANY_REQUESTS)
+      expect(error.message).toBe(messages.RESEND_TOO_SOON)
+      expect(emailService.sendEmail).not.toHaveBeenCalled()
+      expect(verificationCodeRepository.create).not.toHaveBeenCalled()
+    })
+
+    it('passado 1 minuto do último envio, gera outro código', async () => {
+      verificationCodeRepository.findLatestByAccount.mockResolvedValue(
+        await storedCode('123456', {
+          created_at: new Date(NOW.getTime() - MINUTE)
+        })
+      )
+
+      await service.sendCode(request())
+
+      expect(emailService.sendEmail).toHaveBeenCalledTimes(1)
+      expect(verificationCodeRepository.create).toHaveBeenCalledTimes(1)
+    })
+
+    it('quando o e-mail falha, mantém o código anterior e propaga o erro', async () => {
+      const failure = new Error('SMTP indisponível')
+      emailService.sendEmail.mockRejectedValue(failure)
+
+      await expect(service.sendCode(request())).rejects.toBe(failure)
+
+      expect(verificationCodeRepository.deleteByAccount).not.toHaveBeenCalled()
+      expect(verificationCodeRepository.create).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('verifyCode', () => {
+    it('com o código certo, aceita sem consumir o código', async () => {
+      verificationCodeRepository.findLatestByAccount.mockResolvedValue(
+        await storedCode('123456')
+      )
+
+      await expect(
+        service.verifyCode(request('STUDENT', { code: '123456' }))
+      ).resolves.toBeUndefined()
+
+      expect(verificationCodeRepository.markAsUsed).not.toHaveBeenCalled()
+      expect(
+        verificationCodeRepository.incrementAttempts
+      ).not.toHaveBeenCalled()
+    })
+
+    it('com o código errado, recusa e conta a tentativa', async () => {
+      verificationCodeRepository.findLatestByAccount.mockResolvedValue(
+        await storedCode('123456')
+      )
+
+      await expect(
+        service.verifyCode(request('STUDENT', { code: '654321' }))
+      ).rejects.toThrow(new BadRequestException(messages.INVALID_CODE))
+
+      expect(verificationCodeRepository.incrementAttempts).toHaveBeenCalledWith(
+        5
+      )
+    })
+
+    it.each([
+      ['expirado', { expires_at: NOW }],
+      ['já utilizado', { used_at: new Date(NOW.getTime() - MINUTE) }]
+    ])('com código %s, recusa mesmo que confira', async (_, overrides) => {
+      verificationCodeRepository.findLatestByAccount.mockResolvedValue(
+        await storedCode('123456', overrides)
+      )
+
+      await expect(
+        service.verifyCode(request('STUDENT', { code: '123456' }))
+      ).rejects.toThrow(new BadRequestException(messages.EXPIRED_CODE))
+    })
+
+    it('depois de 5 tentativas erradas, recusa até o código certo', async () => {
+      verificationCodeRepository.findLatestByAccount.mockResolvedValue(
+        await storedCode('123456', { attempts: 5 })
+      )
+
+      await expect(
+        service.verifyCode(request('STUDENT', { code: '123456' }))
+      ).rejects.toThrow(new BadRequestException(messages.TOO_MANY_ATTEMPTS))
+    })
+
+    it('sem código pendente, recusa como código inválido', async () => {
+      await expect(
+        service.verifyCode(request('STUDENT', { code: '123456' }))
+      ).rejects.toThrow(new BadRequestException(messages.INVALID_CODE))
+    })
+
+    it('com conta inexistente, recusa como código inválido', async () => {
+      studentRepository.findByEmail.mockResolvedValue(null)
+
+      await expect(
+        service.verifyCode(request('STUDENT', { code: '123456' }))
+      ).rejects.toThrow(new BadRequestException(messages.INVALID_CODE))
+
+      expect(
+        verificationCodeRepository.findLatestByAccount
+      ).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('confirmReset', () => {
+    function confirmation(role: string, code = '123456') {
+      return request(role, {
+        code,
+        new_password: 'nova1',
+        confirm_new_password: 'nova1'
+      })
+    }
+
+    it.each([
+      ['STUDENT', false, () => studentRepository, 10],
+      ['ADVISOR', false, () => advisorRepository, 20],
+      ['ADMIN', true, () => advisorRepository, 21],
+      ['ADMIN', false, () => adminRepository, 30]
+    ])(
+      'grava a nova senha hasheada na conta certa e consome o código (%s, orientador admin: %s)',
+      async (role, isAdvisorAdmin, target, id) => {
+        advisorRepository.findByEmailAndAdminPrivileges.mockResolvedValue(
+          isAdvisorAdmin ? { id: 21 } : null
         )
-        expect(emailService.sendEmail).not.toHaveBeenCalled()
-        expect(savedPasswords()).toHaveLength(0)
+        verificationCodeRepository.findLatestByAccount.mockResolvedValue(
+          await storedCode('123456')
+        )
+
+        await service.confirmReset(confirmation(role))
+
+        expect(passwordUpdates()).toHaveLength(1)
+        const [accountId, hash] = target().updatePasswordById.mock.calls[0]
+        expect(accountId).toBe(id)
+        await expect(comparePassword('nova1', hash)).resolves.toBe(true)
+        expect(verificationCodeRepository.markAsUsed).toHaveBeenCalledWith(
+          5,
+          NOW
+        )
       }
     )
 
-    it.each([['ADMINISTRADOR'], ['student'], [''], ['SECRETARY']])(
-      'quando o cargo é desconhecido, falha com BadRequest sem buscar, enviar e-mail nem gravar (%s)',
-      async (role) => {
-        await expect(
-          service.resetPassword(request(role))
-        ).rejects.toBeInstanceOf(BadRequestException)
+    it('com código inválido, não altera a senha', async () => {
+      verificationCodeRepository.findLatestByAccount.mockResolvedValue(
+        await storedCode('123456')
+      )
 
-        expect(userService.findUserByEmailAndRole).not.toHaveBeenCalled()
-        expect(emailService.sendEmail).not.toHaveBeenCalled()
-        expect(savedPasswords()).toHaveLength(0)
-      }
-    )
+      await expect(
+        service.confirmReset(confirmation('STUDENT', '000000'))
+      ).rejects.toBeInstanceOf(BadRequestException)
+
+      expect(passwordUpdates()).toEqual([])
+      expect(verificationCodeRepository.markAsUsed).not.toHaveBeenCalled()
+    })
   })
 })

@@ -61,11 +61,6 @@ export class AdminService {
     }
   }
 
-  async setPasswordByEmail(email: string, password: string): Promise<void> {
-    const passwordHash = await hashPassword(password)
-    await this.adminRepository.updatePasswordByEmail(email, passwordHash)
-  }
-
   async updatePassword(
     email: string,
     current_password: string,

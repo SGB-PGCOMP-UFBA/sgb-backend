@@ -141,11 +141,6 @@ export class AdvisorService {
     await this.advisorRepository.updatePasswordByEmail(email, passwordHash)
   }
 
-  async setPasswordByEmail(email: string, password: string): Promise<void> {
-    const passwordHash = await hashPassword(password)
-    await this.advisorRepository.updatePasswordByEmail(email, passwordHash)
-  }
-
   async delete(id: number) {
     const affected = await this.advisorRepository.deleteById(id)
     if (affected === 1) {

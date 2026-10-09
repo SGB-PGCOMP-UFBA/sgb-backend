@@ -56,6 +56,12 @@ describe('TypeOrmAdminRepository', () => {
     )
   })
 
+  it('updatePasswordById altera só a senha, filtrando pelo id', async () => {
+    await repository.updatePasswordById(7, 'hash')
+
+    expect(typeorm.update).toHaveBeenCalledWith({ id: 7 }, { password: 'hash' })
+  })
+
   it('create repassa os dados recebidos sem alterá-los', async () => {
     const data = { name: 'Carlos Lima', password: 'hash' } as CreateAdminDto
 
