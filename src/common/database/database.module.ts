@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { EnvironmentEnum, env } from '@/config/env.validation'
+import { APP_TIME_ZONE } from '@/config/time-zone.constant'
 import { Admin } from '@/admin/entities/admin.entity'
 import { AdminRepository } from '@/admin/repositories/admin.repository'
 import { TypeOrmAdminRepository } from '@/admin/repositories/typeorm-admin.repository'
@@ -74,7 +75,8 @@ const repositories = [
       url: env.DATABASE_URL,
       ssl: isProduction,
       extra: {
-        ssl: isProduction ? { rejectUnauthorized: false } : false
+        ssl: isProduction ? { rejectUnauthorized: false } : false,
+        options: `-c timezone=${APP_TIME_ZONE}`
       },
       synchronize: env.DB_SYNCHRONIZE
     }),
