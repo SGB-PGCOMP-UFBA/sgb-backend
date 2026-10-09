@@ -1,5 +1,5 @@
-import { ExecutionContext } from '@nestjs/common'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { ExecutionContext, Logger } from '@nestjs/common'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { RolesGuard } from './roles.guard'
 
 /** Contexto mínimo do Nest: o guard só usa o handler e o `request.user`. */
@@ -14,9 +14,16 @@ describe('RolesGuard', () => {
   let reflector: { get: ReturnType<typeof vi.fn> }
   let guard: RolesGuard
 
+  let warn: ReturnType<typeof vi.spyOn>
+
   beforeEach(() => {
     reflector = { get: vi.fn() }
     guard = new RolesGuard(reflector as never)
+    warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    warn.mockRestore()
   })
 
   it.each([[undefined], [null]])(
@@ -64,29 +71,34 @@ describe('RolesGuard', () => {
     }
   )
 
-  it.each([[['ADMIN'], 'admin', false]])(
-    'quando o cargo difere apenas na grafia, bloqueia o acesso (cargos %s, usuário %s)',
-    (requiredRoles, userRole, expected) => {
+  it.each([
+    [['ADMIN'], 'admin'],
+    [['ADVISOR_WITH_ADMIN_PRIVILEGES'], 'Advisor_With_Admin_Privileges'],
+    [['ADMIN'], 'SECRETARY']
+  ])(
+    'quando o cargo não é exatamente um dos exigidos, bloqueia o acesso (cargos %s, usuário %s)',
+    (requiredRoles, userRole) => {
       reflector.get.mockReturnValue(requiredRoles)
 
-      expect(guard.canActivate(createContext({ role: userRole }))).toBe(
-        expected
-      )
+      expect(guard.canActivate(createContext({ role: userRole }))).toBe(false)
+      expect(warn).not.toHaveBeenCalled()
     }
   )
 
-  it('quando a lista de cargos exigidos está vazia, nega o acesso', () => {
+  it('quando a lista de cargos exigidos está vazia, nega o acesso e avisa no log', () => {
     reflector.get.mockReturnValue([])
 
     expect(guard.canActivate(createContext({ role: 'ADMIN' }))).toBe(false)
+    expect(warn).toHaveBeenCalledTimes(1)
   })
 
-  it.each([[undefined], [null]])(
-    'quando não há usuário na requisição, estoura TypeError (%s)',
+  it.each([[undefined], [null], [{}], [{ role: 123 }], [{ role: null }]])(
+    'quando não há usuário com cargo na requisição, nega sem estourar erro e avisa no log (%s)',
     (user) => {
       reflector.get.mockReturnValue(['ADMIN'])
 
-      expect(() => guard.canActivate(createContext(user))).toThrow(TypeError)
+      expect(guard.canActivate(createContext(user))).toBe(false)
+      expect(warn).toHaveBeenCalledTimes(1)
     }
   )
 })
