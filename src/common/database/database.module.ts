@@ -25,6 +25,9 @@ import { TypeOrmEnrollmentRepository } from '@/enrollment/repositories/typeorm-e
 import { Scholarship } from '@/scholarship/entities/scholarship.entity'
 import { ScholarshipRepository } from '@/scholarship/repositories/scholarship.repository'
 import { TypeOrmScholarshipRepository } from '@/scholarship/repositories/typeorm-scholarship.repository'
+import { VerificationCode } from '@/password-recovery/entities/verification-code.entity'
+import { VerificationCodeRepository } from '@/password-recovery/repositories/verification-code.repository'
+import { TypeOrmVerificationCodeRepository } from '@/password-recovery/repositories/typeorm-verification-code.repository'
 
 const isProduction = env.NODE_ENV === EnvironmentEnum.PROD
 
@@ -36,7 +39,8 @@ const entities = [
   EmbedNotification,
   Enrollment,
   Scholarship,
-  Student
+  Student,
+  VerificationCode
 ]
 
 const repositories = [
@@ -50,7 +54,11 @@ const repositories = [
   },
   { provide: EnrollmentRepository, useClass: TypeOrmEnrollmentRepository },
   { provide: ScholarshipRepository, useClass: TypeOrmScholarshipRepository },
-  { provide: StudentRepository, useClass: TypeOrmStudentRepository }
+  { provide: StudentRepository, useClass: TypeOrmStudentRepository },
+  {
+    provide: VerificationCodeRepository,
+    useClass: TypeOrmVerificationCodeRepository
+  }
 ]
 
 /**

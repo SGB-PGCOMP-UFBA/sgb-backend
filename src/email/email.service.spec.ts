@@ -4,7 +4,7 @@ import { EmailService } from './email.service'
 const EMAIL = {
   to: 'usuario@ufba.br',
   subject: 'Assunto',
-  template: 'reset-password-request',
+  template: 'reset-password-code',
   context: {}
 }
 

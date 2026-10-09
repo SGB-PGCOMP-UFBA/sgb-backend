@@ -20,6 +20,7 @@ export abstract class AdvisorRepository {
     email: string,
     passwordHash: string
   ): Promise<void>
+  abstract updatePasswordById(id: number, passwordHash: string): Promise<void>
   abstract setAdminPrivileges(
     id: number,
     hasAdminPrivileges: boolean

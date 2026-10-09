@@ -33,6 +33,7 @@ function createAdminRepositoryMock() {
     create: vi.fn(async (data: unknown) => data),
     update: vi.fn(async (_id: number, data: unknown) => data),
     updatePasswordByEmail: vi.fn().mockResolvedValue(undefined),
+    updatePasswordById: vi.fn().mockResolvedValue(undefined),
     deleteById: vi.fn().mockResolvedValue(1)
   } satisfies Record<keyof AdminRepository, unknown>
 }
@@ -214,18 +215,6 @@ describe('AdminService', () => {
 
       expect(erro).toBeInstanceOf(BadRequestException)
       expect(erro.message).toBe(constants.exceptionMessages.admin.UPDATE_FAILED)
-    })
-  })
-
-  describe('setPasswordByEmail', () => {
-    it('grava a nova senha hasheada pelo e-mail, sem buscar a conta', async () => {
-      await service.setPasswordByEmail('carlos@ufba.br', 'nova1')
-
-      const [email, hash] = repository.updatePasswordByEmail.mock.calls[0]
-      expect(email).toBe('carlos@ufba.br')
-      expect(hash).not.toBe('nova1')
-      await expect(comparePassword('nova1', hash)).resolves.toBe(true)
-      expect(repository.findByEmail).not.toHaveBeenCalled()
     })
   })
 

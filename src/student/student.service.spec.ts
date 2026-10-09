@@ -30,6 +30,7 @@ function createStudentRepositoryMock() {
     create: vi.fn(async (data: object) => ({ ...data, id: 4 })),
     update: vi.fn(async (_id: number, data: unknown) => data),
     updatePasswordByEmail: vi.fn().mockResolvedValue(undefined),
+    updatePasswordById: vi.fn().mockResolvedValue(undefined),
     deleteById: vi.fn().mockResolvedValue(1)
   } satisfies Record<keyof StudentRepository, unknown>
 }
@@ -113,18 +114,6 @@ describe('StudentService', () => {
       expect(repository.findByEmailWithEnrollments).toHaveBeenCalledWith(
         'ana@ufba.br'
       )
-      expect(repository.findByEmail).not.toHaveBeenCalled()
-    })
-  })
-
-  describe('setPasswordByEmail', () => {
-    it('grava a nova senha hasheada pelo e-mail, sem buscar a conta', async () => {
-      await service.setPasswordByEmail('ana@ufba.br', 'nova1')
-
-      const [email, hash] = repository.updatePasswordByEmail.mock.calls[0]
-      expect(email).toBe('ana@ufba.br')
-      expect(hash).not.toBe('nova1')
-      await expect(comparePassword('nova1', hash)).resolves.toBe(true)
       expect(repository.findByEmail).not.toHaveBeenCalled()
     })
   })

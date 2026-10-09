@@ -14,5 +14,6 @@ export abstract class AdminRepository {
     email: string,
     passwordHash: string
   ): Promise<void>
+  abstract updatePasswordById(id: number, passwordHash: string): Promise<void>
   abstract deleteById(id: number): Promise<number>
 }

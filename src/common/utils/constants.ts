@@ -32,7 +32,8 @@ const constants = {
     PASSWORD_NOT_MATCHING: 'A senha e o confirmar senha são diferentes.',
     CURRENT_PASSWORD_NOT_MATCHING: 'Sua senha atual está incorreta.',
     ROLE_IS_REQUIRED: 'O papel do usuário é obrigatório.',
-    ROLE_IS_INVALID: 'O papel do usuário é inválido.'
+    ROLE_IS_INVALID: 'O papel do usuário é inválido.',
+    VERIFICATION_CODE_FORMAT_ERROR: 'O código deve ter 6 dígitos.'
   },
   negotialValidationMessages: {
     ENROLLMENT_NUMBER_ALREADY_REGISTERED:
@@ -125,6 +126,14 @@ const constants = {
       SOMETHING_WRONG: 'Algo deu errado.',
       NOT_FOUND: 'Usuário não encontrado.',
       WRONG_PASSWORD: 'Senha inválida.'
+    },
+    passwordRecovery: {
+      INVALID_CODE: 'Código inválido.',
+      EXPIRED_CODE:
+        'Este código expirou ou já foi utilizado. Solicite um novo código.',
+      TOO_MANY_ATTEMPTS:
+        'Limite de tentativas atingido. Solicite um novo código.',
+      RESEND_TOO_SOON: 'Aguarde um minuto antes de solicitar um novo código.'
     },
     token: {
       EXPIRED_ERROR: 'Este token expirou, tente novamente!'
