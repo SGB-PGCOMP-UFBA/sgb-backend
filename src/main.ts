@@ -4,6 +4,9 @@ import { AppModule } from './app.module'
 import { HttpExceptionFilter } from '@/common/filters/http-exception.filter'
 import { CustomValidationException } from '@/common/exceptions/custom-validation.exception'
 import { env } from '@/config/env.validation'
+import { APP_TIME_ZONE } from '@/config/time-zone.constant'
+
+process.env.TZ = APP_TIME_ZONE
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
