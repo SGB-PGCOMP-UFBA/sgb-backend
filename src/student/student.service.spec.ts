@@ -22,6 +22,7 @@ function createStudentRepositoryMock() {
     findAllWithEnrollments: vi.fn().mockResolvedValue([]),
     search: vi.fn().mockResolvedValue([]),
     findAllByAdvisorId: vi.fn().mockResolvedValue([]),
+    findById: vi.fn().mockResolvedValue(null),
     findByEmail: vi.fn().mockResolvedValue(null),
     findByEmailWithEnrollments: vi.fn().mockResolvedValue(null),
     findByTaxId: vi.fn().mockResolvedValue(null),

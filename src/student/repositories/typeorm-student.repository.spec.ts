@@ -62,6 +62,12 @@ describe('TypeOrmStudentRepository', () => {
     ])
   })
 
+  it('findById busca pelo id, sem relações', async () => {
+    await repository.findById(5)
+
+    expect(typeorm.findOneBy).toHaveBeenCalledWith({ id: 5 })
+  })
+
   it.each([
     ['findByTaxId', '12345678901', { tax_id: '12345678901' }],
     ['findByPhoneNumber', '71999999999', { phone_number: '71999999999' }],

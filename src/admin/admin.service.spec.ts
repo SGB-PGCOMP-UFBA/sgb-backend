@@ -27,6 +27,7 @@ function createAdminRepositoryMock() {
   return {
     findAllOrderedByName: vi.fn().mockResolvedValue([]),
     search: vi.fn().mockResolvedValue([]),
+    findById: vi.fn().mockResolvedValue(null),
     findByEmail: vi.fn().mockResolvedValue(null),
     findByTaxId: vi.fn().mockResolvedValue(null),
     findByPhoneNumber: vi.fn().mockResolvedValue(null),
@@ -76,6 +77,12 @@ describe('AdminService', () => {
         ForbiddenException
       )
       expect(repository.create).not.toHaveBeenCalled()
+    })
+
+    it('register cria o administrador sem pedir a chave de API', async () => {
+      await service.register(CREATE_DTO)
+
+      expect(repository.create).toHaveBeenCalledTimes(1)
     })
 
     it('quando a chave de API confere, cria o administrador', async () => {

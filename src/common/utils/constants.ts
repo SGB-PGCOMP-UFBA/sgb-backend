@@ -125,7 +125,12 @@ const constants = {
     user: {
       SOMETHING_WRONG: 'Algo deu errado.',
       NOT_FOUND: 'Usuário não encontrado.',
-      WRONG_PASSWORD: 'Senha inválida.'
+      WRONG_PASSWORD: 'Senha inválida.',
+      ONLY_ADMIN_MANAGES_ADMIN:
+        'Apenas administradores podem gerenciar outros administradores.',
+      CANNOT_DELETE_SELF: 'Você não pode excluir o próprio usuário.',
+      WELCOME_EMAIL_FAILED:
+        'Não foi possível enviar o e-mail com a senha. O cadastro foi desfeito.'
     },
     passwordRecovery: {
       INVALID_CODE: 'Código inválido.',

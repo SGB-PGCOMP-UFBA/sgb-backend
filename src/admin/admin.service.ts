@@ -20,6 +20,10 @@ export class AdminService {
       throw new ForbiddenException()
     }
 
+    return await this.register(dto)
+  }
+
+  async register(dto: CreateAdminDto) {
     try {
       const passwordHash = await hashPassword(dto.password)
       return await this.adminRepository.create({

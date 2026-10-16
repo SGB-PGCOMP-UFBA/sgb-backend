@@ -5,6 +5,7 @@ import { UserSearchFilters } from '@/common/interfaces/user-search-filters.inter
 export abstract class AdminRepository {
   abstract findAllOrderedByName(): Promise<Admin[]>
   abstract search(filters: UserSearchFilters): Promise<Admin[]>
+  abstract findById(id: number): Promise<Admin | null>
   abstract findByEmail(email: string): Promise<Admin | null>
   abstract findByTaxId(taxId: string): Promise<Admin | null>
   abstract findByPhoneNumber(phoneNumber: string): Promise<Admin | null>

@@ -28,6 +28,12 @@ describe('TypeOrmAdminRepository', () => {
     expect(typeorm.find).toHaveBeenCalledWith({ order: { name: 'ASC' } })
   })
 
+  it('findById busca pelo id', async () => {
+    await repository.findById(3)
+
+    expect(typeorm.findOneBy).toHaveBeenCalledWith({ id: 3 })
+  })
+
   it.each([
     ['findByEmail', 'carlos@ufba.br', { email: 'carlos@ufba.br' }],
     ['findByTaxId', '12345678901', { tax_id: '12345678901' }],

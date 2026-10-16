@@ -44,6 +44,10 @@ export class TypeOrmStudentRepository implements StudentRepository {
     })
   }
 
+  async findById(id: number): Promise<Student | null> {
+    return await this.repository.findOneBy({ id })
+  }
+
   async findByEmail(email: string): Promise<Student | null> {
     return await this.repository.findOne({ where: { email }, relations: [] })
   }
