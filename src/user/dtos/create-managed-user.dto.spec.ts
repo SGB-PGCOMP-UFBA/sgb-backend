@@ -52,12 +52,6 @@ describe('CreateManagedUserDto', () => {
     }
   )
 
-  it('quando a situação não é ACTIVE nem INACTIVE, recusa', async () => {
-    expect(
-      await errorsFor({ ...BASE, role: 'ADVISOR', status: 'BLOCKED' })
-    ).toEqual(['status'])
-  })
-
   it('quando o e-mail é inválido, recusa', async () => {
     expect(
       await errorsFor({ ...BASE, role: 'ADMIN', email: 'ana.ufba.br' })

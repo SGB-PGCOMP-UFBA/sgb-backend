@@ -13,11 +13,13 @@ import {
   UseGuards
 } from '@nestjs/common'
 import { UserService } from './user.service'
-import { Caller, UserManagementService } from './user-management.service'
+import { UserManagementService } from './user-management.service'
+import { Caller } from '@/user/caller.interface'
 import { FindUsersDto } from '@/user/dtos/find-users.dto'
 import { ManagedUserParamsDto } from '@/user/dtos/managed-user-params.dto'
 import { CreateManagedUserDto } from '@/user/dtos/create-managed-user.dto'
 import { UpdateManagedUserDto } from '@/user/dtos/update-managed-user.dto'
+import { UpdateManagedUserStatusDto } from '@/user/dtos/update-managed-user-status.dto'
 import { Roles } from '@/auth/role.decorator'
 import { RolesGuard } from '@/auth/guards/roles.guard'
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard'
@@ -34,8 +36,11 @@ export class UserController {
   @Get()
   @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  async findAll(@Query() filters: FindUsersDto) {
-    return await this.userService.findAll(filters)
+  async findAll(
+    @Query() filters: FindUsersDto,
+    @Request() request: AuthenticatedRequest
+  ) {
+    return await this.userService.findAll(filters, request.user)
   }
 
   @Get(':role/:id')
@@ -67,6 +72,22 @@ export class UserController {
       params.role,
       params.id,
       dto,
+      request.user
+    )
+  }
+
+  @Patch(':role/:id/status')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async updateStatus(
+    @Param() params: ManagedUserParamsDto,
+    @Body() dto: UpdateManagedUserStatusDto,
+    @Request() request: AuthenticatedRequest
+  ) {
+    return await this.userManagementService.updateStatus(
+      params.role,
+      params.id,
+      dto.status,
       request.user
     )
   }

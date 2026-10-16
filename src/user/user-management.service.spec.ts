@@ -6,7 +6,8 @@ import {
 } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { makeAdmin, makeAdvisor, makeStudent } from '@/common/testing/factories'
-import { Caller, UserManagementService } from './user-management.service'
+import { UserManagementService } from './user-management.service'
+import { Caller } from './caller.interface'
 
 type Mock = ReturnType<typeof vi.fn>
 
@@ -21,8 +22,7 @@ const NEW_USER = {
   email: 'ana@ufba.br',
   tax_id: '12345678901',
   phone_number: null,
-  link_to_lattes: null,
-  status: null
+  link_to_lattes: null
 }
 
 describe('UserManagementService', () => {
@@ -31,8 +31,9 @@ describe('UserManagementService', () => {
     findById: Mock
     deleteById: Mock
     setAdminPrivileges: Mock
+    update: Mock
   }
-  let adminRepository: { findById: Mock; deleteById: Mock }
+  let adminRepository: { findById: Mock; deleteById: Mock; update: Mock }
   let enrollmentRepository: { countActiveScholarships: Mock }
   let studentService: { create: Mock; update: Mock }
   let advisorService: { create: Mock; update: Mock }
@@ -48,11 +49,13 @@ describe('UserManagementService', () => {
     advisorRepository = {
       findById: vi.fn().mockResolvedValue(makeAdvisor({ id: 9 })),
       deleteById: vi.fn().mockResolvedValue(1),
-      setAdminPrivileges: vi.fn().mockResolvedValue(undefined)
+      setAdminPrivileges: vi.fn().mockResolvedValue(undefined),
+      update: vi.fn().mockResolvedValue(undefined)
     }
     adminRepository = {
       findById: vi.fn().mockResolvedValue(makeAdmin({ id: 3 })),
-      deleteById: vi.fn().mockResolvedValue(1)
+      deleteById: vi.fn().mockResolvedValue(1),
+      update: vi.fn().mockResolvedValue(undefined)
     }
     enrollmentRepository = {
       countActiveScholarships: vi.fn().mockResolvedValue(0)
@@ -136,7 +139,7 @@ describe('UserManagementService', () => {
       expect(options).toEqual({ throwOnError: true })
     })
 
-    it('quando é orientador, cria ativo e sem o e-mail de boas-vindas próprio do orientador', async () => {
+    it('quando é orientador, cria sempre ativo e sem o e-mail de boas-vindas próprio do orientador', async () => {
       await service.create({ ...NEW_USER, role: 'ADVISOR' }, ADMIN_CALLER)
 
       expect(advisorService.create).toHaveBeenCalledWith(
@@ -195,8 +198,7 @@ describe('UserManagementService', () => {
       email: null,
       tax_id: null,
       phone_number: null,
-      link_to_lattes: 'lattes',
-      status: 'INACTIVE'
+      link_to_lattes: 'lattes'
     }
 
     it('quando é estudante, edita pelo e-mail atual e manda o Lattes', async () => {
@@ -214,11 +216,11 @@ describe('UserManagementService', () => {
       )
     })
 
-    it('quando é orientador, edita e manda a situação', async () => {
+    it('quando é orientador, edita sem mexer na situação', async () => {
       await service.update('ADVISOR', 9, CHANGES, ADMIN_CALLER)
 
       expect(advisorService.update).toHaveBeenCalledWith(
-        expect.objectContaining({ status: 'INACTIVE' })
+        expect.objectContaining({ status: null })
       )
     })
 
@@ -237,6 +239,43 @@ describe('UserManagementService', () => {
       const user = await service.update('STUDENT', 5, CHANGES, ADMIN_CALLER)
 
       expect(user.name).toBe('Novo Nome')
+    })
+  })
+
+  describe('updateStatus', () => {
+    it.each([
+      ['ADVISOR', 9, () => advisorRepository, 'INACTIVE'],
+      ['ADVISOR_WITH_ADMIN_PRIVILEGES', 9, () => advisorRepository, 'ACTIVE'],
+      ['ADMIN', 3, () => adminRepository, 'INACTIVE']
+    ] as const)(
+      'quando é %s, grava a nova situação na tabela certa',
+      async (role, id, repository, status) => {
+        await service.updateStatus(role, id, status, ADMIN_CALLER)
+
+        expect(repository().update).toHaveBeenCalledWith(id, { status })
+      }
+    )
+
+    it('quando é estudante, recusa porque estudante não tem situação', async () => {
+      await expect(
+        service.updateStatus('STUDENT', 5, 'INACTIVE', ADMIN_CALLER)
+      ).rejects.toThrow('Estudantes não têm situação')
+    })
+
+    it('quando é o próprio usuário, recusa', async () => {
+      adminRepository.findById.mockResolvedValue(makeAdmin({ id: 1 }))
+
+      await expect(
+        service.updateStatus('ADMIN', 1, 'INACTIVE', ADMIN_CALLER)
+      ).rejects.toThrow('próprio usuário')
+      expect(adminRepository.update).not.toHaveBeenCalled()
+    })
+
+    it('quando é administrador e quem chama não é ADMIN, recusa', async () => {
+      await expect(
+        service.updateStatus('ADMIN', 3, 'INACTIVE', ADVISOR_ADMIN_CALLER)
+      ).rejects.toBeInstanceOf(ForbiddenException)
+      expect(adminRepository.update).not.toHaveBeenCalled()
     })
   })
 

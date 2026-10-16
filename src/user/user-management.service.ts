@@ -20,6 +20,9 @@ import { ManagedUser } from '@/user/managed-user.interface'
 import { USER_ROLE_LABELS, UserRole } from '@/user/user-role.constant'
 import { CreateManagedUserDto } from '@/user/dtos/create-managed-user.dto'
 import { UpdateManagedUserDto } from '@/user/dtos/update-managed-user.dto'
+import { UserStatus } from '@/user/dtos/update-managed-user-status.dto'
+import { Caller } from '@/user/caller.interface'
+import { isCaller } from '@/user/caller.util'
 import {
   toManagedAdmin,
   toManagedAdvisor,
@@ -27,11 +30,6 @@ import {
 } from '@/user/user.mapper'
 
 type UserTable = 'STUDENT' | 'ADVISOR' | 'ADMIN'
-
-export interface Caller {
-  userId: string
-  role: string
-}
 
 @Injectable()
 export class UserManagementService {
@@ -118,11 +116,44 @@ export class UserManagementService {
         })
         break
       case 'ADVISOR':
-        await this.advisorService.update({ ...common, status: dto.status })
+        await this.advisorService.update({ ...common, status: null })
         break
       case 'ADMIN':
         await this.adminService.update(common)
         break
+    }
+
+    return await this.findOne(role, id)
+  }
+
+  /** Situação só existe para orientador e administrador. */
+  async updateStatus(
+    role: UserRole,
+    id: number,
+    status: UserStatus,
+    caller: Caller
+  ): Promise<ManagedUser> {
+    const user = await this.findOne(role, id)
+    assertCanManage(user.role, caller)
+
+    const table = tableOf(user.role)
+
+    if (table === 'STUDENT') {
+      throw new BadRequestException(
+        constants.exceptionMessages.user.STUDENT_HAS_NO_STATUS
+      )
+    }
+
+    if (isCaller(user, caller)) {
+      throw new BadRequestException(
+        constants.exceptionMessages.user.CANNOT_CHANGE_OWN_STATUS
+      )
+    }
+
+    if (table === 'ADVISOR') {
+      await this.advisorRepository.update(id, { status })
+    } else {
+      await this.adminRepository.update(id, { status })
     }
 
     return await this.findOne(role, id)
@@ -134,7 +165,7 @@ export class UserManagementService {
 
     const table = tableOf(user.role)
 
-    if (isSameUser(table, id, caller)) {
+    if (isCaller(user, caller)) {
       throw new BadRequestException(
         constants.exceptionMessages.user.CANNOT_DELETE_SELF
       )
@@ -168,7 +199,7 @@ export class UserManagementService {
       case 'ADVISOR_WITH_ADMIN_PRIVILEGES': {
         const advisor = await this.advisorService.create({
           ...common,
-          status: dto.status ?? 'ACTIVE',
+          status: 'ACTIVE',
           notify: false
         })
 
@@ -254,10 +285,4 @@ function assertCanManage(targetRole: UserRole, caller: Caller): void {
       constants.exceptionMessages.user.ONLY_ADMIN_MANAGES_ADMIN
     )
   }
-}
-
-function isSameUser(table: UserTable, id: number, caller: Caller): boolean {
-  const [callerId, callerRole] = caller.userId.split(/-(.+)/)
-
-  return Number(callerId) === id && tableOf(callerRole as UserRole) === table
 }

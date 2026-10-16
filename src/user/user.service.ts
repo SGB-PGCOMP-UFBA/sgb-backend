@@ -10,6 +10,8 @@ import { constants } from '@/common/utils/constants'
 import { FindUsersDto } from '@/user/dtos/find-users.dto'
 import { ManagedUser } from '@/user/managed-user.interface'
 import { UserRole } from '@/user/user-role.constant'
+import { Caller } from '@/user/caller.interface'
+import { isCaller } from '@/user/caller.util'
 import {
   toManagedAdmin,
   toManagedAdvisor,
@@ -61,9 +63,13 @@ export class UserService {
 
   /**
    * Os usuários vivem em três tabelas; por isso a consulta vai só às tabelas
-   * do perfil pedido e junta o resultado aqui, ordenado pelo nome.
+   * do perfil pedido e junta o resultado aqui, ordenado pelo nome. Quem faz a
+   * chamada fica de fora: a própria conta é gerida em Configurações.
    */
-  async findAll(filters: FindUsersDto = {}): Promise<ManagedUser[]> {
+  async findAll(
+    filters: FindUsersDto = {},
+    caller?: Caller
+  ): Promise<ManagedUser[]> {
     const search = { name: filters.name, email: filters.email }
     const wants = (...roles: UserRole[]) =>
       !filters.role || roles.includes(filters.role)
@@ -82,6 +88,7 @@ export class UserService {
       ...admins.map(toManagedAdmin)
     ]
       .filter((user) => wants(user.role))
+      .filter((user) => !caller || !isCaller(user, caller))
       .sort((first, second) => first.name.localeCompare(second.name, 'pt-BR'))
   }
 }

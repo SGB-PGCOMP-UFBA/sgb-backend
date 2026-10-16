@@ -129,6 +129,9 @@ const constants = {
       ONLY_ADMIN_MANAGES_ADMIN:
         'Apenas administradores podem gerenciar outros administradores.',
       CANNOT_DELETE_SELF: 'Você não pode excluir o próprio usuário.',
+      CANNOT_CHANGE_OWN_STATUS:
+        'Você não pode ativar ou inativar o próprio usuário.',
+      STUDENT_HAS_NO_STATUS: 'Estudantes não têm situação de ativo/inativo.',
       WELCOME_EMAIL_FAILED:
         'Não foi possível enviar o e-mail com a senha. O cadastro foi desfeito.'
     },

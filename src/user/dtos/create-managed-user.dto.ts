@@ -53,9 +53,4 @@ export class CreateManagedUserDto {
     message: constants.bodyValidationMessages.LATTES_LINK_FORMAT_ERROR
   })
   readonly link_to_lattes: string | null
-
-  @Transform(trimToNull)
-  @IsOptional()
-  @IsIn(['ACTIVE', 'INACTIVE'])
-  readonly status: string | null
 }
