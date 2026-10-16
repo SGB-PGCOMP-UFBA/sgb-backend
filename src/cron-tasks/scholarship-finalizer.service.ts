@@ -22,12 +22,39 @@ export class ScholarshipFinalizerService {
 
     this.logger.log(`[${scholarships.length}] scholarships found ending today.`)
 
+    let failed = 0
+
     for (const scholarship of scholarships) {
-      await this.notifyStudentAndAdvisor(scholarship)
-      this.logger.log(`Scholarship [${scholarship.id}] ended!`)
+      const notified = await this.notifyScholarshipSafely(scholarship)
+
+      if (!notified) failed++
     }
 
-    this.logger.log('Finish task to notify scholarships that end today.')
+    this.logger.log(
+      `Finish task to notify scholarships that end today. [${
+        scholarships.length - failed
+      }] notified, [${failed}] failed.`
+    )
+  }
+
+  private async notifyScholarshipSafely(
+    scholarship: Scholarship
+  ): Promise<boolean> {
+    try {
+      await this.notifyStudentAndAdvisor(scholarship)
+      this.logger.log(`Scholarship [${scholarship.id}] ended!`)
+
+      return true
+    } catch (error: unknown) {
+      const reason = error instanceof Error ? error : new Error(String(error))
+
+      this.logger.error(
+        `Failed to notify scholarship [${scholarship.id}] ending today: ${reason.message}`,
+        reason.stack
+      )
+
+      return false
+    }
   }
 
   private async notifyStudentAndAdvisor(scholarship: Scholarship) {
