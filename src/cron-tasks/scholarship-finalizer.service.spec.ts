@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   makeAdvisor,
@@ -31,8 +32,14 @@ describe('ScholarshipFinalizerService', () => {
   }
   let embedNotificationService: { create: ReturnType<typeof vi.fn> }
   let service: ScholarshipFinalizerService
+  let loggerError: ReturnType<typeof vi.spyOn>
 
   beforeEach(() => {
+    vi.spyOn(Logger.prototype, 'log').mockImplementation(() => {})
+    loggerError = vi
+      .spyOn(Logger.prototype, 'error')
+      .mockImplementation(() => {})
+
     vi.useFakeTimers()
     vi.setSystemTime(HOJE)
 
@@ -49,6 +56,7 @@ describe('ScholarshipFinalizerService', () => {
 
   afterEach(() => {
     vi.useRealTimers()
+    vi.restoreAllMocks()
   })
 
   it('quando nenhuma bolsa encerra hoje, não notifica ninguém', async () => {
@@ -111,15 +119,49 @@ describe('ScholarshipFinalizerService', () => {
       expect(embedNotificationService.create).toHaveBeenCalledTimes(6)
     })
 
-    it('quando uma bolsa vem sem as relações carregadas, aborta o lote', async () => {
+    it('quando uma bolsa vem sem as relações carregadas, notifica as demais e registra o erro', async () => {
       scholarshipService.findAllEndingOn.mockResolvedValue([
         buildScholarship({ id: 1, enrollment: null }),
         buildScholarship({ id: 2 })
       ])
 
-      await expect(service.notifyEndedScholarships()).rejects.toThrow()
+      await service.notifyEndedScholarships()
 
-      expect(embedNotificationService.create).not.toHaveBeenCalled()
+      expect(embedNotificationService.create).toHaveBeenCalledTimes(2)
+      expect(loggerError).toHaveBeenCalledTimes(1)
+      expect(loggerError).toHaveBeenCalledWith(
+        expect.stringContaining('[1]'),
+        expect.any(String)
+      )
+    })
+
+    it('quando a notificação de uma bolsa falha, segue para as próximas', async () => {
+      scholarshipService.findAllEndingOn.mockResolvedValue([
+        buildScholarship({ id: 1 }),
+        buildScholarship({ id: 2 }),
+        buildScholarship({ id: 3 })
+      ])
+      embedNotificationService.create
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error('falha ao salvar notificação'))
+
+      await service.notifyEndedScholarships()
+
+      expect(embedNotificationService.create).toHaveBeenCalledTimes(6)
+      expect(loggerError).toHaveBeenCalledTimes(1)
+      expect(loggerError).toHaveBeenCalledWith(
+        expect.stringContaining('[2]'),
+        expect.any(String)
+      )
+    })
+
+    it('quando uma bolsa falha, a rotina termina sem lançar', async () => {
+      scholarshipService.findAllEndingOn.mockResolvedValue([
+        buildScholarship({ id: 1, enrollment: null })
+      ])
+
+      await expect(service.notifyEndedScholarships()).resolves.toBeUndefined()
     })
   })
 })
