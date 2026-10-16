@@ -25,6 +25,10 @@ export class TypeOrmAdminRepository implements AdminRepository {
     return await this.repository.find({ order: { name: 'ASC' } })
   }
 
+  async findById(id: number): Promise<Admin | null> {
+    return await this.repository.findOneBy({ id })
+  }
+
   async findByEmail(email: string): Promise<Admin | null> {
     return await this.repository.findOneBy({ email })
   }

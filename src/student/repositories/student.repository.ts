@@ -6,6 +6,7 @@ export abstract class StudentRepository {
   abstract findAllWithEnrollments(): Promise<Student[]>
   abstract search(filters: UserSearchFilters): Promise<Student[]>
   abstract findAllByAdvisorId(advisorId: number): Promise<Student[]>
+  abstract findById(id: number): Promise<Student | null>
   abstract findByEmail(email: string): Promise<Student | null>
   abstract findByEmailWithEnrollments(email: string): Promise<Student | null>
   abstract findByTaxId(taxId: string): Promise<Student | null>

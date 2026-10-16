@@ -21,6 +21,41 @@ describe('TypeOrmEnrollmentRepository', () => {
     repository = new TypeOrmEnrollmentRepository(typeorm)
   })
 
+  describe('countActiveScholarships', () => {
+    it.each([
+      [{ student_id: 5 }, 'enrollment.student_id = :value', 5],
+      [{ advisor_id: 9 }, 'enrollment.advisor_id = :value', 9]
+    ] as const)(
+      'conta as bolsas das matrículas do dono informado (%o)',
+      async (owner, where, value) => {
+        const queryBuilder = createQueryBuilderMock([{ count: '3' }])
+        typeorm.createQueryBuilder.mockReturnValue(queryBuilder)
+
+        await expect(repository.countActiveScholarships(owner)).resolves.toBe(3)
+        expect(queryBuilder.select).toHaveBeenCalledWith(
+          'COUNT(scholarship.id)',
+          'count'
+        )
+        expect(queryBuilder.where).toHaveBeenCalledWith(where, { value })
+      }
+    )
+
+    it('junta só as bolsas que ocupam vaga hoje', async () => {
+      const queryBuilder = createQueryBuilderMock([])
+      typeorm.createQueryBuilder.mockReturnValue(queryBuilder)
+
+      await expect(
+        repository.countActiveScholarships({ student_id: 5 })
+      ).resolves.toBe(0)
+      expect(queryBuilder.innerJoin).toHaveBeenCalledWith(
+        'enrollment.scholarships',
+        'scholarship',
+        expect.stringContaining('COALESCE'),
+        expect.objectContaining({ today: expect.any(String) })
+      )
+    })
+  })
+
   it('findDistinctPrograms traz os programas distintos e ordenados', async () => {
     const queryBuilder = createQueryBuilderMock([
       { enrollment_program: 'DOUTORADO' },

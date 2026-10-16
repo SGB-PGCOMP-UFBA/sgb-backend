@@ -156,6 +156,39 @@ describe('UserService', () => {
       ])
     })
 
+    it('deixa de fora quem faz a chamada', async () => {
+      const users = await service.findAll(
+        {},
+        { userId: '3-ADMIN', role: 'ADMIN' }
+      )
+
+      expect(users.map((user) => user.name)).not.toContain('Davi Administrador')
+      expect(users).toHaveLength(3)
+    })
+
+    it('reconhece o orientador administrador logado mesmo listado na tabela de orientadores', async () => {
+      const users = await service.findAll(
+        {},
+        {
+          userId: '11-ADVISOR_WITH_ADMIN_PRIVILEGES',
+          role: 'ADVISOR_WITH_ADMIN_PRIVILEGES'
+        }
+      )
+
+      expect(users.map((user) => user.name)).not.toContain(
+        'Caio Orientador Admin'
+      )
+    })
+
+    it('não remove quem só tem o mesmo id em outra tabela', async () => {
+      const users = await service.findAll(
+        {},
+        { userId: '7-ADMIN', role: 'ADMIN' }
+      )
+
+      expect(users.map((user) => user.name)).toContain('Bruna Estudante')
+    })
+
     it('repassa os filtros de nome e e-mail para as três bases', async () => {
       await service.findAll({ name: 'ana', email: 'ufba' })
 

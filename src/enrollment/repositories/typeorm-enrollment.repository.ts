@@ -3,9 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Enrollment } from '@/enrollment/entities/enrollment.entity'
 import {
+  EnrollmentOwner,
   EnrollmentProgramRow,
   EnrollmentRepository
 } from '@/enrollment/repositories/enrollment.repository'
+import {
+  occupiesSlotSql,
+  todayAsCalendarDay
+} from '@/scholarship/utils/scholarship-status.util'
 
 @Injectable()
 export class TypeOrmEnrollmentRepository implements EnrollmentRepository {
@@ -57,5 +62,23 @@ export class TypeOrmEnrollmentRepository implements EnrollmentRepository {
   async deleteById(id: number): Promise<number> {
     const removed = await this.repository.delete(id)
     return removed.affected ?? 0
+  }
+
+  async countActiveScholarships(owner: EnrollmentOwner): Promise<number> {
+    const [column, value] = Object.entries(owner)[0]
+
+    const row = await this.repository
+      .createQueryBuilder('enrollment')
+      .innerJoin(
+        'enrollment.scholarships',
+        'scholarship',
+        occupiesSlotSql('scholarship'),
+        { today: todayAsCalendarDay() }
+      )
+      .select('COUNT(scholarship.id)', 'count')
+      .where(`enrollment.${column} = :value`, { value })
+      .getRawOne()
+
+    return Number(row?.count ?? 0)
   }
 }

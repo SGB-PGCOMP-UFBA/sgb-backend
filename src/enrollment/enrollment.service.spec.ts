@@ -28,6 +28,7 @@ function createEnrollmentRepositoryMock() {
     findByIdAndStudentId: vi.fn().mockResolvedValue(null),
     findByStudentIdAndNumber: vi.fn().mockResolvedValue(null),
     findByNumber: vi.fn().mockResolvedValue(null),
+    countActiveScholarships: vi.fn().mockResolvedValue(0),
     create: vi.fn(async (data: unknown) => data),
     update: vi.fn(async (_id: number, data: unknown) => data),
     deleteById: vi.fn().mockResolvedValue(1)
