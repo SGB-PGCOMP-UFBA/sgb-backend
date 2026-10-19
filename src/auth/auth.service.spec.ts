@@ -1,10 +1,14 @@
-import { HttpException, HttpStatus } from '@nestjs/common'
+import { HttpStatus, UnauthorizedException } from '@nestjs/common'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { makeStudent } from '@/common/testing/factories'
-import { hashPassword } from '@/common/utils/bcrypt.util'
+import * as bcryptUtil from '@/common/utils/bcrypt.util'
+import { constants } from '@/common/utils/constants'
 import { AuthService } from './auth.service'
 
 const PLAIN_PASSWORD = 'Senha@123'
+const INVALID_CREDENTIALS = new UnauthorizedException(
+  constants.exceptionMessages.auth.INVALID_CREDENTIALS
+)
 
 const USER = makeStudent({
   id: 10,
@@ -22,7 +26,7 @@ describe('AuthService', () => {
   let service: AuthService
 
   beforeAll(async () => {
-    USER.password = await hashPassword(PLAIN_PASSWORD)
+    USER.password = await bcryptUtil.hashPassword(PLAIN_PASSWORD)
   })
 
   beforeEach(() => {
@@ -75,16 +79,16 @@ describe('AuthService', () => {
       )
     })
 
-    it('quando não existe usuário com aquele e-mail e cargo, rejeita com 404', async () => {
+    it('quando não existe usuário com aquele e-mail e cargo, rejeita com 401 genérico', async () => {
       userService.findUserByEmailAndRole.mockResolvedValue(null)
 
       await expect(
         service.validateUser(USER.email, PLAIN_PASSWORD, 'ADMIN')
-      ).rejects.toMatchObject({ status: HttpStatus.NOT_FOUND })
+      ).rejects.toThrow(INVALID_CREDENTIALS)
     })
 
     it.each([['senha-errada'], [''], ['senha@123'], ['Senha@1234']])(
-      'quando a senha não confere, rejeita com 401 (%s)',
+      'quando a senha não confere, rejeita com 401 genérico (%s)',
       async (wrongPassword) => {
         const promise = service.validateUser(
           USER.email,
@@ -92,23 +96,38 @@ describe('AuthService', () => {
           USER.role
         )
 
-        await expect(promise).rejects.toBeInstanceOf(HttpException)
+        await expect(promise).rejects.toThrow(INVALID_CREDENTIALS)
         await expect(promise).rejects.toMatchObject({
           status: HttpStatus.UNAUTHORIZED
         })
       }
     )
 
-    it('quando o usuário não existe ou a senha erra, distingue as respostas (404 e 401)', async () => {
+    it('quando o usuário não existe ou a senha erra, responde exatamente igual', async () => {
       userService.findUserByEmailAndRole.mockResolvedValue(null)
-      await expect(
-        service.validateUser('naoexiste@ufba.br', PLAIN_PASSWORD, USER.role)
-      ).rejects.toMatchObject({ status: HttpStatus.NOT_FOUND })
+      const unknownUser = await service
+        .validateUser('naoexiste@ufba.br', PLAIN_PASSWORD, USER.role)
+        .catch((error) => error)
 
       userService.findUserByEmailAndRole.mockResolvedValue(USER)
-      await expect(
-        service.validateUser(USER.email, 'errada', USER.role)
-      ).rejects.toMatchObject({ status: HttpStatus.UNAUTHORIZED })
+      const wrongPassword = await service
+        .validateUser(USER.email, 'errada', USER.role)
+        .catch((error) => error)
+
+      expect(unknownUser.getStatus()).toBe(wrongPassword.getStatus())
+      expect(unknownUser.getResponse()).toEqual(wrongPassword.getResponse())
+    })
+
+    it('quando o usuário não existe, ainda compara a senha para não responder mais rápido', async () => {
+      const compare = vi.spyOn(bcryptUtil, 'comparePasswordOrDecoy')
+      userService.findUserByEmailAndRole.mockResolvedValue(null)
+
+      await service
+        .validateUser('naoexiste@ufba.br', PLAIN_PASSWORD, USER.role)
+        .catch(() => undefined)
+
+      expect(compare).toHaveBeenCalledWith(PLAIN_PASSWORD, undefined)
+      compare.mockRestore()
     })
   })
 

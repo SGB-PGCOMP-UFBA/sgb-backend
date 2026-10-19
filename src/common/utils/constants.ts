@@ -122,10 +122,14 @@ const constants = {
       QUOTA_NOT_CONFIGURED:
         'Não há vagas concedidas cadastradas para esta bolsa.'
     },
+    auth: {
+      INVALID_CREDENTIALS: 'E-mail, senha ou perfil inválidos.',
+      TOO_MANY_ATTEMPTS:
+        'Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente.'
+    },
     user: {
       SOMETHING_WRONG: 'Algo deu errado.',
       NOT_FOUND: 'Usuário não encontrado.',
-      WRONG_PASSWORD: 'Senha inválida.',
       ONLY_ADMIN_MANAGES_ADMIN:
         'Apenas administradores podem gerenciar outros administradores.',
       CANNOT_DELETE_SELF: 'Você não pode excluir o próprio usuário.',
@@ -136,12 +140,8 @@ const constants = {
         'Não foi possível enviar o e-mail com a senha. O cadastro foi desfeito.'
     },
     passwordRecovery: {
-      INVALID_CODE: 'Código inválido.',
-      EXPIRED_CODE:
-        'Este código expirou ou já foi utilizado. Solicite um novo código.',
-      TOO_MANY_ATTEMPTS:
-        'Limite de tentativas atingido. Solicite um novo código.',
-      RESEND_TOO_SOON: 'Aguarde um minuto antes de solicitar um novo código.'
+      INVALID_CODE:
+        'Código inválido ou expirado. Confira o código ou solicite um novo.'
     },
     token: {
       EXPIRED_ERROR: 'Este token expirou, tente novamente!'

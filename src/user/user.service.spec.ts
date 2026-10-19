@@ -1,4 +1,3 @@
-import { NotFoundException } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { makeAdmin, makeAdvisor, makeStudent } from '@/common/testing/factories'
 import { AdminRepository } from '@/admin/repositories/admin.repository'
@@ -102,26 +101,26 @@ describe('UserService', () => {
       expect(user.role).not.toBe('ADVISOR_WITH_ADMIN_PRIVILEGES')
     })
 
-    it('quando não existe em nenhuma das duas bases, lança NotFound', async () => {
+    it('quando não existe em nenhuma das duas bases, devolve null', async () => {
       await expect(
         service.findUserByEmailAndRole('sumiu@ufba.br', 'ADMIN')
-      ).rejects.toBeInstanceOf(NotFoundException)
+      ).resolves.toBeNull()
     })
   })
 
   it.each([['STUDENT'], ['ADVISOR'], ['ADMIN']])(
-    'quando o usuário não é encontrado, lança NotFound (%s)',
+    'quando o usuário não é encontrado, devolve null (%s)',
     async (role) => {
       await expect(
         service.findUserByEmailAndRole('sumiu@ufba.br', role)
-      ).rejects.toBeInstanceOf(NotFoundException)
+      ).resolves.toBeNull()
     }
   )
 
-  it('quando o papel é desconhecido, não consulta base nenhuma e lança NotFound', async () => {
+  it('quando o papel é desconhecido, não consulta base nenhuma e devolve null', async () => {
     await expect(
       service.findUserByEmailAndRole('ana@ufba.br', 'PAPEL_INEXISTENTE')
-    ).rejects.toBeInstanceOf(NotFoundException)
+    ).resolves.toBeNull()
     expect(studentRepository.findByEmail).not.toHaveBeenCalled()
     expect(advisorRepository.findByEmail).not.toHaveBeenCalled()
     expect(adminRepository.findByEmail).not.toHaveBeenCalled()

@@ -1,5 +1,6 @@
-import { BadRequestException, HttpException, HttpStatus } from '@nestjs/common'
+import { BadRequestException } from '@nestjs/common'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import * as bcryptUtil from '@/common/utils/bcrypt.util'
 import { comparePassword, hashPassword } from '@/common/utils/bcrypt.util'
 import { constants } from '@/common/utils/constants'
 import { PasswordRecoveryService } from './password-recovery.service'
@@ -181,18 +182,15 @@ describe('PasswordRecoveryService', () => {
       }
     )
 
-    it('quando o último envio foi há menos de 1 minuto, recusa com 429', async () => {
+    it('quando o último envio foi há menos de 1 minuto, responde igual sem reenviar', async () => {
       verificationCodeRepository.findLatestByAccount.mockResolvedValue(
         await storedCode('123456', {
           created_at: new Date(NOW.getTime() - 30 * 1000)
         })
       )
 
-      const error = await service.sendCode(request()).catch((e) => e)
+      await expect(service.sendCode(request())).resolves.toBeUndefined()
 
-      expect(error).toBeInstanceOf(HttpException)
-      expect(error.getStatus()).toBe(HttpStatus.TOO_MANY_REQUESTS)
-      expect(error.message).toBe(messages.RESEND_TOO_SOON)
       expect(emailService.sendEmail).not.toHaveBeenCalled()
       expect(verificationCodeRepository.create).not.toHaveBeenCalled()
     })
@@ -218,6 +216,37 @@ describe('PasswordRecoveryService', () => {
 
       expect(verificationCodeRepository.deleteByAccount).not.toHaveBeenCalled()
       expect(verificationCodeRepository.create).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('requestCode', () => {
+    it('responde antes de procurar a conta e de enviar o e-mail', () => {
+      let releaseLookup: (value: unknown) => void = () => undefined
+      studentRepository.findByEmail.mockReturnValue(
+        new Promise((resolve) => {
+          releaseLookup = resolve
+        })
+      )
+
+      expect(service.requestCode(request())).toBeUndefined()
+      expect(emailService.sendEmail).not.toHaveBeenCalled()
+
+      releaseLookup({ id: 10 })
+    })
+
+    it('quando o envio falha em segundo plano, registra o erro sem propagar', async () => {
+      const send = vi
+        .spyOn(service, 'sendCode')
+        .mockRejectedValue(new Error('SMTP indisponível'))
+      const logError = vi
+        .spyOn(service['logger'], 'error')
+        .mockImplementation(() => undefined)
+
+      expect(() => service.requestCode(request())).not.toThrow()
+      await vi.waitFor(() => expect(logError).toHaveBeenCalledTimes(1))
+
+      expect(send).toHaveBeenCalledWith(request())
+      expect(logError.mock.calls[0][0]).toContain(EMAIL)
     })
   })
 
@@ -254,24 +283,42 @@ describe('PasswordRecoveryService', () => {
     it.each([
       ['expirado', { expires_at: NOW }],
       ['já utilizado', { used_at: new Date(NOW.getTime() - MINUTE) }]
-    ])('com código %s, recusa mesmo que confira', async (_, overrides) => {
-      verificationCodeRepository.findLatestByAccount.mockResolvedValue(
-        await storedCode('123456', overrides)
-      )
+    ])(
+      'com código %s, recusa como código inválido mesmo que confira',
+      async (_, overrides) => {
+        verificationCodeRepository.findLatestByAccount.mockResolvedValue(
+          await storedCode('123456', overrides)
+        )
 
-      await expect(
-        service.verifyCode(request('STUDENT', { code: '123456' }))
-      ).rejects.toThrow(new BadRequestException(messages.EXPIRED_CODE))
-    })
+        await expect(
+          service.verifyCode(request('STUDENT', { code: '123456' }))
+        ).rejects.toThrow(new BadRequestException(messages.INVALID_CODE))
+      }
+    )
 
-    it('depois de 5 tentativas erradas, recusa até o código certo', async () => {
+    it('depois de 5 tentativas erradas, recusa como código inválido até o código certo', async () => {
       verificationCodeRepository.findLatestByAccount.mockResolvedValue(
         await storedCode('123456', { attempts: 5 })
       )
 
       await expect(
         service.verifyCode(request('STUDENT', { code: '123456' }))
-      ).rejects.toThrow(new BadRequestException(messages.TOO_MANY_ATTEMPTS))
+      ).rejects.toThrow(new BadRequestException(messages.INVALID_CODE))
+      expect(
+        verificationCodeRepository.incrementAttempts
+      ).not.toHaveBeenCalled()
+    })
+
+    it('com conta inexistente, ainda compara o código para não responder mais rápido', async () => {
+      const compare = vi.spyOn(bcryptUtil, 'comparePasswordOrDecoy')
+      studentRepository.findByEmail.mockResolvedValue(null)
+
+      await service
+        .verifyCode(request('STUDENT', { code: '123456' }))
+        .catch(() => undefined)
+
+      expect(compare).toHaveBeenCalledWith('123456', null)
+      compare.mockRestore()
     })
 
     it('sem código pendente, recusa como código inválido', async () => {

@@ -1,4 +1,5 @@
 import { Controller, Request, Post, UseGuards } from '@nestjs/common'
+import { ThrottlerGuard } from '@nestjs/throttler'
 import { AuthService } from './auth.service'
 import { LocalAuthGuard } from '@/auth/guards/local-auth.guard'
 import { AuthRequest } from './auth.request'
@@ -7,7 +8,7 @@ import { AuthRequest } from './auth.request'
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(ThrottlerGuard, LocalAuthGuard)
   @Post()
   async login(@Request() request: AuthRequest) {
     return this.authService.login(request.user)

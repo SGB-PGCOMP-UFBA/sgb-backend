@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { AdminRepository } from '@/admin/repositories/admin.repository'
 import { AdvisorRepository } from '@/advisor/repositories/advisor.repository'
 import { StudentRepository } from '@/student/repositories/student.repository'
@@ -6,7 +6,6 @@ import { Admin } from '@/admin/entities/admin.entity'
 import { Advisor } from '@/advisor/entities/advisor.entity'
 import { Student } from '@/student/entities/student.entity'
 import { CreateUserDto } from '@/user/dtos/create-user.dto'
-import { constants } from '@/common/utils/constants'
 import { FindUsersDto } from '@/user/dtos/find-users.dto'
 import { ManagedUser } from '@/user/managed-user.interface'
 import { UserRole } from '@/user/user-role.constant'
@@ -31,7 +30,7 @@ export class UserService {
   async findUserByEmailAndRole(
     email: string,
     role: string
-  ): Promise<CreateUserDto> {
+  ): Promise<CreateUserDto | null> {
     let user: Student | Advisor | Admin
 
     if (role === 'STUDENT') {
@@ -52,11 +51,9 @@ export class UserService {
     }
 
     if (!user) {
-      this.logger.error(`User could not be authenticated: ${email}`)
-      throw new NotFoundException(constants.exceptionMessages.user.NOT_FOUND)
+      this.logger.warn(`Login attempt for unknown account: ${email}`)
+      return null
     }
-
-    this.logger.log(`User Authenticated: ${user.email}`)
 
     return new CreateUserDto(user)
   }

@@ -1,5 +1,6 @@
 import { ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
+import { NestExpressApplication } from '@nestjs/platform-express'
 import { AppModule } from './app.module'
 import { HttpExceptionFilter } from '@/common/filters/http-exception.filter'
 import { CustomValidationException } from '@/common/exceptions/custom-validation.exception'
@@ -9,10 +10,12 @@ import { APP_TIME_ZONE } from '@/config/time-zone.constant'
 process.env.TZ = APP_TIME_ZONE
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     cors: true,
     logger: ['error', 'log', 'warn']
   })
+
+  app.set('trust proxy', env.TRUST_PROXY_HOPS)
 
   app.useGlobalFilters(new HttpExceptionFilter())
 

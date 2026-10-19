@@ -1,4 +1,4 @@
-import { plainToInstance, Transform } from 'class-transformer'
+import { plainToInstance, Transform, Type } from 'class-transformer'
 import * as dotenv from 'dotenv'
 import {
   IsBoolean,
@@ -39,6 +39,17 @@ export class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   CORS_ALLOWED_ORIGIN: string
+
+  /**
+   * Quantos proxies confiáveis ficam na frente da API. Sem isso o Express vê
+   * o IP do proxy em toda requisição e o rate limit do login vira um contador
+   * único para todos. Em produção (Heroku/Dokku) há um proxy; rodando a API
+   * direto exposta, use 0 para ninguém forjar o IP pelo X-Forwarded-For.
+   */
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  TRUST_PROXY_HOPS = 1
 
   @IsString()
   @IsNotEmpty()

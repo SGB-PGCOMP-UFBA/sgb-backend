@@ -1,6 +1,6 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common'
+import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
-import { comparePassword } from '@/common/utils/bcrypt.util'
+import { comparePasswordOrDecoy } from '@/common/utils/bcrypt.util'
 import { UserService } from '@/user/user.service'
 import { ResponseUserDto } from '@/user/dtos/response-user.dto'
 import { constants } from '@/common/utils/constants'
@@ -18,18 +18,14 @@ export class AuthService {
     role: string
   ): Promise<ResponseUserDto> {
     const user = await this.userService.findUserByEmailAndRole(email, role)
-    if (!user) {
-      throw new HttpException(
-        constants.exceptionMessages.user.NOT_FOUND,
-        HttpStatus.NOT_FOUND
-      )
-    }
+    const validPassword = await comparePasswordOrDecoy(
+      passwordInserted,
+      user?.password
+    )
 
-    const validPassword = await comparePassword(passwordInserted, user.password)
-    if (!validPassword) {
-      throw new HttpException(
-        constants.exceptionMessages.user.WRONG_PASSWORD,
-        HttpStatus.UNAUTHORIZED
+    if (!user || !validPassword) {
+      throw new UnauthorizedException(
+        constants.exceptionMessages.auth.INVALID_CREDENTIALS
       )
     }
 
