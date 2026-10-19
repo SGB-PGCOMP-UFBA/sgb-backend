@@ -74,6 +74,16 @@ describe('validate', () => {
     expect(() => validate({ ...ENV_VALIDA, PORT: 'porta' })).toThrow(/PORT/)
   })
 
+  it('quando TRUST_PROXY_HOPS não é informada, assume um proxy', () => {
+    expect(validate(ENV_VALIDA).TRUST_PROXY_HOPS).toBe(1)
+  })
+
+  it('quando TRUST_PROXY_HOPS vem como string do ambiente, converte para número', () => {
+    expect(
+      validate({ ...ENV_VALIDA, TRUST_PROXY_HOPS: '0' }).TRUST_PROXY_HOPS
+    ).toBe(0)
+  })
+
   it('quando DB_SYNCHRONIZE não é informada, assume false', () => {
     expect(validate(ENV_VALIDA).DB_SYNCHRONIZE).toBe(false)
   })

@@ -1,12 +1,6 @@
 import { randomInt } from 'node:crypto'
 import { addMinutes, differenceInSeconds, isBefore } from 'date-fns'
-import {
-  BadRequestException,
-  HttpException,
-  HttpStatus,
-  Injectable,
-  Logger
-} from '@nestjs/common'
+import { BadRequestException, Injectable, Logger } from '@nestjs/common'
 import { EmailService } from '@/email/email.service'
 import { StudentRepository } from '@/student/repositories/student.repository'
 import { AdvisorRepository } from '@/advisor/repositories/advisor.repository'
@@ -18,7 +12,10 @@ import { ResetPasswordRequestDto } from '@/password-recovery/dtos/reset-password
 import { VerifyRecoveryCodeDto } from '@/password-recovery/dtos/verify-recovery-code.dto'
 import { ConfirmPasswordRecoveryDto } from '@/password-recovery/dtos/confirm-password-recovery.dto'
 import { UserRole } from '@/user/user-role.constant'
-import { comparePassword, hashPassword } from '@/common/utils/bcrypt.util'
+import {
+  comparePasswordOrDecoy,
+  hashPassword
+} from '@/common/utils/bcrypt.util'
 import { constants } from '@/common/utils/constants'
 
 const CODE_LENGTH = 6
@@ -45,6 +42,22 @@ export class PasswordRecoveryService {
     private readonly adminRepository: AdminRepository
   ) {}
 
+  /**
+   * Responde antes de procurar a conta e enviar o e-mail. Se a resposta
+   * esperasse o envio, uma conta existente demoraria segundos (SMTP) e uma
+   * inexistente voltaria na hora; falhas de e-mail e o intervalo entre envios
+   * também só apareceriam para contas reais. Tudo isso revelaria quais
+   * e-mails estão cadastrados.
+   */
+  requestCode(dto: ResetPasswordRequestDto): void {
+    this.sendCode(dto).catch((error: Error) =>
+      this.logger.error(
+        `Password recovery code could not be sent: ${dto.email}`,
+        error?.stack
+      )
+    )
+  }
+
   async sendCode(dto: ResetPasswordRequestDto): Promise<void> {
     const account = await this.findAccount(dto.email, dto.role)
 
@@ -63,10 +76,8 @@ export class PasswordRecoveryService {
       differenceInSeconds(new Date(), latest.created_at) <
         RESEND_COOLDOWN_SECONDS
     ) {
-      throw new HttpException(
-        messages.RESEND_TOO_SOON,
-        HttpStatus.TOO_MANY_REQUESTS
-      )
+      this.logger.warn(`Password recovery requested too soon: ${dto.email}`)
+      return
     }
 
     const code = generateCode()
@@ -112,6 +123,11 @@ export class PasswordRecoveryService {
     this.logger.log(`Password reset by recovery code: ${dto.email}`)
   }
 
+  /**
+   * Todo código recusado sai com a mesma mensagem e passa pelo mesmo bcrypt.
+   * Mensagens de "expirado" ou "limite de tentativas" só existiriam para
+   * contas reais com código pendente, e serviriam para descobrir e-mails.
+   */
   private async checkCode(
     dto: VerifyRecoveryCodeDto
   ): Promise<{ account: Account; verificationCode: VerificationCode }> {
@@ -122,23 +138,16 @@ export class PasswordRecoveryService {
           account.id
         )
       : null
+    const usable = isUsable(verificationCode)
 
-    if (!account || !verificationCode) {
+    const matches = await comparePasswordOrDecoy(
+      dto.code,
+      usable ? verificationCode.code_hash : null
+    )
+
+    if (!usable) {
       throw new BadRequestException(messages.INVALID_CODE)
     }
-
-    if (
-      verificationCode.used_at ||
-      !isBefore(new Date(), verificationCode.expires_at)
-    ) {
-      throw new BadRequestException(messages.EXPIRED_CODE)
-    }
-
-    if (verificationCode.attempts >= MAX_ATTEMPTS) {
-      throw new BadRequestException(messages.TOO_MANY_ATTEMPTS)
-    }
-
-    const matches = await comparePassword(dto.code, verificationCode.code_hash)
 
     if (!matches) {
       await this.verificationCodeRepository.incrementAttempts(
@@ -214,6 +223,15 @@ function generateCode(): string {
   return randomInt(0, 10 ** CODE_LENGTH)
     .toString()
     .padStart(CODE_LENGTH, '0')
+}
+
+function isUsable(code: VerificationCode | null): boolean {
+  return (
+    !!code &&
+    !code.used_at &&
+    isBefore(new Date(), code.expires_at) &&
+    code.attempts < MAX_ATTEMPTS
+  )
 }
 
 function toAccount(

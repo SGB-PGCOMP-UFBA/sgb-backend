@@ -3,14 +3,17 @@ import { AuthService } from './auth.service'
 import { PassportModule } from '@nestjs/passport'
 import { LocalStrategy } from '@/auth/strategies/local.strategy'
 import { JwtModule } from '@nestjs/jwt'
+import { ThrottlerModule } from '@nestjs/throttler'
 import { UserService } from '@/user/user.service'
 import { AuthController } from './auth.controller'
 import { JwtStrategy } from '@/auth/strategies/jwt.strategy'
 import { constants } from '@/common/utils/constants'
+import { CREDENTIALS_THROTTLER_OPTIONS } from '@/config/credentials-throttler.constant'
 
 @Module({
   imports: [
     PassportModule,
+    ThrottlerModule.forRoot(CREDENTIALS_THROTTLER_OPTIONS),
     JwtModule.register({
       secret: constants.jwt.SECRET_KEY,
       signOptions: { expiresIn: constants.jwt.EXPIRATION_TIME }
