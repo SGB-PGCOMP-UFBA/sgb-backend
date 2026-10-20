@@ -81,7 +81,8 @@ const constants = {
       CREATION_COMPLETED:
         'O processo de cadastro de uma nova notificação foi concluído.',
       CREATION_FAILED: 'Não foi possível cadastrar a notificação.',
-      UPDATE_FAILED: 'Não foi possível atualizar a notificação.'
+      UPDATE_FAILED: 'Não foi possível atualizar a notificação.',
+      NOT_FOUND: 'Notificação não encontrada.'
     },
     student: {
       CREATION_STARTED:

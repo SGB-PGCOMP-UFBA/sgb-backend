@@ -28,10 +28,26 @@ describe('TypeOrmEmbedNotificationRepository', () => {
     })
   })
 
+  it('findByIdAndOwner só encontra a notificação se o id e o dono conferem', async () => {
+    await repository.findByIdAndOwner(31, 7, 'STUDENT')
+
+    expect(typeorm.findOneBy).toHaveBeenCalledWith({
+      id: 31,
+      owner_id: 7,
+      owner_type: 'STUDENT'
+    })
+  })
+
   it('markAsConsumed marca como lida sem tocar em título, descrição ou dono', async () => {
     await repository.markAsConsumed(31)
 
-    expect(typeorm.save).toHaveBeenCalledWith({ id: 31, consumed: true })
+    expect(typeorm.update).toHaveBeenCalledWith({ id: 31 }, { consumed: true })
+  })
+
+  it('markAsConsumed nunca usa save, para não criar notificação com id inexistente', async () => {
+    await repository.markAsConsumed(999)
+
+    expect(typeorm.save).not.toHaveBeenCalled()
   })
 
   it('deleteById devolve a quantidade de linhas removidas', async () => {

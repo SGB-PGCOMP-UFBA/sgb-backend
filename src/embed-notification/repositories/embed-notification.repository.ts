@@ -6,7 +6,12 @@ export abstract class EmbedNotificationRepository {
     ownerId: number,
     ownerType: string
   ): Promise<EmbedNotification[]>
+  abstract findByIdAndOwner(
+    id: number,
+    ownerId: number,
+    ownerType: string
+  ): Promise<EmbedNotification | null>
   abstract create(data: CreateEmbedNotificationDto): Promise<EmbedNotification>
-  abstract markAsConsumed(id: number): Promise<EmbedNotification>
+  abstract markAsConsumed(id: number): Promise<void>
   abstract deleteById(id: number): Promise<number>
 }

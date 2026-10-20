@@ -1,8 +1,14 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException
+} from '@nestjs/common'
 import { EmbedNotification } from '@/embed-notification/entities/embed-notification.entity'
 import { CreateEmbedNotificationDto } from '@/embed-notification/dtos/create-embed-notification.dto'
 import { EmbedNotificationRepository } from '@/embed-notification/repositories/embed-notification.repository'
 import { constants } from '@/common/utils/constants'
+import { NotificationOwner } from '@/embed-notification/notification-owner.util'
 
 @Injectable()
 export class EmbedNotificationService {
@@ -12,13 +18,10 @@ export class EmbedNotificationService {
     private readonly embedNotificationRepository: EmbedNotificationRepository
   ) {}
 
-  async findAllBy(
-    owner_id: number,
-    owner_type: string
-  ): Promise<EmbedNotification[]> {
+  async findAllBy(owner: NotificationOwner): Promise<EmbedNotification[]> {
     return await this.embedNotificationRepository.findPendingByOwner(
-      owner_id,
-      owner_type
+      owner.owner_id,
+      owner.owner_type
     )
   }
 
@@ -42,14 +45,40 @@ export class EmbedNotificationService {
     }
   }
 
-  async consume(id: number): Promise<EmbedNotification> {
+  /**
+   * Notificação de outro dono responde o mesmo 404 de uma inexistente, para
+   * não revelar quais ids existem.
+   */
+  async consume(
+    id: number,
+    owner: NotificationOwner
+  ): Promise<EmbedNotification> {
+    const notification =
+      await this.embedNotificationRepository.findByIdAndOwner(
+        id,
+        owner.owner_id,
+        owner.owner_type
+      )
+
+    if (!notification) {
+      throw new NotFoundException(
+        constants.exceptionMessages.notification.NOT_FOUND
+      )
+    }
+
     try {
-      return await this.embedNotificationRepository.markAsConsumed(id)
+      await this.embedNotificationRepository.markAsConsumed(id)
     } catch (error) {
+      this.logger.error(
+        constants.exceptionMessages.notification.UPDATE_FAILED,
+        error
+      )
       throw new BadRequestException(
         constants.exceptionMessages.notification.UPDATE_FAILED
       )
     }
+
+    return { ...notification, consumed: true }
   }
 
   async delete(id: number) {

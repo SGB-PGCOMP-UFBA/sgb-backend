@@ -1,30 +1,46 @@
-import { Controller, Get, Param, Patch, Query, UseGuards } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Request,
+  UseGuards
+} from '@nestjs/common'
 import { EmbedNotificationService } from './embed-notification.service'
 import { EmbedNotificationMapper } from './embed-notification.mapper'
+import { toNotificationOwner } from './notification-owner.util'
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard'
+import { Caller } from '@/user/caller.interface'
+
+type AuthenticatedRequest = { user: Caller }
 
 @Controller('v1/embed-notification')
+@UseGuards(JwtAuthGuard)
 export class EmbedNotificationController {
   constructor(
     private readonly embedNotificationService: EmbedNotificationService
   ) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard)
-  async findAll(
-    @Query('owner_id') owner_id: number,
-    @Query('owner_type') owner_type: string
-  ) {
+  async findAll(@Request() request: AuthenticatedRequest) {
     const notifications = await this.embedNotificationService.findAllBy(
-      owner_id,
-      owner_type
+      toNotificationOwner(request.user)
     )
-    return notifications.map((admin) => EmbedNotificationMapper.detailed(admin))
+    return notifications.map((notification) =>
+      EmbedNotificationMapper.detailed(notification)
+    )
   }
 
   @Patch('/consume/:id')
-  @UseGuards(JwtAuthGuard)
-  async consume(@Param('id') id: number) {
-    return await this.embedNotificationService.consume(id)
+  async consume(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() request: AuthenticatedRequest
+  ) {
+    const notification = await this.embedNotificationService.consume(
+      id,
+      toNotificationOwner(request.user)
+    )
+    return EmbedNotificationMapper.detailed(notification)
   }
 }
