@@ -1,7 +1,10 @@
-import { BadRequestException } from '@nestjs/common'
+import { BadRequestException, NotFoundException } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { EmbedNotificationRepository } from '@/embed-notification/repositories/embed-notification.repository'
+import { makeEmbedNotification } from '@/common/testing/factories'
 import { EmbedNotificationService } from './embed-notification.service'
+
+const OWNER = { owner_id: 7, owner_type: 'STUDENT' } as const
 
 const VALID_DTO = {
   owner_id: 7,
@@ -13,8 +16,9 @@ const VALID_DTO = {
 function createEmbedNotificationRepositoryMock() {
   return {
     findPendingByOwner: vi.fn().mockResolvedValue([]),
+    findByIdAndOwner: vi.fn().mockResolvedValue(makeEmbedNotification()),
     create: vi.fn(async (data: unknown) => data),
-    markAsConsumed: vi.fn(async (id: number) => ({ id, consumed: true })),
+    markAsConsumed: vi.fn().mockResolvedValue(undefined),
     deleteById: vi.fn().mockResolvedValue(1)
   } satisfies Record<keyof EmbedNotificationRepository, unknown>
 }
@@ -31,17 +35,17 @@ describe('EmbedNotificationService', () => {
   })
 
   describe('findAllBy', () => {
-    it.each([['ADMIN'], ['ADVISOR'], ['STUDENT']])(
+    it.each([['ADMIN'], ['ADVISOR'], ['STUDENT']] as const)(
       'repassa dono e tipo de dono para o repositório (%s)',
       async (ownerType) => {
-        await service.findAllBy(7, ownerType)
+        await service.findAllBy({ owner_id: 7, owner_type: ownerType })
 
         expect(repository.findPendingByOwner).toHaveBeenCalledWith(7, ownerType)
       }
     )
 
     it('quando não há notificação pendente, devolve lista vazia', async () => {
-      await expect(service.findAllBy(7, 'STUDENT')).resolves.toEqual([])
+      await expect(service.findAllBy(OWNER)).resolves.toEqual([])
     })
   })
 
@@ -65,16 +69,27 @@ describe('EmbedNotificationService', () => {
   })
 
   describe('consume', () => {
-    it('quando a notificação é consumida, pede ao repositório para marcá-la como lida', async () => {
-      await service.consume(31)
+    it('quando a notificação é do dono, marca como lida e devolve a notificação consumida', async () => {
+      const result = await service.consume(55, OWNER)
 
-      expect(repository.markAsConsumed).toHaveBeenCalledWith(31)
+      expect(repository.findByIdAndOwner).toHaveBeenCalledWith(55, 7, 'STUDENT')
+      expect(repository.markAsConsumed).toHaveBeenCalledWith(55)
+      expect(result).toMatchObject({ id: 55, consumed: true })
+    })
+
+    it('quando a notificação não existe ou é de outro dono, recusa com 404 sem alterar nada', async () => {
+      repository.findByIdAndOwner.mockResolvedValue(null)
+
+      await expect(service.consume(55, OWNER)).rejects.toBeInstanceOf(
+        NotFoundException
+      )
+      expect(repository.markAsConsumed).not.toHaveBeenCalled()
     })
 
     it('quando a persistência falha ao consumir, traduz o erro em BadRequest', async () => {
       repository.markAsConsumed.mockRejectedValue(new Error('conexão perdida'))
 
-      await expect(service.consume(31)).rejects.toBeInstanceOf(
+      await expect(service.consume(55, OWNER)).rejects.toBeInstanceOf(
         BadRequestException
       )
     })

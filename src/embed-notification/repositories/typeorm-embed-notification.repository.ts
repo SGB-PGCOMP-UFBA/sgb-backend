@@ -27,12 +27,24 @@ export class TypeOrmEmbedNotificationRepository
     })
   }
 
+  async findByIdAndOwner(
+    id: number,
+    ownerId: number,
+    ownerType: string
+  ): Promise<EmbedNotification | null> {
+    return await this.repository.findOneBy({
+      id,
+      owner_id: ownerId,
+      owner_type: ownerType
+    })
+  }
+
   async create(data: CreateEmbedNotificationDto): Promise<EmbedNotification> {
     return await this.repository.save(this.repository.create({ ...data }))
   }
 
-  async markAsConsumed(id: number): Promise<EmbedNotification> {
-    return await this.repository.save({ id, consumed: true })
+  async markAsConsumed(id: number): Promise<void> {
+    await this.repository.update({ id }, { consumed: true })
   }
 
   async deleteById(id: number): Promise<number> {
