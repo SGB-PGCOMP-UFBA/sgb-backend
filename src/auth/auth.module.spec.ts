@@ -3,26 +3,16 @@ import { compileFeatureModule } from '@/common/testing/wiring'
 import { AuthModule } from '@/auth/auth.module'
 import { AuthService } from '@/auth/auth.service'
 import { UserService } from '@/user/user.service'
-import { Admin } from '@/admin/entities/admin.entity'
-import { AdminRepository } from '@/admin/repositories/admin.repository'
-import { TypeOrmAdminRepository } from '@/admin/repositories/typeorm-admin.repository'
-import { Advisor } from '@/advisor/entities/advisor.entity'
-import { AdvisorRepository } from '@/advisor/repositories/advisor.repository'
-import { TypeOrmAdvisorRepository } from '@/advisor/repositories/typeorm-advisor.repository'
-import { Student } from '@/student/entities/student.entity'
-import { StudentRepository } from '@/student/repositories/student.repository'
-import { TypeOrmStudentRepository } from '@/student/repositories/typeorm-student.repository'
+import { User } from '@/user/entities/user.entity'
+import { UserRepository } from '@/user/repositories/user.repository'
+import { TypeOrmUserRepository } from '@/user/repositories/typeorm-user.repository'
 
 describe('AuthModule', () => {
   it('monta o AuthService e o UserService que ele declara, sem registrar entidade nenhuma', async () => {
     const moduleRef = await compileFeatureModule(
       AuthModule,
-      [Student, Advisor, Admin],
-      [
-        { provide: StudentRepository, useClass: TypeOrmStudentRepository },
-        { provide: AdvisorRepository, useClass: TypeOrmAdvisorRepository },
-        { provide: AdminRepository, useClass: TypeOrmAdminRepository }
-      ]
+      [User],
+      [{ provide: UserRepository, useClass: TypeOrmUserRepository }]
     )
 
     expect(moduleRef.get(AuthService)).toBeInstanceOf(AuthService)

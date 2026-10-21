@@ -1,12 +1,14 @@
 import { IsNumber, IsString, IsDate } from 'class-validator'
-import { User } from '@/user/user.interface'
+import { User } from '@/user/entities/user.entity'
+import { UserRole } from '@/user/user-role.constant'
 
 export class CreateUserDto {
-  constructor(user: User) {
+  /** `role` é o perfil com que a pessoa entrou, não o tipo da linha. */
+  constructor(user: User, role: UserRole) {
     this.id = user.id
     this.tax_id = user.tax_id
     this.name = user.name
-    this.role = user.role
+    this.role = role
     this.email = user.email
     this.password = user.password
     this.phone_number = user.phone_number

@@ -2,12 +2,10 @@ import { randomInt } from 'node:crypto'
 import { addMinutes, differenceInSeconds, isBefore } from 'date-fns'
 import { BadRequestException, Injectable, Logger } from '@nestjs/common'
 import { EmailService } from '@/email/email.service'
-import { StudentRepository } from '@/student/repositories/student.repository'
-import { AdvisorRepository } from '@/advisor/repositories/advisor.repository'
-import { AdminRepository } from '@/admin/repositories/admin.repository'
+import { UserRepository } from '@/user/repositories/user.repository'
 import { VerificationCodeRepository } from '@/password-recovery/repositories/verification-code.repository'
 import { VerificationCode } from '@/password-recovery/entities/verification-code.entity'
-import { AccountTable } from '@/password-recovery/account-table.constant'
+import { UserType } from '@/user/user-type.constant'
 import { ResetPasswordRequestDto } from '@/password-recovery/dtos/reset-password-request.dto'
 import { VerifyRecoveryCodeDto } from '@/password-recovery/dtos/verify-recovery-code.dto'
 import { ConfirmPasswordRecoveryDto } from '@/password-recovery/dtos/confirm-password-recovery.dto'
@@ -27,7 +25,7 @@ const messages = constants.exceptionMessages.passwordRecovery
 
 interface Account {
   id: number
-  table: AccountTable
+  table: UserType
 }
 
 @Injectable()
@@ -37,9 +35,7 @@ export class PasswordRecoveryService {
   constructor(
     private readonly emailService: EmailService,
     private readonly verificationCodeRepository: VerificationCodeRepository,
-    private readonly studentRepository: StudentRepository,
-    private readonly advisorRepository: AdvisorRepository,
-    private readonly adminRepository: AdminRepository
+    private readonly userRepository: UserRepository
   ) {}
 
   /**
@@ -159,40 +155,28 @@ export class PasswordRecoveryService {
     return { account, verificationCode }
   }
 
+  /**
+   * Quem entra como ADMIN pode ser administrador ou orientador com
+   * privilégio; o orientador tem precedência, como no login.
+   */
   private async findAccount(
     email: string,
     role: UserRole
   ): Promise<Account | null> {
     switch (role) {
       case 'STUDENT':
-        return toAccount(
-          await this.studentRepository.findByEmail(email),
-          'STUDENT'
-        )
       case 'ADVISOR':
-        return toAccount(
-          await this.advisorRepository.findByEmail(email),
-          'ADVISOR'
-        )
+        return toAccount(await this.userRepository.findByEmail(email, role))
       case 'ADVISOR_WITH_ADMIN_PRIVILEGES':
         return toAccount(
-          await this.advisorRepository.findByEmailAndAdminPrivileges(
-            email,
-            true
-          ),
-          'ADVISOR'
+          await this.userRepository.findAdvisorWithAdminPrivilegesByEmail(email)
         )
-      case 'ADMIN': {
-        const advisor =
-          await this.advisorRepository.findByEmailAndAdminPrivileges(
-            email,
-            true
-          )
-
-        if (advisor) return { id: advisor.id, table: 'ADVISOR' }
-
-        return toAccount(await this.adminRepository.findByEmail(email), 'ADMIN')
-      }
+      case 'ADMIN':
+        return toAccount(
+          (await this.userRepository.findAdvisorWithAdminPrivilegesByEmail(
+            email
+          )) ?? (await this.userRepository.findByEmail(email, 'ADMIN'))
+        )
       default:
         return null
     }
@@ -202,20 +186,7 @@ export class PasswordRecoveryService {
     account: Account,
     passwordHash: string
   ): Promise<void> {
-    switch (account.table) {
-      case 'STUDENT':
-        return this.studentRepository.updatePasswordById(
-          account.id,
-          passwordHash
-        )
-      case 'ADVISOR':
-        return this.advisorRepository.updatePasswordById(
-          account.id,
-          passwordHash
-        )
-      case 'ADMIN':
-        return this.adminRepository.updatePasswordById(account.id, passwordHash)
-    }
+    await this.userRepository.updatePassword(account.id, passwordHash)
   }
 }
 
@@ -235,8 +206,7 @@ function isUsable(code: VerificationCode | null): boolean {
 }
 
 function toAccount(
-  user: { id: number } | null,
-  table: AccountTable
+  user: { id: number; role: UserType } | null
 ): Account | null {
-  return user ? { id: user.id, table } : null
+  return user ? { id: user.id, table: user.role } : null
 }

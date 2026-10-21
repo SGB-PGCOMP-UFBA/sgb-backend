@@ -4,8 +4,8 @@ import {
   ConflictException,
   NotFoundException
 } from '@nestjs/common/exceptions'
-import { AdvisorService } from '@/advisor/advisor.service'
-import { StudentService } from '@/student/student.service'
+import { UserRepository } from '@/user/repositories/user.repository'
+import { findAdvisorByEmail, findStudentByEmail } from '@/user/user-lookup.util'
 import { Enrollment } from '@/enrollment/entities/enrollment.entity'
 import { CreateEnrollmentDto } from '@/enrollment/dtos/create-enrollment.dto'
 import {
@@ -21,8 +21,7 @@ export class EnrollmentService {
 
   constructor(
     private readonly enrollmentRepository: EnrollmentRepository,
-    private advisorService: AdvisorService,
-    private studentService: StudentService
+    private readonly userRepository: UserRepository
   ) {}
 
   async findAllForFilter(): Promise<EnrollmentProgramRow[]> {
@@ -51,7 +50,7 @@ export class EnrollmentService {
     student_email: string,
     enrollment_number: string
   ): Promise<Enrollment> {
-    const student = await this.studentService.findByEmail(student_email)
+    const student = await findStudentByEmail(this.userRepository, student_email)
 
     const enrollment = await this.enrollmentRepository.findByStudentIdAndNumber(
       student.id,
@@ -79,11 +78,15 @@ export class EnrollmentService {
           `Matrícula com código ${dto.enrollment_number} já existente no sistema`
         )
 
-      const advisor = await this.advisorService.findOneByEmail(
+      const advisor = await findAdvisorByEmail(
+        this.userRepository,
         dto.advisor_email
       )
 
-      const student = await this.studentService.findByEmail(dto.student_email)
+      const student = await findStudentByEmail(
+        this.userRepository,
+        dto.student_email
+      )
 
       const newEnrollment = await this.enrollmentRepository.create({
         student_id: student.id,
@@ -115,11 +118,15 @@ export class EnrollmentService {
 
   async update(id: number, dto: UpdateEnrollmentDto) {
     try {
-      const advisor = await this.advisorService.findOneByEmail(
+      const advisor = await findAdvisorByEmail(
+        this.userRepository,
         dto.advisor_email
       )
 
-      const student = await this.studentService.findByEmail(dto.student_email)
+      const student = await findStudentByEmail(
+        this.userRepository,
+        dto.student_email
+      )
 
       const enrollment = await this.enrollmentRepository.findByIdAndStudentId(
         id,

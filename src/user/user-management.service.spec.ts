@@ -6,10 +6,11 @@ import {
 } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { makeAdmin, makeAdvisor, makeStudent } from '@/common/testing/factories'
+import { User } from '@/user/entities/user.entity'
 import { UserManagementService } from './user-management.service'
 import { Caller } from './caller.interface'
 
-type Mock = ReturnType<typeof vi.fn>
+type Mock = ReturnType<typeof vi.fn<(...args: any[]) => any>>
 
 const ADMIN_CALLER: Caller = { userId: '1-ADMIN', role: 'ADMIN' }
 const ADVISOR_ADMIN_CALLER: Caller = {
@@ -25,149 +26,128 @@ const NEW_USER = {
   link_to_lattes: null
 }
 
+const USERS: Record<number, User> = {
+  1: makeAdmin({ id: 1 }),
+  2: makeAdvisor({ id: 2, has_admin_privileges: true }),
+  3: makeAdmin({ id: 3 }),
+  5: makeStudent({ id: 5 }),
+  9: makeAdvisor({ id: 9 })
+}
+
 describe('UserManagementService', () => {
-  let studentRepository: { findById: Mock; deleteById: Mock }
-  let advisorRepository: {
-    findById: Mock
-    deleteById: Mock
-    setAdminPrivileges: Mock
-    update: Mock
-  }
-  let adminRepository: { findById: Mock; deleteById: Mock; update: Mock }
+  let userRepository: Record<'findById' | 'update' | 'deleteById', Mock>
   let enrollmentRepository: { countActiveScholarships: Mock }
-  let studentService: { create: Mock; update: Mock }
-  let advisorService: { create: Mock; update: Mock }
-  let adminService: { register: Mock; update: Mock }
+  let userRecordsService: { register: Mock; update: Mock }
   let emailService: { sendEmail: Mock }
   let service: UserManagementService
 
   beforeEach(() => {
-    studentRepository = {
-      findById: vi.fn().mockResolvedValue(makeStudent({ id: 5 })),
+    userRepository = {
+      findById: vi.fn(async (id: number) => USERS[id] ?? null),
+      update: vi.fn().mockResolvedValue(undefined),
       deleteById: vi.fn().mockResolvedValue(1)
-    }
-    advisorRepository = {
-      findById: vi.fn().mockResolvedValue(makeAdvisor({ id: 9 })),
-      deleteById: vi.fn().mockResolvedValue(1),
-      setAdminPrivileges: vi.fn().mockResolvedValue(undefined),
-      update: vi.fn().mockResolvedValue(undefined)
-    }
-    adminRepository = {
-      findById: vi.fn().mockResolvedValue(makeAdmin({ id: 3 })),
-      deleteById: vi.fn().mockResolvedValue(1),
-      update: vi.fn().mockResolvedValue(undefined)
     }
     enrollmentRepository = {
       countActiveScholarships: vi.fn().mockResolvedValue(0)
     }
-    studentService = {
-      create: vi.fn().mockResolvedValue({ id: 5 }),
-      update: vi.fn().mockResolvedValue(undefined)
-    }
-    advisorService = {
-      create: vi.fn().mockResolvedValue({ id: 9 }),
-      update: vi.fn().mockResolvedValue(undefined)
-    }
-    adminService = {
-      register: vi.fn().mockResolvedValue({ id: 3 }),
+    userRecordsService = {
+      register: vi.fn(async (data: { role: string }) => ({
+        ...makeStudent({ id: 5 }),
+        ...data,
+        id: 5
+      })),
       update: vi.fn().mockResolvedValue(undefined)
     }
     emailService = { sendEmail: vi.fn().mockResolvedValue(undefined) }
 
     service = new UserManagementService(
-      studentRepository as never,
-      advisorRepository as never,
-      adminRepository as never,
+      userRepository as never,
       enrollmentRepository as never,
-      studentService as never,
-      advisorService as never,
-      adminService as never,
+      userRecordsService as never,
       emailService as never
     )
   })
 
   describe('findOne', () => {
     it.each([
-      ['STUDENT', () => studentRepository, 5, 'STUDENT'],
-      ['ADVISOR', () => advisorRepository, 9, 'ADVISOR'],
-      ['ADVISOR_WITH_ADMIN_PRIVILEGES', () => advisorRepository, 9, 'ADVISOR'],
-      ['ADMIN', () => adminRepository, 3, 'ADMIN']
+      [5, 'STUDENT'],
+      [9, 'ADVISOR'],
+      [2, 'ADVISOR_WITH_ADMIN_PRIVILEGES'],
+      [3, 'ADMIN']
     ] as const)(
-      'quando o perfil é %s, busca na tabela certa e devolve no formato da listagem',
-      async (role, repository, id, expectedRole) => {
-        const user = await service.findOne(role, id)
-
-        expect(repository().findById).toHaveBeenCalledWith(id)
-        expect(user).toMatchObject({ id, role: expectedRole })
+      'busca pelo id e devolve no formato da listagem (%s → %s)',
+      async (id, role) => {
+        await expect(service.findOne(id)).resolves.toMatchObject({ id, role })
       }
     )
 
     it('quando o usuário não existe, lança NotFound', async () => {
-      studentRepository.findById.mockResolvedValue(null)
-
-      await expect(service.findOne('STUDENT', 99)).rejects.toBeInstanceOf(
+      await expect(service.findOne(99)).rejects.toBeInstanceOf(
         NotFoundException
       )
     })
   })
 
   describe('create', () => {
-    it('quando é estudante, cria pelo service do estudante com a senha gerada e envia por e-mail', async () => {
+    it('cadastra com a senha gerada e envia por e-mail', async () => {
       await service.create(
         { ...NEW_USER, role: 'STUDENT', link_to_lattes: 'lattes' },
         ADMIN_CALLER
       )
 
-      const [created] = studentService.create.mock.calls[0]
+      const [registered] = userRecordsService.register.mock.calls[0]
       const [email, options] = emailService.sendEmail.mock.calls[0]
 
-      expect(created).toMatchObject({
+      expect(registered).toMatchObject({
+        role: 'STUDENT',
+        has_admin_privileges: false,
         name: 'Ana Souza',
         email: 'ana@ufba.br',
         link_to_lattes: 'lattes'
       })
-      expect(created.password).toMatch(/^[A-Za-z0-9]{8}$/)
+      expect(registered.password).toMatch(/^[A-Za-z0-9]{8}$/)
       expect(email).toMatchObject({
         to: 'ana@ufba.br',
         template: 'user-created',
         context: {
           name: 'Ana Souza',
           roleLabel: 'Estudante',
-          newPassword: created.password
+          newPassword: registered.password
         }
       })
       expect(options).toEqual({ throwOnError: true })
     })
 
-    it('quando é orientador, cria sempre ativo e sem o e-mail de boas-vindas próprio do orientador', async () => {
-      await service.create({ ...NEW_USER, role: 'ADVISOR' }, ADMIN_CALLER)
+    it.each([
+      ['ADVISOR', false],
+      ['ADVISOR_WITH_ADMIN_PRIVILEGES', true]
+    ] as const)(
+      'o perfil %s vira uma linha ADVISOR com privilégio %s',
+      async (role, hasAdminPrivileges) => {
+        await service.create({ ...NEW_USER, role }, ADMIN_CALLER)
 
-      expect(advisorService.create).toHaveBeenCalledWith(
-        expect.objectContaining({ status: 'ACTIVE', notify: false })
-      )
-      expect(advisorRepository.setAdminPrivileges).not.toHaveBeenCalled()
-    })
+        expect(userRecordsService.register).toHaveBeenCalledWith(
+          expect.objectContaining({
+            role: 'ADVISOR',
+            has_admin_privileges: hasAdminPrivileges
+          })
+        )
+      }
+    )
 
-    it('quando é orientador administrador, cria o orientador e liga o privilégio', async () => {
-      await service.create(
-        { ...NEW_USER, role: 'ADVISOR_WITH_ADMIN_PRIVILEGES' },
-        ADVISOR_ADMIN_CALLER
-      )
-
-      expect(advisorRepository.setAdminPrivileges).toHaveBeenCalledWith(9, true)
-    })
-
-    it('quando é administrador e quem chama é ADMIN, cria sem pedir a chave de API', async () => {
+    it('quando é administrador e quem chama é ADMIN, cadastra', async () => {
       await service.create({ ...NEW_USER, role: 'ADMIN' }, ADMIN_CALLER)
 
-      expect(adminService.register).toHaveBeenCalledTimes(1)
+      expect(userRecordsService.register).toHaveBeenCalledWith(
+        expect.objectContaining({ role: 'ADMIN' })
+      )
     })
 
-    it('quando é administrador e quem chama não é ADMIN, recusa sem criar nem enviar e-mail', async () => {
+    it('quando é administrador e quem chama não é ADMIN, recusa sem cadastrar nem enviar e-mail', async () => {
       await expect(
         service.create({ ...NEW_USER, role: 'ADMIN' }, ADVISOR_ADMIN_CALLER)
       ).rejects.toBeInstanceOf(ForbiddenException)
-      expect(adminService.register).not.toHaveBeenCalled()
+      expect(userRecordsService.register).not.toHaveBeenCalled()
       expect(emailService.sendEmail).not.toHaveBeenCalled()
     })
 
@@ -177,12 +157,14 @@ describe('UserManagementService', () => {
       await expect(
         service.create({ ...NEW_USER, role: 'STUDENT' }, ADMIN_CALLER)
       ).rejects.toBeInstanceOf(InternalServerErrorException)
-      expect(studentRepository.deleteById).toHaveBeenCalledWith(5)
+      expect(userRepository.deleteById).toHaveBeenCalledWith(5)
     })
 
     it('quando o cadastro falha, não envia e-mail', async () => {
-      studentService.create.mockRejectedValue(
-        new BadRequestException('Email or CPF already in use')
+      userRecordsService.register.mockRejectedValue(
+        new BadRequestException(
+          'Parece que este e-mail já está sendo utilizado.'
+        )
       )
 
       await expect(
@@ -201,42 +183,25 @@ describe('UserManagementService', () => {
       link_to_lattes: 'lattes'
     }
 
-    it('quando é estudante, edita pelo e-mail atual e manda o Lattes', async () => {
-      const student = makeStudent({ id: 5, email: 'atual@ufba.br' })
-      studentRepository.findById.mockResolvedValue(student)
+    it('aplica as mudanças no cadastro encontrado pelo id', async () => {
+      await service.update(5, CHANGES, ADMIN_CALLER)
 
-      await service.update('STUDENT', 5, CHANGES, ADMIN_CALLER)
-
-      expect(studentService.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          current_email: 'atual@ufba.br',
-          name: 'Novo Nome',
-          link_to_lattes: 'lattes'
-        })
-      )
-    })
-
-    it('quando é orientador, edita sem mexer na situação', async () => {
-      await service.update('ADVISOR', 9, CHANGES, ADMIN_CALLER)
-
-      expect(advisorService.update).toHaveBeenCalledWith(
-        expect.objectContaining({ status: null })
-      )
+      expect(userRecordsService.update).toHaveBeenCalledWith(USERS[5], CHANGES)
     })
 
     it('quando é administrador e quem chama não é ADMIN, recusa a edição', async () => {
       await expect(
-        service.update('ADMIN', 3, CHANGES, ADVISOR_ADMIN_CALLER)
+        service.update(3, CHANGES, ADVISOR_ADMIN_CALLER)
       ).rejects.toBeInstanceOf(ForbiddenException)
-      expect(adminService.update).not.toHaveBeenCalled()
+      expect(userRecordsService.update).not.toHaveBeenCalled()
     })
 
     it('devolve o usuário como ficou depois da edição', async () => {
-      studentRepository.findById
+      userRepository.findById
         .mockResolvedValueOnce(makeStudent({ id: 5, name: 'Antigo' }))
         .mockResolvedValueOnce(makeStudent({ id: 5, name: 'Novo Nome' }))
 
-      const user = await service.update('STUDENT', 5, CHANGES, ADMIN_CALLER)
+      const user = await service.update(5, CHANGES, ADMIN_CALLER)
 
       expect(user.name).toBe('Novo Nome')
     })
@@ -244,126 +209,137 @@ describe('UserManagementService', () => {
 
   describe('updateStatus', () => {
     it.each([
-      ['ADVISOR', 9, () => advisorRepository, 'INACTIVE'],
-      ['ADVISOR_WITH_ADMIN_PRIVILEGES', 9, () => advisorRepository, 'ACTIVE'],
-      ['ADMIN', 3, () => adminRepository, 'INACTIVE']
-    ] as const)(
-      'quando é %s, grava a nova situação na tabela certa',
-      async (role, id, repository, status) => {
-        await service.updateStatus(role, id, status, ADMIN_CALLER)
+      [9, 'INACTIVE'],
+      [2, 'ACTIVE'],
+      [3, 'INACTIVE']
+    ] as const)('grava a nova situação (id %s)', async (id, status) => {
+      await service.updateStatus(id, status, ADMIN_CALLER)
 
-        expect(repository().update).toHaveBeenCalledWith(id, { status })
-      }
-    )
+      expect(userRepository.update).toHaveBeenCalledWith(id, { status })
+    })
 
     it('quando é estudante, recusa porque estudante não tem situação', async () => {
       await expect(
-        service.updateStatus('STUDENT', 5, 'INACTIVE', ADMIN_CALLER)
+        service.updateStatus(5, 'INACTIVE', ADMIN_CALLER)
       ).rejects.toThrow('Estudantes não têm situação')
     })
 
     it('quando é o próprio usuário, recusa', async () => {
-      adminRepository.findById.mockResolvedValue(makeAdmin({ id: 1 }))
-
       await expect(
-        service.updateStatus('ADMIN', 1, 'INACTIVE', ADMIN_CALLER)
+        service.updateStatus(1, 'INACTIVE', ADMIN_CALLER)
       ).rejects.toThrow('próprio usuário')
-      expect(adminRepository.update).not.toHaveBeenCalled()
+      expect(userRepository.update).not.toHaveBeenCalled()
     })
 
     it('quando é administrador e quem chama não é ADMIN, recusa', async () => {
       await expect(
-        service.updateStatus('ADMIN', 3, 'INACTIVE', ADVISOR_ADMIN_CALLER)
+        service.updateStatus(3, 'INACTIVE', ADVISOR_ADMIN_CALLER)
       ).rejects.toBeInstanceOf(ForbiddenException)
-      expect(adminRepository.update).not.toHaveBeenCalled()
+      expect(userRepository.update).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('toggleAdminPrivileges', () => {
+    it.each([
+      [9, true],
+      [2, false]
+    ])(
+      'inverte o privilégio do orientador (id %s passa a %s)',
+      async (id, expected) => {
+        await service.toggleAdminPrivileges(id, ADMIN_CALLER)
+
+        expect(userRepository.update).toHaveBeenCalledWith(id, {
+          has_admin_privileges: expected
+        })
+      }
+    )
+
+    it.each([[5], [3]])(
+      'quando não é orientador (id %s), recusa',
+      async (id) => {
+        await expect(
+          service.toggleAdminPrivileges(id, ADMIN_CALLER)
+        ).rejects.toThrow('Só orientadores')
+        expect(userRepository.update).not.toHaveBeenCalled()
+      }
+    )
+
+    it('quando é o próprio orientador administrador, recusa', async () => {
+      await expect(
+        service.toggleAdminPrivileges(2, ADVISOR_ADMIN_CALLER)
+      ).rejects.toThrow('próprios privilégios')
     })
   })
 
   describe('delete', () => {
     it.each([
-      ['STUDENT', 5, { student_id: 5 }, () => studentRepository],
-      ['ADVISOR', 9, { advisor_id: 9 }, () => advisorRepository]
+      [5, { student_id: 5 }],
+      [9, { advisor_id: 9 }]
     ] as const)(
-      'quando %s não tem bolsa vigente, exclui',
-      async (role, id, owner, repository) => {
-        await service.delete(role, id, ADMIN_CALLER)
+      'quando não tem bolsa vigente, exclui (id %s)',
+      async (id, owner) => {
+        await service.delete(id, ADMIN_CALLER)
 
         expect(
           enrollmentRepository.countActiveScholarships
         ).toHaveBeenCalledWith(owner)
-        expect(repository().deleteById).toHaveBeenCalledWith(id)
+        expect(userRepository.deleteById).toHaveBeenCalledWith(id)
       }
     )
 
-    it.each([
-      ['STUDENT', 5, () => studentRepository],
-      ['ADVISOR', 9, () => advisorRepository]
-    ] as const)(
-      'quando %s tem bolsa ativa, bloqueia a exclusão informando quantas são',
-      async (role, id, repository) => {
+    it.each([[5], [9]])(
+      'quando tem bolsa ativa, bloqueia a exclusão informando quantas são (id %s)',
+      async (id) => {
         enrollmentRepository.countActiveScholarships.mockResolvedValue(3)
 
-        await expect(service.delete(role, id, ADMIN_CALLER)).rejects.toThrow(
+        await expect(service.delete(id, ADMIN_CALLER)).rejects.toThrow(
           'Não é possível excluir: o usuário possui 3 bolsas ativas.'
         )
-        expect(repository().deleteById).not.toHaveBeenCalled()
+        expect(userRepository.deleteById).not.toHaveBeenCalled()
       }
     )
 
     it('quando há uma única bolsa ativa, usa o singular', async () => {
       enrollmentRepository.countActiveScholarships.mockResolvedValue(1)
 
-      await expect(service.delete('STUDENT', 5, ADMIN_CALLER)).rejects.toThrow(
+      await expect(service.delete(5, ADMIN_CALLER)).rejects.toThrow(
         'Não é possível excluir: o usuário possui 1 bolsa ativa.'
       )
     })
 
     it('quando é administrador, exclui sem consultar matrículas', async () => {
-      await service.delete('ADMIN', 3, ADMIN_CALLER)
+      await service.delete(3, ADMIN_CALLER)
 
       expect(
         enrollmentRepository.countActiveScholarships
       ).not.toHaveBeenCalled()
-      expect(adminRepository.deleteById).toHaveBeenCalledWith(3)
+      expect(userRepository.deleteById).toHaveBeenCalledWith(3)
     })
 
     it('quando é administrador e quem chama não é ADMIN, recusa a exclusão', async () => {
       await expect(
-        service.delete('ADMIN', 3, ADVISOR_ADMIN_CALLER)
+        service.delete(3, ADVISOR_ADMIN_CALLER)
       ).rejects.toBeInstanceOf(ForbiddenException)
-      expect(adminRepository.deleteById).not.toHaveBeenCalled()
+      expect(userRepository.deleteById).not.toHaveBeenCalled()
     })
 
     it.each([
-      ['ADMIN', 1, { userId: '1-ADMIN', role: 'ADMIN' }],
-      ['ADVISOR_WITH_ADMIN_PRIVILEGES', 2, ADVISOR_ADMIN_CALLER]
+      [1, ADMIN_CALLER],
+      [2, ADVISOR_ADMIN_CALLER]
     ] as const)(
-      'quando o usuário tenta excluir a si mesmo (%s), recusa',
-      async (role, id, caller) => {
-        adminRepository.findById.mockResolvedValue(makeAdmin({ id }))
-        advisorRepository.findById.mockResolvedValue(
-          makeAdvisor({ id, has_admin_privileges: true })
-        )
-
-        await expect(service.delete(role, id, caller)).rejects.toThrow(
+      'quando o usuário tenta excluir a si mesmo (id %s), recusa',
+      async (id, caller) => {
+        await expect(service.delete(id, caller)).rejects.toThrow(
           'próprio usuário'
         )
       }
     )
 
-    it('quando o id coincide mas a tabela é outra, não confunde com o próprio usuário', async () => {
-      await service.delete('STUDENT', 1, ADMIN_CALLER)
-
-      expect(studentRepository.deleteById).toHaveBeenCalledWith(1)
-    })
-
     it('quando o usuário não existe, lança NotFound sem excluir', async () => {
-      studentRepository.findById.mockResolvedValue(null)
-
-      await expect(
-        service.delete('STUDENT', 99, ADMIN_CALLER)
-      ).rejects.toBeInstanceOf(NotFoundException)
-      expect(studentRepository.deleteById).not.toHaveBeenCalled()
+      await expect(service.delete(99, ADMIN_CALLER)).rejects.toBeInstanceOf(
+        NotFoundException
+      )
+      expect(userRepository.deleteById).not.toHaveBeenCalled()
     })
   })
 })

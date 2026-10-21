@@ -1,8 +1,7 @@
 import { Scholarship } from '@/scholarship/entities/scholarship.entity'
 import { AgencyMapper } from '@/agency/agency.mapper'
 import { EnrollmentMapper } from '@/enrollment/enrollment.mapper'
-import { StudentMapper } from '@/student/student.mapper'
-import { AdvisorMapper } from '@/advisor/advisor.mapper'
+import { toAdvisorSummary, toStudentSummary } from '@/user/user.mapper'
 import { AllocationMapper } from '@/allocation/allocation.mapper'
 import { StatusEnum } from '@/common/enums/status.enum'
 import { ProgramEnum } from '@/common/enums/program.enum'
@@ -55,10 +54,10 @@ export class ScholarshipMapper {
       ? EnrollmentMapper.detailed(scholarship.enrollment)
       : null
     const student = scholarship.enrollment
-      ? StudentMapper.detailed(scholarship.enrollment.student)
+      ? toStudentSummary(scholarship.enrollment.student)
       : null
     const advisor = scholarship.enrollment
-      ? AdvisorMapper.detailed(scholarship.enrollment.advisor)
+      ? toAdvisorSummary(scholarship.enrollment.advisor)
       : null
 
     return {

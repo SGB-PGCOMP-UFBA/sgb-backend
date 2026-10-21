@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16
+    image: postgres:17
     container_name: sgb-api-database
     environment:
       POSTGRES_USER: postgres

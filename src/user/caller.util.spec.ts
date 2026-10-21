@@ -1,17 +1,30 @@
+import { UnauthorizedException } from '@nestjs/common'
 import { describe, expect, it } from 'vitest'
-import { isCaller } from './caller.util'
+import { callerIdOf, isCaller } from './caller.util'
 
-describe('isCaller', () => {
-  it('quando id e perfil coincidem, é quem faz a chamada', () => {
-    expect(
-      isCaller({ id: 1, role: 'ADMIN' }, { userId: '1-ADMIN', role: 'ADMIN' })
-    ).toBe(true)
+describe('callerIdOf', () => {
+  it.each([
+    ['1-ADMIN', 1],
+    ['12-ADVISOR_WITH_ADMIN_PRIVILEGES', 12]
+  ])('lê o id do sub do token (%s)', (userId, id) => {
+    expect(callerIdOf({ userId, role: 'ADMIN' })).toBe(id)
   })
 
-  it('quando é orientador com e sem privilégio no mesmo id, é a mesma pessoa', () => {
+  it.each([[''], ['abc-ADMIN'], ['0-ADMIN']])(
+    'recusa um sub sem id válido (%s)',
+    (userId) => {
+      expect(() => callerIdOf({ userId, role: 'ADMIN' })).toThrow(
+        UnauthorizedException
+      )
+    }
+  )
+})
+
+describe('isCaller', () => {
+  it('quando o id coincide, é quem faz a chamada, seja qual for o perfil do token', () => {
     expect(
       isCaller(
-        { id: 2, role: 'ADVISOR' },
+        { id: 2 },
         {
           userId: '2-ADVISOR_WITH_ADMIN_PRIVILEGES',
           role: 'ADVISOR_WITH_ADMIN_PRIVILEGES'
@@ -20,15 +33,9 @@ describe('isCaller', () => {
     ).toBe(true)
   })
 
-  it('quando o id coincide mas a tabela é outra, não é quem faz a chamada', () => {
-    expect(
-      isCaller({ id: 1, role: 'STUDENT' }, { userId: '1-ADMIN', role: 'ADMIN' })
-    ).toBe(false)
-  })
-
   it('quando o id é outro, não é quem faz a chamada', () => {
-    expect(
-      isCaller({ id: 3, role: 'ADMIN' }, { userId: '1-ADMIN', role: 'ADMIN' })
-    ).toBe(false)
+    expect(isCaller({ id: 3 }, { userId: '1-ADMIN', role: 'ADMIN' })).toBe(
+      false
+    )
   })
 })

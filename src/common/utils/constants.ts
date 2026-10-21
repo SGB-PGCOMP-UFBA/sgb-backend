@@ -46,21 +46,6 @@ const constants = {
       'Parece que este link para o currículo lattes já está sendo utilizado.'
   },
   exceptionMessages: {
-    admin: {
-      CREATION_FAILED: 'Não foi possível cadastrar o administrador.',
-      UPDATE_FAILED: 'Não foi possível atualizar o administrador.',
-      NOT_FOUND: 'Administrador não encontrado.',
-      WRONG_PASSWORD: 'Senha inválida.'
-    },
-    advisor: {
-      CREATION_STARTED:
-        'O processo de cadastro de um novo orientador foi iniciado.',
-      CREATION_COMPLETED:
-        'O processo de cadastro de um novo orientador foi concluído.',
-      CREATION_FAILED: 'Não foi possível cadastrar o orientador.',
-      UPDATE_FAILED: 'Não foi possível atualizar o orientador.',
-      NOT_FOUND: 'Orientador não encontrado.'
-    },
     article: {
       CREATION_FAILED: 'Não foi possível cadastrar o artigo.',
       NOT_FOUND: 'Artigo não encontrado.'
@@ -83,16 +68,6 @@ const constants = {
       CREATION_FAILED: 'Não foi possível cadastrar a notificação.',
       UPDATE_FAILED: 'Não foi possível atualizar a notificação.',
       NOT_FOUND: 'Notificação não encontrada.'
-    },
-    student: {
-      CREATION_STARTED:
-        'O processo de cadastro de um novo estudante foi iniciado.',
-      CREATION_COMPLETED:
-        'O processo de cadastro de um novo estudante foi concluído.',
-      CREATION_FAILED: 'Não foi possível cadastrar o estudante.',
-      UPDATE_FAILED: 'Não foi possível atualizar o estudante.',
-      NOT_FOUND: 'Estudante não encontrado.',
-      COUNT_BY_SCHOLARSHIP_FAILED: 'Falha ao contar os estudantes por bolsa.'
     },
     enrollment: {
       CREATION_STARTED:
@@ -138,7 +113,16 @@ const constants = {
         'Você não pode ativar ou inativar o próprio usuário.',
       STUDENT_HAS_NO_STATUS: 'Estudantes não têm situação de ativo/inativo.',
       WELCOME_EMAIL_FAILED:
-        'Não foi possível enviar o e-mail com a senha. O cadastro foi desfeito.'
+        'Não foi possível enviar o e-mail com a senha. O cadastro foi desfeito.',
+      CREATION_FAILED: 'Não foi possível cadastrar o usuário.',
+      UPDATE_FAILED: 'Não foi possível atualizar o usuário.',
+      STUDENT_NOT_FOUND: 'Estudante não encontrado.',
+      ADVISOR_NOT_FOUND: 'Orientador não encontrado.',
+      ONLY_ADVISORS_HAVE_ADMIN_PRIVILEGES:
+        'Só orientadores podem receber privilégios de administrador.',
+      CANNOT_CHANGE_OWN_PRIVILEGES:
+        'Você não pode alterar os próprios privilégios de administrador.',
+      ONLY_OWN_DATA: 'Você só pode consultar os próprios dados.'
     },
     passwordRecovery: {
       INVALID_CODE:

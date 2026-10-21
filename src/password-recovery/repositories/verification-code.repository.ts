@@ -1,5 +1,5 @@
 import { VerificationCode } from '@/password-recovery/entities/verification-code.entity'
-import { AccountTable } from '@/password-recovery/account-table.constant'
+import { UserType } from '@/user/user-type.constant'
 
 export type NewVerificationCode = Pick<
   VerificationCode,
@@ -8,12 +8,12 @@ export type NewVerificationCode = Pick<
 
 export abstract class VerificationCodeRepository {
   abstract findLatestByAccount(
-    accountTable: AccountTable,
+    accountTable: UserType,
     accountId: number
   ): Promise<VerificationCode | null>
   abstract create(data: NewVerificationCode): Promise<VerificationCode>
   abstract deleteByAccount(
-    accountTable: AccountTable,
+    accountTable: UserType,
     accountId: number
   ): Promise<void>
   abstract incrementAttempts(id: number): Promise<void>

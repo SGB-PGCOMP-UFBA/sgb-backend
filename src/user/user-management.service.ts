@@ -6,54 +6,38 @@ import {
   Logger,
   NotFoundException
 } from '@nestjs/common'
-import { AdminRepository } from '@/admin/repositories/admin.repository'
-import { AdminService } from '@/admin/admin.service'
-import { AdvisorRepository } from '@/advisor/repositories/advisor.repository'
-import { AdvisorService } from '@/advisor/advisor.service'
-import { StudentRepository } from '@/student/repositories/student.repository'
-import { StudentService } from '@/student/student.service'
+import { User } from '@/user/entities/user.entity'
+import { UserRepository } from '@/user/repositories/user.repository'
+import { UserRecordsService } from '@/user/user-records.service'
 import { EnrollmentRepository } from '@/enrollment/repositories/enrollment.repository'
 import { EmailService } from '@/email/email.service'
 import { constants } from '@/common/utils/constants'
 import { generateTemporaryPassword } from '@/common/utils/password.util'
 import { ManagedUser } from '@/user/managed-user.interface'
 import { USER_ROLE_LABELS, UserRole } from '@/user/user-role.constant'
+import { roleOf, userTypeOf } from '@/user/user-type.constant'
 import { CreateManagedUserDto } from '@/user/dtos/create-managed-user.dto'
 import { UpdateManagedUserDto } from '@/user/dtos/update-managed-user.dto'
 import { UserStatus } from '@/user/dtos/update-managed-user-status.dto'
 import { Caller } from '@/user/caller.interface'
 import { isCaller } from '@/user/caller.util'
-import {
-  toManagedAdmin,
-  toManagedAdvisor,
-  toManagedStudent
-} from '@/user/user.mapper'
+import { toManagedUser } from '@/user/user.mapper'
 
-type UserTable = 'STUDENT' | 'ADVISOR' | 'ADMIN'
+const messages = constants.exceptionMessages.user
 
 @Injectable()
 export class UserManagementService {
   private readonly logger = new Logger(UserManagementService.name)
 
   constructor(
-    private readonly studentRepository: StudentRepository,
-    private readonly advisorRepository: AdvisorRepository,
-    private readonly adminRepository: AdminRepository,
+    private readonly userRepository: UserRepository,
     private readonly enrollmentRepository: EnrollmentRepository,
-    private readonly studentService: StudentService,
-    private readonly advisorService: AdvisorService,
-    private readonly adminService: AdminService,
+    private readonly userRecordsService: UserRecordsService,
     private readonly emailService: EmailService
   ) {}
 
-  async findOne(role: UserRole, id: number): Promise<ManagedUser> {
-    const user = await this.findManagedUser(tableOf(role), id)
-
-    if (!user) {
-      throw new NotFoundException(constants.exceptionMessages.user.NOT_FOUND)
-    }
-
-    return user
+  async findOne(id: number): Promise<ManagedUser> {
+    return toManagedUser(await this.findUser(id))
   }
 
   async create(
@@ -63,8 +47,16 @@ export class UserManagementService {
     assertCanManage(dto.role, caller)
 
     const password = generateTemporaryPassword()
-    const table = tableOf(dto.role)
-    const id = await this.register(dto, password)
+    const user = await this.userRecordsService.register({
+      role: userTypeOf(dto.role),
+      has_admin_privileges: dto.role === 'ADVISOR_WITH_ADMIN_PRIVILEGES',
+      name: dto.name,
+      email: dto.email,
+      password,
+      tax_id: dto.tax_id,
+      phone_number: dto.phone_number,
+      link_to_lattes: dto.link_to_lattes
+    })
 
     try {
       await this.emailService.sendEmail(
@@ -82,189 +74,108 @@ export class UserManagementService {
       )
     } catch (error) {
       this.logger.error(`Welcome e-mail failed, rolling back: ${dto.email}`)
-      await this.deleteFromTable(table, id)
-      throw new InternalServerErrorException(
-        constants.exceptionMessages.user.WELCOME_EMAIL_FAILED
-      )
+      await this.userRepository.deleteById(user.id)
+      throw new InternalServerErrorException(messages.WELCOME_EMAIL_FAILED)
     }
 
-    return await this.findOne(dto.role, id)
+    return toManagedUser(user)
   }
 
   async update(
-    role: UserRole,
     id: number,
     dto: UpdateManagedUserDto,
     caller: Caller
   ): Promise<ManagedUser> {
-    const user = await this.findOne(role, id)
-    assertCanManage(user.role, caller)
+    const user = await this.findUser(id)
+    assertCanManage(roleOf(user), caller)
 
-    const common = {
-      current_email: user.email,
-      name: dto.name,
-      email: dto.email,
-      tax_id: dto.tax_id,
-      phone_number: dto.phone_number
-    }
+    await this.userRecordsService.update(user, dto)
 
-    switch (tableOf(user.role)) {
-      case 'STUDENT':
-        await this.studentService.update({
-          ...common,
-          link_to_lattes: dto.link_to_lattes
-        })
-        break
-      case 'ADVISOR':
-        await this.advisorService.update({ ...common, status: null })
-        break
-      case 'ADMIN':
-        await this.adminService.update(common)
-        break
-    }
-
-    return await this.findOne(role, id)
+    return await this.findOne(id)
   }
 
   /** Situação só existe para orientador e administrador. */
   async updateStatus(
-    role: UserRole,
     id: number,
     status: UserStatus,
     caller: Caller
   ): Promise<ManagedUser> {
-    const user = await this.findOne(role, id)
-    assertCanManage(user.role, caller)
+    const user = await this.findUser(id)
+    assertCanManage(roleOf(user), caller)
 
-    const table = tableOf(user.role)
+    if (user.role === 'STUDENT') {
+      throw new BadRequestException(messages.STUDENT_HAS_NO_STATUS)
+    }
 
-    if (table === 'STUDENT') {
+    if (isCaller(user, caller)) {
+      throw new BadRequestException(messages.CANNOT_CHANGE_OWN_STATUS)
+    }
+
+    await this.userRepository.update(id, { status })
+
+    return await this.findOne(id)
+  }
+
+  /** Liga o privilégio de administrador do orientador, ou desliga se já tiver. */
+  async toggleAdminPrivileges(
+    id: number,
+    caller: Caller
+  ): Promise<ManagedUser> {
+    const user = await this.findUser(id)
+
+    if (user.role !== 'ADVISOR') {
       throw new BadRequestException(
-        constants.exceptionMessages.user.STUDENT_HAS_NO_STATUS
+        messages.ONLY_ADVISORS_HAVE_ADMIN_PRIVILEGES
       )
     }
 
     if (isCaller(user, caller)) {
-      throw new BadRequestException(
-        constants.exceptionMessages.user.CANNOT_CHANGE_OWN_STATUS
-      )
+      throw new BadRequestException(messages.CANNOT_CHANGE_OWN_PRIVILEGES)
     }
 
-    if (table === 'ADVISOR') {
-      await this.advisorRepository.update(id, { status })
-    } else {
-      await this.adminRepository.update(id, { status })
-    }
+    await this.userRepository.update(id, {
+      has_admin_privileges: !user.has_admin_privileges
+    })
 
-    return await this.findOne(role, id)
+    return await this.findOne(id)
   }
 
-  async delete(role: UserRole, id: number, caller: Caller): Promise<void> {
-    const user = await this.findOne(role, id)
-    assertCanManage(user.role, caller)
-
-    const table = tableOf(user.role)
+  async delete(id: number, caller: Caller): Promise<void> {
+    const user = await this.findUser(id)
+    assertCanManage(roleOf(user), caller)
 
     if (isCaller(user, caller)) {
-      throw new BadRequestException(
-        constants.exceptionMessages.user.CANNOT_DELETE_SELF
-      )
+      throw new BadRequestException(messages.CANNOT_DELETE_SELF)
     }
 
-    await this.assertHasNoActiveScholarships(table, id)
-    await this.deleteFromTable(table, id)
+    await this.assertHasNoActiveScholarships(user)
+    await this.userRepository.deleteById(id)
   }
 
-  private async register(
-    dto: CreateManagedUserDto,
-    password: string
-  ): Promise<number> {
-    const common = {
-      name: dto.name,
-      email: dto.email,
-      password,
-      tax_id: dto.tax_id,
-      phone_number: dto.phone_number
+  private async findUser(id: number): Promise<User> {
+    const user = await this.userRepository.findById(id)
+
+    if (!user) {
+      throw new NotFoundException(messages.NOT_FOUND)
     }
 
-    switch (dto.role) {
-      case 'STUDENT': {
-        const student = await this.studentService.create({
-          ...common,
-          link_to_lattes: dto.link_to_lattes
-        })
-        return student.id
-      }
-      case 'ADVISOR':
-      case 'ADVISOR_WITH_ADMIN_PRIVILEGES': {
-        const advisor = await this.advisorService.create({
-          ...common,
-          status: 'ACTIVE',
-          notify: false
-        })
-
-        if (dto.role === 'ADVISOR_WITH_ADMIN_PRIVILEGES') {
-          await this.advisorRepository.setAdminPrivileges(advisor.id, true)
-        }
-
-        return advisor.id
-      }
-      case 'ADMIN': {
-        const admin = await this.adminService.register(common)
-        return admin.id
-      }
-    }
+    return user
   }
 
-  private async assertHasNoActiveScholarships(
-    table: UserTable,
-    id: number
-  ): Promise<void> {
-    if (table === 'ADMIN') return
+  private async assertHasNoActiveScholarships(user: User): Promise<void> {
+    if (user.role === 'ADMIN') return
 
     const activeScholarships =
       await this.enrollmentRepository.countActiveScholarships(
-        table === 'STUDENT' ? { student_id: id } : { advisor_id: id }
+        user.role === 'STUDENT'
+          ? { student_id: user.id }
+          : { advisor_id: user.id }
       )
 
     if (activeScholarships > 0) {
       throw new BadRequestException(
         hasActiveScholarshipsMessage(activeScholarships)
       )
-    }
-  }
-
-  private async findManagedUser(
-    table: UserTable,
-    id: number
-  ): Promise<ManagedUser | null> {
-    switch (table) {
-      case 'STUDENT': {
-        const student = await this.studentRepository.findById(id)
-        return student && toManagedStudent(student)
-      }
-      case 'ADVISOR': {
-        const advisor = await this.advisorRepository.findById(id)
-        return advisor && toManagedAdvisor(advisor)
-      }
-      case 'ADMIN': {
-        const admin = await this.adminRepository.findById(id)
-        return admin && toManagedAdmin(admin)
-      }
-    }
-  }
-
-  private async deleteFromTable(table: UserTable, id: number): Promise<void> {
-    switch (table) {
-      case 'STUDENT':
-        await this.studentRepository.deleteById(id)
-        return
-      case 'ADVISOR':
-        await this.advisorRepository.deleteById(id)
-        return
-      case 'ADMIN':
-        await this.adminRepository.deleteById(id)
-        return
     }
   }
 }
@@ -275,14 +186,8 @@ function hasActiveScholarshipsMessage(count: number): string {
   return `Não é possível excluir: o usuário possui ${count} ${scholarships}.`
 }
 
-function tableOf(role: UserRole): UserTable {
-  return role === 'ADVISOR_WITH_ADMIN_PRIVILEGES' ? 'ADVISOR' : role
-}
-
 function assertCanManage(targetRole: UserRole, caller: Caller): void {
   if (targetRole === 'ADMIN' && caller.role !== 'ADMIN') {
-    throw new ForbiddenException(
-      constants.exceptionMessages.user.ONLY_ADMIN_MANAGES_ADMIN
-    )
+    throw new ForbiddenException(messages.ONLY_ADMIN_MANAGES_ADMIN)
   }
 }

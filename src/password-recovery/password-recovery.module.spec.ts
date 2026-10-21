@@ -10,29 +10,21 @@ import { PasswordRecoveryController } from '@/password-recovery/password-recover
 import { VerificationCode } from '@/password-recovery/entities/verification-code.entity'
 import { VerificationCodeRepository } from '@/password-recovery/repositories/verification-code.repository'
 import { TypeOrmVerificationCodeRepository } from '@/password-recovery/repositories/typeorm-verification-code.repository'
-import { Admin } from '@/admin/entities/admin.entity'
-import { AdminRepository } from '@/admin/repositories/admin.repository'
-import { TypeOrmAdminRepository } from '@/admin/repositories/typeorm-admin.repository'
-import { Advisor } from '@/advisor/entities/advisor.entity'
-import { AdvisorRepository } from '@/advisor/repositories/advisor.repository'
-import { TypeOrmAdvisorRepository } from '@/advisor/repositories/typeorm-advisor.repository'
-import { Student } from '@/student/entities/student.entity'
-import { StudentRepository } from '@/student/repositories/student.repository'
-import { TypeOrmStudentRepository } from '@/student/repositories/typeorm-student.repository'
+import { User } from '@/user/entities/user.entity'
+import { UserRepository } from '@/user/repositories/user.repository'
+import { TypeOrmUserRepository } from '@/user/repositories/typeorm-user.repository'
 
 describe('PasswordRecoveryModule', () => {
   it('monta o PasswordRecoveryService com os repositórios exportados globalmente', async () => {
     const moduleRef = await compileFeatureModule(
       PasswordRecoveryModule,
-      [Student, Advisor, Admin, VerificationCode],
+      [User, VerificationCode],
       [
-        { provide: StudentRepository, useClass: TypeOrmStudentRepository },
-        { provide: AdvisorRepository, useClass: TypeOrmAdvisorRepository },
-        { provide: AdminRepository, useClass: TypeOrmAdminRepository },
         {
           provide: VerificationCodeRepository,
           useClass: TypeOrmVerificationCodeRepository
-        }
+        },
+        { provide: UserRepository, useClass: TypeOrmUserRepository }
       ]
     )
 

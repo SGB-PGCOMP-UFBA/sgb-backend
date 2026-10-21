@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { VerificationCode } from '@/password-recovery/entities/verification-code.entity'
-import { AccountTable } from '@/password-recovery/account-table.constant'
+import { UserType } from '@/user/user-type.constant'
 import {
   NewVerificationCode,
   VerificationCodeRepository
@@ -18,7 +18,7 @@ export class TypeOrmVerificationCodeRepository
   ) {}
 
   async findLatestByAccount(
-    accountTable: AccountTable,
+    accountTable: UserType,
     accountId: number
   ): Promise<VerificationCode | null> {
     return await this.repository.findOne({
@@ -32,7 +32,7 @@ export class TypeOrmVerificationCodeRepository
   }
 
   async deleteByAccount(
-    accountTable: AccountTable,
+    accountTable: UserType,
     accountId: number
   ): Promise<void> {
     await this.repository.delete({

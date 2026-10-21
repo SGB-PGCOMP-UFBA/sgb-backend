@@ -1,11 +1,9 @@
-import { Admin } from '@/admin/entities/admin.entity'
-import { Advisor } from '@/advisor/entities/advisor.entity'
 import { Agency } from '@/agency/entities/agency.entity'
 import { Allocation } from '@/allocation/entities/allocation.entity'
 import { EmbedNotification } from '@/embed-notification/entities/embed-notification.entity'
 import { Enrollment } from '@/enrollment/entities/enrollment.entity'
 import { Scholarship } from '@/scholarship/entities/scholarship.entity'
-import { Student } from '@/student/entities/student.entity'
+import { User } from '@/user/entities/user.entity'
 
 type Overrides<T> = Partial<T> & Record<string, unknown>
 
@@ -26,46 +24,54 @@ function defineFactory<T>(defaults: () => T): Factory<T> {
 
 const CRIADO_EM = new Date('2024-01-01T00:00:00.000Z')
 
-export const makeStudent = defineFactory<Student>(() => ({
+const userDefaults = (): User => ({
+  id: 1,
+  name: 'Usuário Teste',
+  email: 'usuario@ufba.br',
+  tax_id: null,
+  phone_number: null,
+  password: '$2a$10$hash',
+  role: 'STUDENT',
+  status: null,
+  link_to_lattes: null,
+  has_admin_privileges: false,
+  created_at: CRIADO_EM,
+  updated_at: CRIADO_EM,
+  enrollments: [],
+  advised_enrollments: []
+})
+
+export const makeStudent = defineFactory<User>(() => ({
+  ...userDefaults(),
   id: 7,
   name: 'Aluno Teste',
   email: 'aluno@ufba.br',
   tax_id: '12345678901',
   phone_number: '71999999999',
   link_to_lattes: 'http://lattes.cnpq.br/1',
-  password: '$2a$10$hash',
-  role: 'STUDENT',
-  created_at: CRIADO_EM,
-  updated_at: CRIADO_EM,
-  enrollments: []
+  role: 'STUDENT'
 }))
 
-export const makeAdvisor = defineFactory<Advisor>(() => ({
+export const makeAdvisor = defineFactory<User>(() => ({
+  ...userDefaults(),
   id: 10,
   name: 'Orientadora Teste',
   email: 'orientadora@ufba.br',
   tax_id: '98765432100',
   phone_number: '71988888888',
-  password: '$2a$10$hash',
   role: 'ADVISOR',
-  status: 'ACTIVE',
-  has_admin_privileges: false,
-  created_at: CRIADO_EM,
-  updated_at: CRIADO_EM,
-  enrollments: []
+  status: 'ACTIVE'
 }))
 
-export const makeAdmin = defineFactory<Admin>(() => ({
+export const makeAdmin = defineFactory<User>(() => ({
+  ...userDefaults(),
   id: 3,
   name: 'Carlos Lima',
   email: 'carlos@ufba.br',
   tax_id: '12345678901',
   phone_number: '71999999999',
-  password: '$2a$10$hash',
   role: 'ADMIN',
-  status: 'ACTIVE',
-  created_at: CRIADO_EM,
-  updated_at: CRIADO_EM
+  status: 'ACTIVE'
 }))
 
 export const makeEnrollment = defineFactory<Enrollment>(() => ({

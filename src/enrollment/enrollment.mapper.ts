@@ -1,7 +1,6 @@
 import { Enrollment } from '@/enrollment/entities/enrollment.entity'
 import { EnrollmentProgramRow } from '@/enrollment/repositories/enrollment.repository'
-import { AdvisorMapper } from '@/advisor/advisor.mapper'
-import { StudentMapper } from '@/student/student.mapper'
+import { toAdvisorSummary, toStudentSummary } from '@/user/user.mapper'
 import { ScholarshipMapper } from '@/scholarship/scholarship.mapper'
 import { ProgramEnum } from '@/common/enums/program.enum'
 
@@ -38,10 +37,10 @@ export class EnrollmentMapper {
   static detailedWithRelations(enrollment: Enrollment) {
     const detailed = this.detailed(enrollment)
     const advisor = enrollment.advisor
-      ? AdvisorMapper.detailed(enrollment.advisor)
+      ? toAdvisorSummary(enrollment.advisor)
       : null
     const student = enrollment.student
-      ? StudentMapper.detailed(enrollment.student)
+      ? toStudentSummary(enrollment.student)
       : null
     const scholarships = enrollment.scholarships?.map((scholarship) =>
       ScholarshipMapper.detailed(scholarship)
@@ -58,7 +57,7 @@ export class EnrollmentMapper {
   static detailedWithFullRelations(enrollment: Enrollment) {
     const detailed = this.detailed(enrollment)
     const advisor = enrollment.advisor
-      ? AdvisorMapper.detailed(enrollment.advisor)
+      ? toAdvisorSummary(enrollment.advisor)
       : null
     const scholarships = enrollment.scholarships?.map((scholarship) =>
       ScholarshipMapper.detailedWithFullRelations(scholarship)

@@ -8,8 +8,7 @@ import {
   UpdateDateColumn,
   OneToMany
 } from 'typeorm'
-import { Advisor } from '@/advisor/entities/advisor.entity'
-import { Student } from '@/student/entities/student.entity'
+import { User } from '@/user/entities/user.entity'
 import { Scholarship } from '@/scholarship/entities/scholarship.entity'
 
 @Entity('enrollment')
@@ -44,11 +43,11 @@ export class Enrollment {
   @OneToMany(() => Scholarship, (scholarship) => scholarship.enrollment)
   scholarships: Scholarship[]
 
-  @ManyToOne(() => Student, (student) => student.enrollments)
+  @ManyToOne(() => User, (student) => student.enrollments)
   @JoinColumn({ name: 'student_id' })
-  student: Student
+  student: User
 
-  @ManyToOne(() => Advisor, (advisor) => advisor.enrollments)
+  @ManyToOne(() => User, (advisor) => advisor.advised_enrollments)
   @JoinColumn({ name: 'advisor_id' })
-  advisor: Advisor
+  advisor: User
 }

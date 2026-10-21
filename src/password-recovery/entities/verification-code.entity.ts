@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm'
-import { AccountTable } from '@/password-recovery/account-table.constant'
+import { UserType } from '@/user/user-type.constant'
 
 @Entity('verification_code')
 @Index('IDX_VERIFICATION_CODE_ACCOUNT', ['account_table', 'account_id'])
@@ -18,7 +18,7 @@ export class VerificationCode {
   account_id: number
 
   @Column({ type: 'varchar', nullable: false })
-  account_table: AccountTable
+  account_table: UserType
 
   @Column({ type: 'varchar', nullable: false })
   code_hash: string

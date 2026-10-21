@@ -59,7 +59,7 @@ describe('ScholarshipService', () => {
   let agencyService: any
   let allocationService: any
   let enrollmentService: any
-  let studentService: any
+  let userRepository: { findByEmail: ReturnType<typeof vi.fn> }
   let service: ScholarshipService
 
   beforeEach(() => {
@@ -78,14 +78,14 @@ describe('ScholarshipService', () => {
         .mockResolvedValue(ENROLLMENT),
       findOneByIdAndStudentId: vi.fn().mockResolvedValue(ENROLLMENT)
     }
-    studentService = { findByEmail: vi.fn().mockResolvedValue(makeStudent()) }
+    userRepository = { findByEmail: vi.fn().mockResolvedValue(makeStudent()) }
 
     service = new ScholarshipService(
       repository as unknown as ScholarshipRepository,
       agencyService,
       allocationService,
       enrollmentService,
-      studentService
+      userRepository as never
     )
   })
 
