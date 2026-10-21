@@ -2,12 +2,6 @@ import { Global, Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { EnvironmentEnum, env } from '@/config/env.validation'
 import { APP_TIME_ZONE } from '@/config/time-zone.constant'
-import { Admin } from '@/admin/entities/admin.entity'
-import { AdminRepository } from '@/admin/repositories/admin.repository'
-import { TypeOrmAdminRepository } from '@/admin/repositories/typeorm-admin.repository'
-import { Advisor } from '@/advisor/entities/advisor.entity'
-import { AdvisorRepository } from '@/advisor/repositories/advisor.repository'
-import { TypeOrmAdvisorRepository } from '@/advisor/repositories/typeorm-advisor.repository'
 import { Agency } from '@/agency/entities/agency.entity'
 import { AgencyRepository } from '@/agency/repositories/agency.repository'
 import { TypeOrmAgencyRepository } from '@/agency/repositories/typeorm-agency.repository'
@@ -17,15 +11,15 @@ import { TypeOrmAllocationRepository } from '@/allocation/repositories/typeorm-a
 import { EmbedNotification } from '@/embed-notification/entities/embed-notification.entity'
 import { EmbedNotificationRepository } from '@/embed-notification/repositories/embed-notification.repository'
 import { TypeOrmEmbedNotificationRepository } from '@/embed-notification/repositories/typeorm-embed-notification.repository'
-import { Student } from '@/student/entities/student.entity'
-import { StudentRepository } from '@/student/repositories/student.repository'
-import { TypeOrmStudentRepository } from '@/student/repositories/typeorm-student.repository'
 import { Enrollment } from '@/enrollment/entities/enrollment.entity'
 import { EnrollmentRepository } from '@/enrollment/repositories/enrollment.repository'
 import { TypeOrmEnrollmentRepository } from '@/enrollment/repositories/typeorm-enrollment.repository'
 import { Scholarship } from '@/scholarship/entities/scholarship.entity'
 import { ScholarshipRepository } from '@/scholarship/repositories/scholarship.repository'
 import { TypeOrmScholarshipRepository } from '@/scholarship/repositories/typeorm-scholarship.repository'
+import { User } from '@/user/entities/user.entity'
+import { UserRepository } from '@/user/repositories/user.repository'
+import { TypeOrmUserRepository } from '@/user/repositories/typeorm-user.repository'
 import { VerificationCode } from '@/password-recovery/entities/verification-code.entity'
 import { VerificationCodeRepository } from '@/password-recovery/repositories/verification-code.repository'
 import { TypeOrmVerificationCodeRepository } from '@/password-recovery/repositories/typeorm-verification-code.repository'
@@ -33,20 +27,16 @@ import { TypeOrmVerificationCodeRepository } from '@/password-recovery/repositor
 const isProduction = env.NODE_ENV === EnvironmentEnum.PROD
 
 const entities = [
-  Admin,
-  Advisor,
   Agency,
   Allocation,
   EmbedNotification,
   Enrollment,
   Scholarship,
-  Student,
+  User,
   VerificationCode
 ]
 
 const repositories = [
-  { provide: AdminRepository, useClass: TypeOrmAdminRepository },
-  { provide: AdvisorRepository, useClass: TypeOrmAdvisorRepository },
   { provide: AgencyRepository, useClass: TypeOrmAgencyRepository },
   { provide: AllocationRepository, useClass: TypeOrmAllocationRepository },
   {
@@ -55,7 +45,7 @@ const repositories = [
   },
   { provide: EnrollmentRepository, useClass: TypeOrmEnrollmentRepository },
   { provide: ScholarshipRepository, useClass: TypeOrmScholarshipRepository },
-  { provide: StudentRepository, useClass: TypeOrmStudentRepository },
+  { provide: UserRepository, useClass: TypeOrmUserRepository },
   {
     provide: VerificationCodeRepository,
     useClass: TypeOrmVerificationCodeRepository

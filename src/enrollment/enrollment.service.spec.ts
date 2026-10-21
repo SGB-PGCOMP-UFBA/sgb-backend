@@ -37,18 +37,19 @@ function createEnrollmentRepositoryMock() {
 
 describe('EnrollmentService', () => {
   let repository: ReturnType<typeof createEnrollmentRepositoryMock>
-  let advisorService: any
-  let studentService: any
+  let userRepository: { findByEmail: ReturnType<typeof vi.fn> }
   let service: EnrollmentService
 
   beforeEach(() => {
     repository = createEnrollmentRepositoryMock()
-    advisorService = { findOneByEmail: vi.fn().mockResolvedValue(ADVISOR) }
-    studentService = { findByEmail: vi.fn().mockResolvedValue(STUDENT) }
+    userRepository = {
+      findByEmail: vi.fn(async (_email: string, type: string) =>
+        type === 'ADVISOR' ? ADVISOR : STUDENT
+      )
+    }
     service = new EnrollmentService(
       repository as unknown as EnrollmentRepository,
-      advisorService,
-      studentService
+      userRepository as never
     )
   })
 
@@ -91,7 +92,10 @@ describe('EnrollmentService', () => {
         '2024123456'
       )
 
-      expect(studentService.findByEmail).toHaveBeenCalledWith('aluno@ufba.br')
+      expect(userRepository.findByEmail).toHaveBeenCalledWith(
+        'aluno@ufba.br',
+        'STUDENT'
+      )
       expect(repository.findByStudentIdAndNumber).toHaveBeenCalledWith(
         7,
         '2024123456'
@@ -139,27 +143,21 @@ describe('EnrollmentService', () => {
       await expect(service.create(VALID_DTO)).rejects.toBeInstanceOf(
         BadRequestException
       )
-      expect(advisorService.findOneByEmail).not.toHaveBeenCalled()
-      expect(studentService.findByEmail).not.toHaveBeenCalled()
+      expect(userRepository.findByEmail).not.toHaveBeenCalled()
     })
 
     it.each([
-      ['orientador', 'advisorService'],
-      ['aluno', 'studentService']
+      ['orientador', 'ADVISOR', 'Orientador não encontrado.'],
+      ['aluno', 'STUDENT', 'Estudante não encontrado.']
     ])(
       'quando a pessoa informada não existe, aborta a criação sem salvar (%s)',
-      async (_papel, dependency) => {
-        const failing =
-          dependency === 'advisorService' ? advisorService : studentService
-        const method =
-          dependency === 'advisorService' ? 'findOneByEmail' : 'findByEmail'
-        failing[method].mockRejectedValue(
-          new NotFoundException('Advisor not found.')
+      async (_papel, missingType, message) => {
+        userRepository.findByEmail.mockImplementation(
+          async (_email: string, type: string) =>
+            type === missingType ? null : type === 'ADVISOR' ? ADVISOR : STUDENT
         )
 
-        await expect(service.create(VALID_DTO)).rejects.toBeInstanceOf(
-          BadRequestException
-        )
+        await expect(service.create(VALID_DTO)).rejects.toThrow(message)
         expect(repository.create).not.toHaveBeenCalled()
       }
     )
@@ -181,7 +179,10 @@ describe('EnrollmentService', () => {
   describe('update', () => {
     it('quando o DTO só troca o orientador, mantém os campos que ele não mandou', async () => {
       repository.findByIdAndStudentId.mockResolvedValue(ENROLLMENT)
-      advisorService.findOneByEmail.mockResolvedValue({ id: 99 })
+      userRepository.findByEmail.mockImplementation(
+        async (_email: string, type: string) =>
+          type === 'ADVISOR' ? { id: 99 } : STUDENT
+      )
 
       await service.update(42, {
         student_email: 'aluno@ufba.br',
@@ -228,8 +229,9 @@ describe('EnrollmentService', () => {
     })
 
     it('quando o novo orientador não existe, aborta sem salvar', async () => {
-      advisorService.findOneByEmail.mockRejectedValue(
-        new NotFoundException('Advisor not found.')
+      userRepository.findByEmail.mockImplementation(
+        async (_email: string, type: string) =>
+          type === 'ADVISOR' ? null : STUDENT
       )
 
       await expect(

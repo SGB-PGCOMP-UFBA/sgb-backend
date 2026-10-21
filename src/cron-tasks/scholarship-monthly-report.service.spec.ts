@@ -33,7 +33,7 @@ describe('ScholarshipMonthlyReportService', () => {
   let scholarshipRepository: {
     findAllEndingBetween: ReturnType<typeof vi.fn>
   }
-  let adminRepository: { findAllOrderedByName: ReturnType<typeof vi.fn> }
+  let userRepository: { findAllByType: ReturnType<typeof vi.fn> }
   let emailService: { sendEmail: ReturnType<typeof vi.fn> }
   let service: ScholarshipMonthlyReportService
 
@@ -44,13 +44,13 @@ describe('ScholarshipMonthlyReportService', () => {
     scholarshipRepository = {
       findAllEndingBetween: vi.fn().mockResolvedValue([])
     }
-    adminRepository = {
-      findAllOrderedByName: vi.fn().mockResolvedValue([makeAdmin()])
+    userRepository = {
+      findAllByType: vi.fn().mockResolvedValue([makeAdmin()])
     }
     emailService = { sendEmail: vi.fn().mockResolvedValue(undefined) }
 
     service = new ScholarshipMonthlyReportService(
-      adminRepository as never,
+      userRepository as never,
       emailService as never,
       scholarshipRepository as never
     )
@@ -72,7 +72,7 @@ describe('ScholarshipMonthlyReportService', () => {
   it('não envia nada quando nenhuma bolsa encerra no mês', async () => {
     await service.notifyAdminsAboutScholarshipsEndingThisMonth()
 
-    expect(adminRepository.findAllOrderedByName).not.toHaveBeenCalled()
+    expect(userRepository.findAllByType).not.toHaveBeenCalled()
     expect(emailService.sendEmail).not.toHaveBeenCalled()
   })
 
@@ -81,13 +81,14 @@ describe('ScholarshipMonthlyReportService', () => {
       buildScholarship(1, 'Maria Souza', new Date(2026, 8, 10)),
       buildScholarship(2, 'João Lima', new Date(2026, 8, 25))
     ])
-    adminRepository.findAllOrderedByName.mockResolvedValue([
+    userRepository.findAllByType.mockResolvedValue([
       makeAdmin({ id: 3, name: 'Carlos Lima', email: 'carlos@ufba.br' }),
       makeAdmin({ id: 4, name: 'Ana Dias', email: 'ana@ufba.br' })
     ])
 
     await service.notifyAdminsAboutScholarshipsEndingThisMonth()
 
+    expect(userRepository.findAllByType).toHaveBeenCalledWith('ADMIN')
     expect(emailService.sendEmail).toHaveBeenCalledTimes(2)
 
     const [primeiro] = emailService.sendEmail.mock.calls[0]

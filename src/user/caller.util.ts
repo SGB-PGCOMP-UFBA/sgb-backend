@@ -1,19 +1,17 @@
+import { UnauthorizedException } from '@nestjs/common'
 import { Caller } from '@/user/caller.interface'
-import { ManagedUser } from '@/user/managed-user.interface'
 
-const isAdvisorRole = (role: string) =>
-  role === 'ADVISOR' || role === 'ADVISOR_WITH_ADMIN_PRIVILEGES'
+/** O `sub` do token é `${id}-${role}`; o id já identifica o usuário. */
+export function callerIdOf(caller: Caller): number {
+  const id = Number((caller?.userId ?? '').split('-')[0])
 
-export function isCaller(
-  user: Pick<ManagedUser, 'id' | 'role'>,
-  caller: Caller
-): boolean {
-  const [callerId, callerRole] = caller.userId.split(/-(.+)/)
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new UnauthorizedException()
+  }
 
-  if (Number(callerId) !== user.id) return false
+  return id
+}
 
-  return (
-    callerRole === user.role ||
-    (isAdvisorRole(callerRole) && isAdvisorRole(user.role))
-  )
+export function isCaller(user: { id: number }, caller: Caller): boolean {
+  return callerIdOf(caller) === user.id
 }

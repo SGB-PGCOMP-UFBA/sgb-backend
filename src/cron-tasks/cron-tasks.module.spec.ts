@@ -3,12 +3,6 @@ import { compileFeatureModule } from '@/common/testing/wiring'
 import { CronTasksModule } from '@/cron-tasks/cron-tasks.module'
 import { ScholarshipFinalizerService } from '@/cron-tasks/scholarship-finalizer.service'
 import { ScholarshipMonthlyReportService } from '@/cron-tasks/scholarship-monthly-report.service'
-import { Admin } from '@/admin/entities/admin.entity'
-import { AdminRepository } from '@/admin/repositories/admin.repository'
-import { TypeOrmAdminRepository } from '@/admin/repositories/typeorm-admin.repository'
-import { Advisor } from '@/advisor/entities/advisor.entity'
-import { AdvisorRepository } from '@/advisor/repositories/advisor.repository'
-import { TypeOrmAdvisorRepository } from '@/advisor/repositories/typeorm-advisor.repository'
 import { Agency } from '@/agency/entities/agency.entity'
 import { AgencyRepository } from '@/agency/repositories/agency.repository'
 import { TypeOrmAgencyRepository } from '@/agency/repositories/typeorm-agency.repository'
@@ -24,24 +18,20 @@ import { TypeOrmEnrollmentRepository } from '@/enrollment/repositories/typeorm-e
 import { Scholarship } from '@/scholarship/entities/scholarship.entity'
 import { ScholarshipRepository } from '@/scholarship/repositories/scholarship.repository'
 import { TypeOrmScholarshipRepository } from '@/scholarship/repositories/typeorm-scholarship.repository'
-import { Student } from '@/student/entities/student.entity'
-import { StudentRepository } from '@/student/repositories/student.repository'
-import { TypeOrmStudentRepository } from '@/student/repositories/typeorm-student.repository'
+import { User } from '@/user/entities/user.entity'
+import { UserRepository } from '@/user/repositories/user.repository'
+import { TypeOrmUserRepository } from '@/user/repositories/typeorm-user.repository'
 
 const ENTITIES = [
-  Admin,
-  Advisor,
   Agency,
   Allocation,
   EmbedNotification,
   Enrollment,
   Scholarship,
-  Student
+  User
 ]
 
 const BINDINGS = [
-  { provide: AdminRepository, useClass: TypeOrmAdminRepository },
-  { provide: AdvisorRepository, useClass: TypeOrmAdvisorRepository },
   { provide: AgencyRepository, useClass: TypeOrmAgencyRepository },
   { provide: AllocationRepository, useClass: TypeOrmAllocationRepository },
   {
@@ -50,7 +40,7 @@ const BINDINGS = [
   },
   { provide: EnrollmentRepository, useClass: TypeOrmEnrollmentRepository },
   { provide: ScholarshipRepository, useClass: TypeOrmScholarshipRepository },
-  { provide: StudentRepository, useClass: TypeOrmStudentRepository }
+  { provide: UserRepository, useClass: TypeOrmUserRepository }
 ]
 
 describe('CronTasksModule', () => {

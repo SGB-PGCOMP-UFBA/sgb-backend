@@ -13,7 +13,8 @@ import { constants } from '@/common/utils/constants'
 import { ScholarshipMapper } from './scholarship.mapper'
 import { ScholarshipFilters } from './scholarship-filters.interface'
 import { ScholarshipRepository } from '@/scholarship/repositories/scholarship.repository'
-import { StudentService } from '@/student/student.service'
+import { UserRepository } from '@/user/repositories/user.repository'
+import { findStudentByEmail } from '@/user/user-lookup.util'
 import { AgencyService } from '@/agency/agency.service'
 import { AllocationService } from '@/allocation/allocation.service'
 import { EnrollmentService } from '@/enrollment/enrollment.service'
@@ -51,7 +52,7 @@ export class ScholarshipService {
     private agencyService: AgencyService,
     private allocationService: AllocationService,
     private enrollmentService: EnrollmentService,
-    private studentService: StudentService
+    private readonly userRepository: UserRepository
   ) {}
 
   async findAll(): Promise<Scholarship[]> {
@@ -242,7 +243,10 @@ export class ScholarshipService {
 
   async update(id: number, dto: UpdateScholarshipDto) {
     try {
-      const student = await this.studentService.findByEmail(dto.student_email)
+      const student = await findStudentByEmail(
+        this.userRepository,
+        dto.student_email
+      )
 
       const enrollment = await this.enrollmentService.findOneByIdAndStudentId(
         dto.enrollment_id,

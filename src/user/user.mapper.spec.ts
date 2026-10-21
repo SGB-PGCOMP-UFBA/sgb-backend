@@ -1,10 +1,17 @@
 import { describe, expect, it } from 'vitest'
-import { makeAdmin, makeAdvisor, makeStudent } from '@/common/testing/factories'
 import {
-  toManagedAdmin,
-  toManagedAdvisor,
-  toManagedStudent,
-  toResponseUserDto
+  makeAdmin,
+  makeAdvisor,
+  makeEnrollment,
+  makeStudent
+} from '@/common/testing/factories'
+import {
+  toAdvisorFilterOption,
+  toAdvisorSummary,
+  toManagedUser,
+  toResponseUserDto,
+  toStudentSummary,
+  toStudentWithEnrollments
 } from './user.mapper'
 
 describe('toResponseUserDto', () => {
@@ -46,11 +53,11 @@ describe('toResponseUserDto', () => {
   })
 })
 
-describe('mapeamento para a página de gerenciamento de usuários', () => {
+describe('toManagedUser', () => {
   it('estudante sai com o Lattes e sem situação', () => {
     expect(
-      toManagedStudent(
-        makeStudent({ link_to_lattes: 'http://lattes.cnpq.br/1' })
+      toManagedUser(
+        makeStudent({ link_to_lattes: 'http://lattes.cnpq.br/1', status: 'X' })
       )
     ).toMatchObject({
       role: 'STUDENT',
@@ -66,15 +73,18 @@ describe('mapeamento para a página de gerenciamento de usuários', () => {
     'orientador sai com o perfil de acordo com o privilégio de administrador (%s → %s)',
     (hasAdminPrivileges, role) => {
       expect(
-        toManagedAdvisor(
-          makeAdvisor({ has_admin_privileges: hasAdminPrivileges })
+        toManagedUser(
+          makeAdvisor({
+            has_admin_privileges: hasAdminPrivileges,
+            link_to_lattes: 'sobra'
+          })
         )
       ).toMatchObject({ role, status: 'ACTIVE', link_to_lattes: null })
     }
   )
 
   it('administrador sai com o perfil ADMIN e a situação dele', () => {
-    expect(toManagedAdmin(makeAdmin({ status: 'INACTIVE' }))).toMatchObject({
+    expect(toManagedUser(makeAdmin({ status: 'INACTIVE' }))).toMatchObject({
       role: 'ADMIN',
       status: 'INACTIVE',
       link_to_lattes: null
@@ -83,17 +93,101 @@ describe('mapeamento para a página de gerenciamento de usuários', () => {
 
   it('CPF e telefone vazios saem como null', () => {
     expect(
-      toManagedAdvisor(makeAdvisor({ tax_id: '', phone_number: '' }))
+      toManagedUser(makeAdvisor({ tax_id: '', phone_number: '' }))
     ).toMatchObject({ tax_id: null, phone_number: null })
   })
 
   it('nunca inclui a senha', () => {
-    for (const user of [
-      toManagedStudent(makeStudent()),
-      toManagedAdvisor(makeAdvisor()),
-      toManagedAdmin(makeAdmin())
-    ]) {
-      expect(user).not.toHaveProperty('password')
+    for (const user of [makeStudent(), makeAdvisor(), makeAdmin()]) {
+      expect(toManagedUser(user)).not.toHaveProperty('password')
     }
+  })
+})
+
+describe('toResponseUserDto com orientador', () => {
+  it('usa o perfil de orientador administrador quando há privilégio', () => {
+    expect(
+      toResponseUserDto(makeAdvisor({ has_admin_privileges: true })).role
+    ).toBe('ADVISOR_WITH_ADMIN_PRIVILEGES')
+  })
+})
+
+describe('toAdvisorSummary', () => {
+  it('conta as orientações quando a relação está carregada', () => {
+    const advisor = makeAdvisor({
+      advised_enrollments: makeEnrollment.list(2, (index) => ({
+        id: index + 1
+      }))
+    })
+
+    expect(toAdvisorSummary(advisor).enrollmentsCount).toBe(2)
+  })
+
+  it.each([[undefined], [null]])(
+    'quando as orientações não foram carregadas, conta zero (%s)',
+    (notLoaded) => {
+      const advisor = makeAdvisor({ advised_enrollments: notLoaded as never })
+
+      expect(toAdvisorSummary(advisor).enrollmentsCount).toBe(0)
+    }
+  )
+
+  it('mantém o formato que a tela de orientadores e as bolsas consomem', () => {
+    expect(
+      toAdvisorSummary(makeAdvisor({ has_admin_privileges: true }))
+    ).toEqual({
+      id: 10,
+      role: 'ADVISOR_WITH_ADMIN_PRIVILEGES',
+      status: 'ACTIVE',
+      created_at: expect.any(Date),
+      updated_at: expect.any(Date),
+      tax_id: '98765432100',
+      phone_number: '71988888888',
+      name: 'Orientadora Teste',
+      email: 'orientadora@ufba.br',
+      enrollmentsCount: 0,
+      has_admin_privileges: true
+    })
+  })
+})
+
+describe('toAdvisorFilterOption', () => {
+  it('usa o nome como chave e valor', () => {
+    expect(toAdvisorFilterOption(makeAdvisor())).toEqual({
+      id: 10,
+      key: 'Orientadora Teste',
+      value: 'Orientadora Teste',
+      email: 'orientadora@ufba.br'
+    })
+  })
+})
+
+describe('toStudentSummary', () => {
+  it('traz os dados cadastrais sem a senha', () => {
+    const summary = toStudentSummary(makeStudent())
+
+    expect(summary).toMatchObject({
+      id: 7,
+      role: 'STUDENT',
+      name: 'Aluno Teste',
+      link_to_lattes: 'http://lattes.cnpq.br/1'
+    })
+    expect(summary).not.toHaveProperty('password')
+  })
+})
+
+describe('toStudentWithEnrollments', () => {
+  it('detalha as matrículas com o orientador de cada uma', () => {
+    const student = makeStudent({
+      enrollments: [makeEnrollment({ id: 42, enrollment_number: '202412341' })]
+    })
+
+    const [enrollment] = toStudentWithEnrollments(student).enrollments
+
+    expect(enrollment).toMatchObject({
+      id: 42,
+      enrollment_number: '202412341',
+      advisor: { name: 'Orientadora Teste' }
+    })
   })
 })

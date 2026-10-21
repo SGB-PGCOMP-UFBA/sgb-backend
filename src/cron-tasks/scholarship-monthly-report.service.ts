@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Cron } from '@nestjs/schedule'
-import { AdminRepository } from '@/admin/repositories/admin.repository'
+import { UserRepository } from '@/user/repositories/user.repository'
 import { EmailService } from '@/email/email.service'
 import { Scholarship } from '@/scholarship/entities/scholarship.entity'
 import { ScholarshipRepository } from '@/scholarship/repositories/scholarship.repository'
@@ -18,7 +18,7 @@ import {
 @Injectable()
 export class ScholarshipMonthlyReportService {
   constructor(
-    private adminRepository: AdminRepository,
+    private userRepository: UserRepository,
     private emailService: EmailService,
     private scholarshipRepository: ScholarshipRepository
   ) {}
@@ -40,7 +40,7 @@ export class ScholarshipMonthlyReportService {
       return
     }
 
-    const admins = await this.adminRepository.findAllOrderedByName()
+    const admins = await this.userRepository.findAllByType('ADMIN')
 
     if (admins.length === 0) {
       this.logger.warn('No admin registered to receive the monthly report.')

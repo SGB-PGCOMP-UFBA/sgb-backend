@@ -10,7 +10,7 @@ const NOW = new Date('2026-10-08T12:00:00Z')
 const MINUTE = 60 * 1000
 const messages = constants.exceptionMessages.passwordRecovery
 
-type Mock = ReturnType<typeof vi.fn>
+type Mock = ReturnType<typeof vi.fn<(...args: any[]) => any>>
 
 describe('PasswordRecoveryService', () => {
   let emailService: { sendEmail: Mock }
@@ -22,13 +22,13 @@ describe('PasswordRecoveryService', () => {
     | 'markAsUsed',
     Mock
   >
-  let studentRepository: { findByEmail: Mock; updatePasswordById: Mock }
-  let advisorRepository: {
+  /** Uma busca por perfil, para cada teste controlar só a que interessa. */
+  let accounts: Record<'STUDENT' | 'ADVISOR' | 'ADMIN' | 'ADVISOR_ADMIN', Mock>
+  let userRepository: {
     findByEmail: Mock
-    findByEmailAndAdminPrivileges: Mock
-    updatePasswordById: Mock
+    findAdvisorWithAdminPrivilegesByEmail: Mock
+    updatePassword: Mock
   }
-  let adminRepository: { findByEmail: Mock; updatePasswordById: Mock }
   let service: PasswordRecoveryService
 
   beforeEach(() => {
@@ -43,26 +43,31 @@ describe('PasswordRecoveryService', () => {
       incrementAttempts: vi.fn().mockResolvedValue(undefined),
       markAsUsed: vi.fn().mockResolvedValue(undefined)
     }
-    studentRepository = {
-      findByEmail: vi.fn().mockResolvedValue({ id: 10 }),
-      updatePasswordById: vi.fn().mockResolvedValue(undefined)
+    accounts = {
+      STUDENT: vi.fn().mockResolvedValue({ id: 10 }),
+      ADVISOR: vi.fn().mockResolvedValue({ id: 20 }),
+      ADMIN: vi.fn().mockResolvedValue({ id: 30 }),
+      ADVISOR_ADMIN: vi.fn().mockResolvedValue(null)
     }
-    advisorRepository = {
-      findByEmail: vi.fn().mockResolvedValue({ id: 20 }),
-      findByEmailAndAdminPrivileges: vi.fn().mockResolvedValue(null),
-      updatePasswordById: vi.fn().mockResolvedValue(undefined)
+    const typed = async (found: Promise<object | null>, role: string) => {
+      const user = await found
+      return user && { ...user, role }
     }
-    adminRepository = {
-      findByEmail: vi.fn().mockResolvedValue({ id: 30 }),
-      updatePasswordById: vi.fn().mockResolvedValue(undefined)
+    userRepository = {
+      findByEmail: vi.fn(
+        (email: string, type: 'STUDENT' | 'ADVISOR' | 'ADMIN') =>
+          typed(accounts[type](email), type)
+      ),
+      findAdvisorWithAdminPrivilegesByEmail: vi.fn((email: string) =>
+        typed(accounts.ADVISOR_ADMIN(email), 'ADVISOR')
+      ),
+      updatePassword: vi.fn().mockResolvedValue(undefined)
     }
 
     service = new PasswordRecoveryService(
       emailService as never,
       verificationCodeRepository as never,
-      studentRepository as never,
-      advisorRepository as never,
-      adminRepository as never
+      userRepository as never
     )
   })
 
@@ -93,9 +98,7 @@ describe('PasswordRecoveryService', () => {
   }
 
   function passwordUpdates() {
-    return [studentRepository, advisorRepository, adminRepository].flatMap(
-      (repository) => repository.updatePasswordById.mock.calls
-    )
+    return userRepository.updatePassword.mock.calls
   }
 
   describe('sendCode', () => {
@@ -150,7 +153,7 @@ describe('PasswordRecoveryService', () => {
     ])(
       'vincula o código à conta certa (%s, orientador admin: %s)',
       async (role, isAdvisorAdmin, table, id) => {
-        advisorRepository.findByEmailAndAdminPrivileges.mockResolvedValue(
+        accounts.ADVISOR_ADMIN.mockResolvedValue(
           isAdvisorAdmin ? { id: 21 } : null
         )
 
@@ -163,13 +166,10 @@ describe('PasswordRecoveryService', () => {
     )
 
     it.each([
-      ['STUDENT', () => studentRepository.findByEmail],
-      ['ADVISOR', () => advisorRepository.findByEmail],
-      [
-        'ADVISOR_WITH_ADMIN_PRIVILEGES',
-        () => advisorRepository.findByEmailAndAdminPrivileges
-      ],
-      ['ADMIN', () => adminRepository.findByEmail]
+      ['STUDENT', () => accounts.STUDENT],
+      ['ADVISOR', () => accounts.ADVISOR],
+      ['ADVISOR_WITH_ADMIN_PRIVILEGES', () => accounts.ADVISOR_ADMIN],
+      ['ADMIN', () => accounts.ADMIN]
     ])(
       'quando a conta não existe, responde sem erro e sem enviar nada (%s)',
       async (role, lookup) => {
@@ -222,7 +222,7 @@ describe('PasswordRecoveryService', () => {
   describe('requestCode', () => {
     it('responde antes de procurar a conta e de enviar o e-mail', () => {
       let releaseLookup: (value: unknown) => void = () => undefined
-      studentRepository.findByEmail.mockReturnValue(
+      accounts.STUDENT.mockReturnValue(
         new Promise((resolve) => {
           releaseLookup = resolve
         })
@@ -311,7 +311,7 @@ describe('PasswordRecoveryService', () => {
 
     it('com conta inexistente, ainda compara o código para não responder mais rápido', async () => {
       const compare = vi.spyOn(bcryptUtil, 'comparePasswordOrDecoy')
-      studentRepository.findByEmail.mockResolvedValue(null)
+      accounts.STUDENT.mockResolvedValue(null)
 
       await service
         .verifyCode(request('STUDENT', { code: '123456' }))
@@ -328,7 +328,7 @@ describe('PasswordRecoveryService', () => {
     })
 
     it('com conta inexistente, recusa como código inválido', async () => {
-      studentRepository.findByEmail.mockResolvedValue(null)
+      accounts.STUDENT.mockResolvedValue(null)
 
       await expect(
         service.verifyCode(request('STUDENT', { code: '123456' }))
@@ -350,14 +350,14 @@ describe('PasswordRecoveryService', () => {
     }
 
     it.each([
-      ['STUDENT', false, () => studentRepository, 10],
-      ['ADVISOR', false, () => advisorRepository, 20],
-      ['ADMIN', true, () => advisorRepository, 21],
-      ['ADMIN', false, () => adminRepository, 30]
+      ['STUDENT', false, 10],
+      ['ADVISOR', false, 20],
+      ['ADMIN', true, 21],
+      ['ADMIN', false, 30]
     ])(
       'grava a nova senha hasheada na conta certa e consome o código (%s, orientador admin: %s)',
-      async (role, isAdvisorAdmin, target, id) => {
-        advisorRepository.findByEmailAndAdminPrivileges.mockResolvedValue(
+      async (role, isAdvisorAdmin, id) => {
+        accounts.ADVISOR_ADMIN.mockResolvedValue(
           isAdvisorAdmin ? { id: 21 } : null
         )
         verificationCodeRepository.findLatestByAccount.mockResolvedValue(
@@ -367,7 +367,7 @@ describe('PasswordRecoveryService', () => {
         await service.confirmReset(confirmation(role))
 
         expect(passwordUpdates()).toHaveLength(1)
-        const [accountId, hash] = target().updatePasswordById.mock.calls[0]
+        const [accountId, hash] = passwordUpdates()[0]
         expect(accountId).toBe(id)
         await expect(comparePassword('nova1', hash)).resolves.toBe(true)
         expect(verificationCodeRepository.markAsUsed).toHaveBeenCalledWith(

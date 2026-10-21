@@ -15,32 +15,21 @@ import { TypeOrmAgencyRepository } from '@/agency/repositories/typeorm-agency.re
 import { Allocation } from '@/allocation/entities/allocation.entity'
 import { AllocationRepository } from '@/allocation/repositories/allocation.repository'
 import { TypeOrmAllocationRepository } from '@/allocation/repositories/typeorm-allocation.repository'
-import { Advisor } from '@/advisor/entities/advisor.entity'
-import { AdvisorRepository } from '@/advisor/repositories/advisor.repository'
-import { TypeOrmAdvisorRepository } from '@/advisor/repositories/typeorm-advisor.repository'
 import { Enrollment } from '@/enrollment/entities/enrollment.entity'
 import { EnrollmentRepository } from '@/enrollment/repositories/enrollment.repository'
 import { TypeOrmEnrollmentRepository } from '@/enrollment/repositories/typeorm-enrollment.repository'
-import { Student } from '@/student/entities/student.entity'
-import { StudentRepository } from '@/student/repositories/student.repository'
-import { TypeOrmStudentRepository } from '@/student/repositories/typeorm-student.repository'
 import { EmbedNotification } from '@/embed-notification/entities/embed-notification.entity'
 import { EmbedNotificationRepository } from '@/embed-notification/repositories/embed-notification.repository'
 import { TypeOrmEmbedNotificationRepository } from '@/embed-notification/repositories/typeorm-embed-notification.repository'
+import { User } from '@/user/entities/user.entity'
+import { UserRepository } from '@/user/repositories/user.repository'
+import { TypeOrmUserRepository } from '@/user/repositories/typeorm-user.repository'
 
 describe('ScholarshipModule', () => {
   it('monta o ScholarshipService com os repositórios e serviços de que depende', async () => {
     const moduleRef = await compileFeatureModule(
       ScholarshipModule,
-      [
-        Scholarship,
-        Agency,
-        Allocation,
-        Advisor,
-        Enrollment,
-        Student,
-        EmbedNotification
-      ],
+      [Scholarship, Agency, Allocation, Enrollment, User, EmbedNotification],
       [
         {
           provide: ScholarshipRepository,
@@ -51,16 +40,15 @@ describe('ScholarshipModule', () => {
           provide: AllocationRepository,
           useClass: TypeOrmAllocationRepository
         },
-        { provide: AdvisorRepository, useClass: TypeOrmAdvisorRepository },
         {
           provide: EnrollmentRepository,
           useClass: TypeOrmEnrollmentRepository
         },
-        { provide: StudentRepository, useClass: TypeOrmStudentRepository },
         {
           provide: EmbedNotificationRepository,
           useClass: TypeOrmEmbedNotificationRepository
-        }
+        },
+        { provide: UserRepository, useClass: TypeOrmUserRepository }
       ]
     )
 

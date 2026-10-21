@@ -1,79 +1,77 @@
+import { ForbiddenException, NotFoundException } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { makeAdmin, makeAdvisor, makeStudent } from '@/common/testing/factories'
-import { AdminRepository } from '@/admin/repositories/admin.repository'
-import { AdvisorRepository } from '@/advisor/repositories/advisor.repository'
-import { StudentRepository } from '@/student/repositories/student.repository'
+import {
+  makeAdmin,
+  makeAdvisor,
+  makeEnrollment,
+  makeStudent
+} from '@/common/testing/factories'
+import { UserRepository } from '@/user/repositories/user.repository'
 import { UserService } from './user.service'
 
+type Mock = ReturnType<typeof vi.fn>
+
 describe('UserService', () => {
-  let studentRepository: {
-    findByEmail: ReturnType<typeof vi.fn>
-    search: ReturnType<typeof vi.fn>
-  }
-  let advisorRepository: {
-    findByEmail: ReturnType<typeof vi.fn>
-    findByEmailAndAdminPrivileges: ReturnType<typeof vi.fn>
-    search: ReturnType<typeof vi.fn>
-  }
-  let adminRepository: {
-    findByEmail: ReturnType<typeof vi.fn>
-    search: ReturnType<typeof vi.fn>
-  }
+  let userRepository: Record<
+    | 'findByEmail'
+    | 'findAdvisorWithAdminPrivilegesByEmail'
+    | 'search'
+    | 'findAllByType'
+    | 'findAdvisorsWithEnrollments'
+    | 'findStudentWithEnrollments'
+    | 'findStudentsByAdvisorId',
+    Mock
+  >
   let service: UserService
 
   beforeEach(() => {
-    studentRepository = {
+    userRepository = {
       findByEmail: vi.fn().mockResolvedValue(null),
-      search: vi.fn().mockResolvedValue([])
+      findAdvisorWithAdminPrivilegesByEmail: vi.fn().mockResolvedValue(null),
+      search: vi.fn().mockResolvedValue([]),
+      findAllByType: vi.fn().mockResolvedValue([]),
+      findAdvisorsWithEnrollments: vi.fn().mockResolvedValue([]),
+      findStudentWithEnrollments: vi.fn().mockResolvedValue(null),
+      findStudentsByAdvisorId: vi.fn().mockResolvedValue([])
     }
-    advisorRepository = {
-      findByEmail: vi.fn().mockResolvedValue(null),
-      findByEmailAndAdminPrivileges: vi.fn().mockResolvedValue(null),
-      search: vi.fn().mockResolvedValue([])
-    }
-    adminRepository = {
-      findByEmail: vi.fn().mockResolvedValue(null),
-      search: vi.fn().mockResolvedValue([])
-    }
-    service = new UserService(
-      studentRepository as unknown as StudentRepository,
-      advisorRepository as unknown as AdvisorRepository,
-      adminRepository as unknown as AdminRepository
+    service = new UserService(userRepository as unknown as UserRepository)
+  })
+
+  describe('findUserByEmailAndRole', () => {
+    it.each([['STUDENT'], ['ADVISOR']] as const)(
+      'com o perfil %s, procura só entre as linhas desse tipo',
+      async (role) => {
+        userRepository.findByEmail.mockResolvedValue(makeStudent())
+
+        const user = await service.findUserByEmailAndRole('ana@ufba.br', role)
+
+        expect(userRepository.findByEmail).toHaveBeenCalledWith(
+          'ana@ufba.br',
+          role
+        )
+        expect(user.role).toBe(role)
+      }
     )
-  })
 
-  describe('STUDENT', () => {
-    it('procura só na base de estudantes', async () => {
-      studentRepository.findByEmail.mockResolvedValue(makeStudent())
-
-      await service.findUserByEmailAndRole('ana@ufba.br', 'STUDENT')
-
-      expect(studentRepository.findByEmail).toHaveBeenCalledWith('ana@ufba.br')
-      expect(advisorRepository.findByEmail).not.toHaveBeenCalled()
-      expect(adminRepository.findByEmail).not.toHaveBeenCalled()
-    })
-  })
-
-  describe('ADVISOR', () => {
-    it('procura só na base de orientadores, sem exigir privilégio', async () => {
-      advisorRepository.findByEmail.mockResolvedValue(makeAdvisor())
-
-      await service.findUserByEmailAndRole('orientador@ufba.br', 'ADVISOR')
-
-      expect(advisorRepository.findByEmail).toHaveBeenCalledWith(
-        'orientador@ufba.br'
+    it('com o perfil ADVISOR, entra como orientador mesmo tendo privilégio de administrador', async () => {
+      userRepository.findByEmail.mockResolvedValue(
+        makeAdvisor({ has_admin_privileges: true })
       )
-      expect(
-        advisorRepository.findByEmailAndAdminPrivileges
-      ).not.toHaveBeenCalled()
-      expect(studentRepository.findByEmail).not.toHaveBeenCalled()
-    })
-  })
 
-  describe('ADMIN', () => {
-    it('quando é um orientador com privilégio, marca o papel como ADVISOR_WITH_ADMIN_PRIVILEGES e não consulta a base de admins', async () => {
-      advisorRepository.findByEmailAndAdminPrivileges.mockResolvedValue(
-        makeAdvisor()
+      const user = await service.findUserByEmailAndRole(
+        'orientador@ufba.br',
+        'ADVISOR'
+      )
+
+      expect(user.role).toBe('ADVISOR')
+      expect(
+        userRepository.findAdvisorWithAdminPrivilegesByEmail
+      ).not.toHaveBeenCalled()
+    })
+
+    it('com o perfil ADMIN, quando é orientador com privilégio, entra como ADVISOR_WITH_ADMIN_PRIVILEGES sem procurar administradores', async () => {
+      userRepository.findAdvisorWithAdminPrivilegesByEmail.mockResolvedValue(
+        makeAdvisor({ has_admin_privileges: true })
       )
 
       const user = await service.findUserByEmailAndRole(
@@ -81,72 +79,160 @@ describe('UserService', () => {
         'ADMIN'
       )
 
-      expect(
-        advisorRepository.findByEmailAndAdminPrivileges
-      ).toHaveBeenCalledWith('orientador@ufba.br', true)
       expect(user.role).toBe('ADVISOR_WITH_ADMIN_PRIVILEGES')
-      expect(adminRepository.findByEmail).not.toHaveBeenCalled()
+      expect(userRepository.findByEmail).not.toHaveBeenCalled()
     })
 
-    it('quando não é orientador com privilégio, cai para a base de admins', async () => {
-      advisorRepository.findByEmailAndAdminPrivileges.mockResolvedValue(null)
-      adminRepository.findByEmail.mockResolvedValue(makeAdmin())
+    it('com o perfil ADMIN, quando não é orientador com privilégio, procura entre os administradores', async () => {
+      userRepository.findByEmail.mockResolvedValue(makeAdmin())
 
       const user = await service.findUserByEmailAndRole(
         'carlos@ufba.br',
         'ADMIN'
       )
 
-      expect(adminRepository.findByEmail).toHaveBeenCalledWith('carlos@ufba.br')
-      expect(user.role).not.toBe('ADVISOR_WITH_ADMIN_PRIVILEGES')
+      expect(userRepository.findByEmail).toHaveBeenCalledWith(
+        'carlos@ufba.br',
+        'ADMIN'
+      )
+      expect(user.role).toBe('ADMIN')
     })
 
-    it('quando não existe em nenhuma das duas bases, devolve null', async () => {
+    it.each([['STUDENT'], ['ADVISOR'], ['ADMIN']])(
+      'quando a conta não existe, devolve null (%s)',
+      async (role) => {
+        await expect(
+          service.findUserByEmailAndRole('sumiu@ufba.br', role)
+        ).resolves.toBeNull()
+      }
+    )
+
+    it('quando o perfil é desconhecido, não consulta nada e devolve null', async () => {
       await expect(
-        service.findUserByEmailAndRole('sumiu@ufba.br', 'ADMIN')
+        service.findUserByEmailAndRole('ana@ufba.br', 'PAPEL_INEXISTENTE')
       ).resolves.toBeNull()
+      expect(userRepository.findByEmail).not.toHaveBeenCalled()
     })
   })
 
-  it.each([['STUDENT'], ['ADVISOR'], ['ADMIN']])(
-    'quando o usuário não é encontrado, devolve null (%s)',
-    async (role) => {
-      await expect(
-        service.findUserByEmailAndRole('sumiu@ufba.br', role)
-      ).resolves.toBeNull()
-    }
-  )
+  describe('findAdvisors', () => {
+    it('lista os orientadores com a contagem de orientações', async () => {
+      userRepository.findAdvisorsWithEnrollments.mockResolvedValue([
+        makeAdvisor({ advised_enrollments: [makeEnrollment()] })
+      ])
 
-  it('quando o papel é desconhecido, não consulta base nenhuma e devolve null', async () => {
-    await expect(
-      service.findUserByEmailAndRole('ana@ufba.br', 'PAPEL_INEXISTENTE')
-    ).resolves.toBeNull()
-    expect(studentRepository.findByEmail).not.toHaveBeenCalled()
-    expect(advisorRepository.findByEmail).not.toHaveBeenCalled()
-    expect(adminRepository.findByEmail).not.toHaveBeenCalled()
+      const [advisor] = await service.findAdvisors()
+
+      expect(advisor).toMatchObject({ id: 10, enrollmentsCount: 1 })
+    })
+  })
+
+  describe('findAdvisorsForFilter', () => {
+    it('lista só orientadores, como opções de filtro', async () => {
+      userRepository.findAllByType.mockResolvedValue([makeAdvisor()])
+
+      const options = await service.findAdvisorsForFilter()
+
+      expect(userRepository.findAllByType).toHaveBeenCalledWith('ADVISOR')
+      expect(options).toEqual([
+        expect.objectContaining({ key: 'Orientadora Teste' })
+      ])
+    })
+  })
+
+  describe('findStudent', () => {
+    it('o estudante consulta os próprios dados com as matrículas', async () => {
+      userRepository.findStudentWithEnrollments.mockResolvedValue(
+        makeStudent({ id: 7 })
+      )
+
+      const student = await service.findStudent(7, {
+        userId: '7-STUDENT',
+        role: 'STUDENT'
+      })
+
+      expect(student).toMatchObject({ id: 7, enrollments: [] })
+    })
+
+    it('o estudante não consulta outro estudante', async () => {
+      await expect(
+        service.findStudent(8, { userId: '7-STUDENT', role: 'STUDENT' })
+      ).rejects.toBeInstanceOf(ForbiddenException)
+      expect(userRepository.findStudentWithEnrollments).not.toHaveBeenCalled()
+    })
+
+    it('o administrador consulta qualquer estudante', async () => {
+      userRepository.findStudentWithEnrollments.mockResolvedValue(
+        makeStudent({ id: 8 })
+      )
+
+      await expect(
+        service.findStudent(8, { userId: '1-ADMIN', role: 'ADMIN' })
+      ).resolves.toMatchObject({ id: 8 })
+    })
+
+    it('quando o estudante não existe, lança NotFound', async () => {
+      await expect(
+        service.findStudent(8, { userId: '1-ADMIN', role: 'ADMIN' })
+      ).rejects.toBeInstanceOf(NotFoundException)
+    })
+  })
+
+  describe('findStudentsByAdvisor', () => {
+    it('o orientador lista os próprios orientandos', async () => {
+      userRepository.findStudentsByAdvisorId.mockResolvedValue([makeStudent()])
+
+      const students = await service.findStudentsByAdvisor(10, {
+        userId: '10-ADVISOR',
+        role: 'ADVISOR'
+      })
+
+      expect(userRepository.findStudentsByAdvisorId).toHaveBeenCalledWith(10)
+      expect(students).toHaveLength(1)
+    })
+
+    it('o orientador não lista orientandos de outro orientador', async () => {
+      await expect(
+        service.findStudentsByAdvisor(11, {
+          userId: '10-ADVISOR',
+          role: 'ADVISOR'
+        })
+      ).rejects.toBeInstanceOf(ForbiddenException)
+    })
+
+    it('o administrador lista os orientandos de qualquer orientador', async () => {
+      await service.findStudentsByAdvisor(11, {
+        userId: '1-ADMIN',
+        role: 'ADMIN'
+      })
+
+      expect(userRepository.findStudentsByAdvisorId).toHaveBeenCalledWith(11)
+    })
   })
 
   describe('findAll', () => {
+    const everyone = [
+      makeAdmin({ id: 3, name: 'Davi Administrador' }),
+      makeStudent({ id: 7, name: 'Bruna Estudante' }),
+      makeAdvisor({ id: 10, name: 'Ana Orientadora' }),
+      makeAdvisor({
+        id: 11,
+        name: 'Caio Orientador Admin',
+        has_admin_privileges: true
+      })
+    ]
+
     beforeEach(() => {
-      studentRepository.search.mockResolvedValue([
-        makeStudent({ id: 7, name: 'Bruna Estudante' })
-      ])
-      advisorRepository.search.mockResolvedValue([
-        makeAdvisor({ id: 10, name: 'Ana Orientadora' }),
-        makeAdvisor({
-          id: 11,
-          name: 'Caio Orientador Admin',
-          has_admin_privileges: true
-        })
-      ])
-      adminRepository.search.mockResolvedValue([
-        makeAdmin({ id: 3, name: 'Davi Administrador' })
-      ])
+      userRepository.search.mockImplementation(
+        async (_filters: unknown, type?: string) =>
+          everyone.filter((user) => !type || user.role === type)
+      )
     })
 
-    it('sem filtro de perfil, junta as três bases e ordena pelo nome', async () => {
+    it('sem filtro de perfil, faz uma só consulta e ordena pelo nome', async () => {
       const users = await service.findAll()
 
+      expect(userRepository.search).toHaveBeenCalledTimes(1)
       expect(users.map((user) => [user.name, user.role])).toEqual([
         ['Ana Orientadora', 'ADVISOR'],
         ['Bruna Estudante', 'STUDENT'],
@@ -165,7 +251,7 @@ describe('UserService', () => {
       expect(users).toHaveLength(3)
     })
 
-    it('reconhece o orientador administrador logado mesmo listado na tabela de orientadores', async () => {
+    it('reconhece o orientador administrador logado', async () => {
       const users = await service.findAll(
         {},
         {
@@ -179,57 +265,30 @@ describe('UserService', () => {
       )
     })
 
-    it('não remove quem só tem o mesmo id em outra tabela', async () => {
-      const users = await service.findAll(
-        {},
-        { userId: '7-ADMIN', role: 'ADMIN' }
-      )
-
-      expect(users.map((user) => user.name)).toContain('Bruna Estudante')
-    })
-
-    it('repassa os filtros de nome e e-mail para as três bases', async () => {
+    it('repassa os filtros de nome e e-mail para a consulta', async () => {
       await service.findAll({ name: 'ana', email: 'ufba' })
 
-      for (const repository of [
-        studentRepository,
-        advisorRepository,
-        adminRepository
-      ]) {
-        expect(repository.search).toHaveBeenCalledWith({
-          name: 'ana',
-          email: 'ufba'
-        })
-      }
-    })
-
-    it('com o perfil STUDENT, consulta só a base de estudantes', async () => {
-      const users = await service.findAll({ role: 'STUDENT' })
-
-      expect(users.map((user) => user.role)).toEqual(['STUDENT'])
-      expect(advisorRepository.search).not.toHaveBeenCalled()
-      expect(adminRepository.search).not.toHaveBeenCalled()
-    })
-
-    it('com o perfil ADMIN, consulta só a base de administradores', async () => {
-      const users = await service.findAll({ role: 'ADMIN' })
-
-      expect(users.map((user) => user.role)).toEqual(['ADMIN'])
-      expect(studentRepository.search).not.toHaveBeenCalled()
-      expect(advisorRepository.search).not.toHaveBeenCalled()
+      expect(userRepository.search).toHaveBeenCalledWith(
+        { name: 'ana', email: 'ufba' },
+        undefined
+      )
     })
 
     it.each([
-      ['ADVISOR', 'Ana Orientadora'],
-      ['ADVISOR_WITH_ADMIN_PRIVILEGES', 'Caio Orientador Admin']
+      ['STUDENT', 'STUDENT', ['Bruna Estudante']],
+      ['ADMIN', 'ADMIN', ['Davi Administrador']],
+      ['ADVISOR', 'ADVISOR', ['Ana Orientadora']],
+      ['ADVISOR_WITH_ADMIN_PRIVILEGES', 'ADVISOR', ['Caio Orientador Admin']]
     ] as const)(
-      'com o perfil %s, separa os orientadores pelo privilégio de administrador',
-      async (role, expectedName) => {
+      'com o perfil %s, consulta só as linhas do tipo %s',
+      async (role, type, expectedNames) => {
         const users = await service.findAll({ role })
 
-        expect(users.map((user) => user.name)).toEqual([expectedName])
-        expect(studentRepository.search).not.toHaveBeenCalled()
-        expect(adminRepository.search).not.toHaveBeenCalled()
+        expect(userRepository.search).toHaveBeenCalledWith(
+          { name: undefined, email: undefined },
+          type
+        )
+        expect(users.map((user) => user.name)).toEqual(expectedNames)
       }
     )
 
