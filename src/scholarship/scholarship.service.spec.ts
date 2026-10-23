@@ -8,6 +8,8 @@ import {
   notStartedScholarship,
   extendedScholarship,
   daysFromToday,
+  makeAdmin,
+  makeAdvisor,
   makeAgency,
   makeAllocation,
   makeEnrollment,
@@ -40,6 +42,8 @@ function createScholarshipRepositoryMock() {
     findAllOccupyingSlot: vi.fn().mockResolvedValue([]),
     findAllEndingOn: vi.fn().mockResolvedValue([]),
     findAllEndingBetween: vi.fn().mockResolvedValue([]),
+    findByIdWithRelations: vi.fn().mockResolvedValue(null),
+    findAllByOwner: vi.fn().mockResolvedValue([]),
     findByIdAndEnrollmentId: vi.fn().mockResolvedValue(null),
     findDuplicateForCreate: vi.fn().mockResolvedValue(null),
     findDuplicateForUpdate: vi.fn().mockResolvedValue(null),
@@ -63,7 +67,10 @@ describe('ScholarshipService', () => {
   let agencyService: any
   let allocationService: any
   let enrollmentService: any
-  let userRepository: { findByEmail: ReturnType<typeof vi.fn> }
+  let userRepository: {
+    findByEmail: ReturnType<typeof vi.fn>
+    findById: ReturnType<typeof vi.fn>
+  }
   let service: ScholarshipService
 
   beforeEach(() => {
@@ -82,7 +89,10 @@ describe('ScholarshipService', () => {
         .mockResolvedValue(ENROLLMENT),
       findOneByIdAndStudentId: vi.fn().mockResolvedValue(ENROLLMENT)
     }
-    userRepository = { findByEmail: vi.fn().mockResolvedValue(makeStudent()) }
+    userRepository = {
+      findByEmail: vi.fn().mockResolvedValue(makeStudent()),
+      findById: vi.fn().mockResolvedValue(null)
+    }
 
     service = new ScholarshipService(
       repository as unknown as ScholarshipRepository,
@@ -96,6 +106,51 @@ describe('ScholarshipService', () => {
   function withAllocatedSlots(total: number) {
     repository.countAllocatedSlots.mockResolvedValue(total)
   }
+
+  describe('findOneWithRelations', () => {
+    it('quando a bolsa existe, devolve com as relações carregadas', async () => {
+      const scholarship = makeScholarship({ id: 5 })
+      repository.findByIdWithRelations.mockResolvedValue(scholarship)
+
+      await expect(service.findOneWithRelations(5)).resolves.toBe(scholarship)
+      expect(repository.findByIdWithRelations).toHaveBeenCalledWith(5)
+    })
+
+    it('quando a bolsa não existe, responde 404', async () => {
+      await expect(service.findOneWithRelations(99)).rejects.toThrow(
+        new NotFoundException('Bolsa não encontrada.')
+      )
+    })
+  })
+
+  describe('findAllByUser', () => {
+    it.each([
+      ['estudante', makeStudent({ id: 7 }), { student_id: 7 }],
+      ['orientador', makeAdvisor({ id: 10 }), { advisor_id: 10 }]
+    ] as const)(
+      'quando é %s, busca as bolsas das matrículas em que ele aparece',
+      async (_label, user, owner) => {
+        userRepository.findById.mockResolvedValue(user)
+
+        await service.findAllByUser(user.id)
+
+        expect(repository.findAllByOwner).toHaveBeenCalledWith(owner)
+      }
+    )
+
+    it('quando é administrador, devolve lista vazia sem consultar bolsas', async () => {
+      userRepository.findById.mockResolvedValue(makeAdmin({ id: 3 }))
+
+      await expect(service.findAllByUser(3)).resolves.toEqual([])
+      expect(repository.findAllByOwner).not.toHaveBeenCalled()
+    })
+
+    it('quando o usuário não existe, responde 404', async () => {
+      await expect(service.findAllByUser(99)).rejects.toThrow(
+        new NotFoundException('Usuário não encontrado.')
+      )
+    })
+  })
 
   describe('create', () => {
     it('quando ainda há vaga concedida, cria a bolsa', async () => {
@@ -285,6 +340,14 @@ describe('ScholarshipService', () => {
         expect.objectContaining({
           extension_ends_at: extended.extension_ends_at
         })
+      )
+    })
+
+    it('procura duplicata ignorando a própria bolsa', async () => {
+      await service.update(900, UPDATE_DTO)
+
+      expect(repository.findDuplicateForUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({ exclude_id: 900 })
       )
     })
 

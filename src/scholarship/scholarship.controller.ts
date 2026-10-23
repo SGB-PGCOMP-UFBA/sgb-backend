@@ -168,6 +168,25 @@ export class ScholarshipController {
     return ScholarshipMapper.copyFilteredScholarshipsStudentsEmails(emailsArray)
   }
 
+  /** Vem depois das rotas fixas para o Express não ler "paginated" como id. */
+  @Get('/by-user/:userId')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async findAllByUser(@Param('userId', ParseIntPipe) userId: number) {
+    const scholarships = await this.scholarshipService.findAllByUser(userId)
+    return scholarships.map((scholarship) =>
+      ScholarshipMapper.summary(scholarship)
+    )
+  }
+
+  @Get(':id')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    const scholarship = await this.scholarshipService.findOneWithRelations(id)
+    return ScholarshipMapper.detailedWithRelations(scholarship)
+  }
+
   @Patch(':id')
   @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES', 'STUDENT')
   @UseGuards(JwtAuthGuard, RolesGuard)

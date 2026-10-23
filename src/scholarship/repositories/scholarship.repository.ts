@@ -57,6 +57,8 @@ export type DuplicateCreateCriteria = {
 }
 
 export type DuplicateUpdateCriteria = {
+  /** A propria bolsa sendo editada nao conta como duplicata. */
+  exclude_id: number
   enrollment_id: number
   agency_id: number
   allocation_id: number
@@ -65,6 +67,9 @@ export type DuplicateUpdateCriteria = {
   scholarship_ends_at: Date
   extension_ends_at?: Date
 }
+
+/** Dono da bolsa pela matrícula: o estudante ou o orientador dela. */
+export type ScholarshipOwner = { student_id: number } | { advisor_id: number }
 
 export abstract class ScholarshipRepository {
   abstract findAllWithRelations(): Promise<Scholarship[]>
@@ -78,6 +83,8 @@ export abstract class ScholarshipRepository {
     startDay: string,
     endDay: string
   ): Promise<Scholarship[]>
+  abstract findByIdWithRelations(id: number): Promise<Scholarship | null>
+  abstract findAllByOwner(owner: ScholarshipOwner): Promise<Scholarship[]>
   abstract findByIdAndEnrollmentId(
     id: number,
     enrollmentId: number

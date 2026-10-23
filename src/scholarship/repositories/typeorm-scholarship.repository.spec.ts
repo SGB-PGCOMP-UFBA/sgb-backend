@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { IsNull, Not } from 'typeorm'
 import {
   createQueryBuilderMock,
   createRepositoryMock
@@ -32,6 +33,39 @@ describe('TypeOrmScholarshipRepository', () => {
     })
   })
 
+  it('findByIdWithRelations busca a bolsa pelo id com agência, alocação, matrícula e pessoas', async () => {
+    await repository.findByIdWithRelations(5)
+
+    expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
+      'scholarship.allocation',
+      'allocation'
+    )
+    expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
+      'enrollment.student',
+      'student'
+    )
+    expect(queryBuilder.where).toHaveBeenCalledWith('scholarship.id = :id', {
+      id: 5
+    })
+    expect(queryBuilder.getOne).toHaveBeenCalled()
+  })
+
+  it.each([
+    [{ student_id: 7 }, 'enrollment.student_id = :value', 7],
+    [{ advisor_id: 10 }, 'enrollment.advisor_id = :value', 10]
+  ] as const)(
+    'findAllByOwner filtra pela pessoa da matrícula (%o), da bolsa mais recente para a mais antiga',
+    async (owner, where, value) => {
+      await repository.findAllByOwner(owner)
+
+      expect(queryBuilder.where).toHaveBeenCalledWith(where, { value })
+      expect(queryBuilder.orderBy).toHaveBeenCalledWith(
+        'scholarship.scholarship_starts_at',
+        'DESC'
+      )
+    }
+  )
+
   it('findByIdAndEnrollmentId filtra pelo par bolsa + matrícula', async () => {
     await repository.findByIdAndEnrollmentId(900, 42)
 
@@ -39,6 +73,28 @@ describe('TypeOrmScholarshipRepository', () => {
       id: 900,
       enrollment_id: 42
     })
+  })
+
+  it('findDuplicateForUpdate ignora a própria bolsa, para salvar sem mudar os dados dela', async () => {
+    const criteria = {
+      exclude_id: 900,
+      enrollment_id: 42,
+      agency_id: 1,
+      allocation_id: 2,
+      salary: 2100,
+      scholarship_starts_at: new Date('2026-03-01'),
+      scholarship_ends_at: new Date('2027-02-28')
+    }
+
+    await repository.findDuplicateForUpdate(criteria)
+
+    expect(typeorm.findOneBy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: Not(900),
+        enrollment_id: 42,
+        extension_ends_at: IsNull()
+      })
+    )
   })
 
   it('findAllEndingOn compara a data efetiva de término com o dia informado', async () => {

@@ -222,6 +222,7 @@ export class ScholarshipService {
 
     const idempotencyScholarship =
       await this.scholarshipRepository.findDuplicateForUpdate({
+        exclude_id: id,
         enrollment_id: enrollment.id,
         agency_id: dto.agency_id,
         allocation_id: dto.allocation_id,
@@ -307,6 +308,45 @@ export class ScholarshipService {
       scholarship_starts_at: nextStartsAt,
       scholarship_ends_at: nextEndsAt
     })
+  }
+
+  async findOneWithRelations(id: number): Promise<Scholarship> {
+    const scholarship = await this.scholarshipRepository.findByIdWithRelations(
+      id
+    )
+
+    if (!scholarship) {
+      throw new NotFoundException(
+        constants.exceptionMessages.scholarship.NOT_FOUND
+      )
+    }
+
+    return scholarship
+  }
+
+  /**
+   * Bolsas das matrículas em que o usuário é o estudante ou o orientador.
+   * Administrador não tem matrícula, então a lista dele é vazia.
+   */
+  async findAllByUser(userId: number): Promise<Scholarship[]> {
+    const user = await this.userRepository.findById(userId)
+
+    if (!user) {
+      throw new NotFoundException(constants.exceptionMessages.user.NOT_FOUND)
+    }
+
+    switch (user.role) {
+      case 'STUDENT':
+        return await this.scholarshipRepository.findAllByOwner({
+          student_id: user.id
+        })
+      case 'ADVISOR':
+        return await this.scholarshipRepository.findAllByOwner({
+          advisor_id: user.id
+        })
+      default:
+        return []
+    }
   }
 
   async delete(id: number): Promise<boolean> {

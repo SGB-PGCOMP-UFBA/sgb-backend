@@ -77,6 +77,29 @@ export class ScholarshipMapper {
     }
   }
 
+  /** Linha curta da lista de bolsas na página do usuário. */
+  static summary(scholarship: Scholarship) {
+    const enrollment = scholarship.enrollment
+
+    return {
+      id: scholarship.id,
+      status: deriveScholarshipStatus(scholarship),
+      scholarship_starts_at: scholarship.scholarship_starts_at,
+      scholarship_ends_at: scholarship.scholarship_ends_at,
+      extension_ends_at: scholarship.extension_ends_at,
+      agency_name: scholarship.agency?.name ?? null,
+      allocation_name: scholarship.allocation?.name ?? null,
+      enrollment_number: enrollment?.enrollment_number ?? null,
+      enrollment_program: enrollment?.enrollment_program ?? null,
+      student: enrollment?.student
+        ? { id: enrollment.student.id, name: enrollment.student.name }
+        : null,
+      advisor: enrollment?.advisor
+        ? { id: enrollment.advisor.id, name: enrollment.advisor.name }
+        : null
+    }
+  }
+
   static detailedWithFullRelations(scholarship: Scholarship) {
     const agency = scholarship.agency
       ? AgencyMapper.simplified(scholarship.agency)

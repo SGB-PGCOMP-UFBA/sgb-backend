@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { IsNull, Repository, SelectQueryBuilder } from 'typeorm'
+import { IsNull, Not, Repository, SelectQueryBuilder } from 'typeorm'
 import {
   IPaginationOptions,
   Pagination,
@@ -16,6 +16,7 @@ import {
   AgencyStatusCountRow,
   DuplicateCreateCriteria,
   DuplicateUpdateCriteria,
+  ScholarshipOwner,
   ScholarshipRepository,
   SlotCountParams,
   StatusCountRow,
@@ -156,6 +157,24 @@ export class TypeOrmScholarshipRepository implements ScholarshipRepository {
       .getMany()
   }
 
+  async findByIdWithRelations(id: number): Promise<Scholarship | null> {
+    return await this.withRelationsQuery()
+      .leftJoinAndSelect('scholarship.allocation', 'allocation')
+      .where('scholarship.id = :id', { id })
+      .getOne()
+  }
+
+  async findAllByOwner(owner: ScholarshipOwner): Promise<Scholarship[]> {
+    const [column, value] = Object.entries(owner)[0]
+
+    return await this.withRelationsQuery()
+      .leftJoinAndSelect('scholarship.allocation', 'allocation')
+      .where(`enrollment.${column} = :value`, { value })
+      .orderBy('scholarship.scholarship_starts_at', 'DESC')
+      .addOrderBy('scholarship.id', 'DESC')
+      .getMany()
+  }
+
   async findByIdAndEnrollmentId(
     id: number,
     enrollmentId: number
@@ -173,6 +192,7 @@ export class TypeOrmScholarshipRepository implements ScholarshipRepository {
     criteria: DuplicateUpdateCriteria
   ): Promise<Scholarship | null> {
     return await this.repository.findOneBy({
+      id: Not(criteria.exclude_id),
       enrollment_id: criteria.enrollment_id,
       agency: { id: criteria.agency_id },
       allocation: { id: criteria.allocation_id },
