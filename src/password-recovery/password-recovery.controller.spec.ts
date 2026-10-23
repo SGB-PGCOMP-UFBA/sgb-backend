@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing'
 import { ThrottlerModule } from '@nestjs/throttler'
 import request from 'supertest'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { HttpExceptionFilter } from '@/common/filters/http-exception.filter'
+import { AllExceptionsFilter } from '@/common/filters/all-exceptions.filter'
 import { constants } from '@/common/utils/constants'
 import { CREDENTIALS_THROTTLER_OPTIONS } from '@/config/credentials-throttler.constant'
 import { PasswordRecoveryController } from './password-recovery.controller'
@@ -30,7 +30,7 @@ describe('PasswordRecoveryController', () => {
     }).compile()
 
     app = moduleRef.createNestApplication()
-    app.useGlobalFilters(new HttpExceptionFilter())
+    app.useGlobalFilters(new AllExceptionsFilter())
     await app.init()
   })
 

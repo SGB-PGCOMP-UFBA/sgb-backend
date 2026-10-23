@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing'
 import request from 'supertest'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard'
-import { HttpExceptionFilter } from '@/common/filters/http-exception.filter'
+import { AllExceptionsFilter } from '@/common/filters/all-exceptions.filter'
 import { makeEmbedNotification } from '@/common/testing/factories'
 import { EmbedNotificationRepository } from '@/embed-notification/repositories/embed-notification.repository'
 import { EmbedNotificationController } from './embed-notification.controller'
@@ -66,7 +66,7 @@ describe('EmbedNotificationController', () => {
       .compile()
 
     app = moduleRef.createNestApplication()
-    app.useGlobalFilters(new HttpExceptionFilter())
+    app.useGlobalFilters(new AllExceptionsFilter())
     await app.init()
   })
 

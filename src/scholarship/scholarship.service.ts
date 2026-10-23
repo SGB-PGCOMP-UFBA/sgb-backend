@@ -1,10 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common'
-import { isBefore, parse } from 'date-fns'
 import {
   BadRequestException,
-  NotFoundException,
-  InternalServerErrorException
-} from '@nestjs/common/exceptions'
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException
+} from '@nestjs/common'
+import { isBefore, parse } from 'date-fns'
 import { IPaginationOptions } from 'nestjs-typeorm-paginate'
 import { PageDto } from '@/common/pagination/page.dto'
 import { PageMetaDto } from '@/common/pagination/page-meta.dto'
@@ -107,10 +108,6 @@ export class ScholarshipService {
 
     if (activeScholarships === 0) return
 
-    this.logger.warn(
-      constants.exceptionMessages.scholarship.ENROLLMENT_ALREADY_HAS_ACTIVE
-    )
-
     throw new BadRequestException(
       constants.exceptionMessages.scholarship.ENROLLMENT_ALREADY_HAS_ACTIVE
     )
@@ -143,220 +140,173 @@ export class ScholarshipService {
           `A agência ${agency.name} possui ${awardedSlots} vaga(s) de ${programLabel} ` +
           `concedida(s) e ${allocatedSlots} já alocada(s).`
 
-    this.logger.warn(message)
-
     throw new BadRequestException(message)
   }
 
   async create(dto: CreateScholarshipDto): Promise<Scholarship> {
-    this.logger.log(constants.exceptionMessages.scholarship.CREATION_STARTED)
-    try {
-      const agency = await this.agencyService.findOneByName(dto.agency_name)
-      const allocation = await this.allocationService.findOneByName(
-        dto.allocation_name
+    const agency = await this.agencyService.findOneByName(dto.agency_name)
+    const allocation = await this.allocationService.findOneByName(
+      dto.allocation_name
+    )
+    const enrollment =
+      await this.enrollmentService.findOneByStudentEmailAndEnrollmentNumber(
+        dto.student_email,
+        dto.enrollment_number
       )
-      const enrollment =
-        await this.enrollmentService.findOneByStudentEmailAndEnrollmentNumber(
-          dto.student_email,
-          dto.enrollment_number
-        )
 
-      const scholarship =
-        await this.scholarshipRepository.findDuplicateForCreate({
-          enrollment_id: enrollment.id,
-          agency_id: agency.id,
-          allocation_id: allocation.id,
-          salary: dto.salary,
-          scholarship_starts_at: dto.scholarship_starts_at,
-          scholarship_ends_at: dto.scholarship_ends_at
-        })
-
-      if (scholarship) {
-        this.logger.warn(
-          constants.exceptionMessages.scholarship.ALREADY_REGISTERED
-        )
-
-        throw new BadRequestException(
-          constants.exceptionMessages.scholarship.ALREADY_REGISTERED
-        )
+    const scholarship = await this.scholarshipRepository.findDuplicateForCreate(
+      {
+        enrollment_id: enrollment.id,
+        agency_id: agency.id,
+        allocation_id: allocation.id,
+        salary: dto.salary,
+        scholarship_starts_at: dto.scholarship_starts_at,
+        scholarship_ends_at: dto.scholarship_ends_at
       }
+    )
 
-      const isValidEndDate = validateScholarshipDuration(
-        {
-          givenDate: dto.scholarship_ends_at,
-          referenceDate: dto.scholarship_starts_at
-        },
-        enrollment
+    if (scholarship) {
+      throw new ConflictException(
+        constants.exceptionMessages.scholarship.ALREADY_REGISTERED
       )
-      if (!isValidEndDate.isValid) {
-        this.logger.warn(isValidEndDate.errorMessage)
+    }
 
-        throw new BadRequestException(isValidEndDate.errorMessage)
-      }
+    const isValidEndDate = validateScholarshipDuration(
+      {
+        givenDate: dto.scholarship_ends_at,
+        referenceDate: dto.scholarship_starts_at
+      },
+      enrollment
+    )
+    if (!isValidEndDate.isValid) {
+      throw new BadRequestException(isValidEndDate.errorMessage)
+    }
 
-      const willOccupySlot = occupiesSlot({
+    const willOccupySlot = occupiesSlot({
+      scholarship_starts_at: dto.scholarship_starts_at,
+      scholarship_ends_at: dto.scholarship_ends_at,
+      extension_ends_at: dto.extension_ends_at
+    })
+
+    if (willOccupySlot) {
+      await this.assertEnrollmentHasNoActiveScholarship(enrollment.id)
+
+      await this.assertAgencyHasAvailableSlot(agency, enrollment)
+    }
+
+    const newScholarship = await this.scholarshipRepository.create({
+      agency_id: agency.id,
+      allocation_id: allocation.id,
+      enrollment_id: enrollment.id,
+      scholarship_starts_at: dto.scholarship_starts_at,
+      scholarship_ends_at: dto.scholarship_ends_at,
+      extension_ends_at: dto.extension_ends_at,
+      salary: dto.salary
+    })
+
+    this.logger.log(constants.exceptionMessages.scholarship.CREATION_COMPLETED)
+
+    return newScholarship
+  }
+
+  async update(id: number, dto: UpdateScholarshipDto) {
+    const student = await findStudentByEmail(
+      this.userRepository,
+      dto.student_email
+    )
+
+    const enrollment = await this.enrollmentService.findOneByIdAndStudentId(
+      dto.enrollment_id,
+      student.id
+    )
+
+    const idempotencyScholarship =
+      await this.scholarshipRepository.findDuplicateForUpdate({
+        enrollment_id: enrollment.id,
+        agency_id: dto.agency_id,
+        allocation_id: dto.allocation_id,
+        salary: dto.salary,
         scholarship_starts_at: dto.scholarship_starts_at,
         scholarship_ends_at: dto.scholarship_ends_at,
         extension_ends_at: dto.extension_ends_at
       })
 
-      if (willOccupySlot) {
-        await this.assertEnrollmentHasNoActiveScholarship(enrollment.id)
-
-        await this.assertAgencyHasAvailableSlot(agency, enrollment)
-      }
-
-      const newScholarship = await this.scholarshipRepository.create({
-        agency_id: agency.id,
-        allocation_id: allocation.id,
-        enrollment_id: enrollment.id,
-        scholarship_starts_at: dto.scholarship_starts_at,
-        scholarship_ends_at: dto.scholarship_ends_at,
-        extension_ends_at: dto.extension_ends_at,
-        salary: dto.salary
-      })
-
-      this.logger.log(
-        constants.exceptionMessages.scholarship.CREATION_COMPLETED
-      )
-
-      return newScholarship
-    } catch (error: any) {
-      this.logger.error(
-        constants.exceptionMessages.scholarship.CREATION_FAILED,
-        error,
-        error.message,
-        `Student Email: ${dto.student_email}`,
-        `Enrollment Number: ${dto.enrollment_number}`,
-        `Agency Name: ${dto.agency_name}`,
-        `Allocation Name: ${dto.allocation_name}`
-      )
-      throw new BadRequestException(
-        error.message
-          ? error.message
-          : error.response.message
-          ? error.response.message
-          : constants.exceptionMessages.scholarship.CREATION_FAILED
+    if (idempotencyScholarship) {
+      throw new ConflictException(
+        constants.exceptionMessages.scholarship.ALREADY_REGISTERED
       )
     }
-  }
 
-  async update(id: number, dto: UpdateScholarshipDto) {
-    try {
-      const student = await findStudentByEmail(
-        this.userRepository,
-        dto.student_email
+    const scholarship =
+      await this.scholarshipRepository.findByIdAndEnrollmentId(
+        id,
+        enrollment.id
       )
 
-      const enrollment = await this.enrollmentService.findOneByIdAndStudentId(
-        dto.enrollment_id,
-        student.id
+    if (!scholarship) {
+      throw new NotFoundException(
+        constants.exceptionMessages.scholarship.NOT_FOUND
       )
+    }
 
-      const idempotencyScholarship =
-        await this.scholarshipRepository.findDuplicateForUpdate({
-          enrollment_id: enrollment.id,
-          agency_id: dto.agency_id,
-          allocation_id: dto.allocation_id,
-          salary: dto.salary,
-          scholarship_starts_at: dto.scholarship_starts_at,
-          scholarship_ends_at: dto.scholarship_ends_at,
-          extension_ends_at: dto.extension_ends_at
-        })
+    const isValidEndDate = validateScholarshipDuration(
+      {
+        givenDate: dto.scholarship_ends_at,
+        referenceDate: dto.scholarship_starts_at
+      },
+      enrollment
+    )
+    if (!isValidEndDate.isValid) {
+      throw new BadRequestException(isValidEndDate.errorMessage)
+    }
 
-      if (idempotencyScholarship) {
-        this.logger.warn(
-          constants.exceptionMessages.scholarship.ALREADY_REGISTERED
-        )
-
-        throw new BadRequestException(
-          constants.exceptionMessages.scholarship.ALREADY_REGISTERED
-        )
-      }
-
-      const scholarship =
-        await this.scholarshipRepository.findByIdAndEnrollmentId(
-          id,
-          enrollment.id
-        )
-
-      if (!scholarship) {
-        throw new NotFoundException(
-          constants.exceptionMessages.scholarship.NOT_FOUND
-        )
-      }
-
-      const isValidEndDate = validateScholarshipDuration(
-        {
-          givenDate: dto.scholarship_ends_at,
-          referenceDate: dto.scholarship_starts_at
-        },
-        enrollment
-      )
-      if (!isValidEndDate.isValid) {
-        this.logger.warn(isValidEndDate.errorMessage)
-
-        throw new BadRequestException(isValidEndDate.errorMessage)
-      }
-
-      const isValidExtensionDate = dto.extension_ends_at
-        ? validateScholarshipDuration(
-            {
-              givenDate: dto.extension_ends_at,
-              referenceDate: dto.scholarship_ends_at
-            },
-            enrollment,
-            true
-          )
-        : { isValid: true, errorMessage: '' }
-      if (!isValidExtensionDate.isValid) {
-        this.logger.warn(isValidExtensionDate.errorMessage)
-
-        throw new BadRequestException(isValidExtensionDate.errorMessage)
-      }
-
-      const nextExtensionEndsAt =
-        dto.extension_ends_at ?? scholarship.extension_ends_at
-      const nextStartsAt =
-        dto.scholarship_starts_at || scholarship.scholarship_starts_at
-      const nextEndsAt =
-        dto.scholarship_ends_at || scholarship.scholarship_ends_at
-
-      const willOccupySlot = occupiesSlot({
-        scholarship_starts_at: nextStartsAt,
-        scholarship_ends_at: nextEndsAt,
-        extension_ends_at: nextExtensionEndsAt
-      })
-
-      if (willOccupySlot) {
-        const nextAgency = await this.agencyService.findOneById(
-          dto.agency_id || scholarship.agency_id
-        )
-
-        await this.assertAgencyHasAvailableSlot(
-          nextAgency,
+    const isValidExtensionDate = dto.extension_ends_at
+      ? validateScholarshipDuration(
+          {
+            givenDate: dto.extension_ends_at,
+            referenceDate: dto.scholarship_ends_at
+          },
           enrollment,
-          scholarship.id
+          true
         )
-      }
+      : { isValid: true, errorMessage: '' }
+    if (!isValidExtensionDate.isValid) {
+      throw new BadRequestException(isValidExtensionDate.errorMessage)
+    }
 
-      return await this.scholarshipRepository.update(scholarship.id, {
-        salary: dto.salary,
-        extension_ends_at: nextExtensionEndsAt,
-        agency_id: dto.agency_id || scholarship.agency_id,
-        allocation_id: dto.allocation_id || scholarship.allocation_id,
-        scholarship_starts_at: nextStartsAt,
-        scholarship_ends_at: nextEndsAt
-      })
-    } catch (error: any) {
-      throw new BadRequestException(
-        error.message
-          ? error.message
-          : error.response.message
-          ? error.response.message
-          : constants.exceptionMessages.scholarship.UPDATE_FAILED
+    const nextExtensionEndsAt =
+      dto.extension_ends_at ?? scholarship.extension_ends_at
+    const nextStartsAt =
+      dto.scholarship_starts_at || scholarship.scholarship_starts_at
+    const nextEndsAt =
+      dto.scholarship_ends_at || scholarship.scholarship_ends_at
+
+    const willOccupySlot = occupiesSlot({
+      scholarship_starts_at: nextStartsAt,
+      scholarship_ends_at: nextEndsAt,
+      extension_ends_at: nextExtensionEndsAt
+    })
+
+    if (willOccupySlot) {
+      const nextAgency = await this.agencyService.findOneById(
+        dto.agency_id || scholarship.agency_id
+      )
+
+      await this.assertAgencyHasAvailableSlot(
+        nextAgency,
+        enrollment,
+        scholarship.id
       )
     }
+
+    return await this.scholarshipRepository.update(scholarship.id, {
+      salary: dto.salary,
+      extension_ends_at: nextExtensionEndsAt,
+      agency_id: dto.agency_id || scholarship.agency_id,
+      allocation_id: dto.allocation_id || scholarship.allocation_id,
+      scholarship_starts_at: nextStartsAt,
+      scholarship_ends_at: nextEndsAt
+    })
   }
 
   async delete(id: number): Promise<boolean> {
@@ -381,13 +331,7 @@ export class ScholarshipService {
   }
 
   private async countByProgramAndYear(agencyName?: string) {
-    try {
-      return await this.scholarshipRepository.countByProgramAndYear(agencyName)
-    } catch (error) {
-      throw new InternalServerErrorException(
-        constants.exceptionMessages.scholarship.COUNT_FAILED
-      )
-    }
+    return await this.scholarshipRepository.countByProgramAndYear(agencyName)
   }
 
   async countOnGoingScholarshipsGroupingByAgencyForCourse(programName: string) {
@@ -410,38 +354,20 @@ export class ScholarshipService {
     programName: string,
     status: ScholarshipStatus
   ) {
-    try {
-      return await this.scholarshipRepository.countByAgencyForProgramAndStatus(
-        programName,
-        status
-      )
-    } catch (error) {
-      throw new InternalServerErrorException(
-        constants.exceptionMessages.scholarship.COUNT_FAILED
-      )
-    }
+    return await this.scholarshipRepository.countByAgencyForProgramAndStatus(
+      programName,
+      status
+    )
   }
 
   async countScholarshipsGroupingByStatusForAgency(agencyName: string) {
-    try {
-      return await this.scholarshipRepository.countByStatusForAgency(agencyName)
-    } catch (error) {
-      throw new InternalServerErrorException(
-        constants.exceptionMessages.scholarship.COUNT_FAILED
-      )
-    }
+    return await this.scholarshipRepository.countByStatusForAgency(agencyName)
   }
 
   async countScholarshipsAsReportBetweenDates(
     dto: CountScholarshipsAsReportBetweenDatesDto
   ) {
-    try {
-      return await this.scholarshipRepository.countAsReportBetweenDates(dto)
-    } catch (error) {
-      throw new InternalServerErrorException(
-        constants.exceptionMessages.scholarship.COUNT_FAILED
-      )
-    }
+    return await this.scholarshipRepository.countAsReportBetweenDates(dto)
   }
 
   async findScholarshipsForReport(dto: FindScholarshipsForReportDto) {
@@ -456,26 +382,16 @@ export class ScholarshipService {
       }
     }
 
-    try {
-      return await this.scholarshipRepository.findAllForReport({
-        startDay: dto.start_period,
-        endDay: dto.end_period,
-        enrollmentNumber: dto.enrollment_number
-      })
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Falha ao gerar a lista de bolsas.'
-      )
-    }
+    return await this.scholarshipRepository.findAllForReport({
+      startDay: dto.start_period,
+      endDay: dto.end_period,
+      enrollmentNumber: dto.enrollment_number
+    })
   }
 
   async copyFilteredScholarshipsStudentsEmails(
     filters: ScholarshipFilters
   ): Promise<string[]> {
-    try {
-      return await this.scholarshipRepository.findDistinctStudentEmails(filters)
-    } catch (error) {
-      throw new InternalServerErrorException('Falha ao gerar lista de e-mails.')
-    }
+    return await this.scholarshipRepository.findDistinctStudentEmails(filters)
   }
 }

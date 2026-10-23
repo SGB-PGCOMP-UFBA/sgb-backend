@@ -73,7 +73,10 @@ export class UserManagementService {
         { throwOnError: true }
       )
     } catch (error) {
-      this.logger.error(`Welcome e-mail failed, rolling back: ${dto.email}`)
+      this.logger.error(
+        `Welcome e-mail failed, rolling back: ${dto.email}`,
+        error instanceof Error ? error.stack : String(error)
+      )
       await this.userRepository.deleteById(user.id)
       throw new InternalServerErrorException(messages.WELCOME_EMAIL_FAILED)
     }

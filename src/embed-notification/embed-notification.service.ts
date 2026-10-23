@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  NotFoundException
-} from '@nestjs/common'
+import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { EmbedNotification } from '@/embed-notification/entities/embed-notification.entity'
 import { CreateEmbedNotificationDto } from '@/embed-notification/dtos/create-embed-notification.dto'
 import { EmbedNotificationRepository } from '@/embed-notification/repositories/embed-notification.repository'
@@ -26,23 +21,11 @@ export class EmbedNotificationService {
   }
 
   async create(dto: CreateEmbedNotificationDto): Promise<EmbedNotification> {
-    try {
-      const newNotification = await this.embedNotificationRepository.create(dto)
+    const newNotification = await this.embedNotificationRepository.create(dto)
 
-      this.logger.log(
-        constants.exceptionMessages.notification.CREATION_COMPLETED
-      )
+    this.logger.log(constants.exceptionMessages.notification.CREATION_COMPLETED)
 
-      return newNotification
-    } catch (error) {
-      this.logger.error(
-        constants.exceptionMessages.notification.CREATION_FAILED,
-        error
-      )
-      throw new BadRequestException(
-        constants.exceptionMessages.notification.CREATION_FAILED
-      )
-    }
+    return newNotification
   }
 
   /**
@@ -66,17 +49,7 @@ export class EmbedNotificationService {
       )
     }
 
-    try {
-      await this.embedNotificationRepository.markAsConsumed(id)
-    } catch (error) {
-      this.logger.error(
-        constants.exceptionMessages.notification.UPDATE_FAILED,
-        error
-      )
-      throw new BadRequestException(
-        constants.exceptionMessages.notification.UPDATE_FAILED
-      )
-    }
+    await this.embedNotificationRepository.markAsConsumed(id)
 
     return { ...notification, consumed: true }
   }

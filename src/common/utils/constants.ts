@@ -46,50 +46,45 @@ const constants = {
       'Parece que este link para o currículo lattes já está sendo utilizado.'
   },
   exceptionMessages: {
+    http: {
+      INTERNAL_ERROR: 'Erro interno. Tente novamente em instantes.',
+      BAD_REQUEST: 'Requisição inválida.',
+      INVALID_DATA: 'Dados inválidos.',
+      NOT_FOUND: 'Registro não encontrado.',
+      DUPLICATED: 'Já existe um registro com esses dados.',
+      REFERENCED:
+        'Não foi possível concluir: o registro está vinculado a outros dados.'
+    },
     article: {
-      CREATION_FAILED: 'Não foi possível cadastrar o artigo.',
       NOT_FOUND: 'Artigo não encontrado.'
     },
     agency: {
-      CREATION_FAILED: 'Não foi possível cadastrar a agência.',
       NOT_FOUND: 'Agência não encontrada.',
       NAME_IS_REQUIRED: 'A agência de fomento é obrigatória.',
       AWARDED_BELOW_ALLOCATED:
         'A quantidade de bolsas concedidas pela agência não pode ser menor que a quantidade já alocada.'
     },
     allocation: {
-      CREATION_FAILED: 'Não foi possível cadastrar a alocação.',
       NOT_FOUND: 'Alocação não encontrada.',
       NAME_IS_REQUIRED: 'A alocação é obrigatória.'
     },
     notification: {
       CREATION_COMPLETED:
         'O processo de cadastro de uma nova notificação foi concluído.',
-      CREATION_FAILED: 'Não foi possível cadastrar a notificação.',
-      UPDATE_FAILED: 'Não foi possível atualizar a notificação.',
       NOT_FOUND: 'Notificação não encontrada.'
     },
     enrollment: {
-      CREATION_STARTED:
-        'O processo de cadastro de uma nova matrícula foi iniciado.',
       CREATION_COMPLETED:
         'O processo de cadastro de uma nova matrícula foi concluído.',
-      CREATION_FAILED: 'Não foi possível cadastrar a matrícula.',
-      UPDATE_FAILED: 'Não foi possível atualizar a matrícula.',
       DEACTIVATE_FAILED: 'Não foi possível desativar esta matrícula.',
       NOT_FOUND: 'Matrícula não encontrada.'
     },
     scholarship: {
-      CREATION_STARTED:
-        'O processo de cadastro de uma nova bolsa foi iniciado.',
       CREATION_COMPLETED:
         'O processo de cadastro de uma nova bolsa foi concluído.',
-      CREATION_FAILED: 'Não foi possível cadastrar a bolsa.',
-      UPDATE_FAILED: 'Não foi possível atualizar a bolsa.',
       FINISH_FAILED: 'Não foi possível finalizar esta bolsa.',
       EXTEND_FAILED: 'Não foi possível prorrogar esta bolsa.',
       NOT_FOUND: 'Bolsa não encontrada.',
-      COUNT_FAILED: 'Falha ao contar as bolsas.',
       ALREADY_REGISTERED:
         'Já existe uma bolsa cadastrada com os mesmos detalhes informados.',
       NO_SLOTS_AVAILABLE: 'Não há vagas disponíveis para esta bolsa.',
@@ -104,7 +99,6 @@ const constants = {
         'Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente.'
     },
     user: {
-      SOMETHING_WRONG: 'Algo deu errado.',
       NOT_FOUND: 'Usuário não encontrado.',
       ONLY_ADMIN_MANAGES_ADMIN:
         'Apenas administradores podem gerenciar outros administradores.',
@@ -114,8 +108,6 @@ const constants = {
       STUDENT_HAS_NO_STATUS: 'Estudantes não têm situação de ativo/inativo.',
       WELCOME_EMAIL_FAILED:
         'Não foi possível enviar o e-mail com a senha. O cadastro foi desfeito.',
-      CREATION_FAILED: 'Não foi possível cadastrar o usuário.',
-      UPDATE_FAILED: 'Não foi possível atualizar o usuário.',
       STUDENT_NOT_FOUND: 'Estudante não encontrado.',
       ADVISOR_NOT_FOUND: 'Orientador não encontrado.',
       ONLY_ADVISORS_HAVE_ADMIN_PRIVILEGES:

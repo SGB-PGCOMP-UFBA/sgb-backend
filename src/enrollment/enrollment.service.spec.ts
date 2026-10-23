@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common'
+import { ConflictException, NotFoundException } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   makeAdvisor,
@@ -137,11 +137,11 @@ describe('EnrollmentService', () => {
       expect(repository.create).not.toHaveBeenCalled()
     })
 
-    it('quando o número de matrícula já existe, não resolve orientador nem aluno', async () => {
+    it('quando o número de matrícula já existe, responde conflito sem resolver orientador nem aluno', async () => {
       repository.findByNumber.mockResolvedValue(ENROLLMENT)
 
       await expect(service.create(VALID_DTO)).rejects.toBeInstanceOf(
-        BadRequestException
+        ConflictException
       )
       expect(userRepository.findByEmail).not.toHaveBeenCalled()
     })
@@ -218,17 +218,17 @@ describe('EnrollmentService', () => {
       )
     })
 
-    it('quando a matrícula não pertence ao aluno informado, não atualiza nada', async () => {
+    it('quando a matrícula não pertence ao aluno informado, responde 404 sem atualizar nada', async () => {
       await expect(
         service.update(42, {
           student_email: 'outro@ufba.br',
           advisor_email: 'orientadora@ufba.br'
         } as never)
-      ).rejects.toBeInstanceOf(BadRequestException)
+      ).rejects.toBeInstanceOf(NotFoundException)
       expect(repository.update).not.toHaveBeenCalled()
     })
 
-    it('quando o novo orientador não existe, aborta sem salvar', async () => {
+    it('quando o novo orientador não existe, responde 404 sem salvar', async () => {
       userRepository.findByEmail.mockImplementation(
         async (_email: string, type: string) =>
           type === 'ADVISOR' ? null : STUDENT
@@ -239,7 +239,7 @@ describe('EnrollmentService', () => {
           student_email: 'aluno@ufba.br',
           advisor_email: 'inexistente@ufba.br'
         } as never)
-      ).rejects.toBeInstanceOf(BadRequestException)
+      ).rejects.toBeInstanceOf(NotFoundException)
       expect(repository.update).not.toHaveBeenCalled()
     })
   })

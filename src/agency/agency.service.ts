@@ -48,13 +48,7 @@ export class AgencyService {
   }
 
   async create(dto: CreateAgencyDto): Promise<Agency> {
-    try {
-      return await this.agencyRepository.create(dto)
-    } catch (error) {
-      throw new BadRequestException(
-        constants.exceptionMessages.agency.CREATION_FAILED
-      )
-    }
+    return await this.agencyRepository.create(dto)
   }
 
   async update(id: number, dto: UpdateAgencyDto) {

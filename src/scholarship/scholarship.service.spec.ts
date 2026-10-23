@@ -1,4 +1,8 @@
-import { BadRequestException } from '@nestjs/common'
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException
+} from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   notStartedScholarship,
@@ -284,17 +288,43 @@ describe('ScholarshipService', () => {
       )
     })
 
-    it('quando já existe bolsa idêntica, recusa a atualização', async () => {
+    it('quando já existe bolsa idêntica, recusa a atualização com conflito', async () => {
       repository.findDuplicateForUpdate.mockResolvedValue({ id: 1 })
 
       await expect(service.update(900, UPDATE_DTO)).rejects.toThrow(
-        /Já existe uma bolsa/
+        new ConflictException(
+          'Já existe uma bolsa cadastrada com os mesmos detalhes informados.'
+        )
       )
       expect(repository.update).not.toHaveBeenCalled()
+    })
+
+    it('quando a bolsa não é da matrícula informada, responde 404 em vez de mascarar como 400', async () => {
+      repository.findByIdAndEnrollmentId.mockResolvedValue(null)
+
+      await expect(service.update(900, UPDATE_DTO)).rejects.toBeInstanceOf(
+        NotFoundException
+      )
+    })
+
+    it('quando o banco falha, deixa o erro original subir sem copiar a mensagem dele', async () => {
+      const failure = new Error('connection terminated unexpectedly')
+      repository.update.mockRejectedValue(failure)
+
+      await expect(service.update(900, UPDATE_DTO)).rejects.toBe(failure)
     })
   })
 
   describe('relatórios', () => {
+    it('quando a consulta falha, deixa o erro subir para o filtro global registrar a causa', async () => {
+      const failure = new Error('relation "scholarship" does not exist')
+      repository.countByProgramAndYear.mockRejectedValue(failure)
+
+      await expect(
+        service.countScholarshipsGroupingByCourseAndYear()
+      ).rejects.toBe(failure)
+    })
+
     it('as duas contagens por ano usam a mesma consulta, com e sem filtro de agência', async () => {
       await service.countScholarshipsGroupingByCourseAndYear()
       await service.countScholarshipsGroupingByCourseAndYearFilteringByAgencyName(
