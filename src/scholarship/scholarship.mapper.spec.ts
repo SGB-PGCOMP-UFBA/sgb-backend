@@ -547,3 +547,47 @@ describe('ScholarshipMapper.scholarshipsForReport', () => {
     })
   })
 })
+
+describe('ScholarshipMapper.summary', () => {
+  it('resume a bolsa com agência, alocação, matrícula e só id e nome das pessoas', () => {
+    const scholarship = makeScholarship({
+      agency: makeAgency({ name: 'CAPES' }),
+      allocation: makeAllocation({ name: 'REMOTO' })
+    })
+
+    const summary = ScholarshipMapper.summary(scholarship)
+
+    expect(summary).toEqual({
+      id: 100,
+      status: 'ON_GOING',
+      scholarship_starts_at: scholarship.scholarship_starts_at,
+      scholarship_ends_at: scholarship.scholarship_ends_at,
+      extension_ends_at: null,
+      agency_name: 'CAPES',
+      allocation_name: 'REMOTO',
+      enrollment_number: '2024123456',
+      enrollment_program: 'MESTRADO',
+      student: { id: 7, name: 'Aluno Teste' },
+      advisor: { id: 10, name: 'Orientadora Teste' }
+    })
+    expect(JSON.stringify(summary)).not.toContain('$2a$10$hash')
+  })
+
+  it('quando as relações não vieram carregadas, devolve null nesses campos', () => {
+    const summary = ScholarshipMapper.summary(
+      makeScholarship({
+        agency: undefined,
+        allocation: undefined,
+        enrollment: undefined
+      })
+    )
+
+    expect(summary).toMatchObject({
+      agency_name: null,
+      allocation_name: null,
+      enrollment_number: null,
+      student: null,
+      advisor: null
+    })
+  })
+})
