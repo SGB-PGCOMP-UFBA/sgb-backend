@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common'
+import { ConflictException } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { makeAdvisor, makeStudent } from '@/common/testing/factories'
 import { comparePassword } from '@/common/utils/bcrypt.util'
@@ -125,11 +125,18 @@ describe('UserRecordsService', () => {
       expect(fields).not.toContain('link_to_lattes')
     })
 
-    it('quando o banco recusa, devolve erro de cadastro', async () => {
-      userRepository.create.mockRejectedValue(new Error('duplicate key'))
+    it('quando o banco recusa, deixa o erro original subir para o filtro global', async () => {
+      const failure = new Error('duplicate key')
+      userRepository.create.mockRejectedValue(failure)
 
-      await expect(service.register(NEW_STUDENT)).rejects.toThrow(
-        new BadRequestException('Não foi possível cadastrar o usuário.')
+      await expect(service.register(NEW_STUDENT)).rejects.toBe(failure)
+    })
+
+    it('quando o dado já é de outro usuário do mesmo tipo, responde conflito', async () => {
+      userRepository.findByField.mockResolvedValue(makeStudent({ id: 3 }))
+
+      await expect(service.register(NEW_STUDENT)).rejects.toBeInstanceOf(
+        ConflictException
       )
     })
 

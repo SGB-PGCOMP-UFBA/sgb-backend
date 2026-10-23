@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common'
+import { NotFoundException } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { EmbedNotificationRepository } from '@/embed-notification/repositories/embed-notification.repository'
 import { makeEmbedNotification } from '@/common/testing/factories'
@@ -59,12 +59,11 @@ describe('EmbedNotificationService', () => {
       )
     })
 
-    it('quando a persistência falha ao criar, traduz o erro em BadRequest', async () => {
-      repository.create.mockRejectedValue(new Error('conexão perdida'))
+    it('quando a persistência falha ao criar, deixa o erro original subir para o filtro global', async () => {
+      const failure = new Error('conexão perdida')
+      repository.create.mockRejectedValue(failure)
 
-      await expect(service.create(VALID_DTO)).rejects.toBeInstanceOf(
-        BadRequestException
-      )
+      await expect(service.create(VALID_DTO)).rejects.toBe(failure)
     })
   })
 
@@ -86,12 +85,11 @@ describe('EmbedNotificationService', () => {
       expect(repository.markAsConsumed).not.toHaveBeenCalled()
     })
 
-    it('quando a persistência falha ao consumir, traduz o erro em BadRequest', async () => {
-      repository.markAsConsumed.mockRejectedValue(new Error('conexão perdida'))
+    it('quando a persistência falha ao consumir, deixa o erro original subir para o filtro global', async () => {
+      const failure = new Error('conexão perdida')
+      repository.markAsConsumed.mockRejectedValue(failure)
 
-      await expect(service.consume(55, OWNER)).rejects.toBeInstanceOf(
-        BadRequestException
-      )
+      await expect(service.consume(55, OWNER)).rejects.toBe(failure)
     })
   })
 

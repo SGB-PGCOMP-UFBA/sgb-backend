@@ -1,9 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common'
 import {
-  BadRequestException,
   ConflictException,
+  Injectable,
+  Logger,
   NotFoundException
-} from '@nestjs/common/exceptions'
+} from '@nestjs/common'
 import { UserRepository } from '@/user/repositories/user.repository'
 import { findAdvisorByEmail, findStudentByEmail } from '@/user/user-lookup.util'
 import { Enrollment } from '@/enrollment/entities/enrollment.entity'
@@ -67,93 +67,68 @@ export class EnrollmentService {
   }
 
   async create(dto: CreateEnrollmentDto): Promise<Enrollment> {
-    this.logger.log(constants.exceptionMessages.enrollment.CREATION_STARTED)
-
-    try {
-      const existentEnollment = await this.enrollmentRepository.findByNumber(
-        dto.enrollment_number
-      )
-      if (existentEnollment)
-        throw new ConflictException(
-          `Matrícula com código ${dto.enrollment_number} já existente no sistema`
-        )
-
-      const advisor = await findAdvisorByEmail(
-        this.userRepository,
-        dto.advisor_email
-      )
-
-      const student = await findStudentByEmail(
-        this.userRepository,
-        dto.student_email
-      )
-
-      const newEnrollment = await this.enrollmentRepository.create({
-        student_id: student.id,
-        advisor_id: advisor.id,
-        enrollment_date: dto.enrollment_date,
-        enrollment_number: dto.enrollment_number,
-        enrollment_program: dto.enrollment_program,
-        defense_prediction_date: dto.defense_prediction_date
-      })
-
-      this.logger.log(constants.exceptionMessages.enrollment.CREATION_COMPLETED)
-
-      return newEnrollment
-    } catch (error: any) {
-      this.logger.error(
-        constants.exceptionMessages.enrollment.CREATION_FAILED,
-        error,
-        `Student Email: ${dto.student_email}`,
-        `Advisor Email: ${dto.advisor_email}`,
-        `Enrollment Number: ${dto.enrollment_number}`,
-        `Enrollment Program: ${dto.enrollment_program}`
-      )
-
-      throw new BadRequestException(
-        error.message || constants.exceptionMessages.enrollment.CREATION_FAILED
+    const existentEnrollment = await this.enrollmentRepository.findByNumber(
+      dto.enrollment_number
+    )
+    if (existentEnrollment) {
+      throw new ConflictException(
+        `Matrícula com código ${dto.enrollment_number} já existente no sistema`
       )
     }
+
+    const advisor = await findAdvisorByEmail(
+      this.userRepository,
+      dto.advisor_email
+    )
+    const student = await findStudentByEmail(
+      this.userRepository,
+      dto.student_email
+    )
+
+    const newEnrollment = await this.enrollmentRepository.create({
+      student_id: student.id,
+      advisor_id: advisor.id,
+      enrollment_date: dto.enrollment_date,
+      enrollment_number: dto.enrollment_number,
+      enrollment_program: dto.enrollment_program,
+      defense_prediction_date: dto.defense_prediction_date
+    })
+
+    this.logger.log(constants.exceptionMessages.enrollment.CREATION_COMPLETED)
+
+    return newEnrollment
   }
 
   async update(id: number, dto: UpdateEnrollmentDto) {
-    try {
-      const advisor = await findAdvisorByEmail(
-        this.userRepository,
-        dto.advisor_email
-      )
+    const advisor = await findAdvisorByEmail(
+      this.userRepository,
+      dto.advisor_email
+    )
+    const student = await findStudentByEmail(
+      this.userRepository,
+      dto.student_email
+    )
 
-      const student = await findStudentByEmail(
-        this.userRepository,
-        dto.student_email
-      )
+    const enrollment = await this.enrollmentRepository.findByIdAndStudentId(
+      id,
+      student.id
+    )
 
-      const enrollment = await this.enrollmentRepository.findByIdAndStudentId(
-        id,
-        student.id
-      )
-
-      if (!enrollment) {
-        throw new NotFoundException(
-          constants.exceptionMessages.enrollment.NOT_FOUND
-        )
-      }
-
-      return await this.enrollmentRepository.update(enrollment.id, {
-        advisor_id: advisor.id,
-        enrollment_date: dto.enrollment_date || enrollment.enrollment_date,
-        enrollment_program:
-          dto.enrollment_program || enrollment.enrollment_program,
-        enrollment_number:
-          dto.enrollment_number || enrollment.enrollment_number,
-        defense_prediction_date:
-          dto.defense_prediction_date || enrollment.defense_prediction_date
-      })
-    } catch (error) {
-      throw new BadRequestException(
-        constants.exceptionMessages.enrollment.UPDATE_FAILED
+    if (!enrollment) {
+      throw new NotFoundException(
+        constants.exceptionMessages.enrollment.NOT_FOUND
       )
     }
+
+    return await this.enrollmentRepository.update(enrollment.id, {
+      advisor_id: advisor.id,
+      enrollment_date: dto.enrollment_date || enrollment.enrollment_date,
+      enrollment_program:
+        dto.enrollment_program || enrollment.enrollment_program,
+      enrollment_number: dto.enrollment_number || enrollment.enrollment_number,
+      defense_prediction_date:
+        dto.defense_prediction_date || enrollment.defense_prediction_date
+    })
   }
 
   async delete(id: number): Promise<boolean> {

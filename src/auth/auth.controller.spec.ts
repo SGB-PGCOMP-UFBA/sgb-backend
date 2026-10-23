@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AuthController } from '@/auth/auth.controller'
 import { AuthService } from '@/auth/auth.service'
 import { LocalStrategy } from '@/auth/strategies/local.strategy'
-import { HttpExceptionFilter } from '@/common/filters/http-exception.filter'
+import { AllExceptionsFilter } from '@/common/filters/all-exceptions.filter'
 import { constants } from '@/common/utils/constants'
 import { CREDENTIALS_THROTTLER_OPTIONS } from '@/config/credentials-throttler.constant'
 
@@ -43,7 +43,7 @@ describe('AuthController (POST /login)', () => {
     }).compile()
 
     app = moduleRef.createNestApplication()
-    app.useGlobalFilters(new HttpExceptionFilter())
+    app.useGlobalFilters(new AllExceptionsFilter())
     await app.init()
   })
 

@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException
-} from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateAllocationDto } from '@/allocation/dtos/create-allocation.dto'
 import { UpdateAllocationDto } from '@/allocation/dtos/update-allocation.dto'
 import { Allocation } from '@/allocation/entities/allocation.entity'
@@ -14,13 +10,7 @@ export class AllocationService {
   constructor(private readonly allocationRepository: AllocationRepository) {}
 
   async create(createAllocationDto: CreateAllocationDto): Promise<Allocation> {
-    try {
-      return await this.allocationRepository.create(createAllocationDto)
-    } catch (error) {
-      throw new BadRequestException(
-        constants.exceptionMessages.allocation.CREATION_FAILED
-      )
-    }
+    return await this.allocationRepository.create(createAllocationDto)
   }
 
   async findAll(): Promise<Allocation[]> {

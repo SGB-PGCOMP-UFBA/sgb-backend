@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common'
+import { ConflictException, Injectable, Logger } from '@nestjs/common'
 import { User } from '@/user/entities/user.entity'
 import {
   UniqueUserField,
@@ -63,23 +63,19 @@ export class UserRecordsService {
     await this.assertAvailable(data.role, data)
 
     const passwordHash = await hashPassword(data.password)
-    const user = await this.save(
-      () =>
-        this.userRepository.create({
-          role: data.role,
-          name: data.name,
-          email: data.email,
-          password: passwordHash,
-          tax_id: data.tax_id ?? null,
-          phone_number: data.phone_number ?? null,
-          status: data.role === 'STUDENT' ? null : 'ACTIVE',
-          link_to_lattes:
-            data.role === 'STUDENT' ? data.link_to_lattes ?? null : null,
-          has_admin_privileges:
-            data.role === 'ADVISOR' && !!data.has_admin_privileges
-        }),
-      constants.exceptionMessages.user.CREATION_FAILED
-    )
+    const user = await this.userRepository.create({
+      role: data.role,
+      name: data.name,
+      email: data.email,
+      password: passwordHash,
+      tax_id: data.tax_id ?? null,
+      phone_number: data.phone_number ?? null,
+      status: data.role === 'STUDENT' ? null : 'ACTIVE',
+      link_to_lattes:
+        data.role === 'STUDENT' ? data.link_to_lattes ?? null : null,
+      has_admin_privileges:
+        data.role === 'ADVISOR' && !!data.has_admin_privileges
+    })
 
     if (user.role === 'STUDENT') {
       await this.welcomeStudent(user)
@@ -91,19 +87,15 @@ export class UserRecordsService {
   async update(user: User, changes: UserChanges): Promise<User> {
     await this.assertAvailable(user.role, changes, user.id)
 
-    return await this.save(
-      () =>
-        this.userRepository.update(user.id, {
-          name: changes.name || user.name,
-          email: changes.email || user.email,
-          tax_id: changes.tax_id,
-          phone_number: changes.phone_number,
-          ...(user.role === 'STUDENT' && {
-            link_to_lattes: changes.link_to_lattes
-          })
-        }),
-      constants.exceptionMessages.user.UPDATE_FAILED
-    )
+    return await this.userRepository.update(user.id, {
+      name: changes.name || user.name,
+      email: changes.email || user.email,
+      tax_id: changes.tax_id,
+      phone_number: changes.phone_number,
+      ...(user.role === 'STUDENT' && {
+        link_to_lattes: changes.link_to_lattes
+      })
+    })
   }
 
   private async assertAvailable(
@@ -120,7 +112,7 @@ export class UserRecordsService {
       const owner = await this.userRepository.findByField(type, field, value)
 
       if (owner && owner.id !== ownId) {
-        throw new BadRequestException(ALREADY_REGISTERED[field])
+        throw new ConflictException(ALREADY_REGISTERED[field])
       }
     }
   }
@@ -138,20 +130,8 @@ export class UserRecordsService {
     } catch (error) {
       this.logger.error(
         `Welcome notification failed for student ${student.id}`,
-        error
+        error instanceof Error ? error.stack : String(error)
       )
-    }
-  }
-
-  private async save(
-    write: () => Promise<User>,
-    failureMessage: string
-  ): Promise<User> {
-    try {
-      return await write()
-    } catch (error) {
-      this.logger.error(failureMessage, error)
-      throw new BadRequestException(failureMessage)
     }
   }
 }

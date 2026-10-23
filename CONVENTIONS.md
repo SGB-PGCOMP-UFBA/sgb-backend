@@ -153,3 +153,60 @@ apague. Um nome melhor vale mais que um comentário.
 
 Não crie uma segunda pasta de utilitários. Se é compartilhado, vai em
 `common/utils/`.
+
+## 7. Tratamento de erros
+
+Um erro vira resposta HTTP em um lugar só: o `AllExceptionsFilter`
+(`common/filters/all-exceptions.filter.ts`). Todo erro sai como
+`{ "statusCode": number, "message": string }`.
+
+### 7.1 No service
+
+- **Erro esperado** (regra de negócio, registro inexistente, sem permissão):
+  lance a exceção HTTP do Nest com mensagem de `constants`.
+- **Erro inesperado** (banco fora do ar, bug, resposta estranha de outro
+  serviço): não capture. Deixe subir.
+- Não envolva o método em `try/catch` só para trocar o erro por outro. Isso
+  troca 404 e 409 por 400, esconde a causa do log e, quando repassa
+  `error.message`, entrega texto do banco para o cliente.
+- `try/catch` só existe quando o código faz algo com a falha: desfazer um
+  cadastro, seguir para o próximo item de um cron, ignorar uma notificação
+  que não é essencial. Nesses casos, registre a falha com a stack.
+
+```ts
+✗ try {
+    return await this.repository.create(dto)
+  } catch (error) {
+    throw new BadRequestException(error.message)
+  }
+
+✓ return await this.repository.create(dto)
+```
+
+### 7.2 Status
+
+| Situação                                         | Status | Exceção                        |
+| ------------------------------------------------ | ------ | ------------------------------ |
+| Corpo ou parâmetro fora do formato (DTO)         | 422    | `ValidationPipe` (automático)  |
+| Regra de negócio violada                         | 400    | `BadRequestException`          |
+| Sem token ou token inválido                      | 401    | guards                         |
+| Logado, mas sem permissão                        | 403    | `ForbiddenException`           |
+| Registro não existe (ou não é de quem pede)      | 404    | `NotFoundException`            |
+| Já existe registro com os mesmos dados           | 409    | `ConflictException`            |
+| Muitas tentativas                                | 429    | `ThrottlerGuard` (automático)  |
+| Erro inesperado                                  | 500    | nenhuma: deixe o erro subir    |
+
+Erros do Postgres que chegam ao filtro são traduzidos sem repassar a mensagem
+do banco: unicidade (`23505`) e chave estrangeira (`23503`) viram 409, dado
+fora do formato da coluna (`22001`, `22007`, `22008`, `22P02`, `23502`) vira
+400, e o resto vira 500.
+
+### 7.3 Log
+
+- O filtro registra toda resposta 5xx com a rota e a stack, e todo erro do
+  banco traduzido para 4xx com o código e a constraint. O cliente nunca vê
+  nenhum dos dois.
+- O service não registra o erro que ele mesmo lança: um 4xx de regra de
+  negócio é resposta esperada, não falha.
+- `logger.error(mensagem, stack)`: o segundo argumento é a stack
+  (`error.stack`), não o objeto do erro.
