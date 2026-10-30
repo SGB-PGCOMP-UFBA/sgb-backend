@@ -82,8 +82,8 @@ describe('TypeOrmScholarshipRepository', () => {
       agency_id: 1,
       allocation_id: 2,
       salary: 2100,
-      scholarship_starts_at: new Date('2026-03-01'),
-      scholarship_ends_at: new Date('2027-02-28')
+      scholarship_starts_at: '2026-03-01',
+      scholarship_ends_at: '2027-02-28'
     }
 
     await repository.findDuplicateForUpdate(criteria)
@@ -197,8 +197,8 @@ describe('TypeOrmScholarshipRepository', () => {
 
     it('quando o período já terminou, deriva o status no último dia do período', async () => {
       await repository.countAsReportBetweenDates({
-        start_period: new Date(2021, 0, 1),
-        end_period: new Date(2024, 11, 31)
+        start_period: '2021-01-01',
+        end_period: '2024-12-31'
       })
 
       expect(queryBuilder.setParameter).toHaveBeenCalledWith(
@@ -209,8 +209,8 @@ describe('TypeOrmScholarshipRepository', () => {
 
     it('quando o período ainda não terminou, deriva o status em hoje', async () => {
       await repository.countAsReportBetweenDates({
-        start_period: new Date(2023, 0, 1),
-        end_period: new Date(2026, 11, 31)
+        start_period: '2023-01-01',
+        end_period: '2026-12-31'
       })
 
       expect(queryBuilder.setParameter).toHaveBeenCalledWith(
@@ -221,8 +221,8 @@ describe('TypeOrmScholarshipRepository', () => {
 
     it('traz só bolsas já iniciadas no dia de referência e que terminam, com prorrogação, depois do início do período', async () => {
       await repository.countAsReportBetweenDates({
-        start_period: new Date(2023, 0, 1),
-        end_period: new Date(2026, 11, 31)
+        start_period: '2023-01-01',
+        end_period: '2026-12-31'
       })
 
       expect(queryBuilder.where).toHaveBeenCalledWith(
@@ -257,7 +257,7 @@ describe('TypeOrmScholarshipRepository', () => {
 
     it('só com o fim, deriva o status no fim e não limita o início', async () => {
       await repository.countAsReportBetweenDates({
-        end_period: new Date(2024, 11, 31)
+        end_period: '2024-12-31'
       })
 
       expect(queryBuilder.setParameter).toHaveBeenCalledWith(

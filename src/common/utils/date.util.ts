@@ -1,4 +1,5 @@
 import {
+  addYears,
   endOfMonth,
   format as formatWithPattern,
   parseISO,
@@ -7,19 +8,11 @@ import {
 import { ptBR } from 'date-fns/locale'
 import { Enrollment } from '@/enrollment/entities/enrollment.entity'
 import { constants } from './constants'
+import { toCalendarDay, type CalendarDay } from './calendar-day.util'
 
 enum ScholarshipTimeLimitInYears {
   MESTRADO = 2,
   DOUTORADO = 4
-}
-
-function getDatePlusDays(days: number): Date {
-  const actualDate = new Date()
-
-  actualDate.setUTCHours(3, 0, 0, 0)
-  actualDate.setUTCDate(actualDate.getUTCDate() + days)
-
-  return actualDate
 }
 
 type CalendarDayRange = { startDay: string; endDay: string }
@@ -60,57 +53,53 @@ function formattedNow() {
   })
 }
 
-function today(): Date {
-  const now = new Date()
-  now.setUTCHours(0, 0, 0, 0)
-  return now
-}
-
+/**
+ * Compara dias de calendário: término (ou prorrogação) não pode vir antes da
+ * referência nem passar do limite do curso a partir dela.
+ */
 function validateScholarshipDuration(
-  dates: { givenDate: Date; referenceDate: Date },
+  dates: { givenDate: CalendarDay | Date; referenceDate: CalendarDay | Date },
   enrollment: Partial<Enrollment>,
   extension?: boolean
 ): { isValid: boolean; errorMessage: string } {
-  const validationObject = {
-    isValid: true,
-    errorMessage: ''
-  }
+  const givenDay = toCalendarDay(dates.givenDate)
+  const referenceDay = toCalendarDay(dates.referenceDate)
 
-  const givenDateFormat = new Date(dates.givenDate),
-    referenceDateFormat = new Date(dates.referenceDate)
-
-  if (givenDateFormat.getTime() - referenceDateFormat.getTime() < 0) {
-    validationObject.isValid = false
-    validationObject.errorMessage = extension
-      ? constants.exceptionMessages.dates.EXTENSION_DATE_SMALLER
-      : constants.exceptionMessages.dates.END_DATE_SMALLER
-    return validationObject
+  if (givenDay < referenceDay) {
+    return {
+      isValid: false,
+      errorMessage: extension
+        ? constants.exceptionMessages.dates.EXTENSION_DATE_SMALLER
+        : constants.exceptionMessages.dates.END_DATE_SMALLER
+    }
   }
 
   const scholarshipTimeLimitInYears =
     enrollment.enrollment_program === 'MESTRADO'
       ? ScholarshipTimeLimitInYears.MESTRADO
       : ScholarshipTimeLimitInYears.DOUTORADO
-  const limitDate = new Date(dates.referenceDate)
-  limitDate.setFullYear(limitDate.getFullYear() + scholarshipTimeLimitInYears)
+  const limitDay = formatWithPattern(
+    addYears(parseISO(referenceDay), scholarshipTimeLimitInYears),
+    'yyyy-MM-dd'
+  )
 
-  if (givenDateFormat > limitDate) {
-    validationObject.isValid = false
-    validationObject.errorMessage = extension
-      ? constants.exceptionMessages.dates.EXTENSION_DATE_EXCEEDED
-      : constants.exceptionMessages.dates.END_DATE_EXCEEDED
+  if (givenDay > limitDay) {
+    return {
+      isValid: false,
+      errorMessage: extension
+        ? constants.exceptionMessages.dates.EXTENSION_DATE_EXCEEDED
+        : constants.exceptionMessages.dates.END_DATE_EXCEEDED
+    }
   }
 
-  return validationObject
+  return { isValid: true, errorMessage: '' }
 }
 
 export {
-  getDatePlusDays,
   currentMonthRange,
   formatMonthLabel,
   formatDate,
   formattedNow,
-  today,
   validateScholarshipDuration
 }
 

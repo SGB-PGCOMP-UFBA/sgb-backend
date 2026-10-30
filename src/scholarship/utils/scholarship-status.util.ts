@@ -1,5 +1,10 @@
-import { format } from 'date-fns'
 import { MoreThanOrEqual } from 'typeorm'
+import {
+  toCalendarDay,
+  todayAsCalendarDay
+} from '@/common/utils/calendar-day.util'
+
+export { toCalendarDay, todayAsCalendarDay }
 
 export const ScholarshipStatusEnum = {
   INACTIVE: 'INACTIVE',
@@ -22,16 +27,6 @@ export interface ScholarshipPeriod {
   scholarship_starts_at: Date | string
   scholarship_ends_at: Date | string
   extension_ends_at?: Date | string | null
-}
-
-export function toCalendarDay(value: Date | string): string {
-  if (typeof value === 'string') return value.slice(0, 10)
-
-  return format(value, 'yyyy-MM-dd')
-}
-
-export function todayAsCalendarDay(): string {
-  return toCalendarDay(new Date())
 }
 
 export function effectiveEndDay(period: ScholarshipPeriod): string {

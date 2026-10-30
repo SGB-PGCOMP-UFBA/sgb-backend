@@ -15,7 +15,7 @@ function buildScholarship(overrides: Record<string, unknown> = {}) {
   return {
     ...makeScholarship({
       id: 1,
-      scholarship_ends_at: HOJE,
+      scholarship_ends_at: '2026-06-30',
       agency: makeAgency(),
       enrollment: makeEnrollment({
         student: makeStudent({ id: 10, name: 'Maria Souza' }),

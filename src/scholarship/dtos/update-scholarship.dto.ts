@@ -1,13 +1,11 @@
-import {
-  IsString,
-  IsEmail,
-  IsOptional,
-  IsIn,
-  IsDate,
-  IsNumber
-} from 'class-validator'
-import { Transform, Type } from 'class-transformer'
+import { IsString, IsEmail, IsOptional, IsIn, IsNumber } from 'class-validator'
+import { Transform } from 'class-transformer'
 import { constants } from '@/common/utils/constants'
+import { IsCalendarDay } from '@/common/constraints/is-calendar-day.constraint'
+import {
+  normalizeCalendarDayInput,
+  type CalendarDay
+} from '@/common/utils/calendar-day.util'
 
 export class UpdateScholarshipDto {
   @IsNumber()
@@ -26,19 +24,19 @@ export class UpdateScholarshipDto {
   readonly allocation_id: number
 
   @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  readonly scholarship_starts_at: Date
+  @Transform(normalizeCalendarDayInput)
+  @IsCalendarDay()
+  readonly scholarship_starts_at: CalendarDay
 
   @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  readonly scholarship_ends_at: Date
+  @Transform(normalizeCalendarDayInput)
+  @IsCalendarDay()
+  readonly scholarship_ends_at: CalendarDay
 
   @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  readonly extension_ends_at: Date
+  @Transform(normalizeCalendarDayInput)
+  @IsCalendarDay()
+  readonly extension_ends_at: CalendarDay | null
 
   @IsOptional()
   @IsNumber()

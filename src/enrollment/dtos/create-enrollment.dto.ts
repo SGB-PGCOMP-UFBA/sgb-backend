@@ -1,13 +1,11 @@
-import { Transform, Type } from 'class-transformer'
-import {
-  IsDate,
-  IsEmail,
-  IsIn,
-  IsOptional,
-  IsString,
-  MaxLength
-} from 'class-validator'
+import { Transform } from 'class-transformer'
+import { IsEmail, IsIn, IsOptional, IsString, MaxLength } from 'class-validator'
 import { constants } from '@/common/utils/constants'
+import { IsCalendarDay } from '@/common/constraints/is-calendar-day.constraint'
+import {
+  normalizeCalendarDayInput,
+  type CalendarDay
+} from '@/common/utils/calendar-day.util'
 
 export class CreateEnrollmentDto {
   @IsString()
@@ -18,9 +16,9 @@ export class CreateEnrollmentDto {
   @IsEmail({}, { message: constants.bodyValidationMessages.EMAIL_FORMAT_ERROR })
   readonly advisor_email: string
 
-  @Type(() => Date)
-  @IsDate()
-  readonly enrollment_date: Date
+  @Transform(normalizeCalendarDayInput)
+  @IsCalendarDay()
+  readonly enrollment_date: CalendarDay
 
   @IsString()
   @MaxLength(15)
@@ -32,7 +30,7 @@ export class CreateEnrollmentDto {
   readonly enrollment_program: string
 
   @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  readonly defense_prediction_date: Date
+  @Transform(normalizeCalendarDayInput)
+  @IsCalendarDay()
+  readonly defense_prediction_date: CalendarDay
 }

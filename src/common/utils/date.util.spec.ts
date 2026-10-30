@@ -9,8 +9,8 @@ describe('validateScholarshipDuration', () => {
   it('quando o término do mestrado cabe no limite de 2 anos, aceita a duração', () => {
     const result = validateScholarshipDuration(
       {
-        referenceDate: new Date('2026-01-01'),
-        givenDate: new Date('2027-12-31')
+        referenceDate: '2026-01-01',
+        givenDate: '2027-12-31'
       },
       MESTRADO
     )
@@ -21,8 +21,8 @@ describe('validateScholarshipDuration', () => {
   it('quando o mestrado passa de 2 anos, recusa a duração', () => {
     const result = validateScholarshipDuration(
       {
-        referenceDate: new Date('2026-01-01'),
-        givenDate: new Date('2028-06-01')
+        referenceDate: '2026-01-01',
+        givenDate: '2028-06-01'
       },
       MESTRADO
     )
@@ -36,8 +36,8 @@ describe('validateScholarshipDuration', () => {
   it('quando o término do doutorado cabe no limite de 4 anos, aceita a duração', () => {
     const result = validateScholarshipDuration(
       {
-        referenceDate: new Date('2026-01-01'),
-        givenDate: new Date('2029-12-31')
+        referenceDate: '2026-01-01',
+        givenDate: '2029-12-31'
       },
       DOUTORADO
     )
@@ -48,8 +48,8 @@ describe('validateScholarshipDuration', () => {
   it('quando o doutorado passa de 4 anos, recusa a duração', () => {
     const result = validateScholarshipDuration(
       {
-        referenceDate: new Date('2026-01-01'),
-        givenDate: new Date('2030-06-01')
+        referenceDate: '2026-01-01',
+        givenDate: '2030-06-01'
       },
       DOUTORADO
     )
@@ -62,8 +62,8 @@ describe('validateScholarshipDuration', () => {
 
   it('quando a mesma duração é avaliada para doutorado, aceita o que o mestrado recusa', () => {
     const dates = {
-      referenceDate: new Date('2026-01-01'),
-      givenDate: new Date('2028-06-01')
+      referenceDate: '2026-01-01',
+      givenDate: '2028-06-01'
     }
 
     expect(validateScholarshipDuration(dates, MESTRADO).isValid).toBe(false)
@@ -73,8 +73,8 @@ describe('validateScholarshipDuration', () => {
   it('quando o término é anterior ao início, recusa a duração', () => {
     const result = validateScholarshipDuration(
       {
-        referenceDate: new Date('2026-06-01'),
-        givenDate: new Date('2026-01-01')
+        referenceDate: '2026-06-01',
+        givenDate: '2026-01-01'
       },
       MESTRADO
     )
@@ -88,8 +88,8 @@ describe('validateScholarshipDuration', () => {
   it('quando a validação é de prorrogação, usa a mensagem específica de prorrogação', () => {
     const result = validateScholarshipDuration(
       {
-        referenceDate: new Date('2026-06-01'),
-        givenDate: new Date('2026-01-01')
+        referenceDate: '2026-06-01',
+        givenDate: '2026-01-01'
       },
       MESTRADO,
       true
@@ -98,6 +98,33 @@ describe('validateScholarshipDuration', () => {
     expect(result.errorMessage).toBe(
       constants.exceptionMessages.dates.EXTENSION_DATE_SMALLER
     )
+  })
+
+  it('quando o término cai exatamente no limite do curso, aceita a duração', () => {
+    const result = validateScholarshipDuration(
+      { referenceDate: '2026-01-01', givenDate: '2028-01-01' },
+      MESTRADO
+    )
+
+    expect(result.isValid).toBe(true)
+  })
+
+  it('quando o término passa um dia do limite do curso, recusa a duração', () => {
+    const result = validateScholarshipDuration(
+      { referenceDate: '2026-01-01', givenDate: '2028-01-02' },
+      MESTRADO
+    )
+
+    expect(result.isValid).toBe(false)
+  })
+
+  it('quando o término é o mesmo dia da referência, aceita a duração', () => {
+    const result = validateScholarshipDuration(
+      { referenceDate: '2026-01-01', givenDate: '2026-01-01' },
+      MESTRADO
+    )
+
+    expect(result.isValid).toBe(true)
   })
 })
 

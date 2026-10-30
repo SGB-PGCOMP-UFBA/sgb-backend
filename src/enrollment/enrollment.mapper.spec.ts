@@ -74,7 +74,7 @@ describe('EnrollmentMapper.detailed', () => {
     'quando a data de matrícula vem da entidade, repassa sem converter (%s)',
     (_caso, valor) => {
       const detailed = EnrollmentMapper.detailed(
-        makeEnrollment({ enrollment_date: valor as Date })
+        makeEnrollment({ enrollment_date: valor as never })
       )
 
       expect(detailed.enrollment_date).toBe(valor)

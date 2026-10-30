@@ -23,6 +23,7 @@ import { Enrollment } from '@/enrollment/entities/enrollment.entity'
 import { CreateScholarshipDto } from '@/scholarship/dtos/create-scholarship.dto'
 import { UpdateScholarshipDto } from '@/scholarship/dtos/update-scholarship.dto'
 import { validateScholarshipDuration } from '@/common/utils/date.util'
+import type { CalendarDay } from '@/common/utils/calendar-day.util'
 import { CountScholarshipsAsReportBetweenDatesDto } from '@/scholarship/dtos/count-scholarship-courses-between-dates.dto'
 import { FindScholarshipsForReportDto } from '@/scholarship/dtos/find-scholarships-for-report.dto'
 import { ProgramEnum } from '@/common/enums/program.enum'
@@ -146,9 +147,9 @@ export class ScholarshipService {
 
   private assertValidPeriod(
     period: {
-      scholarship_starts_at: Date
-      scholarship_ends_at: Date
-      extension_ends_at?: Date | null
+      scholarship_starts_at: CalendarDay
+      scholarship_ends_at: CalendarDay
+      extension_ends_at?: CalendarDay | null
     },
     enrollment: Partial<Enrollment>
   ): void {

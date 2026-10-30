@@ -1,6 +1,5 @@
-import { Transform, Type } from 'class-transformer'
+import { Transform } from 'class-transformer'
 import {
-  IsDate,
   IsEmail,
   IsIn,
   IsNumber,
@@ -9,6 +8,11 @@ import {
   MaxLength
 } from 'class-validator'
 import { constants } from '@/common/utils/constants'
+import { IsCalendarDay } from '@/common/constraints/is-calendar-day.constraint'
+import {
+  normalizeCalendarDayInput,
+  type CalendarDay
+} from '@/common/utils/calendar-day.util'
 
 export class CreateScholarshipDto {
   @IsString()
@@ -28,18 +32,18 @@ export class CreateScholarshipDto {
   @Transform(({ value }) => value?.toUpperCase())
   readonly allocation_name: string
 
-  @Type(() => Date)
-  @IsDate()
-  readonly scholarship_starts_at: Date
+  @Transform(normalizeCalendarDayInput)
+  @IsCalendarDay()
+  readonly scholarship_starts_at: CalendarDay
 
-  @Type(() => Date)
-  @IsDate()
-  readonly scholarship_ends_at: Date
+  @Transform(normalizeCalendarDayInput)
+  @IsCalendarDay()
+  readonly scholarship_ends_at: CalendarDay
 
   @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  readonly extension_ends_at?: Date
+  @Transform(normalizeCalendarDayInput)
+  @IsCalendarDay()
+  readonly extension_ends_at?: CalendarDay
 
   @IsOptional()
   @IsNumber()

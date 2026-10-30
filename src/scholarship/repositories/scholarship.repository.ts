@@ -1,3 +1,4 @@
+import type { CalendarDay } from '@/common/utils/calendar-day.util'
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate'
 import { Scholarship } from '@/scholarship/entities/scholarship.entity'
 import { ScholarshipFilters } from '@/scholarship/scholarship-filters.interface'
@@ -52,8 +53,8 @@ export type DuplicateCreateCriteria = {
   agency_id: number
   allocation_id: number
   salary: number
-  scholarship_starts_at: Date
-  scholarship_ends_at: Date
+  scholarship_starts_at: CalendarDay
+  scholarship_ends_at: CalendarDay
 }
 
 export type DuplicateUpdateCriteria = {
@@ -63,9 +64,9 @@ export type DuplicateUpdateCriteria = {
   agency_id: number
   allocation_id: number
   salary: number
-  scholarship_starts_at: Date
-  scholarship_ends_at: Date
-  extension_ends_at?: Date
+  scholarship_starts_at: CalendarDay
+  scholarship_ends_at: CalendarDay
+  extension_ends_at?: CalendarDay | null
 }
 
 /** Dono da bolsa pela matrícula: o estudante ou o orientador dela. */
