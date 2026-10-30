@@ -119,9 +119,13 @@ export class UserManagementService {
     return await this.findOne(id)
   }
 
-  /** Liga o privilégio de administrador do orientador, ou desliga se já tiver. */
-  async toggleAdminPrivileges(
+  /**
+   * Grava o privilégio de administrador pedido para o orientador. Se ele já
+   * está nesse estado, não grava nada: repetir a chamada não desfaz a anterior.
+   */
+  async setAdminPrivileges(
     id: number,
+    enabled: boolean,
     caller: Caller
   ): Promise<ManagedUser> {
     const user = await this.findUser(id)
@@ -136,9 +140,9 @@ export class UserManagementService {
       throw new BadRequestException(messages.CANNOT_CHANGE_OWN_PRIVILEGES)
     }
 
-    await this.userRepository.update(id, {
-      has_admin_privileges: !user.has_admin_privileges
-    })
+    if (user.has_admin_privileges !== enabled) {
+      await this.userRepository.update(id, { has_admin_privileges: enabled })
+    }
 
     return await this.findOne(id)
   }

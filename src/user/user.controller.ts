@@ -22,6 +22,7 @@ import { UserIdParamsDto } from '@/user/dtos/user-id-params.dto'
 import { CreateManagedUserDto } from '@/user/dtos/create-managed-user.dto'
 import { UpdateManagedUserDto } from '@/user/dtos/update-managed-user.dto'
 import { UpdateManagedUserStatusDto } from '@/user/dtos/update-managed-user-status.dto'
+import { UpdateAdminPrivilegesDto } from '@/user/dtos/update-admin-privileges.dto'
 import { SignUpDto } from '@/user/dtos/sign-up.dto'
 import { CreateAdminDto } from '@/user/dtos/create-admin.dto'
 import { UpdateProfileDto } from '@/user/dtos/update-profile.dto'
@@ -167,12 +168,14 @@ export class UserController {
   @Patch(':id/admin-privileges')
   @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  async toggleAdminPrivileges(
+  async setAdminPrivileges(
     @Param() params: UserIdParamsDto,
+    @Body() dto: UpdateAdminPrivilegesDto,
     @Request() request: AuthenticatedRequest
   ) {
-    return await this.userManagementService.toggleAdminPrivileges(
+    return await this.userManagementService.setAdminPrivileges(
       params.id,
+      dto.has_admin_privileges,
       request.user
     )
   }
