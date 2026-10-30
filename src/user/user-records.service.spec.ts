@@ -1,7 +1,8 @@
-import { ConflictException } from '@nestjs/common'
+import { ConflictException, UnprocessableEntityException } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { makeAdvisor, makeStudent } from '@/common/testing/factories'
 import { comparePassword } from '@/common/utils/bcrypt.util'
+import { constants } from '@/common/utils/constants'
 import { UserRecordsService } from './user-records.service'
 
 type Mock = ReturnType<typeof vi.fn<(...args: any[]) => any>>
@@ -150,19 +151,61 @@ describe('UserRecordsService', () => {
   })
 
   describe('update', () => {
-    it('mantém nome e e-mail quando não vêm na mudança', async () => {
-      const student = makeStudent({ id: 7 })
-
-      await service.update(student, { tax_id: '11122233344' })
+    it('campo ausente mantém o valor gravado: só o que veio é escrito', async () => {
+      await service.update(makeStudent({ id: 7 }), {
+        phone_number: '71999990000'
+      })
 
       expect(userRepository.update).toHaveBeenCalledWith(7, {
-        name: 'Aluno Teste',
-        email: 'aluno@ufba.br',
-        tax_id: '11122233344',
-        phone_number: undefined,
-        link_to_lattes: undefined
+        phone_number: '71999990000'
       })
     })
+
+    it.each([[null], [''], ['   ']])(
+      'campo opcional com %j é apagado (celular e Lattes)',
+      async (empty) => {
+        await service.update(makeStudent({ id: 7 }), {
+          phone_number: empty,
+          link_to_lattes: empty
+        })
+
+        expect(userRepository.update).toHaveBeenCalledWith(7, {
+          phone_number: null,
+          link_to_lattes: null
+        })
+      }
+    )
+
+    it('o CPF de orientador pode ser apagado', async () => {
+      await service.update(makeAdvisor({ id: 10 }), { tax_id: null })
+
+      expect(userRepository.update).toHaveBeenCalledWith(10, { tax_id: null })
+    })
+
+    it.each([
+      ['nome', { name: '' }, constants.exceptionMessages.user.NAME_REQUIRED],
+      [
+        'e-mail',
+        { email: null },
+        constants.exceptionMessages.user.EMAIL_REQUIRED
+      ],
+      [
+        'CPF do estudante',
+        { tax_id: '' },
+        constants.exceptionMessages.user.STUDENT_TAX_ID_REQUIRED
+      ]
+    ])(
+      'recusa apagar o %s, que é obrigatório, sem gravar nada',
+      async (_, changes, message) => {
+        const update = service.update(makeStudent({ id: 7 }), changes)
+
+        await expect(update).rejects.toBeInstanceOf(
+          UnprocessableEntityException
+        )
+        await expect(update).rejects.toThrow(message)
+        expect(userRepository.update).not.toHaveBeenCalled()
+      }
+    )
 
     it('ignora o Lattes de quem não é estudante', async () => {
       await service.update(makeAdvisor({ id: 10 }), {

@@ -58,6 +58,13 @@ export class UserController {
     return await this.userAccountService.createAdmin(apiKey, dto)
   }
 
+  @Get('me')
+  @Roles('ADMIN', 'ADVISOR', 'ADVISOR_WITH_ADMIN_PRIVILEGES', 'STUDENT')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async findProfile(@Request() request: AuthenticatedRequest) {
+    return await this.userAccountService.findProfile(request.user)
+  }
+
   @Patch('me')
   @Roles('ADMIN', 'ADVISOR', 'ADVISOR_WITH_ADMIN_PRIVILEGES', 'STUDENT')
   @UseGuards(JwtAuthGuard, RolesGuard)

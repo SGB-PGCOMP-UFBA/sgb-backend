@@ -35,4 +35,11 @@ describe('UpdateEnrollmentDto', () => {
 
     expect(errors).toEqual(['enrollment_date'])
   })
+
+  it('aceita previsão de defesa null, que pede para apagar a previsão', async () => {
+    const { dto, errors } = await parse({ defense_prediction_date: null })
+
+    expect(errors).toEqual([])
+    expect(dto.defense_prediction_date).toBeNull()
+  })
 })

@@ -126,8 +126,11 @@ export class EnrollmentService {
       enrollment_program:
         dto.enrollment_program || enrollment.enrollment_program,
       enrollment_number: dto.enrollment_number || enrollment.enrollment_number,
+      // Opcional: ausente mantém a previsão gravada, `null` apaga.
       defense_prediction_date:
-        dto.defense_prediction_date || enrollment.defense_prediction_date
+        dto.defense_prediction_date === undefined
+          ? enrollment.defense_prediction_date
+          : dto.defense_prediction_date
     })
   }
 
