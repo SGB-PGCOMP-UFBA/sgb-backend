@@ -239,26 +239,56 @@ describe('UserManagementService', () => {
     })
   })
 
-  describe('toggleAdminPrivileges', () => {
+  describe('setAdminPrivileges', () => {
     it.each([
       [9, true],
       [2, false]
     ])(
-      'inverte o privilégio do orientador (id %s passa a %s)',
-      async (id, expected) => {
-        await service.toggleAdminPrivileges(id, ADMIN_CALLER)
+      'grava o estado pedido para o orientador (id %s passa a %s)',
+      async (id, enabled) => {
+        await service.setAdminPrivileges(id, enabled, ADMIN_CALLER)
 
         expect(userRepository.update).toHaveBeenCalledWith(id, {
-          has_admin_privileges: expected
+          has_admin_privileges: enabled
         })
       }
     )
+
+    it.each([
+      [2, true],
+      [9, false]
+    ])(
+      'quando o orientador já está no estado pedido (id %s, %s), não grava nada',
+      async (id, enabled) => {
+        await service.setAdminPrivileges(id, enabled, ADMIN_CALLER)
+
+        expect(userRepository.update).not.toHaveBeenCalled()
+      }
+    )
+
+    it('quando a concessão é repetida, o privilégio continua concedido', async () => {
+      const advisor = makeAdvisor({ id: 9, has_admin_privileges: false })
+      userRepository.findById.mockImplementation(async (id: number) =>
+        id === 9 ? advisor : USERS[id] ?? null
+      )
+      userRepository.update.mockImplementation(
+        async (_id: number, changes: { has_admin_privileges: boolean }) => {
+          advisor.has_admin_privileges = changes.has_admin_privileges
+        }
+      )
+
+      await service.setAdminPrivileges(9, true, ADMIN_CALLER)
+      await service.setAdminPrivileges(9, true, ADMIN_CALLER)
+
+      expect(advisor.has_admin_privileges).toBe(true)
+      expect(userRepository.update).toHaveBeenCalledTimes(1)
+    })
 
     it.each([[5], [3]])(
       'quando não é orientador (id %s), recusa',
       async (id) => {
         await expect(
-          service.toggleAdminPrivileges(id, ADMIN_CALLER)
+          service.setAdminPrivileges(id, true, ADMIN_CALLER)
         ).rejects.toThrow('Só orientadores')
         expect(userRepository.update).not.toHaveBeenCalled()
       }
@@ -266,7 +296,7 @@ describe('UserManagementService', () => {
 
     it('quando é o próprio orientador administrador, recusa', async () => {
       await expect(
-        service.toggleAdminPrivileges(2, ADVISOR_ADMIN_CALLER)
+        service.setAdminPrivileges(2, false, ADVISOR_ADMIN_CALLER)
       ).rejects.toThrow('próprios privilégios')
     })
   })
