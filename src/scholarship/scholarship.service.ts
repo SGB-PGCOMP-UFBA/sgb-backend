@@ -19,6 +19,7 @@ import { findStudentByEmail } from '@/user/user-lookup.util'
 import { AgencyService } from '@/agency/agency.service'
 import { AllocationService } from '@/allocation/allocation.service'
 import { EnrollmentService } from '@/enrollment/enrollment.service'
+import { Enrollment } from '@/enrollment/entities/enrollment.entity'
 import { CreateScholarshipDto } from '@/scholarship/dtos/create-scholarship.dto'
 import { UpdateScholarshipDto } from '@/scholarship/dtos/update-scholarship.dto'
 import { validateScholarshipDuration } from '@/common/utils/date.util'
@@ -143,6 +144,40 @@ export class ScholarshipService {
     throw new BadRequestException(message)
   }
 
+  private assertValidPeriod(
+    period: {
+      scholarship_starts_at: Date
+      scholarship_ends_at: Date
+      extension_ends_at?: Date | null
+    },
+    enrollment: Partial<Enrollment>
+  ): void {
+    const endDate = validateScholarshipDuration(
+      {
+        givenDate: period.scholarship_ends_at,
+        referenceDate: period.scholarship_starts_at
+      },
+      enrollment
+    )
+    if (!endDate.isValid) {
+      throw new BadRequestException(endDate.errorMessage)
+    }
+
+    if (!period.extension_ends_at) return
+
+    const extensionDate = validateScholarshipDuration(
+      {
+        givenDate: period.extension_ends_at,
+        referenceDate: period.scholarship_ends_at
+      },
+      enrollment,
+      true
+    )
+    if (!extensionDate.isValid) {
+      throw new BadRequestException(extensionDate.errorMessage)
+    }
+  }
+
   async create(dto: CreateScholarshipDto): Promise<Scholarship> {
     const agency = await this.agencyService.findOneByName(dto.agency_name)
     const allocation = await this.allocationService.findOneByName(
@@ -171,16 +206,14 @@ export class ScholarshipService {
       )
     }
 
-    const isValidEndDate = validateScholarshipDuration(
+    this.assertValidPeriod(
       {
-        givenDate: dto.scholarship_ends_at,
-        referenceDate: dto.scholarship_starts_at
+        scholarship_starts_at: dto.scholarship_starts_at,
+        scholarship_ends_at: dto.scholarship_ends_at,
+        extension_ends_at: dto.extension_ends_at
       },
       enrollment
     )
-    if (!isValidEndDate.isValid) {
-      throw new BadRequestException(isValidEndDate.errorMessage)
-    }
 
     const willOccupySlot = occupiesSlot({
       scholarship_starts_at: dto.scholarship_starts_at,
@@ -250,37 +283,23 @@ export class ScholarshipService {
       )
     }
 
-    const isValidEndDate = validateScholarshipDuration(
-      {
-        givenDate: dto.scholarship_ends_at,
-        referenceDate: dto.scholarship_starts_at
-      },
-      enrollment
-    )
-    if (!isValidEndDate.isValid) {
-      throw new BadRequestException(isValidEndDate.errorMessage)
-    }
-
-    const isValidExtensionDate = dto.extension_ends_at
-      ? validateScholarshipDuration(
-          {
-            givenDate: dto.extension_ends_at,
-            referenceDate: dto.scholarship_ends_at
-          },
-          enrollment,
-          true
-        )
-      : { isValid: true, errorMessage: '' }
-    if (!isValidExtensionDate.isValid) {
-      throw new BadRequestException(isValidExtensionDate.errorMessage)
-    }
-
     const nextExtensionEndsAt =
-      dto.extension_ends_at ?? scholarship.extension_ends_at
+      dto.extension_ends_at === undefined
+        ? scholarship.extension_ends_at
+        : dto.extension_ends_at
     const nextStartsAt =
       dto.scholarship_starts_at || scholarship.scholarship_starts_at
     const nextEndsAt =
       dto.scholarship_ends_at || scholarship.scholarship_ends_at
+
+    this.assertValidPeriod(
+      {
+        scholarship_starts_at: nextStartsAt,
+        scholarship_ends_at: nextEndsAt,
+        extension_ends_at: nextExtensionEndsAt
+      },
+      enrollment
+    )
 
     const willOccupySlot = occupiesSlot({
       scholarship_starts_at: nextStartsAt,

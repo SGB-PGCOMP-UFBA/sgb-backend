@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest'
+import { MoreThanOrEqual } from 'typeorm'
 import {
   deriveScholarshipStatus,
   effectiveEndDay,
+  effectiveEndSql,
   occupiesSlot,
+  occupiesSlotWhere,
   toCalendarDay,
   todayAsCalendarDay
 } from './scholarship-status.util'
@@ -124,6 +127,35 @@ describe('occupiesSlot', () => {
   it('quando a bolsa está finalizada, não ocupa vaga', () => {
     expect(occupiesSlot(periodo('2024-01-01', '2026-06-14'), HOJE)).toBe(false)
   })
+
+  it('quando a prorrogação também venceu, não ocupa vaga', () => {
+    expect(
+      occupiesSlot(periodo('2024-01-01', '2026-01-01', '2026-06-14'), HOJE)
+    ).toBe(false)
+  })
+
+  it('quando a prorrogação é anterior ao término, ocupa vaga até o término', () => {
+    expect(
+      occupiesSlot(periodo('2024-01-01', '2027-01-01', '2025-01-01'), HOJE)
+    ).toBe(true)
+  })
+})
+
+describe('occupiesSlotWhere', () => {
+  it('ocupa vaga quando o término ou a prorrogação chegam ao dia, sem depender de a prorrogação ser nula', () => {
+    expect(occupiesSlotWhere(HOJE)).toEqual([
+      { scholarship_ends_at: MoreThanOrEqual(HOJE) },
+      { extension_ends_at: MoreThanOrEqual(HOJE) }
+    ])
+  })
+})
+
+describe('effectiveEndSql', () => {
+  it('usa a data mais tarde entre término e prorrogação, como o effectiveEndDay', () => {
+    expect(effectiveEndSql('s')).toBe(
+      'GREATEST(s.scholarship_ends_at, s.extension_ends_at)'
+    )
+  })
 })
 
 describe('effectiveEndDay', () => {
@@ -137,6 +169,22 @@ describe('effectiveEndDay', () => {
     expect(effectiveEndDay(periodo('2024-01-01', '2026-06-14'))).toBe(
       '2026-06-14'
     )
+  })
+
+  it('quando a prorrogação é anterior ao término, o fim efetivo continua sendo o término', () => {
+    expect(
+      effectiveEndDay(periodo('2024-01-01', '2027-01-01', '2025-01-01'))
+    ).toBe('2027-01-01')
+  })
+
+  it('quando as datas chegam como Date, compara os dias', () => {
+    expect(
+      effectiveEndDay({
+        scholarship_starts_at: new Date(2024, 0, 1),
+        scholarship_ends_at: new Date(2026, 5, 14),
+        extension_ends_at: new Date(2026, 11, 1)
+      })
+    ).toBe('2026-12-01')
   })
 })
 

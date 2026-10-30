@@ -1,5 +1,5 @@
 import { format } from 'date-fns'
-import { IsNull, MoreThanOrEqual } from 'typeorm'
+import { MoreThanOrEqual } from 'typeorm'
 
 export const ScholarshipStatusEnum = {
   INACTIVE: 'INACTIVE',
@@ -35,7 +35,11 @@ export function todayAsCalendarDay(): string {
 }
 
 export function effectiveEndDay(period: ScholarshipPeriod): string {
-  return toCalendarDay(period.extension_ends_at ?? period.scholarship_ends_at)
+  const endDay = toCalendarDay(period.scholarship_ends_at)
+  if (!period.extension_ends_at) return endDay
+
+  const extensionDay = toCalendarDay(period.extension_ends_at)
+  return extensionDay > endDay ? extensionDay : endDay
 }
 
 export function deriveScholarshipStatus(
@@ -71,16 +75,13 @@ export function occupiesSlotWhere(
   referenceDay: string = todayAsCalendarDay()
 ): Record<string, unknown>[] {
   return [
-    { extension_ends_at: MoreThanOrEqual(referenceDay) },
-    {
-      extension_ends_at: IsNull(),
-      scholarship_ends_at: MoreThanOrEqual(referenceDay)
-    }
+    { scholarship_ends_at: MoreThanOrEqual(referenceDay) },
+    { extension_ends_at: MoreThanOrEqual(referenceDay) }
   ]
 }
 
 export function effectiveEndSql(alias = 'scholarship'): string {
-  return `COALESCE(${alias}.extension_ends_at, ${alias}.scholarship_ends_at)`
+  return `GREATEST(${alias}.scholarship_ends_at, ${alias}.extension_ends_at)`
 }
 
 export function occupiesSlotSql(alias = 'scholarship'): string {

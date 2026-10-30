@@ -18,6 +18,7 @@ import {
 } from '@/common/testing/factories'
 import { ScholarshipRepository } from '@/scholarship/repositories/scholarship.repository'
 import { ScholarshipService } from './scholarship.service'
+import { constants } from '@/common/utils/constants'
 import { FindScholarshipsForReportDto } from '@/scholarship/dtos/find-scholarships-for-report.dto'
 
 const AGENCY = makeAgency()
@@ -258,6 +259,35 @@ describe('ScholarshipService', () => {
       expect(repository.create).not.toHaveBeenCalled()
     })
 
+    it('quando a prorrogação é anterior ao término, recusa a criação e não salva', async () => {
+      withAllocatedSlots(0)
+
+      await expect(
+        service.create({
+          ...(VALID_DTO as object),
+          extension_ends_at: new Date('2026-06-01')
+        } as never)
+      ).rejects.toThrow(
+        new BadRequestException(
+          constants.exceptionMessages.dates.EXTENSION_DATE_SMALLER
+        )
+      )
+      expect(repository.create).not.toHaveBeenCalled()
+    })
+
+    it('quando a prorrogação é posterior ao término, cria a bolsa com ela', async () => {
+      withAllocatedSlots(0)
+
+      await service.create({
+        ...(VALID_DTO as object),
+        extension_ends_at: new Date('2027-06-01')
+      } as never)
+
+      expect(repository.create).toHaveBeenCalledWith(
+        expect.objectContaining({ extension_ends_at: new Date('2027-06-01') })
+      )
+    })
+
     it('quando o mestrado passa de 2 anos de duração, recusa a criação', async () => {
       withAllocatedSlots(0)
 
@@ -339,6 +369,101 @@ describe('ScholarshipService', () => {
         900,
         expect.objectContaining({
           extension_ends_at: extended.extension_ends_at
+        })
+      )
+    })
+
+    it('quando o PATCH manda prorrogação nula, remove a prorrogação e a vigência volta ao término', async () => {
+      repository.findByIdAndEnrollmentId.mockResolvedValue(
+        makeScholarship({ id: 900, ...extendedScholarship() })
+      )
+      withAllocatedSlots(0)
+
+      await service.update(900, {
+        ...(UPDATE_DTO as object),
+        extension_ends_at: null
+      } as never)
+
+      expect(repository.update).toHaveBeenCalledWith(
+        900,
+        expect.objectContaining({ extension_ends_at: null })
+      )
+    })
+
+    it('quando o PATCH muda a prorrogação, grava a data nova', async () => {
+      withAllocatedSlots(0)
+
+      await service.update(900, {
+        ...(UPDATE_DTO as object),
+        extension_ends_at: new Date('2027-03-01')
+      } as never)
+
+      expect(repository.update).toHaveBeenCalledWith(
+        900,
+        expect.objectContaining({ extension_ends_at: new Date('2027-03-01') })
+      )
+    })
+
+    it('quando a prorrogação enviada é anterior ao término, recusa e não salva', async () => {
+      await expect(
+        service.update(900, {
+          ...(UPDATE_DTO as object),
+          extension_ends_at: new Date('2026-06-01')
+        } as never)
+      ).rejects.toThrow(
+        new BadRequestException(
+          constants.exceptionMessages.dates.EXTENSION_DATE_SMALLER
+        )
+      )
+      expect(repository.update).not.toHaveBeenCalled()
+    })
+
+    it('quando só o término muda para depois da prorrogação já gravada, recusa e não salva', async () => {
+      repository.findByIdAndEnrollmentId.mockResolvedValue(
+        makeScholarship({
+          id: 900,
+          scholarship_starts_at: new Date('2026-01-01'),
+          scholarship_ends_at: new Date('2026-12-01'),
+          extension_ends_at: new Date('2027-02-01')
+        })
+      )
+
+      await expect(
+        service.update(900, {
+          enrollment_id: ENROLLMENT.id,
+          student_email: 'aluno@ufba.br',
+          scholarship_ends_at: new Date('2027-06-01')
+        } as never)
+      ).rejects.toThrow(
+        new BadRequestException(
+          constants.exceptionMessages.dates.EXTENSION_DATE_SMALLER
+        )
+      )
+      expect(repository.update).not.toHaveBeenCalled()
+    })
+
+    it('quando o PATCH não traz as datas, valida o período com as datas gravadas', async () => {
+      repository.findByIdAndEnrollmentId.mockResolvedValue(
+        makeScholarship({
+          id: 900,
+          scholarship_starts_at: new Date('2026-01-01'),
+          scholarship_ends_at: new Date('2026-12-01'),
+          extension_ends_at: new Date('2027-02-01')
+        })
+      )
+      withAllocatedSlots(0)
+
+      await service.update(900, {
+        enrollment_id: ENROLLMENT.id,
+        student_email: 'aluno@ufba.br',
+        salary: 2100
+      } as never)
+
+      expect(repository.update).toHaveBeenCalledWith(
+        900,
+        expect.objectContaining({
+          scholarship_ends_at: new Date('2026-12-01'),
+          extension_ends_at: new Date('2027-02-01')
         })
       )
     })
