@@ -20,7 +20,7 @@ export class IsCalendarDayConstraint implements ValidatorConstraintInterface {
   }
 
   defaultMessage(args: ValidationArguments) {
-    return `${args.property} must be a valid date in the YYYY-MM-DD format`
+    return `${args.property} deve ser uma data válida no formato AAAA-MM-DD.`
   }
 }
 

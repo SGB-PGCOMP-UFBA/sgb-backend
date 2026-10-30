@@ -32,8 +32,8 @@ const VALID_DTO = {
   enrollment_number: '2024123456',
   agency_name: 'CAPES',
   allocation_name: 'REMOTO',
-  scholarship_starts_at: new Date('2026-01-01'),
-  scholarship_ends_at: new Date('2026-12-01')
+  scholarship_starts_at: '2026-01-01',
+  scholarship_ends_at: '2026-12-01'
 } as never
 
 function createScholarshipRepositoryMock() {
@@ -253,7 +253,7 @@ describe('ScholarshipService', () => {
       await expect(
         service.create({
           ...(VALID_DTO as object),
-          scholarship_ends_at: new Date('2025-01-01')
+          scholarship_ends_at: '2025-01-01'
         } as never)
       ).rejects.toBeInstanceOf(BadRequestException)
       expect(repository.create).not.toHaveBeenCalled()
@@ -265,7 +265,7 @@ describe('ScholarshipService', () => {
       await expect(
         service.create({
           ...(VALID_DTO as object),
-          extension_ends_at: new Date('2026-06-01')
+          extension_ends_at: '2026-06-01'
         } as never)
       ).rejects.toThrow(
         new BadRequestException(
@@ -280,11 +280,11 @@ describe('ScholarshipService', () => {
 
       await service.create({
         ...(VALID_DTO as object),
-        extension_ends_at: new Date('2027-06-01')
+        extension_ends_at: '2027-06-01'
       } as never)
 
       expect(repository.create).toHaveBeenCalledWith(
-        expect.objectContaining({ extension_ends_at: new Date('2027-06-01') })
+        expect.objectContaining({ extension_ends_at: '2027-06-01' })
       )
     })
 
@@ -294,7 +294,7 @@ describe('ScholarshipService', () => {
       await expect(
         service.create({
           ...(VALID_DTO as object),
-          scholarship_ends_at: new Date('2029-01-01')
+          scholarship_ends_at: '2029-01-01'
         } as never)
       ).rejects.toBeInstanceOf(BadRequestException)
     })
@@ -305,8 +305,8 @@ describe('ScholarshipService', () => {
       enrollment_id: ENROLLMENT.id,
       student_email: 'aluno@ufba.br',
       status: 'ON_GOING',
-      scholarship_starts_at: new Date('2026-01-01'),
-      scholarship_ends_at: new Date('2026-12-01')
+      scholarship_starts_at: '2026-01-01',
+      scholarship_ends_at: '2026-12-01'
     } as never
 
     const EXISTING = makeScholarship({ id: 900 })
@@ -395,12 +395,12 @@ describe('ScholarshipService', () => {
 
       await service.update(900, {
         ...(UPDATE_DTO as object),
-        extension_ends_at: new Date('2027-03-01')
+        extension_ends_at: '2027-03-01'
       } as never)
 
       expect(repository.update).toHaveBeenCalledWith(
         900,
-        expect.objectContaining({ extension_ends_at: new Date('2027-03-01') })
+        expect.objectContaining({ extension_ends_at: '2027-03-01' })
       )
     })
 
@@ -408,7 +408,7 @@ describe('ScholarshipService', () => {
       await expect(
         service.update(900, {
           ...(UPDATE_DTO as object),
-          extension_ends_at: new Date('2026-06-01')
+          extension_ends_at: '2026-06-01'
         } as never)
       ).rejects.toThrow(
         new BadRequestException(
@@ -422,9 +422,9 @@ describe('ScholarshipService', () => {
       repository.findByIdAndEnrollmentId.mockResolvedValue(
         makeScholarship({
           id: 900,
-          scholarship_starts_at: new Date('2026-01-01'),
-          scholarship_ends_at: new Date('2026-12-01'),
-          extension_ends_at: new Date('2027-02-01')
+          scholarship_starts_at: '2026-01-01',
+          scholarship_ends_at: '2026-12-01',
+          extension_ends_at: '2027-02-01'
         })
       )
 
@@ -432,7 +432,7 @@ describe('ScholarshipService', () => {
         service.update(900, {
           enrollment_id: ENROLLMENT.id,
           student_email: 'aluno@ufba.br',
-          scholarship_ends_at: new Date('2027-06-01')
+          scholarship_ends_at: '2027-06-01'
         } as never)
       ).rejects.toThrow(
         new BadRequestException(
@@ -446,9 +446,9 @@ describe('ScholarshipService', () => {
       repository.findByIdAndEnrollmentId.mockResolvedValue(
         makeScholarship({
           id: 900,
-          scholarship_starts_at: new Date('2026-01-01'),
-          scholarship_ends_at: new Date('2026-12-01'),
-          extension_ends_at: new Date('2027-02-01')
+          scholarship_starts_at: '2026-01-01',
+          scholarship_ends_at: '2026-12-01',
+          extension_ends_at: '2027-02-01'
         })
       )
       withAllocatedSlots(0)
@@ -462,8 +462,8 @@ describe('ScholarshipService', () => {
       expect(repository.update).toHaveBeenCalledWith(
         900,
         expect.objectContaining({
-          scholarship_ends_at: new Date('2026-12-01'),
-          extension_ends_at: new Date('2027-02-01')
+          scholarship_ends_at: '2026-12-01',
+          extension_ends_at: '2027-02-01'
         })
       )
     })

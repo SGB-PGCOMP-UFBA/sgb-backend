@@ -1,14 +1,19 @@
-import { IsDate, IsOptional } from 'class-validator'
-import { Type } from 'class-transformer'
+import { IsOptional } from 'class-validator'
+import { Transform } from 'class-transformer'
+import { IsCalendarDay } from '@/common/constraints/is-calendar-day.constraint'
+import {
+  normalizeCalendarDayInput,
+  type CalendarDay
+} from '@/common/utils/calendar-day.util'
 
 export class CountScholarshipsAsReportBetweenDatesDto {
   @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  readonly start_period?: Date
+  @Transform(normalizeCalendarDayInput)
+  @IsCalendarDay()
+  readonly start_period?: CalendarDay
 
   @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  readonly end_period?: Date
+  @Transform(normalizeCalendarDayInput)
+  @IsCalendarDay()
+  readonly end_period?: CalendarDay
 }

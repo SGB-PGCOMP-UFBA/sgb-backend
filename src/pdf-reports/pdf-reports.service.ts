@@ -11,6 +11,8 @@ import {
   describeReportPeriod
 } from './pdf-reports.helper'
 import { QuadrennialReportDto } from '@/pdf-reports/dtos/quadrennial-report.dto'
+import { toCalendarDay } from '@/common/utils/calendar-day.util'
+import { formatDate } from '@/common/utils/date.util'
 
 @Injectable()
 export class PdfReportsService {
@@ -20,9 +22,9 @@ export class PdfReportsService {
     const result = []
 
     scholarships.sort((a, b) => {
-      const dateA = new Date(a.scholarship_starts_at).getTime()
-      const dateB = new Date(b.scholarship_starts_at).getTime()
-      return dateA - dateB
+      const dayA = toCalendarDay(a.scholarship_starts_at)
+      const dayB = toCalendarDay(b.scholarship_starts_at)
+      return dayA.localeCompare(dayB)
     })
 
     for (const scholarship of scholarships) {
@@ -35,9 +37,7 @@ export class PdfReportsService {
         advisor_name: getFirstAndLastNameFromCompleteName(
           scholarship.enrollment.advisor.name
         ),
-        starting_date: new Date(
-          scholarship.scholarship_starts_at
-        ).toLocaleDateString('pt-BR')
+        starting_date: formatDate(scholarship.scholarship_starts_at)
       }
 
       result.push(Object.assign({}, data))
@@ -50,9 +50,9 @@ export class PdfReportsService {
     const result = []
 
     scholarships.sort((a, b) => {
-      const dateA = new Date(a.scholarship_ends_at).getTime()
-      const dateB = new Date(b.scholarship_ends_at).getTime()
-      return dateA - dateB
+      const dayA = toCalendarDay(a.scholarship_ends_at)
+      const dayB = toCalendarDay(b.scholarship_ends_at)
+      return dayA.localeCompare(dayB)
     })
 
     for (const scholarship of scholarships) {
@@ -65,9 +65,7 @@ export class PdfReportsService {
         advisor_name: getFirstAndLastNameFromCompleteName(
           scholarship.enrollment.advisor.name
         ),
-        ending_date: new Date(
-          scholarship.scholarship_ends_at
-        ).toLocaleDateString('pt-BR')
+        ending_date: formatDate(scholarship.scholarship_ends_at)
       }
 
       result.push(Object.assign({}, data))

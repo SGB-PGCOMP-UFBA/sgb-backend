@@ -43,7 +43,7 @@ describe('IsCalendarDayConstraint', () => {
 
   it('quando a mensagem padrão é pedida, cita o campo e o formato esperado', () => {
     expect(constraint.defaultMessage(ARGS)).toBe(
-      'date must be a valid date in the YYYY-MM-DD format'
+      'date deve ser uma data válida no formato AAAA-MM-DD.'
     )
   })
 })

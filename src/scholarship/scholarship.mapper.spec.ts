@@ -81,7 +81,7 @@ describe('ScholarshipMapper.simplified', () => {
 describe('ScholarshipMapper.detailed', () => {
   it('quando a bolsa é detalhada, acrescenta vigência e salário sem perder os campos do simplified', () => {
     const scholarship = makeScholarship({
-      extension_ends_at: new Date('2026-08-31')
+      extension_ends_at: '2026-08-31'
     })
 
     expect(ScholarshipMapper.detailed(scholarship)).toEqual({
@@ -106,7 +106,7 @@ describe('ScholarshipMapper.detailed', () => {
     'quando a data de início chega crua do banco, repassa o valor sem converter (%s)',
     (_, value) => {
       const detailed = ScholarshipMapper.detailed(
-        makeScholarship({ scholarship_starts_at: value as Date })
+        makeScholarship({ scholarship_starts_at: value as never })
       )
 
       expect(detailed.scholarship_starts_at).toBe(value)

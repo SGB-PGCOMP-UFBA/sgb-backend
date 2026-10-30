@@ -1,13 +1,11 @@
-import {
-  IsString,
-  IsEmail,
-  Length,
-  IsOptional,
-  IsIn,
-  IsDate
-} from 'class-validator'
-import { Transform, Type } from 'class-transformer'
+import { IsString, IsEmail, Length, IsOptional, IsIn } from 'class-validator'
+import { Transform } from 'class-transformer'
 import { constants } from '@/common/utils/constants'
+import { IsCalendarDay } from '@/common/constraints/is-calendar-day.constraint'
+import {
+  normalizeCalendarDayInput,
+  type CalendarDay
+} from '@/common/utils/calendar-day.util'
 
 export class UpdateEnrollmentDto {
   @IsString()
@@ -25,14 +23,14 @@ export class UpdateEnrollmentDto {
   readonly enrollment_program: string
 
   @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  readonly enrollment_date: Date
+  @Transform(normalizeCalendarDayInput)
+  @IsCalendarDay()
+  readonly enrollment_date: CalendarDay
 
   @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  readonly defense_prediction_date: Date
+  @Transform(normalizeCalendarDayInput)
+  @IsCalendarDay()
+  readonly defense_prediction_date: CalendarDay
 
   @IsOptional()
   @IsString()

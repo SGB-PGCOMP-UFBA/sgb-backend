@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
   OneToMany
 } from 'typeorm'
+import type { CalendarDay } from '@/common/utils/calendar-day.util'
 import { User } from '@/user/entities/user.entity'
 import { Scholarship } from '@/scholarship/entities/scholarship.entity'
 
@@ -22,8 +23,8 @@ export class Enrollment {
   @Column({ nullable: false })
   advisor_id: number
 
-  @Column({ nullable: false })
-  enrollment_date: Date
+  @Column({ type: 'date', nullable: false })
+  enrollment_date: CalendarDay
 
   @Column({ nullable: false, length: 15, unique: true })
   enrollment_number: string
@@ -31,8 +32,8 @@ export class Enrollment {
   @Column({ nullable: false, enum: ['MESTRADO', 'DOUTORADO'] })
   enrollment_program: string
 
-  @Column({ nullable: true })
-  defense_prediction_date: Date
+  @Column({ type: 'date', nullable: true })
+  defense_prediction_date: CalendarDay | null
 
   @CreateDateColumn()
   created_at: Date

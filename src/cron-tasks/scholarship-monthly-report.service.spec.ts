@@ -13,7 +13,7 @@ const PRIMEIRO_DIA_DO_MES = new Date(2026, 8, 1, 7, 0, 0)
 function buildScholarship(
   id: number,
   studentName: string,
-  endsAt: Date,
+  endsAt: string,
   overrides: Record<string, unknown> = {}
 ) {
   return makeScholarship({
@@ -78,8 +78,8 @@ describe('ScholarshipMonthlyReportService', () => {
 
   it('envia um e-mail por admin com a tabela das bolsas do mês', async () => {
     scholarshipRepository.findAllEndingBetween.mockResolvedValue([
-      buildScholarship(1, 'Maria Souza', new Date(2026, 8, 10)),
-      buildScholarship(2, 'João Lima', new Date(2026, 8, 25))
+      buildScholarship(1, 'Maria Souza', '2026-09-10'),
+      buildScholarship(2, 'João Lima', '2026-09-25')
     ])
     userRepository.findAllByType.mockResolvedValue([
       makeAdmin({ id: 3, name: 'Carlos Lima', email: 'carlos@ufba.br' }),
@@ -119,7 +119,7 @@ describe('ScholarshipMonthlyReportService', () => {
 
   it('usa a data de prorrogação quando a bolsa foi estendida', async () => {
     scholarshipRepository.findAllEndingBetween.mockResolvedValue([
-      buildScholarship(1, 'Maria Souza', new Date(2026, 7, 10), {
+      buildScholarship(1, 'Maria Souza', '2026-08-10', {
         extension_ends_at: new Date(2026, 8, 20)
       })
     ])

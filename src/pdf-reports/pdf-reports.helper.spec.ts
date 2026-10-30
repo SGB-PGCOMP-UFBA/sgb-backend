@@ -81,6 +81,18 @@ describe('getScholarshipsSplitedByStartingYear', () => {
     })
   })
 
+  it('quando a bolsa começa em 1º de janeiro (dia de calendário do banco), conta no próprio ano', () => {
+    const bolsa = {
+      id: 10,
+      scholarship_starts_at: '2026-01-01',
+      scholarship_ends_at: '2027-12-31'
+    }
+
+    expect(getScholarshipsSplitedByStartingYear([bolsa])).toEqual({
+      2026: [bolsa]
+    })
+  })
+
   it('quando várias bolsas caem no mesmo ano, preserva a ordem original', () => {
     const primeira = scholarship(new Date(2026, 0, 1), new Date(2027, 0, 1), 1)
     const segunda = scholarship(new Date(2026, 5, 1), new Date(2027, 5, 1), 2)

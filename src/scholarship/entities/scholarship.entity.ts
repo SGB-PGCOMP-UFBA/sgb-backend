@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn
 } from 'typeorm'
+import type { CalendarDay } from '@/common/utils/calendar-day.util'
 import { Agency } from '@/agency/entities/agency.entity'
 import { Enrollment } from '@/enrollment/entities/enrollment.entity'
 import { Allocation } from '@/allocation/entities/allocation.entity'
@@ -25,14 +26,14 @@ export class Scholarship {
   @Column({ nullable: true, default: null })
   allocation_id: number
 
-  @Column({ nullable: false })
-  scholarship_starts_at: Date
+  @Column({ type: 'date', nullable: false })
+  scholarship_starts_at: CalendarDay
 
-  @Column({ nullable: false })
-  scholarship_ends_at: Date
+  @Column({ type: 'date', nullable: false })
+  scholarship_ends_at: CalendarDay
 
-  @Column({ nullable: true })
-  extension_ends_at: Date
+  @Column({ type: 'date', nullable: true })
+  extension_ends_at: CalendarDay | null
 
   @Column({ nullable: true })
   salary: number

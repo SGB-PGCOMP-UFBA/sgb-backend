@@ -1,3 +1,5 @@
+import { toCalendarDay } from '@/common/utils/calendar-day.util'
+
 export function getFirstAndLastNameFromCompleteName(name: string) {
   const names = name.split(' ')
 
@@ -8,11 +10,17 @@ export function getFirstAndLastNameFromCompleteName(name: string) {
   return `${names[0]}`
 }
 
+/**
+ * Ano do dia de calendário. `new Date('2026-01-01')` é meia-noite UTC, que no
+ * fuso do Brasil ainda é 2025; por isso o ano sai do texto do dia.
+ */
+function calendarYear(value: Date | string): number {
+  return Number(toCalendarDay(value).slice(0, 4))
+}
+
 export function getScholarshipsSplitedByStartingYear(scholarships) {
   return scholarships.reduce((acc, scholarship) => {
-    const startedAtYear = new Date(
-      scholarship.scholarship_starts_at
-    ).getFullYear()
+    const startedAtYear = calendarYear(scholarship.scholarship_starts_at)
 
     if (!acc[startedAtYear]) {
       acc[startedAtYear] = []
@@ -25,9 +33,7 @@ export function getScholarshipsSplitedByStartingYear(scholarships) {
 
 export function getScholarshipsSplitedByEndingYear(scholarships) {
   return scholarships.reduce((acc, scholarship) => {
-    const startedAtYear = new Date(
-      scholarship.scholarship_ends_at
-    ).getFullYear()
+    const startedAtYear = calendarYear(scholarship.scholarship_ends_at)
 
     if (!acc[startedAtYear]) {
       acc[startedAtYear] = []

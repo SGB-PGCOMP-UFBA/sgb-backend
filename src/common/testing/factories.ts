@@ -1,3 +1,4 @@
+import { toCalendarDay } from '@/common/utils/calendar-day.util'
 import { Agency } from '@/agency/entities/agency.entity'
 import { Allocation } from '@/allocation/entities/allocation.entity'
 import { EmbedNotification } from '@/embed-notification/entities/embed-notification.entity'
@@ -80,8 +81,8 @@ export const makeEnrollment = defineFactory<Enrollment>(() => ({
   advisor_id: 10,
   enrollment_number: '2024123456',
   enrollment_program: 'MESTRADO',
-  enrollment_date: new Date('2024-03-01T00:00:00.000Z'),
-  defense_prediction_date: new Date('2026-02-28T00:00:00.000Z'),
+  enrollment_date: '2024-03-01',
+  defense_prediction_date: '2026-02-28',
   created_at: CRIADO_EM,
   updated_at: CRIADO_EM,
   scholarships: [],
@@ -116,28 +117,33 @@ export function daysFromToday(days: number): Date {
   return date
 }
 
+/** Dia de calendário (`yyyy-MM-dd`) a tantos dias de hoje, como o banco devolve. */
+export function dayFromToday(days: number): string {
+  return toCalendarDay(daysFromToday(days))
+}
+
 export const notStartedScholarship = () => ({
-  scholarship_starts_at: daysFromToday(30),
-  scholarship_ends_at: daysFromToday(395),
-  extension_ends_at: null
+  scholarship_starts_at: dayFromToday(30),
+  scholarship_ends_at: dayFromToday(395),
+  extension_ends_at: null as string | null
 })
 
 export const activeScholarship = () => ({
-  scholarship_starts_at: daysFromToday(-365),
-  scholarship_ends_at: daysFromToday(365),
-  extension_ends_at: null
+  scholarship_starts_at: dayFromToday(-365),
+  scholarship_ends_at: dayFromToday(365),
+  extension_ends_at: null as string | null
 })
 
 export const extendedScholarship = () => ({
-  scholarship_starts_at: daysFromToday(-730),
-  scholarship_ends_at: daysFromToday(-1),
-  extension_ends_at: daysFromToday(180)
+  scholarship_starts_at: dayFromToday(-730),
+  scholarship_ends_at: dayFromToday(-1),
+  extension_ends_at: dayFromToday(180)
 })
 
 export const finishedScholarship = () => ({
-  scholarship_starts_at: daysFromToday(-730),
-  scholarship_ends_at: daysFromToday(-1),
-  extension_ends_at: null
+  scholarship_starts_at: dayFromToday(-730),
+  scholarship_ends_at: dayFromToday(-1),
+  extension_ends_at: null as string | null
 })
 
 export const makeScholarship = defineFactory<Scholarship>(() => ({
