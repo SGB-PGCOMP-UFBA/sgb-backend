@@ -50,7 +50,7 @@ describe('TypeOrmEnrollmentRepository', () => {
       expect(queryBuilder.innerJoin).toHaveBeenCalledWith(
         'enrollment.scholarships',
         'scholarship',
-        expect.stringContaining('COALESCE'),
+        expect.stringContaining('GREATEST'),
         expect.objectContaining({ today: expect.any(String) })
       )
     })

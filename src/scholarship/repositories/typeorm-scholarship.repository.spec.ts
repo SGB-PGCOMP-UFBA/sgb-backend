@@ -101,7 +101,7 @@ describe('TypeOrmScholarshipRepository', () => {
     await repository.findAllEndingOn('2026-09-20')
 
     expect(queryBuilder.where).toHaveBeenCalledWith(
-      expect.stringContaining('COALESCE')
+      expect.stringContaining('GREATEST')
     )
     expect(queryBuilder.setParameter).toHaveBeenCalledWith(
       'today',
@@ -118,7 +118,7 @@ describe('TypeOrmScholarshipRepository', () => {
         { program: 'MESTRADO' }
       )
       expect(queryBuilder.where).toHaveBeenCalledWith(
-        expect.stringContaining('COALESCE')
+        expect.stringContaining('GREATEST')
       )
     })
 
@@ -229,7 +229,7 @@ describe('TypeOrmScholarshipRepository', () => {
         'scholarship.scholarship_starts_at <= CAST(:today AS date)'
       )
       expect(queryBuilder.andWhere).toHaveBeenCalledWith(
-        expect.stringMatching(/COALESCE.*>= CAST\(:searchStart AS date\)/),
+        expect.stringMatching(/GREATEST.*>= CAST\(:searchStart AS date\)/),
         { searchStart: '2023-01-01' }
       )
     })
@@ -280,7 +280,7 @@ describe('TypeOrmScholarshipRepository', () => {
         { endDay: '2024-12-31' }
       )
       expect(queryBuilder.andWhere).toHaveBeenCalledWith(
-        expect.stringMatching(/COALESCE.*>= CAST\(:startDay AS date\)/),
+        expect.stringMatching(/GREATEST.*>= CAST\(:startDay AS date\)/),
         { startDay: '2024-01-01' }
       )
     })
