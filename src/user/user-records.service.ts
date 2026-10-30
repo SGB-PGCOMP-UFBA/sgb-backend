@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common'
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  UnprocessableEntityException
+} from '@nestjs/common'
 import { User } from '@/user/entities/user.entity'
 import {
   UniqueUserField,
@@ -36,6 +41,23 @@ const ALREADY_REGISTERED: Record<UniqueUserField, string> = {
     constants.negotialValidationMessages.PHONE_NUMBER_ALREADY_REGISTERED,
   link_to_lattes:
     constants.negotialValidationMessages.LINK_TO_LATTES_ALREADY_REGISTERED
+}
+
+/** Pedido explícito para apagar o campo: `null` ou só espaços. */
+function isCleared(value: string | null | undefined): boolean {
+  return value === null || (typeof value === 'string' && value.trim() === '')
+}
+
+function emptyToNull(
+  value: string | null | undefined
+): string | null | undefined {
+  return isCleared(value) ? null : value
+}
+
+function withoutUndefined<T extends object>(data: T): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(data).filter(([, value]) => value !== undefined)
+  ) as Partial<T>
 }
 
 const STUDENT_WELCOME = {
@@ -84,18 +106,45 @@ export class UserRecordsService {
     return user
   }
 
+  /**
+   * Edição parcial: campo ausente mantém o valor gravado; `null` ou texto
+   * vazio apaga o campo quando ele é opcional e é recusado quando é
+   * obrigatório (nome, e-mail e o CPF do estudante).
+   */
   async update(user: User, changes: UserChanges): Promise<User> {
+    this.assertRequiredKept(user.role, changes)
     await this.assertAvailable(user.role, changes, user.id)
 
-    return await this.userRepository.update(user.id, {
-      name: changes.name || user.name,
-      email: changes.email || user.email,
-      tax_id: changes.tax_id,
-      phone_number: changes.phone_number,
-      ...(user.role === 'STUDENT' && {
-        link_to_lattes: changes.link_to_lattes
-      })
-    })
+    const data: Partial<User> = {
+      name: changes.name ?? undefined,
+      email: changes.email ?? undefined,
+      tax_id: emptyToNull(changes.tax_id),
+      phone_number: emptyToNull(changes.phone_number),
+      link_to_lattes:
+        user.role === 'STUDENT'
+          ? emptyToNull(changes.link_to_lattes)
+          : undefined
+    }
+
+    return await this.userRepository.update(user.id, withoutUndefined(data))
+  }
+
+  private assertRequiredKept(role: UserType, changes: UserChanges): void {
+    if (isCleared(changes.name)) {
+      throw new UnprocessableEntityException(
+        constants.exceptionMessages.user.NAME_REQUIRED
+      )
+    }
+    if (isCleared(changes.email)) {
+      throw new UnprocessableEntityException(
+        constants.exceptionMessages.user.EMAIL_REQUIRED
+      )
+    }
+    if (role === 'STUDENT' && isCleared(changes.tax_id)) {
+      throw new UnprocessableEntityException(
+        constants.exceptionMessages.user.STUDENT_TAX_ID_REQUIRED
+      )
+    }
   }
 
   private async assertAvailable(

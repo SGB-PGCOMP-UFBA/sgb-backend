@@ -49,6 +49,11 @@ export class UserAccountService {
     return toManagedUser(admin)
   }
 
+  /** Os dados atuais do próprio cadastro, para a tela "Meu perfil". */
+  async findProfile(caller: Caller): Promise<ManagedUser> {
+    return toManagedUser(await this.findCaller(caller))
+  }
+
   async updateProfile(
     caller: Caller,
     dto: UpdateProfileDto

@@ -218,6 +218,21 @@ describe('EnrollmentService', () => {
       )
     })
 
+    it('quando a previsão de defesa chega como null, apaga a previsão gravada', async () => {
+      repository.findByIdAndStudentId.mockResolvedValue(ENROLLMENT)
+
+      await service.update(42, {
+        student_email: 'aluno@ufba.br',
+        advisor_email: 'orientadora@ufba.br',
+        defense_prediction_date: null
+      } as never)
+
+      expect(repository.update).toHaveBeenCalledWith(
+        42,
+        expect.objectContaining({ defense_prediction_date: null })
+      )
+    })
+
     it('quando a matrícula não pertence ao aluno informado, responde 404 sem atualizar nada', async () => {
       await expect(
         service.update(42, {

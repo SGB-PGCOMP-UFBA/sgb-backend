@@ -77,6 +77,24 @@ describe('UserAccountService', () => {
     )
   })
 
+  describe('findProfile', () => {
+    it('devolve o cadastro atual de quem está logado, sem a senha', async () => {
+      const profile = await service.findProfile(STUDENT_CALLER)
+
+      expect(userRepository.findById).toHaveBeenCalledWith(7)
+      expect(profile).toMatchObject({ id: 7, role: 'STUDENT' })
+      expect(profile).not.toHaveProperty('password')
+    })
+
+    it('quando a conta do token não existe mais, lança NotFound', async () => {
+      userRepository.findById.mockResolvedValue(null)
+
+      await expect(service.findProfile(STUDENT_CALLER)).rejects.toBeInstanceOf(
+        NotFoundException
+      )
+    })
+  })
+
   describe('updateProfile', () => {
     it('altera o cadastro de quem está logado, achado pelo id do token', async () => {
       await service.updateProfile(STUDENT_CALLER, { name: 'Novo' })

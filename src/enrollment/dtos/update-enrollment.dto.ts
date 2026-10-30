@@ -30,7 +30,7 @@ export class UpdateEnrollmentDto {
   @IsOptional()
   @Transform(normalizeCalendarDayInput)
   @IsCalendarDay()
-  readonly defense_prediction_date: CalendarDay
+  readonly defense_prediction_date?: CalendarDay | null
 
   @IsOptional()
   @IsString()

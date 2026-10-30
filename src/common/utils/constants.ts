@@ -114,7 +114,10 @@ const constants = {
         'Só orientadores podem receber privilégios de administrador.',
       CANNOT_CHANGE_OWN_PRIVILEGES:
         'Você não pode alterar os próprios privilégios de administrador.',
-      ONLY_OWN_DATA: 'Você só pode consultar os próprios dados.'
+      ONLY_OWN_DATA: 'Você só pode consultar os próprios dados.',
+      NAME_REQUIRED: 'O nome não pode ficar vazio.',
+      EMAIL_REQUIRED: 'O e-mail não pode ficar vazio.',
+      STUDENT_TAX_ID_REQUIRED: 'O CPF do estudante não pode ficar vazio.'
     },
     passwordRecovery: {
       INVALID_CODE:
