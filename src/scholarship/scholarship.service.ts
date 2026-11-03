@@ -23,10 +23,19 @@ import { Enrollment } from '@/enrollment/entities/enrollment.entity'
 import { CreateScholarshipDto } from '@/scholarship/dtos/create-scholarship.dto'
 import { UpdateScholarshipDto } from '@/scholarship/dtos/update-scholarship.dto'
 import { validateScholarshipDuration } from '@/common/utils/date.util'
-import type { CalendarDay } from '@/common/utils/calendar-day.util'
+import {
+  toCalendarDay,
+  type CalendarDay
+} from '@/common/utils/calendar-day.util'
 import { CountScholarshipsAsReportBetweenDatesDto } from '@/scholarship/dtos/count-scholarship-courses-between-dates.dto'
 import { FindScholarshipsForReportDto } from '@/scholarship/dtos/find-scholarships-for-report.dto'
 import { ProgramEnum } from '@/common/enums/program.enum'
+import { EmbedNotificationRepository } from '@/embed-notification/repositories/embed-notification.repository'
+import { User } from '@/user/entities/user.entity'
+import {
+  describeExceededDuration,
+  exceedsExpectedDuration
+} from '@/scholarship/utils/scholarship-duration.util'
 import {
   getAwardedSlotsByProgram,
   hasAvailableSlot
@@ -46,6 +55,8 @@ interface AgencyQuota {
   doctorate_degree_awarded_scholarships?: number
 }
 
+const DURATION_EXCEEDED_TITLE = 'Bolsa com duração acima do esperado'
+
 @Injectable()
 export class ScholarshipService {
   private readonly logger = new Logger(ScholarshipService.name)
@@ -55,7 +66,8 @@ export class ScholarshipService {
     private agencyService: AgencyService,
     private allocationService: AllocationService,
     private enrollmentService: EnrollmentService,
-    private readonly userRepository: UserRepository
+    private readonly userRepository: UserRepository,
+    private readonly embedNotificationRepository: EmbedNotificationRepository
   ) {}
 
   async findAll(): Promise<Scholarship[]> {
@@ -145,6 +157,11 @@ export class ScholarshipService {
     throw new BadRequestException(message)
   }
 
+  /**
+   * O término não tem limite de duração: período acima do esperado para o
+   * curso só gera aviso (no front) e notificação aos administradores. Só
+   * término antes do início é recusado.
+   */
   private assertValidPeriod(
     period: {
       scholarship_starts_at: CalendarDay
@@ -153,15 +170,13 @@ export class ScholarshipService {
     },
     enrollment: Partial<Enrollment>
   ): void {
-    const endDate = validateScholarshipDuration(
-      {
-        givenDate: period.scholarship_ends_at,
-        referenceDate: period.scholarship_starts_at
-      },
-      enrollment
-    )
-    if (!endDate.isValid) {
-      throw new BadRequestException(endDate.errorMessage)
+    if (
+      toCalendarDay(period.scholarship_ends_at) <
+      toCalendarDay(period.scholarship_starts_at)
+    ) {
+      throw new BadRequestException(
+        constants.exceptionMessages.dates.END_DATE_SMALLER
+      )
     }
 
     if (!period.extension_ends_at) return
@@ -239,6 +254,15 @@ export class ScholarshipService {
     })
 
     this.logger.log(constants.exceptionMessages.scholarship.CREATION_COMPLETED)
+
+    await this.notifyAdminsIfDurationExceeded(
+      {
+        scholarship_starts_at: dto.scholarship_starts_at,
+        scholarship_ends_at: dto.scholarship_ends_at
+      },
+      enrollment,
+      () => this.userRepository.findByEmail(dto.student_email, 'STUDENT')
+    )
 
     return newScholarship
   }
@@ -320,7 +344,7 @@ export class ScholarshipService {
       )
     }
 
-    return await this.scholarshipRepository.update(scholarship.id, {
+    const updated = await this.scholarshipRepository.update(scholarship.id, {
       salary: dto.salary,
       extension_ends_at: nextExtensionEndsAt,
       agency_id: dto.agency_id || scholarship.agency_id,
@@ -328,6 +352,71 @@ export class ScholarshipService {
       scholarship_starts_at: nextStartsAt,
       scholarship_ends_at: nextEndsAt
     })
+
+    // Editar outro campo de uma bolsa que já passava do esperado não notifica de novo.
+    const periodChanged =
+      toCalendarDay(nextStartsAt) !==
+        toCalendarDay(scholarship.scholarship_starts_at) ||
+      toCalendarDay(nextEndsAt) !==
+        toCalendarDay(scholarship.scholarship_ends_at)
+
+    if (periodChanged) {
+      await this.notifyAdminsIfDurationExceeded(
+        {
+          scholarship_starts_at: nextStartsAt,
+          scholarship_ends_at: nextEndsAt
+        },
+        enrollment,
+        async () => student
+      )
+    }
+
+    return updated
+  }
+
+  /**
+   * A bolsa já foi gravada: uma falha ao notificar não deve desfazer o
+   * salvamento nem devolver erro.
+   */
+  private async notifyAdminsIfDurationExceeded(
+    period: {
+      scholarship_starts_at: CalendarDay
+      scholarship_ends_at: CalendarDay
+    },
+    enrollment: Partial<Enrollment>,
+    findStudent: () => Promise<User | null>
+  ): Promise<void> {
+    const startsAt = toCalendarDay(period.scholarship_starts_at)
+    const endsAt = toCalendarDay(period.scholarship_ends_at)
+    const program = enrollment.enrollment_program ?? ''
+    if (!exceedsExpectedDuration(startsAt, endsAt, program)) return
+
+    try {
+      const student = await findStudent()
+      const description = describeExceededDuration({
+        studentName: student?.name ?? 'estudante',
+        program,
+        startsAt,
+        endsAt
+      })
+      const admins = (await this.userRepository.findAllByType('ADMIN')).filter(
+        (admin) => admin.status === 'ACTIVE'
+      )
+
+      for (const admin of admins) {
+        await this.embedNotificationRepository.create({
+          owner_id: admin.id,
+          owner_type: 'ADMIN',
+          title: DURATION_EXCEEDED_TITLE,
+          description
+        })
+      }
+    } catch (error) {
+      this.logger.error(
+        'Exceeded duration notification failed',
+        error instanceof Error ? error.stack : String(error)
+      )
+    }
   }
 
   async findOneWithRelations(id: number): Promise<Scholarship> {
