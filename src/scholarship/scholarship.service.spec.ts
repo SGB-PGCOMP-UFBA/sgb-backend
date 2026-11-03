@@ -71,7 +71,9 @@ describe('ScholarshipService', () => {
   let userRepository: {
     findByEmail: ReturnType<typeof vi.fn>
     findById: ReturnType<typeof vi.fn>
+    findAllByType: ReturnType<typeof vi.fn>
   }
+  let embedNotificationRepository: { create: ReturnType<typeof vi.fn> }
   let service: ScholarshipService
 
   beforeEach(() => {
@@ -92,15 +94,18 @@ describe('ScholarshipService', () => {
     }
     userRepository = {
       findByEmail: vi.fn().mockResolvedValue(makeStudent()),
-      findById: vi.fn().mockResolvedValue(null)
+      findById: vi.fn().mockResolvedValue(null),
+      findAllByType: vi.fn().mockResolvedValue([])
     }
+    embedNotificationRepository = { create: vi.fn().mockResolvedValue({}) }
 
     service = new ScholarshipService(
       repository as unknown as ScholarshipRepository,
       agencyService,
       allocationService,
       enrollmentService,
-      userRepository as never
+      userRepository as never,
+      embedNotificationRepository as never
     )
   })
 
@@ -288,15 +293,115 @@ describe('ScholarshipService', () => {
       )
     })
 
-    it('quando o mestrado passa de 2 anos de duração, recusa a criação', async () => {
+    it('quando o mestrado passa de 2 anos de duração, salva mesmo assim', async () => {
       withAllocatedSlots(0)
 
+      await service.create({
+        ...(VALID_DTO as object),
+        scholarship_ends_at: '2029-01-01'
+      } as never)
+
+      expect(repository.create).toHaveBeenCalled()
+    })
+  })
+
+  describe('duração diferente do esperado', () => {
+    const ADMINS = [
+      makeAdmin({ id: 1 }),
+      makeAdmin({ id: 2 }),
+      makeAdmin({ id: 3, status: 'INACTIVE' })
+    ]
+    const EXACT = {
+      scholarship_starts_at: '2026-03-01',
+      scholarship_ends_at: '2028-02-29'
+    }
+
+    beforeEach(() => {
+      userRepository.findAllByType.mockResolvedValue(ADMINS)
+      userRepository.findByEmail.mockResolvedValue(
+        makeStudent({ name: 'Igor Estudante' })
+      )
+    })
+
+    function createWith(period: object) {
+      return service.create({ ...(VALID_DTO as object), ...period } as never)
+    }
+
+    it('ao criar com duração a menos, notifica cada administrador ativo', async () => {
+      await createWith({ ...EXACT, scholarship_ends_at: '2028-02-01' })
+
+      expect(userRepository.findAllByType).toHaveBeenCalledWith('ADMIN')
+      expect(embedNotificationRepository.create).toHaveBeenCalledTimes(2)
+      expect(embedNotificationRepository.create).toHaveBeenCalledWith({
+        owner_id: 1,
+        owner_type: 'ADMIN',
+        title: 'Bolsa com duração diferente do esperado',
+        description: expect.stringContaining('Igor Estudante')
+      })
+      const [{ description }] = embedNotificationRepository.create.mock.calls[0]
+      expect(description).toContain('a menos que os 2 anos esperados')
+    })
+
+    it('ao criar com duração a mais, salva e notifica com "a mais"', async () => {
+      await createWith({ ...EXACT, scholarship_ends_at: '2028-06-01' })
+
+      expect(repository.create).toHaveBeenCalled()
+      const [{ description }] = embedNotificationRepository.create.mock.calls[0]
+      expect(description).toContain('a mais que os 2 anos esperados')
+    })
+
+    it('ao criar com a duração exata do curso, não notifica', async () => {
+      await createWith(EXACT)
+
+      expect(embedNotificationRepository.create).not.toHaveBeenCalled()
+    })
+
+    it('se a notificação falha, a bolsa continua salva e não devolve erro', async () => {
+      embedNotificationRepository.create.mockRejectedValue(new Error('banco'))
+
       await expect(
-        service.create({
-          ...(VALID_DTO as object),
-          scholarship_ends_at: '2029-01-01'
+        createWith({ ...EXACT, scholarship_ends_at: '2028-02-01' })
+      ).resolves.toBeDefined()
+      expect(repository.create).toHaveBeenCalled()
+    })
+
+    describe('ao editar', () => {
+      const STORED = makeScholarship({
+        id: 900,
+        scholarship_starts_at: '2026-03-01',
+        scholarship_ends_at: '2028-02-01'
+      })
+      const UPDATE = {
+        enrollment_id: ENROLLMENT.id,
+        student_email: 'aluno@ufba.br'
+      }
+
+      beforeEach(() => {
+        repository.findByIdAndEnrollmentId.mockResolvedValue(STORED)
+      })
+
+      it('quando o período muda e continua divergente, notifica', async () => {
+        await service.update(900, {
+          ...UPDATE,
+          scholarship_starts_at: '2026-03-01',
+          scholarship_ends_at: '2028-01-01'
         } as never)
-      ).rejects.toBeInstanceOf(BadRequestException)
+
+        expect(embedNotificationRepository.create).toHaveBeenCalledTimes(2)
+      })
+
+      it('quando só o valor muda numa bolsa que já divergia, não notifica de novo', async () => {
+        await service.update(900, { ...UPDATE, salary: 2300 } as never)
+
+        expect(repository.update).toHaveBeenCalled()
+        expect(embedNotificationRepository.create).not.toHaveBeenCalled()
+      })
+
+      it('quando o período é corrigido para a duração exata, não notifica', async () => {
+        await service.update(900, { ...UPDATE, ...EXACT } as never)
+
+        expect(embedNotificationRepository.create).not.toHaveBeenCalled()
+      })
     })
   })
 

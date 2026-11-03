@@ -1,0 +1,69 @@
+import type { CalendarDay } from '@/common/utils/calendar-day.util'
+
+export type DurationMismatch = 'LONGER' | 'SHORTER'
+
+export const EXPECTED_DURATION_IN_YEARS: Record<string, number> = {
+  MESTRADO: 2,
+  DOUTORADO: 4
+}
+
+const PROGRAM_LABEL: Record<string, string> = {
+  MESTRADO: 'mestrado',
+  DOUTORADO: 'doutorado'
+}
+
+function formatDay(day: CalendarDay): string {
+  const [year, month, date] = day.split('-')
+  return `${date}/${month}/${year}`
+}
+
+/**
+ * Último dia de uma bolsa com a duração exata do curso: a véspera do mesmo
+ * dia N anos depois (01/03/2026 → 29/02/2028 no mestrado). Início em 29/02
+ * num ano de destino sem 29/02 cai em 01/03, então o término esperado é 28/02.
+ */
+export function expectedEndDay(
+  startsAt: CalendarDay,
+  program: string
+): CalendarDay | null {
+  const years = EXPECTED_DURATION_IN_YEARS[program]
+  if (!years) return null
+
+  const [year, month, day] = startsAt.split('-').map(Number)
+  const anniversary = new Date(Date.UTC(year + years, month - 1, day))
+  anniversary.setUTCDate(anniversary.getUTCDate() - 1)
+
+  return anniversary.toISOString().slice(0, 10)
+}
+
+/** `null` quando o período tem a duração exata do curso (ou curso desconhecido). */
+export function durationMismatch(
+  startsAt: CalendarDay,
+  endsAt: CalendarDay,
+  program: string
+): DurationMismatch | null {
+  const expected = expectedEndDay(startsAt, program)
+
+  if (!expected || endsAt === expected) return null
+  return endsAt > expected ? 'LONGER' : 'SHORTER'
+}
+
+/** Texto da notificação para os administradores. */
+export function describeDurationMismatch(period: {
+  studentName: string
+  program: string
+  startsAt: CalendarDay
+  endsAt: CalendarDay
+  mismatch: DurationMismatch
+}): string {
+  const years = EXPECTED_DURATION_IN_YEARS[period.program]
+  const expected = expectedEndDay(period.startsAt, period.program)
+  const direction = period.mismatch === 'LONGER' ? 'a mais' : 'a menos'
+  const range = `${formatDay(period.startsAt)} a ${formatDay(period.endsAt)}`
+
+  return (
+    `A bolsa de ${PROGRAM_LABEL[period.program]} de ${period.studentName} ` +
+    `(${range}) tem duração ${direction} que os ${years} anos esperados, ` +
+    `que terminariam em ${formatDay(expected as CalendarDay)}.`
+  )
+}
