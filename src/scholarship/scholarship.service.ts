@@ -33,8 +33,8 @@ import { ProgramEnum } from '@/common/enums/program.enum'
 import { EmbedNotificationRepository } from '@/embed-notification/repositories/embed-notification.repository'
 import { User } from '@/user/entities/user.entity'
 import {
-  describeDurationMismatch,
-  durationMismatch
+  describeExceededDuration,
+  exceedsExpectedDuration
 } from '@/scholarship/utils/scholarship-duration.util'
 import {
   getAwardedSlotsByProgram,
@@ -55,7 +55,7 @@ interface AgencyQuota {
   doctorate_degree_awarded_scholarships?: number
 }
 
-const DURATION_MISMATCH_TITLE = 'Bolsa com duração diferente do esperado'
+const DURATION_EXCEEDED_TITLE = 'Bolsa com duração acima do esperado'
 
 @Injectable()
 export class ScholarshipService {
@@ -158,8 +158,8 @@ export class ScholarshipService {
   }
 
   /**
-   * O término não tem limite de duração: período diferente do esperado para
-   * o curso só gera aviso (no front) e notificação aos administradores. Só
+   * O término não tem limite de duração: período acima do esperado para o
+   * curso só gera aviso (no front) e notificação aos administradores. Só
    * término antes do início é recusado.
    */
   private assertValidPeriod(
@@ -255,7 +255,7 @@ export class ScholarshipService {
 
     this.logger.log(constants.exceptionMessages.scholarship.CREATION_COMPLETED)
 
-    await this.notifyAdminsIfDurationMismatch(
+    await this.notifyAdminsIfDurationExceeded(
       {
         scholarship_starts_at: dto.scholarship_starts_at,
         scholarship_ends_at: dto.scholarship_ends_at
@@ -353,7 +353,7 @@ export class ScholarshipService {
       scholarship_ends_at: nextEndsAt
     })
 
-    // Editar outro campo de uma bolsa que já divergia não notifica de novo.
+    // Editar outro campo de uma bolsa que já passava do esperado não notifica de novo.
     const periodChanged =
       toCalendarDay(nextStartsAt) !==
         toCalendarDay(scholarship.scholarship_starts_at) ||
@@ -361,7 +361,7 @@ export class ScholarshipService {
         toCalendarDay(scholarship.scholarship_ends_at)
 
     if (periodChanged) {
-      await this.notifyAdminsIfDurationMismatch(
+      await this.notifyAdminsIfDurationExceeded(
         {
           scholarship_starts_at: nextStartsAt,
           scholarship_ends_at: nextEndsAt
@@ -378,7 +378,7 @@ export class ScholarshipService {
    * A bolsa já foi gravada: uma falha ao notificar não deve desfazer o
    * salvamento nem devolver erro.
    */
-  private async notifyAdminsIfDurationMismatch(
+  private async notifyAdminsIfDurationExceeded(
     period: {
       scholarship_starts_at: CalendarDay
       scholarship_ends_at: CalendarDay
@@ -389,18 +389,15 @@ export class ScholarshipService {
     const startsAt = toCalendarDay(period.scholarship_starts_at)
     const endsAt = toCalendarDay(period.scholarship_ends_at)
     const program = enrollment.enrollment_program ?? ''
-    const mismatch = durationMismatch(startsAt, endsAt, program)
-
-    if (!mismatch) return
+    if (!exceedsExpectedDuration(startsAt, endsAt, program)) return
 
     try {
       const student = await findStudent()
-      const description = describeDurationMismatch({
+      const description = describeExceededDuration({
         studentName: student?.name ?? 'estudante',
         program,
         startsAt,
-        endsAt,
-        mismatch
+        endsAt
       })
       const admins = (await this.userRepository.findAllByType('ADMIN')).filter(
         (admin) => admin.status === 'ACTIVE'
@@ -410,13 +407,13 @@ export class ScholarshipService {
         await this.embedNotificationRepository.create({
           owner_id: admin.id,
           owner_type: 'ADMIN',
-          title: DURATION_MISMATCH_TITLE,
+          title: DURATION_EXCEEDED_TITLE,
           description
         })
       }
     } catch (error) {
       this.logger.error(
-        'Duration mismatch notification failed',
+        'Exceeded duration notification failed',
         error instanceof Error ? error.stack : String(error)
       )
     }

@@ -305,7 +305,7 @@ describe('ScholarshipService', () => {
     })
   })
 
-  describe('duração diferente do esperado', () => {
+  describe('duração acima do esperado', () => {
     const ADMINS = [
       makeAdmin({ id: 1 }),
       makeAdmin({ id: 2 }),
@@ -327,32 +327,29 @@ describe('ScholarshipService', () => {
       return service.create({ ...(VALID_DTO as object), ...period } as never)
     }
 
-    it('ao criar com duração a menos, notifica cada administrador ativo', async () => {
-      await createWith({ ...EXACT, scholarship_ends_at: '2028-02-01' })
+    it('ao criar passando do esperado, salva e notifica cada administrador ativo', async () => {
+      await createWith({ ...EXACT, scholarship_ends_at: '2028-06-01' })
 
+      expect(repository.create).toHaveBeenCalled()
       expect(userRepository.findAllByType).toHaveBeenCalledWith('ADMIN')
       expect(embedNotificationRepository.create).toHaveBeenCalledTimes(2)
       expect(embedNotificationRepository.create).toHaveBeenCalledWith({
         owner_id: 1,
         owner_type: 'ADMIN',
-        title: 'Bolsa com duração diferente do esperado',
+        title: 'Bolsa com duração acima do esperado',
         description: expect.stringContaining('Igor Estudante')
       })
       const [{ description }] = embedNotificationRepository.create.mock.calls[0]
-      expect(description).toContain('a menos que os 2 anos esperados')
+      expect(description).toContain('passa dos 2 anos esperados')
     })
 
-    it('ao criar com duração a mais, salva e notifica com "a mais"', async () => {
-      await createWith({ ...EXACT, scholarship_ends_at: '2028-06-01' })
+    it.each([
+      ['a duração exata', '2028-02-29'],
+      ['duração mais curta', '2027-06-01']
+    ])('ao criar com %s, não notifica', async (_, end) => {
+      await createWith({ ...EXACT, scholarship_ends_at: end })
 
       expect(repository.create).toHaveBeenCalled()
-      const [{ description }] = embedNotificationRepository.create.mock.calls[0]
-      expect(description).toContain('a mais que os 2 anos esperados')
-    })
-
-    it('ao criar com a duração exata do curso, não notifica', async () => {
-      await createWith(EXACT)
-
       expect(embedNotificationRepository.create).not.toHaveBeenCalled()
     })
 
@@ -360,7 +357,7 @@ describe('ScholarshipService', () => {
       embedNotificationRepository.create.mockRejectedValue(new Error('banco'))
 
       await expect(
-        createWith({ ...EXACT, scholarship_ends_at: '2028-02-01' })
+        createWith({ ...EXACT, scholarship_ends_at: '2028-06-01' })
       ).resolves.toBeDefined()
       expect(repository.create).toHaveBeenCalled()
     })
@@ -369,7 +366,7 @@ describe('ScholarshipService', () => {
       const STORED = makeScholarship({
         id: 900,
         scholarship_starts_at: '2026-03-01',
-        scholarship_ends_at: '2028-02-01'
+        scholarship_ends_at: '2028-06-01'
       })
       const UPDATE = {
         enrollment_id: ENROLLMENT.id,
@@ -380,25 +377,29 @@ describe('ScholarshipService', () => {
         repository.findByIdAndEnrollmentId.mockResolvedValue(STORED)
       })
 
-      it('quando o período muda e continua divergente, notifica', async () => {
+      it('quando o período muda e continua passando do esperado, notifica', async () => {
         await service.update(900, {
           ...UPDATE,
           scholarship_starts_at: '2026-03-01',
-          scholarship_ends_at: '2028-01-01'
+          scholarship_ends_at: '2028-09-01'
         } as never)
 
         expect(embedNotificationRepository.create).toHaveBeenCalledTimes(2)
       })
 
-      it('quando só o valor muda numa bolsa que já divergia, não notifica de novo', async () => {
+      it('quando só o valor muda numa bolsa que já passava do esperado, não notifica de novo', async () => {
         await service.update(900, { ...UPDATE, salary: 2300 } as never)
 
         expect(repository.update).toHaveBeenCalled()
         expect(embedNotificationRepository.create).not.toHaveBeenCalled()
       })
 
-      it('quando o período é corrigido para a duração exata, não notifica', async () => {
-        await service.update(900, { ...UPDATE, ...EXACT } as never)
+      it('quando o período é encurtado para antes do esperado, não notifica', async () => {
+        await service.update(900, {
+          ...UPDATE,
+          scholarship_starts_at: '2026-03-01',
+          scholarship_ends_at: '2027-12-01'
+        } as never)
 
         expect(embedNotificationRepository.create).not.toHaveBeenCalled()
       })

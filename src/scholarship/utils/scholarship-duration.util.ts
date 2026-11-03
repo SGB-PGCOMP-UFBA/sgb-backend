@@ -1,7 +1,5 @@
 import type { CalendarDay } from '@/common/utils/calendar-day.util'
 
-export type DurationMismatch = 'LONGER' | 'SHORTER'
-
 export const EXPECTED_DURATION_IN_YEARS: Record<string, number> = {
   MESTRADO: 2,
   DOUTORADO: 4
@@ -36,34 +34,34 @@ export function expectedEndDay(
   return anniversary.toISOString().slice(0, 10)
 }
 
-/** `null` quando o período tem a duração exata do curso (ou curso desconhecido). */
-export function durationMismatch(
+/**
+ * Só a duração acima da do curso importa: término até o esperado (ou antes)
+ * não é problema. Curso desconhecido nunca passa do esperado.
+ */
+export function exceedsExpectedDuration(
   startsAt: CalendarDay,
   endsAt: CalendarDay,
   program: string
-): DurationMismatch | null {
+): boolean {
   const expected = expectedEndDay(startsAt, program)
 
-  if (!expected || endsAt === expected) return null
-  return endsAt > expected ? 'LONGER' : 'SHORTER'
+  return expected !== null && endsAt > expected
 }
 
 /** Texto da notificação para os administradores. */
-export function describeDurationMismatch(period: {
+export function describeExceededDuration(period: {
   studentName: string
   program: string
   startsAt: CalendarDay
   endsAt: CalendarDay
-  mismatch: DurationMismatch
 }): string {
   const years = EXPECTED_DURATION_IN_YEARS[period.program]
   const expected = expectedEndDay(period.startsAt, period.program)
-  const direction = period.mismatch === 'LONGER' ? 'a mais' : 'a menos'
   const range = `${formatDay(period.startsAt)} a ${formatDay(period.endsAt)}`
 
   return (
     `A bolsa de ${PROGRAM_LABEL[period.program]} de ${period.studentName} ` +
-    `(${range}) tem duração ${direction} que os ${years} anos esperados, ` +
-    `que terminariam em ${formatDay(expected as CalendarDay)}.`
+    `(${range}) passa dos ${years} anos esperados, que terminariam em ` +
+    `${formatDay(expected as CalendarDay)}.`
   )
 }
