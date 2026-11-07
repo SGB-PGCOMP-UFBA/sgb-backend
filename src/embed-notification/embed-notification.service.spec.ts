@@ -16,9 +16,12 @@ const VALID_DTO = {
 function createEmbedNotificationRepositoryMock() {
   return {
     findPendingByOwner: vi.fn().mockResolvedValue([]),
+    findPageByOwner: vi.fn().mockResolvedValue([[], 0]),
+    countUnconsumedByOwner: vi.fn().mockResolvedValue(0),
     findByIdAndOwner: vi.fn().mockResolvedValue(makeEmbedNotification()),
     create: vi.fn(async (data: unknown) => data),
     markAsConsumed: vi.fn().mockResolvedValue(undefined),
+    markAllAsConsumedByOwner: vi.fn().mockResolvedValue(0),
     deleteById: vi.fn().mockResolvedValue(1)
   } satisfies Record<keyof EmbedNotificationRepository, unknown>
 }
@@ -46,6 +49,72 @@ describe('EmbedNotificationService', () => {
 
     it('quando não há notificação pendente, devolve lista vazia', async () => {
       await expect(service.findAllBy(OWNER)).resolves.toEqual([])
+    })
+  })
+
+  describe('findPageBy', () => {
+    it('repassa dono, paginação e filtro e monta o meta a partir do total', async () => {
+      repository.findPageByOwner.mockResolvedValue([
+        [
+          makeEmbedNotification({ id: 60, consumed: true }),
+          makeEmbedNotification({ id: 59 })
+        ],
+        23
+      ])
+
+      const page = await service.findPageBy(OWNER, {
+        page: 2,
+        limit: 10,
+        onlyUnconsumed: true
+      })
+
+      expect(repository.findPageByOwner).toHaveBeenCalledWith(7, 'STUDENT', {
+        page: 2,
+        limit: 10,
+        onlyUnconsumed: true
+      })
+      expect(page.items.map((n) => [n.id, n.consumed])).toEqual([
+        [60, true],
+        [59, false]
+      ])
+      expect(page.meta).toEqual({
+        totalItems: 23,
+        itemCount: 2,
+        itemsPerPage: 10,
+        totalPages: 3,
+        currentPage: 2
+      })
+    })
+
+    it('quando o dono não tem notificação, devolve página vazia com zero páginas', async () => {
+      const page = await service.findPageBy(OWNER, { page: 1, limit: 10 })
+
+      expect(page.items).toEqual([])
+      expect(page.meta.totalPages).toBe(0)
+    })
+  })
+
+  describe('countUnconsumedBy', () => {
+    it('devolve a contagem de não lidas do dono', async () => {
+      repository.countUnconsumedByOwner.mockResolvedValue(14)
+
+      await expect(service.countUnconsumedBy(OWNER)).resolves.toBe(14)
+      expect(repository.countUnconsumedByOwner).toHaveBeenCalledWith(
+        7,
+        'STUDENT'
+      )
+    })
+  })
+
+  describe('consumeAll', () => {
+    it('marca todas as não lidas do dono e devolve quantas mudaram', async () => {
+      repository.markAllAsConsumedByOwner.mockResolvedValue(12)
+
+      await expect(service.consumeAll(OWNER)).resolves.toBe(12)
+      expect(repository.markAllAsConsumedByOwner).toHaveBeenCalledWith(
+        7,
+        'STUDENT'
+      )
     })
   })
 
