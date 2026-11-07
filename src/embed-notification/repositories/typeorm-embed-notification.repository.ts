@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { FindOptionsWhere, Repository } from 'typeorm'
 import { EmbedNotification } from '@/embed-notification/entities/embed-notification.entity'
 import { CreateEmbedNotificationDto } from '@/embed-notification/dtos/create-embed-notification.dto'
-import { EmbedNotificationRepository } from '@/embed-notification/repositories/embed-notification.repository'
+import {
+  EmbedNotificationRepository,
+  NotificationPageOptions
+} from '@/embed-notification/repositories/embed-notification.repository'
 
 const PENDING_LIMIT = 10
 
@@ -27,6 +30,34 @@ export class TypeOrmEmbedNotificationRepository
     })
   }
 
+  async findPageByOwner(
+    ownerId: number,
+    ownerType: string,
+    { page, limit, onlyUnconsumed }: NotificationPageOptions
+  ): Promise<[EmbedNotification[], number]> {
+    const where: FindOptionsWhere<EmbedNotification> = {
+      owner_id: ownerId,
+      owner_type: ownerType
+    }
+    if (onlyUnconsumed) where.consumed = false
+
+    return await this.repository.findAndCount({
+      where,
+      order: { created_at: 'DESC', id: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit
+    })
+  }
+
+  async countUnconsumedByOwner(
+    ownerId: number,
+    ownerType: string
+  ): Promise<number> {
+    return await this.repository.count({
+      where: { owner_id: ownerId, owner_type: ownerType, consumed: false }
+    })
+  }
+
   async findByIdAndOwner(
     id: number,
     ownerId: number,
@@ -45,6 +76,17 @@ export class TypeOrmEmbedNotificationRepository
 
   async markAsConsumed(id: number): Promise<void> {
     await this.repository.update({ id }, { consumed: true })
+  }
+
+  async markAllAsConsumedByOwner(
+    ownerId: number,
+    ownerType: string
+  ): Promise<number> {
+    const result = await this.repository.update(
+      { owner_id: ownerId, owner_type: ownerType, consumed: false },
+      { consumed: true }
+    )
+    return result.affected ?? 0
   }
 
   async deleteById(id: number): Promise<number> {

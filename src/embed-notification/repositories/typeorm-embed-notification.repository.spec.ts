@@ -14,7 +14,9 @@ describe('TypeOrmEmbedNotificationRepository', () => {
   let repository: TypeOrmEmbedNotificationRepository
 
   beforeEach(() => {
-    typeorm = createRepositoryMock()
+    typeorm = createRepositoryMock({
+      findAndCount: vi.fn().mockResolvedValue([[], 0])
+    })
     repository = new TypeOrmEmbedNotificationRepository(typeorm)
   })
 
@@ -25,6 +27,54 @@ describe('TypeOrmEmbedNotificationRepository', () => {
       where: { owner_id: 7, owner_type: 'STUDENT', consumed: false },
       order: { created_at: 'DESC' },
       take: 10
+    })
+  })
+
+  it('findPageByOwner traz lidas e não lidas do dono, da mais nova para a mais antiga', async () => {
+    await repository.findPageByOwner(7, 'STUDENT', { page: 3, limit: 10 })
+
+    expect(typeorm.findAndCount).toHaveBeenCalledWith({
+      where: { owner_id: 7, owner_type: 'STUDENT' },
+      order: { created_at: 'DESC', id: 'DESC' },
+      skip: 20,
+      take: 10
+    })
+  })
+
+  it('findPageByOwner com filtro traz só as não lidas', async () => {
+    await repository.findPageByOwner(7, 'STUDENT', {
+      page: 1,
+      limit: 10,
+      onlyUnconsumed: true
+    })
+
+    expect(typeorm.findAndCount).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { owner_id: 7, owner_type: 'STUDENT', consumed: false }
+      })
+    )
+  })
+
+  it('markAllAsConsumedByOwner marca só as não lidas do dono e devolve quantas mudaram', async () => {
+    typeorm.update.mockResolvedValue({ affected: 6 })
+
+    await expect(
+      repository.markAllAsConsumedByOwner(7, 'STUDENT')
+    ).resolves.toBe(6)
+    expect(typeorm.update).toHaveBeenCalledWith(
+      { owner_id: 7, owner_type: 'STUDENT', consumed: false },
+      { consumed: true }
+    )
+  })
+
+  it('countUnconsumedByOwner conta só as não consumidas do dono', async () => {
+    typeorm.count.mockResolvedValue(14)
+
+    await expect(repository.countUnconsumedByOwner(7, 'STUDENT')).resolves.toBe(
+      14
+    )
+    expect(typeorm.count).toHaveBeenCalledWith({
+      where: { owner_id: 7, owner_type: 'STUDENT', consumed: false }
     })
   })
 

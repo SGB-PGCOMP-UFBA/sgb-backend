@@ -1,7 +1,13 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { EmbedNotification } from '@/embed-notification/entities/embed-notification.entity'
 import { CreateEmbedNotificationDto } from '@/embed-notification/dtos/create-embed-notification.dto'
-import { EmbedNotificationRepository } from '@/embed-notification/repositories/embed-notification.repository'
+import {
+  EmbedNotificationRepository,
+  NotificationPageOptions
+} from '@/embed-notification/repositories/embed-notification.repository'
+import { EmbedNotificationMapper } from '@/embed-notification/embed-notification.mapper'
+import { PageDto } from '@/common/pagination/page.dto'
+import { PageMetaDto } from '@/common/pagination/page-meta.dto'
 import { constants } from '@/common/utils/constants'
 import { NotificationOwner } from '@/embed-notification/notification-owner.util'
 
@@ -15,6 +21,44 @@ export class EmbedNotificationService {
 
   async findAllBy(owner: NotificationOwner): Promise<EmbedNotification[]> {
     return await this.embedNotificationRepository.findPendingByOwner(
+      owner.owner_id,
+      owner.owner_type
+    )
+  }
+
+  async findPageBy(owner: NotificationOwner, options: NotificationPageOptions) {
+    const [notifications, totalItems] =
+      await this.embedNotificationRepository.findPageByOwner(
+        owner.owner_id,
+        owner.owner_type,
+        options
+      )
+
+    const meta = new PageMetaDto(
+      totalItems,
+      notifications.length,
+      options.limit,
+      Math.ceil(totalItems / options.limit),
+      options.page
+    )
+
+    return new PageDto(
+      notifications.map((notification) =>
+        EmbedNotificationMapper.detailed(notification)
+      ),
+      meta
+    )
+  }
+
+  async countUnconsumedBy(owner: NotificationOwner): Promise<number> {
+    return await this.embedNotificationRepository.countUnconsumedByOwner(
+      owner.owner_id,
+      owner.owner_type
+    )
+  }
+
+  async consumeAll(owner: NotificationOwner): Promise<number> {
+    return await this.embedNotificationRepository.markAllAsConsumedByOwner(
       owner.owner_id,
       owner.owner_type
     )
