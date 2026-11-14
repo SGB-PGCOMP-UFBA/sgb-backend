@@ -14,6 +14,9 @@
   },
   "scripts": {
     "db:migrate": "node ./node_modules/typeorm/cli.js migration:run --d dist/config/ormconfig.js",
+    "db:seed:e2e": "node dist/common/database/seeds/e2e.seed.js",
+    "e2e:prepare": "node --env-file=.env.e2e ./node_modules/typeorm/cli.js migration:run --d dist/config/ormconfig.js && node --env-file=.env.e2e dist/common/database/seeds/e2e.seed.js",
+    "e2e:start": "node --env-file=.env.e2e dist/main",
     "build": "rimraf dist && nest build && npm run copy-templates",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",

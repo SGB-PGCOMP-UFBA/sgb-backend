@@ -6,10 +6,14 @@ import { AllExceptionsFilter } from '@/common/filters/all-exceptions.filter'
 import { CustomValidationException } from '@/common/exceptions/custom-validation.exception'
 import { env } from '@/config/env.validation'
 import { APP_TIME_ZONE } from '@/config/time-zone.constant'
+import { assertE2eServer } from '@/common/database/seeds/e2e-environment.util'
 
 process.env.TZ = APP_TIME_ZONE
 
 async function bootstrap() {
+  // NODE_ENV=test só existe no e2e do GitHub Actions: banco e SMTP do próprio job.
+  if (env.NODE_ENV === 'test') assertE2eServer(env)
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     cors: true,
     logger: ['error', 'log', 'warn']

@@ -36,7 +36,7 @@ Proibido: `PascalCase.ts`, prefixo húngaro (`IFoo.ts`), sufixo no plural
 (`.utils.ts`) e sufixo com hífen (`date-utils.ts`).
 
 Exceções deliberadas, por serem referenciadas de fora do TypeScript:
-`main.ts`, `config/ormconfig.ts` (scripts npm) e `common/testing/setup.ts`
+`main.ts`, `config/ormconfig.ts`, `common/database/seeds/e2e.seed.ts` (scripts npm) e `common/testing/setup.ts`
 (`vitest.config.mts`). As migrations mantêm o nome gerado pelo TypeORM
 (`<timestamp>-<descricao>.ts`).
 

@@ -38,6 +38,36 @@ $ npm run start:dev
 # Os endpoints estarão disponíveis com a base em http://localhost:3333.
 ```
 
+### Ambiente de testes e2e
+
+Os testes e2e ficam no `sgb-frontend` (Playwright) e rodam no GitHub Actions,
+que sobe banco, Mailpit, esta API e o front dentro do próprio job. Não existe
+ambiente de teste hospedado, e o e2e nunca usa o banco de produção:
+
+- Com `NODE_ENV=test`, a API só sobe com banco e SMTP em `localhost`.
+- O seed (`npm run db:seed:e2e`) apaga as tabelas do domínio, por isso também
+  exige `NODE_ENV=test` e um banco local cujo nome termine em `_e2e`.
+
+Para reproduzir o ambiente na sua máquina:
+
+```bash
+# Postgres descartável na porta 5434 e Mailpit (e-mails em http://localhost:8025)
+$ docker compose --profile e2e up -d
+
+$ cp .env.e2e.example .env.e2e
+$ npm run build
+
+# Aplica as migrations e o seed no banco sgb_e2e
+$ npm run e2e:prepare
+
+# API do e2e em http://localhost:3334
+$ npm run e2e:start
+```
+
+O seed cria um usuário de cada perfil, todos com a senha `E2e@Sgb1`
+(`src/common/database/seeds/e2e-seed.util.ts`). Para trocar os dados, altere
+esse arquivo e o espelho em `e2e/fixtures/users.ts` no front.
+
 #### Requerimentos
 
 -   Node.js >= 18.20.4
