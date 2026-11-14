@@ -63,6 +63,15 @@ export class EnvironmentVariables {
   @IsNotEmpty()
   APP_SECRET_KEY_EXPIRES_IN: number
 
+  /** Diferente do APP_SECRET_KEY, para um tipo de token não valer pelo outro. */
+  @IsString()
+  @IsNotEmpty()
+  APP_REFRESH_SECRET_KEY: string
+
+  @IsNumber()
+  @IsNotEmpty()
+  APP_REFRESH_SECRET_KEY_EXPIRES_IN: number
+
   @IsString()
   @IsNotEmpty()
   EMAIL_HOST: string

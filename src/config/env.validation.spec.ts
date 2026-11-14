@@ -9,6 +9,8 @@ const ENV_VALIDA: Record<string, string> = {
   API_KEY: 'chave',
   APP_SECRET_KEY: 'segredo',
   APP_SECRET_KEY_EXPIRES_IN: '3600',
+  APP_REFRESH_SECRET_KEY: 'segredo-de-refresh',
+  APP_REFRESH_SECRET_KEY_EXPIRES_IN: '604800',
   EMAIL_HOST: 'smtp.gmail.com',
   EMAIL_PORT: '587'
 }
@@ -30,7 +32,8 @@ describe('validate', () => {
   it.each([
     ['PORT', 3333],
     ['EMAIL_PORT', 587],
-    ['APP_SECRET_KEY_EXPIRES_IN', 3600]
+    ['APP_SECRET_KEY_EXPIRES_IN', 3600],
+    ['APP_REFRESH_SECRET_KEY_EXPIRES_IN', 604800]
   ])(
     'quando a variável numérica chega como string do ambiente, converte para número (%s)',
     (chave, esperado) => {
@@ -46,6 +49,8 @@ describe('validate', () => {
     ['API_KEY'],
     ['APP_SECRET_KEY'],
     ['APP_SECRET_KEY_EXPIRES_IN'],
+    ['APP_REFRESH_SECRET_KEY'],
+    ['APP_REFRESH_SECRET_KEY_EXPIRES_IN'],
     ['EMAIL_HOST'],
     ['EMAIL_PORT']
   ])(

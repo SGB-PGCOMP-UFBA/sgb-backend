@@ -6,7 +6,8 @@ import { JwtModule } from '@nestjs/jwt'
 import { ThrottlerModule } from '@nestjs/throttler'
 import { UserService } from '@/user/user.service'
 import { AuthController } from './auth.controller'
-import { JwtStrategy } from '@/auth/strategies/jwt.strategy'
+import { AccessTokenStrategy } from '@/auth/strategies/access-token.strategy'
+import { RefreshTokenStrategy } from '@/auth/strategies/refresh-token.strategy'
 import { constants } from '@/common/utils/constants'
 import { CREDENTIALS_THROTTLER_OPTIONS } from '@/config/credentials-throttler.constant'
 
@@ -19,7 +20,13 @@ import { CREDENTIALS_THROTTLER_OPTIONS } from '@/config/credentials-throttler.co
       signOptions: { expiresIn: constants.jwt.EXPIRATION_TIME }
     })
   ],
-  providers: [AuthService, UserService, LocalStrategy, JwtStrategy],
+  providers: [
+    AuthService,
+    UserService,
+    LocalStrategy,
+    AccessTokenStrategy,
+    RefreshTokenStrategy
+  ],
   controllers: [AuthController],
   exports: [AuthService]
 })

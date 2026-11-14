@@ -5,6 +5,7 @@ import {
   NotFoundException
 } from '@nestjs/common'
 import { User } from '@/user/entities/user.entity'
+import { RefreshTokenRepository } from '@/auth/repositories/refresh-token.repository'
 import { UserRepository } from '@/user/repositories/user.repository'
 import { UserRecordsService } from '@/user/user-records.service'
 import { ManagedUser } from '@/user/managed-user.interface'
@@ -23,7 +24,8 @@ import { constants } from '@/common/utils/constants'
 export class UserAccountService {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly userRecordsService: UserRecordsService
+    private readonly userRecordsService: UserRecordsService,
+    private readonly refreshTokenRepository: RefreshTokenRepository
   ) {}
 
   async signUp(dto: SignUpDto): Promise<ManagedUser> {
@@ -76,6 +78,7 @@ export class UserAccountService {
       user.id,
       await hashPassword(dto.new_password)
     )
+    await this.refreshTokenRepository.revokeAllByUser(user.id, new Date())
   }
 
   private async findCaller(caller: Caller): Promise<User> {
