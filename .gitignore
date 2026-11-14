@@ -38,5 +38,6 @@ lerna-debug.log*
 
 #ENV
 .env
+.env.e2e
 
 # O lock é versionado: garante instalação reprodutível e habilita `npm ci` no CI.
