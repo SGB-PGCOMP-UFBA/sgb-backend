@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common'
+import { ConflictException, NotFoundException } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { makeAllocation } from '@/common/testing/factories'
 import { AllocationRepository } from '@/allocation/repositories/allocation.repository'
@@ -13,7 +13,8 @@ function createAllocationRepositoryMock() {
     findByName: vi.fn().mockResolvedValue(null),
     create: vi.fn(async (data: unknown) => data),
     update: vi.fn(async (_allocation: unknown, changes: unknown) => changes),
-    deleteById: vi.fn().mockResolvedValue(1)
+    deleteById: vi.fn().mockResolvedValue(1),
+    countScholarships: vi.fn().mockResolvedValue(0)
   } satisfies Record<keyof AllocationRepository, unknown>
 }
 
@@ -69,6 +70,13 @@ describe('AllocationService', () => {
   })
 
   describe('delete', () => {
+    it('quando ainda há bolsas ligadas, recusa com 409 sem apagar', async () => {
+      repository.countScholarships.mockResolvedValue(2)
+
+      await expect(service.delete(1)).rejects.toBeInstanceOf(ConflictException)
+      expect(repository.deleteById).not.toHaveBeenCalled()
+    })
+
     it('quando nada é removido, lança NotFound', async () => {
       repository.deleteById.mockResolvedValue(0)
 

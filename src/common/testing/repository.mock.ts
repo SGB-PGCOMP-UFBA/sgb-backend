@@ -56,6 +56,7 @@ export function createRepositoryMock(overrides: Record<string, unknown> = {}) {
     update: vi.fn().mockResolvedValue({ affected: 1 }),
     remove: vi.fn(async (entity: unknown) => entity),
     delete: vi.fn().mockResolvedValue({ affected: 1 }),
+    softDelete: vi.fn().mockResolvedValue({ affected: 1 }),
     createQueryBuilder: vi.fn(() => createQueryBuilderMock([])),
     query: vi.fn().mockResolvedValue([]),
     ...overrides

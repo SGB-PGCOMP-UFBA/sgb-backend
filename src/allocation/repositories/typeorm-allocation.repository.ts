@@ -53,8 +53,17 @@ export class TypeOrmAllocationRepository implements AllocationRepository {
     )
   }
 
+  /** Soft delete: preenche `deleted_at` e a linha some das consultas do TypeORM. */
   async deleteById(id: number): Promise<number> {
-    const removed = await this.repository.delete(id)
+    const removed = await this.repository.softDelete(id)
     return removed.affected ?? 0
+  }
+
+  async countScholarships(id: number): Promise<number> {
+    return await this.repository
+      .createQueryBuilder('allocation')
+      .innerJoin('allocation.scholarships', 'dependent')
+      .where('allocation.id = :id', { id })
+      .getCount()
   }
 }

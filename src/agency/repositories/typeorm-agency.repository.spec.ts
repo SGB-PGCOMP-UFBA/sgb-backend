@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { createRepositoryMock } from '@/common/testing/repository.mock'
+import {
+  createQueryBuilderMock,
+  createRepositoryMock
+} from '@/common/testing/repository.mock'
 import { TypeOrmAgencyRepository } from './typeorm-agency.repository'
 
 describe('TypeOrmAgencyRepository', () => {
@@ -53,15 +56,32 @@ describe('TypeOrmAgencyRepository', () => {
     expect(typeorm.save).toHaveBeenCalledWith({ id: 7, name: 'CAPES/PROEX' })
   })
 
-  it('deleteById devolve a quantidade de linhas removidas', async () => {
-    typeorm.delete.mockResolvedValue({ affected: 1 })
+  it('deleteById faz soft delete e devolve a quantidade de linhas marcadas', async () => {
+    typeorm.softDelete.mockResolvedValue({ affected: 1 })
 
     await expect(repository.deleteById(7)).resolves.toBe(1)
+    expect(typeorm.softDelete).toHaveBeenCalledWith(7)
+    expect(typeorm.delete).not.toHaveBeenCalled()
   })
 
   it('deleteById devolve 0 quando o driver não informa linhas afetadas', async () => {
-    typeorm.delete.mockResolvedValue({})
+    typeorm.softDelete.mockResolvedValue({})
 
     await expect(repository.deleteById(7)).resolves.toBe(0)
+  })
+
+  it('countScholarships conta só as bolsas não apagadas ligadas ao registro', async () => {
+    const queryBuilder = createQueryBuilderMock()
+    queryBuilder.getCount.mockResolvedValue(2)
+    typeorm.createQueryBuilder.mockReturnValue(queryBuilder)
+
+    await expect(repository.countScholarships(7)).resolves.toBe(2)
+    expect(queryBuilder.innerJoin).toHaveBeenCalledWith(
+      'agency.scholarships',
+      'dependent'
+    )
+    expect(queryBuilder.where).toHaveBeenCalledWith('agency.id = :id', {
+      id: 7
+    })
   })
 })

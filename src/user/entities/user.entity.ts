@@ -2,6 +2,7 @@ import {
   Check,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   Index,
   OneToMany,
@@ -19,18 +20,23 @@ import { UserType } from '@/user/user-type.constant'
  * Os índices únicos reproduzem as regras das antigas tabelas por perfil, sem
  * apertá-las: o mesmo e-mail pode existir em perfis diferentes (uma pessoa
  * pode ser administradora e orientadora), CPF só era único entre estudantes
- * e entre administradores, e telefone só entre administradores.
+ * e entre administradores, e telefone só entre administradores. Todos
+ * ignoram linhas apagadas (`deleted_at`), para que um cadastro excluído não
+ * impeça recadastrar o mesmo e-mail, CPF ou telefone.
  */
 @Entity('users')
 @Check('CHK_USERS_ROLE', `"role" IN ('STUDENT', 'ADVISOR', 'ADMIN')`)
-@Index('UQ_USERS_EMAIL_ROLE', ['email', 'role'], { unique: true })
+@Index('UQ_USERS_EMAIL_ROLE', ['email', 'role'], {
+  unique: true,
+  where: `"deleted_at" IS NULL`
+})
 @Index('UQ_USERS_TAX_ID_ROLE', ['tax_id', 'role'], {
   unique: true,
-  where: `"role" IN ('STUDENT', 'ADMIN')`
+  where: `"role" IN ('STUDENT', 'ADMIN') AND "deleted_at" IS NULL`
 })
 @Index('UQ_USERS_PHONE_NUMBER_ADMIN', ['phone_number'], {
   unique: true,
-  where: `"role" = 'ADMIN'`
+  where: `"role" = 'ADMIN' AND "deleted_at" IS NULL`
 })
 export class User {
   @PrimaryGeneratedColumn()
@@ -71,6 +77,9 @@ export class User {
 
   @UpdateDateColumn()
   updated_at: Date
+
+  @DeleteDateColumn({ type: 'timestamptz', nullable: true })
+  deleted_at: Date | null
 
   /** Matrículas em que o usuário é o estudante. */
   @OneToMany(() => Enrollment, (enrollment) => enrollment.student)

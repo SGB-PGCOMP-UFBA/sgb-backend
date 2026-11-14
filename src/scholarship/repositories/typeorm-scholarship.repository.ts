@@ -410,8 +410,9 @@ export class TypeOrmScholarshipRepository implements ScholarshipRepository {
     await this.repository.update({ id }, changes)
   }
 
+  /** Soft delete: preenche `deleted_at` e a linha some das consultas do TypeORM. */
   async deleteById(id: number): Promise<number> {
-    const removed = await this.repository.delete(id)
+    const removed = await this.repository.softDelete(id)
     return removed.affected ?? 0
   }
 }

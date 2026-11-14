@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException
+} from '@nestjs/common'
 import { CreateAllocationDto } from '@/allocation/dtos/create-allocation.dto'
 import { UpdateAllocationDto } from '@/allocation/dtos/update-allocation.dto'
 import { Allocation } from '@/allocation/entities/allocation.entity'
@@ -72,7 +76,12 @@ export class AllocationService {
     )
   }
 
+  /** Mesma regra da chave estrangeira, que o soft delete não aciona. */
   async delete(id: number): Promise<boolean> {
+    if ((await this.allocationRepository.countScholarships(id)) > 0) {
+      throw new ConflictException(constants.exceptionMessages.http.REFERENCED)
+    }
+
     const affected = await this.allocationRepository.deleteById(id)
     if (affected) return true
 

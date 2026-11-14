@@ -134,7 +134,12 @@ export class EnrollmentService {
     })
   }
 
+  /** Mesma regra da chave estrangeira, que o soft delete não aciona. */
   async delete(id: number): Promise<boolean> {
+    if ((await this.enrollmentRepository.countScholarships(id)) > 0) {
+      throw new ConflictException(constants.exceptionMessages.http.REFERENCED)
+    }
+
     const affected = await this.enrollmentRepository.deleteById(id)
     if (affected === 1) {
       return true

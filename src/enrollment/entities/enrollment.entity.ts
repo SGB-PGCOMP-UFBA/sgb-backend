@@ -1,18 +1,24 @@
 import {
   Column,
-  Entity,
-  JoinColumn,
-  PrimaryGeneratedColumn,
-  ManyToOne,
   CreateDateColumn,
-  UpdateDateColumn,
-  OneToMany
+  DeleteDateColumn,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn
 } from 'typeorm'
 import type { CalendarDay } from '@/common/utils/calendar-day.util'
 import { User } from '@/user/entities/user.entity'
 import { Scholarship } from '@/scholarship/entities/scholarship.entity'
 
 @Entity('enrollment')
+@Index('UQ_ENROLLMENT_NUMBER', ['enrollment_number'], {
+  unique: true,
+  where: `"deleted_at" IS NULL`
+})
 export class Enrollment {
   @PrimaryGeneratedColumn()
   id: number
@@ -26,7 +32,7 @@ export class Enrollment {
   @Column({ type: 'date', nullable: false })
   enrollment_date: CalendarDay
 
-  @Column({ nullable: false, length: 15, unique: true })
+  @Column({ nullable: false, length: 15 })
   enrollment_number: string
 
   @Column({ nullable: false, enum: ['MESTRADO', 'DOUTORADO'] })
@@ -40,6 +46,9 @@ export class Enrollment {
 
   @UpdateDateColumn()
   updated_at: Date
+
+  @DeleteDateColumn({ type: 'timestamptz', nullable: true })
+  deleted_at: Date | null
 
   @OneToMany(() => Scholarship, (scholarship) => scholarship.enrollment)
   scholarships: Scholarship[]

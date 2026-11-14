@@ -14,15 +14,19 @@ describe('User', () => {
   })
 
   it.each([
-    ['UQ_USERS_EMAIL_ROLE', ['email', 'role'], undefined],
+    ['UQ_USERS_EMAIL_ROLE', ['email', 'role'], `"deleted_at" IS NULL`],
     [
       'UQ_USERS_TAX_ID_ROLE',
       ['tax_id', 'role'],
-      `"role" IN ('STUDENT', 'ADMIN')`
+      `"role" IN ('STUDENT', 'ADMIN') AND "deleted_at" IS NULL`
     ],
-    ['UQ_USERS_PHONE_NUMBER_ADMIN', ['phone_number'], `"role" = 'ADMIN'`]
+    [
+      'UQ_USERS_PHONE_NUMBER_ADMIN',
+      ['phone_number'],
+      `"role" = 'ADMIN' AND "deleted_at" IS NULL`
+    ]
   ])(
-    'mantém a unicidade das tabelas antigas por tipo (%s)',
+    'mantém a unicidade das tabelas antigas por tipo, ignorando apagados (%s)',
     (name, columns, where) => {
       const index = storage.indices.find(
         (index) => index.target === User && index.name === name
@@ -33,6 +37,14 @@ describe('User', () => {
       expect(index?.where).toBe(where)
     }
   )
+
+  it('apaga com soft delete, preenchendo deleted_at', () => {
+    const column = storage.columns.find(
+      (column) => column.target === User && column.propertyName === 'deleted_at'
+    )
+
+    expect(column?.mode).toBe('deleteDate')
+  })
 
   it('separa as matrículas como estudante das matrículas como orientador', () => {
     const relations = storage.relations

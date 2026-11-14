@@ -29,4 +29,7 @@ export abstract class UserRepository {
   abstract update(id: number, data: Partial<User>): Promise<User>
   abstract updatePassword(id: number, passwordHash: string): Promise<void>
   abstract deleteById(id: number): Promise<number>
+  abstract hardDeleteById(id: number): Promise<number>
+  /** Matrículas não apagadas em que o usuário é estudante ou orientador. */
+  abstract countEnrollments(id: number): Promise<number>
 }

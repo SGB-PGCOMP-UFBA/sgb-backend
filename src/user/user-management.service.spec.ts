@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   InternalServerErrorException,
   NotFoundException
@@ -35,7 +36,14 @@ const USERS: Record<number, User> = {
 }
 
 describe('UserManagementService', () => {
-  let userRepository: Record<'findById' | 'update' | 'deleteById', Mock>
+  let userRepository: Record<
+    | 'findById'
+    | 'update'
+    | 'deleteById'
+    | 'hardDeleteById'
+    | 'countEnrollments',
+    Mock
+  >
   let enrollmentRepository: { countActiveScholarships: Mock }
   let userRecordsService: { register: Mock; update: Mock }
   let emailService: { sendEmail: Mock }
@@ -45,7 +53,9 @@ describe('UserManagementService', () => {
     userRepository = {
       findById: vi.fn(async (id: number) => USERS[id] ?? null),
       update: vi.fn().mockResolvedValue(undefined),
-      deleteById: vi.fn().mockResolvedValue(1)
+      deleteById: vi.fn().mockResolvedValue(1),
+      hardDeleteById: vi.fn().mockResolvedValue(1),
+      countEnrollments: vi.fn().mockResolvedValue(0)
     }
     enrollmentRepository = {
       countActiveScholarships: vi.fn().mockResolvedValue(0)
@@ -157,7 +167,8 @@ describe('UserManagementService', () => {
       await expect(
         service.create({ ...NEW_USER, role: 'STUDENT' }, ADMIN_CALLER)
       ).rejects.toBeInstanceOf(InternalServerErrorException)
-      expect(userRepository.deleteById).toHaveBeenCalledWith(5)
+      expect(userRepository.hardDeleteById).toHaveBeenCalledWith(5)
+      expect(userRepository.deleteById).not.toHaveBeenCalled()
     })
 
     it('quando o cadastro falha, não envia e-mail', async () => {
@@ -329,6 +340,19 @@ describe('UserManagementService', () => {
       }
     )
 
+    it.each([[5], [9]])(
+      'quando ainda tem matrícula (mesmo com bolsas finalizadas), recusa com 409 (id %s)',
+      async (id) => {
+        userRepository.countEnrollments.mockResolvedValue(1)
+
+        await expect(service.delete(id, ADMIN_CALLER)).rejects.toBeInstanceOf(
+          ConflictException
+        )
+        expect(userRepository.countEnrollments).toHaveBeenCalledWith(id)
+        expect(userRepository.deleteById).not.toHaveBeenCalled()
+      }
+    )
+
     it('quando há uma única bolsa ativa, usa o singular', async () => {
       enrollmentRepository.countActiveScholarships.mockResolvedValue(1)
 
@@ -343,6 +367,7 @@ describe('UserManagementService', () => {
       expect(
         enrollmentRepository.countActiveScholarships
       ).not.toHaveBeenCalled()
+      expect(userRepository.countEnrollments).not.toHaveBeenCalled()
       expect(userRepository.deleteById).toHaveBeenCalledWith(3)
     })
 

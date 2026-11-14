@@ -19,4 +19,6 @@ export abstract class AllocationRepository {
   ): Promise<Allocation>
 
   abstract deleteById(id: number): Promise<number>
+  /** Bolsas não apagadas que apontam para o registro. */
+  abstract countScholarships(id: number): Promise<number>
 }

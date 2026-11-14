@@ -38,6 +38,7 @@ const userDefaults = (): User => ({
   has_admin_privileges: false,
   created_at: CRIADO_EM,
   updated_at: CRIADO_EM,
+  deleted_at: null,
   enrollments: [],
   advised_enrollments: []
 })
@@ -85,6 +86,7 @@ export const makeEnrollment = defineFactory<Enrollment>(() => ({
   defense_prediction_date: '2026-02-28',
   created_at: CRIADO_EM,
   updated_at: CRIADO_EM,
+  deleted_at: null,
   scholarships: [],
   student: makeStudent(),
   advisor: makeAdvisor()
@@ -98,6 +100,7 @@ export const makeAgency = defineFactory<Agency>(() => ({
   doctorate_degree_awarded_scholarships: 7,
   created_at: CRIADO_EM,
   updated_at: CRIADO_EM,
+  deleted_at: null,
   scholarships: []
 }))
 
@@ -106,6 +109,7 @@ export const makeAllocation = defineFactory<Allocation>(() => ({
   name: 'REMOTO',
   created_at: CRIADO_EM,
   updated_at: CRIADO_EM,
+  deleted_at: null,
   scholarships: []
 }))
 
@@ -155,6 +159,7 @@ export const makeScholarship = defineFactory<Scholarship>(() => ({
   salary: 2100,
   created_at: CRIADO_EM,
   updated_at: CRIADO_EM,
+  deleted_at: null,
   enrollment: makeEnrollment(),
   agency: makeAgency(),
   allocation: makeAllocation()
@@ -184,5 +189,6 @@ export const makeEmbedNotification = defineFactory<EmbedNotification>(() => ({
   description: 'Procure seu orientador para mais informações.',
   consumed: false,
   created_at: CRIADO_EM,
-  updated_at: CRIADO_EM
+  updated_at: CRIADO_EM,
+  deleted_at: null
 }))

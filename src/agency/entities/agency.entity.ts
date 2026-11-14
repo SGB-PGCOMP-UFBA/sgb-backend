@@ -2,6 +2,7 @@ import { Scholarship } from '@/scholarship/entities/scholarship.entity'
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -30,6 +31,9 @@ export class Agency {
 
   @UpdateDateColumn()
   updated_at: Date
+
+  @DeleteDateColumn({ type: 'timestamptz', nullable: true })
+  deleted_at: Date | null
 
   @OneToMany(() => Scholarship, (scholarship) => scholarship.agency)
   scholarships: Scholarship[]

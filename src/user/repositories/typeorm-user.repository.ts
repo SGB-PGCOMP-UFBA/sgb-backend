@@ -105,8 +105,31 @@ export class TypeOrmUserRepository implements UserRepository {
     await this.repository.update({ id }, { password: passwordHash })
   }
 
+  /** Soft delete: preenche `deleted_at` e a linha some das consultas do TypeORM. */
   async deleteById(id: number): Promise<number> {
+    const removed = await this.repository.softDelete(id)
+    return removed.affected ?? 0
+  }
+
+  /** Apaga a linha de verdade: só para desfazer um cadastro que não se concluiu. */
+  async hardDeleteById(id: number): Promise<number> {
     const removed = await this.repository.delete(id)
     return removed.affected ?? 0
+  }
+
+  async countEnrollments(id: number): Promise<number> {
+    const [asStudent, asAdvisor] = await Promise.all([
+      this.repository
+        .createQueryBuilder('user')
+        .innerJoin('user.enrollments', 'enrollment')
+        .where('user.id = :id', { id })
+        .getCount(),
+      this.repository
+        .createQueryBuilder('user')
+        .innerJoin('user.advised_enrollments', 'enrollment')
+        .where('user.id = :id', { id })
+        .getCount()
+    ])
+    return asStudent + asAdvisor
   }
 }

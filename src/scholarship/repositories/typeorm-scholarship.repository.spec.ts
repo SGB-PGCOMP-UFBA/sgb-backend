@@ -398,9 +398,11 @@ describe('TypeOrmScholarshipRepository', () => {
     expect(typeorm.save).not.toHaveBeenCalled()
   })
 
-  it('deleteById devolve a quantidade de linhas removidas', async () => {
-    typeorm.delete.mockResolvedValue({ affected: 1 })
+  it('deleteById faz soft delete e devolve a quantidade de linhas marcadas', async () => {
+    typeorm.softDelete.mockResolvedValue({ affected: 1 })
 
     await expect(repository.deleteById(900)).resolves.toBe(1)
+    expect(typeorm.softDelete).toHaveBeenCalledWith(900)
+    expect(typeorm.delete).not.toHaveBeenCalled()
   })
 })
