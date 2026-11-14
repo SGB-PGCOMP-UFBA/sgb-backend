@@ -9,7 +9,9 @@ const constants = {
   },
   jwt: {
     SECRET_KEY: env.APP_SECRET_KEY,
-    EXPIRATION_TIME: env.APP_SECRET_KEY_EXPIRES_IN
+    EXPIRATION_TIME: env.APP_SECRET_KEY_EXPIRES_IN,
+    REFRESH_SECRET_KEY: env.APP_REFRESH_SECRET_KEY,
+    REFRESH_EXPIRATION_TIME: env.APP_REFRESH_SECRET_KEY_EXPIRES_IN
   },
   expressions: {
     REGEX_TAX_ID: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
@@ -95,6 +97,7 @@ const constants = {
     },
     auth: {
       INVALID_CREDENTIALS: 'E-mail, senha ou perfil inválidos.',
+      SESSION_EXPIRED: 'Sua sessão expirou. Entre novamente.',
       TOO_MANY_ATTEMPTS:
         'Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente.'
     },

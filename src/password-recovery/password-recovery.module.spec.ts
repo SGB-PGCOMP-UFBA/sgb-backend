@@ -11,6 +11,9 @@ import { VerificationCode } from '@/password-recovery/entities/verification-code
 import { VerificationCodeRepository } from '@/password-recovery/repositories/verification-code.repository'
 import { TypeOrmVerificationCodeRepository } from '@/password-recovery/repositories/typeorm-verification-code.repository'
 import { User } from '@/user/entities/user.entity'
+import { RefreshToken } from '@/auth/entities/refresh-token.entity'
+import { RefreshTokenRepository } from '@/auth/repositories/refresh-token.repository'
+import { TypeOrmRefreshTokenRepository } from '@/auth/repositories/typeorm-refresh-token.repository'
 import { UserRepository } from '@/user/repositories/user.repository'
 import { TypeOrmUserRepository } from '@/user/repositories/typeorm-user.repository'
 
@@ -18,13 +21,17 @@ describe('PasswordRecoveryModule', () => {
   it('monta o PasswordRecoveryService com os repositórios exportados globalmente', async () => {
     const moduleRef = await compileFeatureModule(
       PasswordRecoveryModule,
-      [User, VerificationCode],
+      [User, VerificationCode, RefreshToken],
       [
         {
           provide: VerificationCodeRepository,
           useClass: TypeOrmVerificationCodeRepository
         },
-        { provide: UserRepository, useClass: TypeOrmUserRepository }
+        { provide: UserRepository, useClass: TypeOrmUserRepository },
+        {
+          provide: RefreshTokenRepository,
+          useClass: TypeOrmRefreshTokenRepository
+        }
       ]
     )
 

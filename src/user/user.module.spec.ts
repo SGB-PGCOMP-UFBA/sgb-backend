@@ -17,6 +17,9 @@ import { EmbedNotification } from '@/embed-notification/entities/embed-notificat
 import { EmbedNotificationRepository } from '@/embed-notification/repositories/embed-notification.repository'
 import { TypeOrmEmbedNotificationRepository } from '@/embed-notification/repositories/typeorm-embed-notification.repository'
 import { User } from '@/user/entities/user.entity'
+import { RefreshToken } from '@/auth/entities/refresh-token.entity'
+import { RefreshTokenRepository } from '@/auth/repositories/refresh-token.repository'
+import { TypeOrmRefreshTokenRepository } from '@/auth/repositories/typeorm-refresh-token.repository'
 import { UserRepository } from '@/user/repositories/user.repository'
 import { TypeOrmUserRepository } from '@/user/repositories/typeorm-user.repository'
 
@@ -24,7 +27,7 @@ describe('UserModule', () => {
   it('monta os services de usuário e o controller com os repositórios globais', async () => {
     const moduleRef = await compileFeatureModule(
       UserModule,
-      [User, Enrollment, EmbedNotification],
+      [User, Enrollment, EmbedNotification, RefreshToken],
       [
         {
           provide: EnrollmentRepository,
@@ -34,7 +37,11 @@ describe('UserModule', () => {
           provide: EmbedNotificationRepository,
           useClass: TypeOrmEmbedNotificationRepository
         },
-        { provide: UserRepository, useClass: TypeOrmUserRepository }
+        { provide: UserRepository, useClass: TypeOrmUserRepository },
+        {
+          provide: RefreshTokenRepository,
+          useClass: TypeOrmRefreshTokenRepository
+        }
       ]
     )
 

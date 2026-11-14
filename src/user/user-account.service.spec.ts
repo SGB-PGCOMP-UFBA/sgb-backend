@@ -16,6 +16,7 @@ const STUDENT_CALLER = { userId: '7-STUDENT', role: 'STUDENT' }
 describe('UserAccountService', () => {
   let userRepository: Record<'findById' | 'updatePassword', Mock>
   let userRecordsService: Record<'register' | 'update', Mock>
+  let refreshTokenRepository: Record<'revokeAllByUser', Mock>
   let service: UserAccountService
 
   beforeEach(() => {
@@ -29,9 +30,13 @@ describe('UserAccountService', () => {
       ),
       update: vi.fn().mockResolvedValue(undefined)
     }
+    refreshTokenRepository = {
+      revokeAllByUser: vi.fn().mockResolvedValue(undefined)
+    }
     service = new UserAccountService(
       userRepository as never,
-      userRecordsService as never
+      userRecordsService as never,
+      refreshTokenRepository as never
     )
   })
 
@@ -144,6 +149,16 @@ describe('UserAccountService', () => {
         })
       ).rejects.toBeInstanceOf(BadRequestException)
       expect(userRepository.updatePassword).not.toHaveBeenCalled()
+      expect(refreshTokenRepository.revokeAllByUser).not.toHaveBeenCalled()
+    })
+
+    it('quando troca a senha, encerra as sessões abertas do usuário', async () => {
+      await service.updatePassword(STUDENT_CALLER, CHANGE)
+
+      expect(refreshTokenRepository.revokeAllByUser).toHaveBeenCalledWith(
+        7,
+        expect.any(Date)
+      )
     })
   })
 })

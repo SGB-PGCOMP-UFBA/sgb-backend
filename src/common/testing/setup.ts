@@ -9,6 +9,8 @@ const ENV_DE_TESTE = {
   API_KEY: 'chave-de-teste',
   APP_SECRET_KEY: 'segredo-de-teste',
   APP_SECRET_KEY_EXPIRES_IN: '3600',
+  APP_REFRESH_SECRET_KEY: 'segredo-de-refresh-de-teste',
+  APP_REFRESH_SECRET_KEY_EXPIRES_IN: '604800',
   EMAIL_HOST: 'smtp.teste',
   EMAIL_PORT: '587'
 }

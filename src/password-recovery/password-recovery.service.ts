@@ -3,6 +3,7 @@ import { addMinutes, differenceInSeconds, isBefore } from 'date-fns'
 import { BadRequestException, Injectable, Logger } from '@nestjs/common'
 import { EmailService } from '@/email/email.service'
 import { UserRepository } from '@/user/repositories/user.repository'
+import { RefreshTokenRepository } from '@/auth/repositories/refresh-token.repository'
 import { VerificationCodeRepository } from '@/password-recovery/repositories/verification-code.repository'
 import { VerificationCode } from '@/password-recovery/entities/verification-code.entity'
 import { UserType } from '@/user/user-type.constant'
@@ -35,7 +36,8 @@ export class PasswordRecoveryService {
   constructor(
     private readonly emailService: EmailService,
     private readonly verificationCodeRepository: VerificationCodeRepository,
-    private readonly userRepository: UserRepository
+    private readonly userRepository: UserRepository,
+    private readonly refreshTokenRepository: RefreshTokenRepository
   ) {}
 
   /**
@@ -111,6 +113,7 @@ export class PasswordRecoveryService {
     const { account, verificationCode } = await this.checkCode(dto)
 
     await this.savePassword(account, await hashPassword(dto.new_password))
+    await this.refreshTokenRepository.revokeAllByUser(account.id, new Date())
     await this.verificationCodeRepository.markAsUsed(
       verificationCode.id,
       new Date()

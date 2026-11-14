@@ -29,6 +29,7 @@ describe('PasswordRecoveryService', () => {
     findAdvisorWithAdminPrivilegesByEmail: Mock
     updatePassword: Mock
   }
+  let refreshTokenRepository: { revokeAllByUser: Mock }
   let service: PasswordRecoveryService
 
   beforeEach(() => {
@@ -64,10 +65,15 @@ describe('PasswordRecoveryService', () => {
       updatePassword: vi.fn().mockResolvedValue(undefined)
     }
 
+    refreshTokenRepository = {
+      revokeAllByUser: vi.fn().mockResolvedValue(undefined)
+    }
+
     service = new PasswordRecoveryService(
       emailService as never,
       verificationCodeRepository as never,
-      userRepository as never
+      userRepository as never,
+      refreshTokenRepository as never
     )
   })
 
@@ -374,6 +380,10 @@ describe('PasswordRecoveryService', () => {
           5,
           NOW
         )
+        expect(refreshTokenRepository.revokeAllByUser).toHaveBeenCalledWith(
+          id,
+          NOW
+        )
       }
     )
 
@@ -388,6 +398,7 @@ describe('PasswordRecoveryService', () => {
 
       expect(passwordUpdates()).toEqual([])
       expect(verificationCodeRepository.markAsUsed).not.toHaveBeenCalled()
+      expect(refreshTokenRepository.revokeAllByUser).not.toHaveBeenCalled()
     })
   })
 })

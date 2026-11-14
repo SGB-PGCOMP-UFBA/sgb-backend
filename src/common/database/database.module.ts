@@ -17,6 +17,9 @@ import { TypeOrmEnrollmentRepository } from '@/enrollment/repositories/typeorm-e
 import { Scholarship } from '@/scholarship/entities/scholarship.entity'
 import { ScholarshipRepository } from '@/scholarship/repositories/scholarship.repository'
 import { TypeOrmScholarshipRepository } from '@/scholarship/repositories/typeorm-scholarship.repository'
+import { RefreshToken } from '@/auth/entities/refresh-token.entity'
+import { RefreshTokenRepository } from '@/auth/repositories/refresh-token.repository'
+import { TypeOrmRefreshTokenRepository } from '@/auth/repositories/typeorm-refresh-token.repository'
 import { User } from '@/user/entities/user.entity'
 import { UserRepository } from '@/user/repositories/user.repository'
 import { TypeOrmUserRepository } from '@/user/repositories/typeorm-user.repository'
@@ -31,6 +34,7 @@ const entities = [
   Allocation,
   EmbedNotification,
   Enrollment,
+  RefreshToken,
   Scholarship,
   User,
   VerificationCode
@@ -44,6 +48,7 @@ const repositories = [
     useClass: TypeOrmEmbedNotificationRepository
   },
   { provide: EnrollmentRepository, useClass: TypeOrmEnrollmentRepository },
+  { provide: RefreshTokenRepository, useClass: TypeOrmRefreshTokenRepository },
   { provide: ScholarshipRepository, useClass: TypeOrmScholarshipRepository },
   { provide: UserRepository, useClass: TypeOrmUserRepository },
   {
