@@ -89,8 +89,9 @@ export class TypeOrmEmbedNotificationRepository
     return result.affected ?? 0
   }
 
+  /** Soft delete: preenche `deleted_at` e a linha some das consultas do TypeORM. */
   async deleteById(id: number): Promise<number> {
-    const removed = await this.repository.delete(id)
+    const removed = await this.repository.softDelete(id)
     return removed.affected ?? 0
   }
 }

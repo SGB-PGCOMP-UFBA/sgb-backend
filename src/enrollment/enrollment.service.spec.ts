@@ -31,7 +31,8 @@ function createEnrollmentRepositoryMock() {
     countActiveScholarships: vi.fn().mockResolvedValue(0),
     create: vi.fn(async (data: unknown) => data),
     update: vi.fn(async (_id: number, data: unknown) => data),
-    deleteById: vi.fn().mockResolvedValue(1)
+    deleteById: vi.fn().mockResolvedValue(1),
+    countScholarships: vi.fn().mockResolvedValue(0)
   } satisfies Record<keyof EnrollmentRepository, unknown>
 }
 
@@ -260,6 +261,13 @@ describe('EnrollmentService', () => {
   })
 
   describe('delete', () => {
+    it('quando ainda há bolsas ligadas, recusa com 409 sem apagar', async () => {
+      repository.countScholarships.mockResolvedValue(2)
+
+      await expect(service.delete(42)).rejects.toBeInstanceOf(ConflictException)
+      expect(repository.deleteById).not.toHaveBeenCalled()
+    })
+
     it('quando uma linha é afetada, confirma a remoção', async () => {
       await expect(service.delete(42)).resolves.toBe(true)
       expect(repository.deleteById).toHaveBeenCalledWith(42)

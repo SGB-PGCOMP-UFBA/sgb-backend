@@ -22,4 +22,6 @@ export abstract class EnrollmentRepository {
   abstract create(data: Partial<Enrollment>): Promise<Enrollment>
   abstract update(id: number, data: Partial<Enrollment>): Promise<Enrollment>
   abstract deleteById(id: number): Promise<number>
+  /** Bolsas não apagadas que apontam para o registro. */
+  abstract countScholarships(id: number): Promise<number>
 }

@@ -105,9 +105,26 @@ describe('TypeOrmEnrollmentRepository', () => {
     expect(typeorm.save).toHaveBeenCalledWith({ id: 42, advisor_id: 99 })
   })
 
-  it('deleteById devolve a quantidade de linhas removidas', async () => {
-    typeorm.delete.mockResolvedValue({ affected: 1 })
+  it('deleteById faz soft delete e devolve a quantidade de linhas marcadas', async () => {
+    typeorm.softDelete.mockResolvedValue({ affected: 1 })
 
     await expect(repository.deleteById(42)).resolves.toBe(1)
+    expect(typeorm.softDelete).toHaveBeenCalledWith(42)
+    expect(typeorm.delete).not.toHaveBeenCalled()
+  })
+
+  it('countScholarships conta só as bolsas não apagadas ligadas ao registro', async () => {
+    const queryBuilder = createQueryBuilderMock()
+    queryBuilder.getCount.mockResolvedValue(2)
+    typeorm.createQueryBuilder.mockReturnValue(queryBuilder)
+
+    await expect(repository.countScholarships(42)).resolves.toBe(2)
+    expect(queryBuilder.innerJoin).toHaveBeenCalledWith(
+      'enrollment.scholarships',
+      'dependent'
+    )
+    expect(queryBuilder.where).toHaveBeenCalledWith('enrollment.id = :id', {
+      id: 42
+    })
   })
 })

@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { ILike } from 'typeorm'
-import { createRepositoryMock } from '@/common/testing/repository.mock'
+import {
+  createQueryBuilderMock,
+  createRepositoryMock
+} from '@/common/testing/repository.mock'
 import { TypeOrmUserRepository } from './typeorm-user.repository'
 
 describe('TypeOrmUserRepository', () => {
@@ -125,9 +128,39 @@ describe('TypeOrmUserRepository', () => {
     expect(typeorm.update).toHaveBeenCalledWith({ id: 3 }, { password: 'hash' })
   })
 
-  it('deleteById devolve a quantidade de linhas removidas', async () => {
-    typeorm.delete.mockResolvedValue({ affected: 1 })
+  it('deleteById faz soft delete e devolve a quantidade de linhas marcadas', async () => {
+    typeorm.softDelete.mockResolvedValue({ affected: 1 })
 
     await expect(repository.deleteById(3)).resolves.toBe(1)
+    expect(typeorm.softDelete).toHaveBeenCalledWith(3)
+    expect(typeorm.delete).not.toHaveBeenCalled()
+  })
+
+  it('hardDeleteById apaga a linha de verdade, sem soft delete', async () => {
+    typeorm.delete.mockResolvedValue({ affected: 1 })
+
+    await expect(repository.hardDeleteById(5)).resolves.toBe(1)
+    expect(typeorm.delete).toHaveBeenCalledWith(5)
+    expect(typeorm.softDelete).not.toHaveBeenCalled()
+  })
+
+  it('countEnrollments soma as matrículas como estudante e como orientador', async () => {
+    const asStudent = createQueryBuilderMock()
+    asStudent.getCount.mockResolvedValue(2)
+    const asAdvisor = createQueryBuilderMock()
+    asAdvisor.getCount.mockResolvedValue(1)
+    typeorm.createQueryBuilder
+      .mockReturnValueOnce(asStudent)
+      .mockReturnValueOnce(asAdvisor)
+
+    await expect(repository.countEnrollments(9)).resolves.toBe(3)
+    expect(asStudent.innerJoin).toHaveBeenCalledWith(
+      'user.enrollments',
+      'enrollment'
+    )
+    expect(asAdvisor.innerJoin).toHaveBeenCalledWith(
+      'user.advised_enrollments',
+      'enrollment'
+    )
   })
 })

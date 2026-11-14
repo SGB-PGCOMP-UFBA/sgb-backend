@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
@@ -77,7 +78,7 @@ export class UserManagementService {
         `Welcome e-mail failed, rolling back: ${dto.email}`,
         error instanceof Error ? error.stack : String(error)
       )
-      await this.userRepository.deleteById(user.id)
+      await this.userRepository.hardDeleteById(user.id)
       throw new InternalServerErrorException(messages.WELCOME_EMAIL_FAILED)
     }
 
@@ -156,6 +157,7 @@ export class UserManagementService {
     }
 
     await this.assertHasNoActiveScholarships(user)
+    await this.assertHasNoEnrollments(user)
     await this.userRepository.deleteById(id)
   }
 
@@ -167,6 +169,18 @@ export class UserManagementService {
     }
 
     return user
+  }
+
+  /**
+   * O soft delete não passa pela chave estrangeira de `enrollment`, que antes
+   * impedia apagar quem tem matrícula (mesmo com bolsas já finalizadas).
+   */
+  private async assertHasNoEnrollments(user: User): Promise<void> {
+    if (user.role === 'ADMIN') return
+
+    if ((await this.userRepository.countEnrollments(user.id)) > 0) {
+      throw new ConflictException(constants.exceptionMessages.http.REFERENCED)
+    }
   }
 
   private async assertHasNoActiveScholarships(user: User): Promise<void> {

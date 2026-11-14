@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { createRepositoryMock } from '@/common/testing/repository.mock'
+import {
+  createQueryBuilderMock,
+  createRepositoryMock
+} from '@/common/testing/repository.mock'
 import { makeAllocation } from '@/common/testing/factories'
 import { TypeOrmAllocationRepository } from './typeorm-allocation.repository'
 
@@ -57,9 +60,26 @@ describe('TypeOrmAllocationRepository', () => {
     )
   })
 
-  it('deleteById devolve a quantidade de linhas removidas', async () => {
-    typeorm.delete.mockResolvedValue({ affected: 1 })
+  it('deleteById faz soft delete e devolve a quantidade de linhas marcadas', async () => {
+    typeorm.softDelete.mockResolvedValue({ affected: 1 })
 
     await expect(repository.deleteById(3)).resolves.toBe(1)
+    expect(typeorm.softDelete).toHaveBeenCalledWith(3)
+    expect(typeorm.delete).not.toHaveBeenCalled()
+  })
+
+  it('countScholarships conta só as bolsas não apagadas ligadas ao registro', async () => {
+    const queryBuilder = createQueryBuilderMock()
+    queryBuilder.getCount.mockResolvedValue(2)
+    typeorm.createQueryBuilder.mockReturnValue(queryBuilder)
+
+    await expect(repository.countScholarships(3)).resolves.toBe(2)
+    expect(queryBuilder.innerJoin).toHaveBeenCalledWith(
+      'allocation.scholarships',
+      'dependent'
+    )
+    expect(queryBuilder.where).toHaveBeenCalledWith('allocation.id = :id', {
+      id: 3
+    })
   })
 })

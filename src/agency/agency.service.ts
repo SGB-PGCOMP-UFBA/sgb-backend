@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException
 } from '@nestjs/common'
@@ -108,7 +109,15 @@ export class AgencyService {
     }
   }
 
+  /**
+   * O soft delete não passa pela chave estrangeira, que antes impedia apagar
+   * uma agência com bolsas; a mesma regra fica aqui, com o mesmo 409.
+   */
   async delete(id: number): Promise<boolean> {
+    if ((await this.agencyRepository.countScholarships(id)) > 0) {
+      throw new ConflictException(constants.exceptionMessages.http.REFERENCED)
+    }
+
     const affected = await this.agencyRepository.deleteById(id)
     if (affected === 1) {
       return true

@@ -1,4 +1,8 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common'
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException
+} from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   makeAgency,
@@ -16,7 +20,8 @@ function createAgencyRepositoryMock() {
     findByName: vi.fn().mockResolvedValue(null),
     create: vi.fn(async (data: unknown) => data),
     update: vi.fn(async (_id: number, data: unknown) => data),
-    deleteById: vi.fn().mockResolvedValue(1)
+    deleteById: vi.fn().mockResolvedValue(1),
+    countScholarships: vi.fn().mockResolvedValue(0)
   } satisfies Record<keyof AgencyRepository, unknown>
 }
 
@@ -119,6 +124,13 @@ describe('AgencyService', () => {
   })
 
   describe('delete', () => {
+    it('quando ainda há bolsas ligadas, recusa com 409 sem apagar', async () => {
+      repository.countScholarships.mockResolvedValue(2)
+
+      await expect(service.delete(1)).rejects.toBeInstanceOf(ConflictException)
+      expect(repository.deleteById).not.toHaveBeenCalled()
+    })
+
     it('quando nada é removido, lança NotFound', async () => {
       repository.deleteById.mockResolvedValue(0)
 

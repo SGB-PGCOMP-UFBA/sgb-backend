@@ -10,4 +10,6 @@ export abstract class AgencyRepository {
   abstract create(data: CreateAgencyDto): Promise<Agency>
   abstract update(id: number, data: Partial<Agency>): Promise<Agency>
   abstract deleteById(id: number): Promise<number>
+  /** Bolsas não apagadas que apontam para o registro. */
+  abstract countScholarships(id: number): Promise<number>
 }
