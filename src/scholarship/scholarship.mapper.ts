@@ -5,11 +5,54 @@ import { toAdvisorSummary, toStudentSummary } from '@/user/user.mapper'
 import { AllocationMapper } from '@/allocation/allocation.mapper'
 import { StatusEnum } from '@/common/enums/status.enum'
 import { ProgramEnum } from '@/common/enums/program.enum'
-import { ScholarshipReportRow } from '@/scholarship/repositories/scholarship.repository'
+import {
+  AgencyStatusCountRow,
+  ScholarshipReportRow
+} from '@/scholarship/repositories/scholarship.repository'
 import {
   deriveScholarshipStatus,
+  ScholarshipStatusEnum,
   toCalendarDay
 } from '@/scholarship/utils/scholarship-status.util'
+
+interface DegreeCount {
+  masters: number
+  phd: number
+}
+
+export interface AgencyScholarshipReport {
+  agencyName: string
+  scholarshipsTotal: number
+  totalMasters: number
+  totalPhd: number
+  onGoingCount: DegreeCount
+  extendedCount: DegreeCount
+  finishedCount: DegreeCount
+}
+
+type ReportBucket = 'onGoingCount' | 'extendedCount' | 'finishedCount'
+
+/**
+ * Status que o relatório do período conta. INACTIVE não entra: a consulta só
+ * traz bolsas já iniciadas na data de referência.
+ */
+const REPORT_BUCKET_BY_STATUS: Record<string, ReportBucket> = {
+  [ScholarshipStatusEnum.ON_GOING]: 'onGoingCount',
+  [ScholarshipStatusEnum.EXTENDED]: 'extendedCount',
+  [ScholarshipStatusEnum.FINISHED]: 'finishedCount'
+}
+
+function emptyAgencyReport(agencyName: string): AgencyScholarshipReport {
+  return {
+    agencyName,
+    scholarshipsTotal: 0,
+    totalMasters: 0,
+    totalPhd: 0,
+    onGoingCount: { masters: 0, phd: 0 },
+    extendedCount: { masters: 0, phd: 0 },
+    finishedCount: { masters: 0, phd: 0 }
+  }
+}
 
 export class ScholarshipMapper {
   static forFilter(scholarship: { status: string }) {
@@ -170,93 +213,44 @@ export class ScholarshipMapper {
     return result
   }
 
-  static countAllScholarshipsGroupingBetweenDates(counts) {
-    interface AgencyScholarshipReport {
-      agencyName: string
-      scholarshipsTotal: number
-      totalMasters: number
-      totalPhd: number
-      activeCount: DegreeCount
-      finishedCount: DegreeCount
-      onGoingCount: DegreeCount
-      extendedCount: DegreeCount
-    }
+  /**
+   * Monta o relatório de bolsas do período por agência. As agências vêm do
+   * banco (`agencyNames`, já na ordem de exibição) e aparecem mesmo sem bolsas;
+   * uma agência que só existe nas linhas da consulta entra no fim. Cada linha
+   * cai em exatamente um balde de status real, e os totais são a soma dos
+   * baldes, para que total e subtotais sempre fechem.
+   */
+  static countAllScholarshipsGroupingBetweenDates(
+    counts: AgencyStatusCountRow[],
+    agencyNames: string[]
+  ): AgencyScholarshipReport[] {
+    const report = new Map<string, AgencyScholarshipReport>()
 
-    interface DegreeCount {
-      masters: number
-      phd: number
-    }
-
-    const statusKeyMap: Record<string, string> = {
-      FINISHED: 'finishedCount',
-      ON_GOING: 'onGoingCount',
-      EXTENDED: 'extendedCount'
-    }
-
-    const requiredAgencies = ['CNPQ', 'CAPES', 'FAPESB']
-
-    const initialData: Record<string, AgencyScholarshipReport> = {}
-
-    requiredAgencies.forEach((name) => {
-      initialData[name] = {
-        agencyName: name,
-        scholarshipsTotal: 0,
-        totalMasters: 0,
-        totalPhd: 0,
-        activeCount: { masters: 0, phd: 0 },
-        finishedCount: { masters: 0, phd: 0 },
-        onGoingCount: { masters: 0, phd: 0 },
-        extendedCount: { masters: 0, phd: 0 }
+    const reportFor = (agencyName: string) => {
+      if (!report.has(agencyName)) {
+        report.set(agencyName, emptyAgencyReport(agencyName))
       }
+      return report.get(agencyName)
+    }
+
+    agencyNames.forEach(reportFor)
+
+    counts.forEach((row) => {
+      const bucket = REPORT_BUCKET_BY_STATUS[row.status]
+      if (!bucket) return
+
+      const masters = Number(row.masters_count) || 0
+      const phd = Number(row.phd_count) || 0
+      const agency = reportFor(row.agency_name)
+
+      agency[bucket].masters += masters
+      agency[bucket].phd += phd
+      agency.totalMasters += masters
+      agency.totalPhd += phd
+      agency.scholarshipsTotal += masters + phd
     })
 
-    const groupedData = counts.reduce((acc: AgencyScholarshipReport, row) => {
-      const name = row.agency_name
-      const status = row.status
-
-      if (!acc[name]) {
-        acc[name] = {
-          agencyName: name,
-          scholarshipsTotal: 0,
-          totalMasters: 0,
-          totalPhd: 0,
-          activeCount: { masters: 0, phd: 0 },
-          finishedCount: { masters: 0, phd: 0 },
-          onGoingCount: { masters: 0, phd: 0 },
-          extendedCount: { masters: 0, phd: 0 }
-        }
-      }
-
-      const mCount = Number(row.masters_count)
-      const pCount = Number(row.phd_count)
-
-      acc[name].scholarshipsTotal += mCount + pCount
-      acc[name].totalMasters += mCount
-      acc[name].totalPhd += pCount
-      acc[name].activeCount.masters += mCount
-      acc[name].activeCount.phd += pCount
-
-      const targetKey = statusKeyMap[status]
-
-      if (targetKey) {
-        acc[name][targetKey].masters += mCount
-        acc[name][targetKey].phd += pCount
-      }
-
-      return acc
-    }, initialData)
-
-    return Object.values(groupedData).sort(
-      (a: AgencyScholarshipReport, b: AgencyScholarshipReport) => {
-        const indexA = requiredAgencies.indexOf(a.agencyName)
-        const indexB = requiredAgencies.indexOf(b.agencyName)
-
-        const posA = indexA === -1 ? 99 : indexA
-        const posB = indexB === -1 ? 99 : indexB
-
-        return posA - posB
-      }
-    )
+    return [...report.values()]
   }
 
   static scholarshipsForReport(rows: ScholarshipReportRow[]) {

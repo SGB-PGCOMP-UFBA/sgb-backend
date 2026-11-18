@@ -80,7 +80,8 @@ describe('ScholarshipService', () => {
     repository = createScholarshipRepositoryMock()
     agencyService = {
       findOneByName: vi.fn().mockResolvedValue(AGENCY),
-      findOneById: vi.fn().mockResolvedValue(AGENCY)
+      findOneById: vi.fn().mockResolvedValue(AGENCY),
+      findAllForFilter: vi.fn().mockResolvedValue([])
     }
     allocationService = {
       findOneByName: vi.fn().mockResolvedValue(ALLOCATION),
@@ -648,6 +649,32 @@ describe('ScholarshipService', () => {
       expect(primeira[0]).toBe('MESTRADO')
       expect(segunda[0]).toBe('MESTRADO')
       expect(primeira[1]).not.toBe(segunda[1])
+    })
+  })
+
+  describe('countScholarshipsAsReportBetweenDates', () => {
+    it('busca as agências no banco junto com as contagens, em vez de usar uma lista fixa', async () => {
+      const counts = [
+        {
+          agency_name: 'CAPES',
+          status: 'ON_GOING',
+          masters_count: '1',
+          phd_count: '0'
+        }
+      ]
+      agencyService.findAllForFilter.mockResolvedValue([
+        { ...AGENCY, name: 'CAPES' },
+        { ...AGENCY, name: 'OUTRAS' }
+      ])
+      repository.countAsReportBetweenDates.mockResolvedValue(counts)
+      const dto = { start_period: '2024-01-01', end_period: '2024-12-31' }
+
+      const result = await service.countScholarshipsAsReportBetweenDates(
+        dto as any
+      )
+
+      expect(repository.countAsReportBetweenDates).toHaveBeenCalledWith(dto)
+      expect(result).toEqual({ agencyNames: ['CAPES', 'OUTRAS'], counts })
     })
   })
 
