@@ -37,10 +37,15 @@ class AgencyReportDto {
   @Min(0)
   totalPhd: number
 
+  /**
+   * Obsoleto: o balde de ativas era uma cópia do total. Aceito e ignorado só
+   * para o front anterior não receber 400 enquanto os deploys não se alinham.
+   */
+  @IsOptional()
   @IsObject()
   @ValidateNested()
   @Type(() => DegreeCountDto)
-  activeCount: DegreeCountDto
+  activeCount?: DegreeCountDto
 
   @IsObject()
   @ValidateNested()

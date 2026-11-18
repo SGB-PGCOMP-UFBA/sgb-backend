@@ -320,49 +320,49 @@ describe('ScholarshipMapper.countScholarshipsGroupingByCourseAndYear', () => {
 })
 
 describe('ScholarshipMapper.countAllScholarshipsGroupingBetweenDates', () => {
-  it('quando não há dados no período, devolve as três agências obrigatórias zeradas', () => {
-    const report = ScholarshipMapper.countAllScholarshipsGroupingBetweenDates(
-      []
+  const AGENCIES = ['CAPES', 'CNPQ', 'FAPESB', 'OUTRAS']
+
+  const report = (rows: ReturnType<typeof reportRow>[], agencies = AGENCIES) =>
+    ScholarshipMapper.countAllScholarshipsGroupingBetweenDates(
+      rows as any,
+      agencies
     )
 
-    expect(report.map((item: any) => item.agencyName)).toEqual([
-      'CNPQ',
-      'CAPES',
-      'FAPESB'
-    ])
-    expect(report[0]).toEqual({
-      agencyName: 'CNPQ',
+  it('quando não há dados no período, devolve todas as agências do banco zeradas, na ordem recebida', () => {
+    const result = report([])
+
+    expect(result.map((item) => item.agencyName)).toEqual(AGENCIES)
+    expect(result[0]).toEqual({
+      agencyName: 'CAPES',
       scholarshipsTotal: 0,
       totalMasters: 0,
       totalPhd: 0,
-      activeCount: { masters: 0, phd: 0 },
-      finishedCount: { masters: 0, phd: 0 },
       onGoingCount: { masters: 0, phd: 0 },
-      extendedCount: { masters: 0, phd: 0 }
+      extendedCount: { masters: 0, phd: 0 },
+      finishedCount: { masters: 0, phd: 0 }
     })
   })
 
-  it('quando aparece uma agência fora da lista obrigatória, mantém a ordem CNPQ, CAPES, FAPESB e joga as demais no fim', () => {
-    const report = ScholarshipMapper.countAllScholarshipsGroupingBetweenDates([
-      reportRow('FAPESB', 'ON_GOING', 1, 0),
-      reportRow('FUNDAÇÃO X', 'ON_GOING', 1, 0),
-      reportRow('CNPQ', 'ON_GOING', 1, 0)
-    ])
+  it('não usa lista fixa de agências: só aparecem as que vieram do banco', () => {
+    const result = report([], ['FAPESB'])
 
-    expect(report.map((item: any) => item.agencyName)).toEqual([
-      'CNPQ',
-      'CAPES',
-      'FAPESB',
-      'FUNDAÇÃO X'
-    ])
+    expect(result.map((item) => item.agencyName)).toEqual(['FAPESB'])
   })
 
-  it('quando a agência não está na lista obrigatória, cria a agência com os demais baldes zerados', () => {
-    const report = ScholarshipMapper.countAllScholarshipsGroupingBetweenDates([
-      reportRow('FUNDAÇÃO X', 'FINISHED', 2, 1)
-    ])
-    const fundacao = findAgency(report, 'FUNDAÇÃO X')
+  it('não devolve mais o balde de ativas, que só repetia o total', () => {
+    const [capes] = report([reportRow('CAPES', 'ON_GOING', 1, 1)])
 
+    expect(capes).not.toHaveProperty('activeCount')
+  })
+
+  it('quando uma linha traz agência que não veio do banco, cria a agência no fim com os demais baldes zerados', () => {
+    const result = report([reportRow('FUNDAÇÃO X', 'FINISHED', 2, 1)])
+    const fundacao = findAgency(result, 'FUNDAÇÃO X')
+
+    expect(result.map((item) => item.agencyName)).toEqual([
+      ...AGENCIES,
+      'FUNDAÇÃO X'
+    ])
     expect(fundacao.finishedCount).toEqual({ masters: 2, phd: 1 })
     expect(fundacao.onGoingCount).toEqual({ masters: 0, phd: 0 })
     expect(fundacao.scholarshipsTotal).toBe(3)
@@ -373,12 +373,12 @@ describe('ScholarshipMapper.countAllScholarshipsGroupingBetweenDates', () => {
     ['ON_GOING', 'onGoingCount'],
     ['EXTENDED', 'extendedCount']
   ])(
-    'quando a linha do relatório tem um status conhecido, joga as contagens no balde daquele status (%s, %s)',
+    'quando a linha do relatório tem um status real, joga as contagens no balde daquele status (%s, %s)',
     (status, bucket) => {
-      const report = ScholarshipMapper.countAllScholarshipsGroupingBetweenDates(
-        [reportRow('CAPES', status, 3, 2)]
+      const capes = findAgency(
+        report([reportRow('CAPES', status, 3, 2)]),
+        'CAPES'
       )
-      const capes = findAgency(report, 'CAPES')
 
       expect(capes[bucket]).toEqual({ masters: 3, phd: 2 })
       expect(capes.totalMasters).toBe(3)
@@ -387,11 +387,13 @@ describe('ScholarshipMapper.countAllScholarshipsGroupingBetweenDates', () => {
   )
 
   it('quando as somas chegam como string do driver, converte para número antes de totalizar', () => {
-    const report = ScholarshipMapper.countAllScholarshipsGroupingBetweenDates([
-      reportRow('CAPES', 'ON_GOING', '3', '2'),
-      reportRow('CAPES', 'FINISHED', '1', '4')
-    ])
-    const capes = findAgency(report, 'CAPES')
+    const capes = findAgency(
+      report([
+        reportRow('CAPES', 'ON_GOING', '3', '2'),
+        reportRow('CAPES', 'FINISHED', '1', '4')
+      ]),
+      'CAPES'
+    )
 
     expect(capes.totalMasters).toBe(4)
     expect(capes.totalPhd).toBe(6)
@@ -399,12 +401,14 @@ describe('ScholarshipMapper.countAllScholarshipsGroupingBetweenDates', () => {
   })
 
   it('quando a mesma agência tem várias linhas de status, acumula as contagens em cada balde', () => {
-    const report = ScholarshipMapper.countAllScholarshipsGroupingBetweenDates([
-      reportRow('CNPQ', 'ON_GOING', 2, 1),
-      reportRow('CNPQ', 'EXTENDED', 1, 0),
-      reportRow('CNPQ', 'FINISHED', 5, 3)
-    ])
-    const cnpq = findAgency(report, 'CNPQ')
+    const cnpq = findAgency(
+      report([
+        reportRow('CNPQ', 'ON_GOING', 2, 1),
+        reportRow('CNPQ', 'EXTENDED', 1, 0),
+        reportRow('CNPQ', 'FINISHED', 5, 3)
+      ]),
+      'CNPQ'
+    )
 
     expect(cnpq.onGoingCount).toEqual({ masters: 2, phd: 1 })
     expect(cnpq.extendedCount).toEqual({ masters: 1, phd: 0 })
@@ -413,58 +417,60 @@ describe('ScholarshipMapper.countAllScholarshipsGroupingBetweenDates', () => {
     expect(cnpq.totalPhd).toBe(4)
   })
 
-  it('quando a agência tem contagens nos dois programas, mantém o total igual à soma de mestrado com doutorado', () => {
-    const report = ScholarshipMapper.countAllScholarshipsGroupingBetweenDates([
-      reportRow('CAPES', 'ON_GOING', 7, 5),
-      reportRow('CAPES', 'FINISHED', 2, 1)
-    ])
-    const capes = findAgency(report, 'CAPES')
+  it('o total geral fecha com a soma dos baldes, por programa e no todo', () => {
+    const capes = findAgency(
+      report([
+        reportRow('CAPES', 'ON_GOING', 7, 5),
+        reportRow('CAPES', 'EXTENDED', 1, 2),
+        reportRow('CAPES', 'FINISHED', 2, 1)
+      ]),
+      'CAPES'
+    )
+    const buckets = [
+      capes.onGoingCount,
+      capes.extendedCount,
+      capes.finishedCount
+    ]
+    const sum = (key: 'masters' | 'phd') =>
+      buckets.reduce((acc, bucket) => acc + bucket[key], 0)
 
-    expect(capes.scholarshipsTotal).toBe(capes.totalMasters + capes.totalPhd)
-    expect(capes.scholarshipsTotal).toBe(15)
+    expect(capes.totalMasters).toBe(sum('masters'))
+    expect(capes.totalPhd).toBe(sum('phd'))
+    expect(capes.scholarshipsTotal).toBe(18)
   })
 
-  it('quando a agência tem bolsas em vários status, conta todas como ativas no período', () => {
-    const report = ScholarshipMapper.countAllScholarshipsGroupingBetweenDates([
-      reportRow('CAPES', 'ON_GOING', 2, 1),
-      reportRow('CAPES', 'EXTENDED', 1, 1),
-      reportRow('CAPES', 'FINISHED', 3, 0)
-    ])
-    const capes = findAgency(report, 'CAPES')
+  it.each(['INACTIVE', 'ACTIVE', 'QUALQUER'])(
+    'quando chega uma linha com status fora dos baldes (%s), não conta em total nenhum para não abrir diferença',
+    (status) => {
+      const cnpq = findAgency(
+        report([
+          reportRow('CNPQ', status, 1, 1),
+          reportRow('CNPQ', 'ON_GOING', 2, 0)
+        ]),
+        'CNPQ'
+      )
 
-    expect(capes.activeCount).toEqual({ masters: 6, phd: 2 })
-  })
-
-  it('quando chega uma linha com status INACTIVE, conta como ativa mas não cria balde de inativas', () => {
-    const report = ScholarshipMapper.countAllScholarshipsGroupingBetweenDates([
-      reportRow('CNPQ', 'INACTIVE', 1, 1)
-    ])
-    const cnpq = findAgency(report, 'CNPQ')
-
-    expect(cnpq).not.toHaveProperty('inactiveCount')
-    expect(cnpq.activeCount).toEqual({ masters: 1, phd: 1 })
-  })
+      expect(cnpq.scholarshipsTotal).toBe(2)
+      expect(cnpq.totalMasters).toBe(2)
+      expect(cnpq.totalPhd).toBe(0)
+    }
+  )
 
   it('quando há linhas de agências diferentes, não deixa uma contaminar os números da outra', () => {
-    const report = ScholarshipMapper.countAllScholarshipsGroupingBetweenDates([
+    const result = report([
       reportRow('CAPES', 'ON_GOING', 3, 0),
       reportRow('CNPQ', 'ON_GOING', 1, 1)
     ])
 
-    expect(findAgency(report, 'CAPES').scholarshipsTotal).toBe(3)
-    expect(findAgency(report, 'CNPQ').scholarshipsTotal).toBe(2)
-    expect(findAgency(report, 'FAPESB').scholarshipsTotal).toBe(0)
+    expect(findAgency(result, 'CAPES').scholarshipsTotal).toBe(3)
+    expect(findAgency(result, 'CNPQ').scholarshipsTotal).toBe(2)
+    expect(findAgency(result, 'FAPESB').scholarshipsTotal).toBe(0)
   })
 
   it('quando o relatório é gerado uma segunda vez, não acumula os dados da chamada anterior', () => {
-    ScholarshipMapper.countAllScholarshipsGroupingBetweenDates([
-      reportRow('CAPES', 'ON_GOING', 9, 9)
-    ])
+    report([reportRow('CAPES', 'ON_GOING', 9, 9)])
 
-    const segundoRelatorio =
-      ScholarshipMapper.countAllScholarshipsGroupingBetweenDates([])
-
-    expect(findAgency(segundoRelatorio, 'CAPES').scholarshipsTotal).toBe(0)
+    expect(findAgency(report([]), 'CAPES').scholarshipsTotal).toBe(0)
   })
 })
 

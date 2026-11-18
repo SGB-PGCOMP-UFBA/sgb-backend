@@ -138,11 +138,12 @@ export class ScholarshipController {
   async countScholarshipsAsReportBetweenDates(
     @Query() dto: CountScholarshipsAsReportBetweenDatesDto
   ) {
-    const resultCount =
+    const { agencyNames, counts } =
       await this.scholarshipService.countScholarshipsAsReportBetweenDates(dto)
 
     return ScholarshipMapper.countAllScholarshipsGroupingBetweenDates(
-      resultCount
+      counts,
+      agencyNames
     )
   }
 

@@ -516,7 +516,12 @@ export class ScholarshipService {
   async countScholarshipsAsReportBetweenDates(
     dto: CountScholarshipsAsReportBetweenDatesDto
   ) {
-    return await this.scholarshipRepository.countAsReportBetweenDates(dto)
+    const [agencies, counts] = await Promise.all([
+      this.agencyService.findAllForFilter(),
+      this.scholarshipRepository.countAsReportBetweenDates(dto)
+    ])
+
+    return { agencyNames: agencies.map((agency) => agency.name), counts }
   }
 
   async findScholarshipsForReport(dto: FindScholarshipsForReportDto) {
