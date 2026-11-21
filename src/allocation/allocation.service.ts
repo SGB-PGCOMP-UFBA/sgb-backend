@@ -21,8 +21,19 @@ export class AllocationService {
     return await this.allocationRepository.findAllWithScholarships()
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} allocation`
+  /** Carrega as bolsas porque o detalhe mostra as vagas alocadas. */
+  async findOneDetailed(id: number): Promise<Allocation> {
+    const allocation = await this.allocationRepository.findByIdWithScholarships(
+      id
+    )
+
+    if (!allocation) {
+      throw new NotFoundException(
+        constants.exceptionMessages.allocation.NOT_FOUND
+      )
+    }
+
+    return allocation
   }
 
   async findAllForFilter(): Promise<Allocation[]> {

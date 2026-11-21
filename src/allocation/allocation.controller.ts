@@ -8,7 +8,8 @@ import {
   Delete,
   UseGuards,
   HttpStatus,
-  HttpCode
+  HttpCode,
+  ParseIntPipe
 } from '@nestjs/common'
 import { AllocationService } from './allocation.service'
 import { CreateAllocationDto } from '@/allocation/dtos/create-allocation.dto'
@@ -39,11 +40,6 @@ export class AllocationController {
     )
   }
 
-  @Get('/by-id/:id')
-  findOne(@Param('id') id: string) {
-    return this.allocationService.findOne(+id)
-  }
-
   @Get('/filter-list')
   @UseGuards(JwtAuthGuard)
   async findAllForFilter() {
@@ -51,6 +47,14 @@ export class AllocationController {
     return allocations.map((allocation) =>
       AllocationMapper.forFilter(allocation)
     )
+  }
+
+  @Get(':id')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    const allocation = await this.allocationService.findOneDetailed(id)
+    return AllocationMapper.detailed(allocation)
   }
 
   @Patch(':id')

@@ -33,6 +33,17 @@ export class AgencyService {
     return agency
   }
 
+  /** Carrega as bolsas porque o detalhe mostra as vagas alocadas. */
+  async findOneDetailed(id: number): Promise<Agency> {
+    const agency = await this.agencyRepository.findByIdWithScholarships(id)
+
+    if (!agency) {
+      throw new NotFoundException(constants.exceptionMessages.agency.NOT_FOUND)
+    }
+
+    return agency
+  }
+
   async findOneByName(name: string): Promise<Agency> {
     if (!name) {
       throw new NotFoundException(

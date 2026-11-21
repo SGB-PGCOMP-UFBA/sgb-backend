@@ -110,7 +110,7 @@ export class UserController {
   }
 
   @Get('students/:id')
-  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES', 'STUDENT')
+  @Roles('ADMIN', 'ADVISOR', 'ADVISOR_WITH_ADMIN_PRIVILEGES', 'STUDENT')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async findStudent(
     @Param() params: UserIdParamsDto,

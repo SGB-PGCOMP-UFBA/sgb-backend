@@ -75,7 +75,10 @@ export class UserService {
     return advisors.map(toAdvisorFilterOption)
   }
 
-  /** O estudante só vê a si mesmo; administradores veem qualquer um. */
+  /**
+   * O estudante só vê a si mesmo; o orientador, só os próprios orientandos;
+   * administradores veem qualquer um.
+   */
   async findStudent(id: number, caller: Caller) {
     if (caller.role === 'STUDENT') {
       assertIsCaller(id, caller)
@@ -85,6 +88,10 @@ export class UserService {
 
     if (!student) {
       throw new NotFoundException(messages.STUDENT_NOT_FOUND)
+    }
+
+    if (caller.role === 'ADVISOR' && !isAdvisedBy(student, caller)) {
+      throw new ForbiddenException(messages.ONLY_OWN_DATA)
     }
 
     return toStudentWithEnrollments(student)
@@ -130,4 +137,11 @@ function assertIsCaller(id: number, caller: Caller): void {
   if (callerIdOf(caller) !== id) {
     throw new ForbiddenException(messages.ONLY_OWN_DATA)
   }
+}
+
+function isAdvisedBy(student: User, caller: Caller): boolean {
+  const advisorId = callerIdOf(caller)
+  return (student.enrollments ?? []).some(
+    (enrollment) => enrollment.advisor_id === advisorId
+  )
 }

@@ -34,6 +34,22 @@ describe('AgencyService', () => {
     service = new AgencyService(repository as unknown as AgencyRepository)
   })
 
+  describe('findOneDetailed', () => {
+    it('devolve a agência com as bolsas carregadas', async () => {
+      const agency = makeAgency()
+      repository.findByIdWithScholarships.mockResolvedValue(agency)
+
+      await expect(service.findOneDetailed(7)).resolves.toBe(agency)
+      expect(repository.findByIdWithScholarships).toHaveBeenCalledWith(7)
+    })
+
+    it('quando a agência não existe, lança NotFound', async () => {
+      await expect(service.findOneDetailed(7)).rejects.toBeInstanceOf(
+        NotFoundException
+      )
+    })
+  })
+
   describe('findOneByName', () => {
     it.each([[undefined], [null], ['']])(
       'quando o nome da agência é vazio, recusa a busca sem consultar o banco (%s)',
