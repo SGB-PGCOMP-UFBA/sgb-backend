@@ -7,6 +7,7 @@ import {
   EnrollmentProgramRow,
   EnrollmentRepository
 } from '@/enrollment/repositories/enrollment.repository'
+import { toAggregateNumber } from '@/common/utils/aggregate.util'
 import {
   occupiesSlotSql,
   todayAsCalendarDay
@@ -88,6 +89,6 @@ export class TypeOrmEnrollmentRepository implements EnrollmentRepository {
       .where(`enrollment.${column} = :value`, { value })
       .getRawOne()
 
-    return Number(row?.count ?? 0)
+    return toAggregateNumber(row?.count)
   }
 }

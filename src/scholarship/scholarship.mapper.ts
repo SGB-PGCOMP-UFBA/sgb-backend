@@ -5,9 +5,13 @@ import { toAdvisorSummary, toStudentSummary } from '@/user/user.mapper'
 import { AllocationMapper } from '@/allocation/allocation.mapper'
 import { StatusEnum } from '@/common/enums/status.enum'
 import { ProgramEnum } from '@/common/enums/program.enum'
+import { toAggregateNumber } from '@/common/utils/aggregate.util'
 import {
+  AgencyProgramCountRow,
   AgencyStatusCountRow,
-  ScholarshipReportRow
+  ScholarshipReportRow,
+  StatusCountRow,
+  YearProgramCountRow
 } from '@/scholarship/repositories/scholarship.repository'
 import {
   deriveScholarshipStatus,
@@ -166,7 +170,9 @@ export class ScholarshipMapper {
     }
   }
 
-  static countOnGoingScholarshipsGroupingByAgencyForCourse(counts) {
+  static countOnGoingScholarshipsGroupingByAgencyForCourse(
+    counts: AgencyProgramCountRow[]
+  ) {
     const result = {}
 
     counts.forEach(({ course_name, agency_name, count }) => {
@@ -175,14 +181,17 @@ export class ScholarshipMapper {
       }
 
       result[course_name][agency_name] = {
-        count: count
+        count: toAggregateNumber(count)
       }
     })
 
     return result
   }
 
-  static countScholarshipsGroupingByStatusForAgency(counts, agencyName) {
+  static countScholarshipsGroupingByStatusForAgency(
+    counts: StatusCountRow[],
+    agencyName: string
+  ) {
     const result = {}
 
     counts.forEach(({ status, count }) => {
@@ -191,14 +200,16 @@ export class ScholarshipMapper {
       }
 
       result[agencyName][status] = {
-        count: count
+        count: toAggregateNumber(count)
       }
     })
 
     return result
   }
 
-  static countScholarshipsGroupingByCourseAndYear(counts) {
+  static countScholarshipsGroupingByCourseAndYear(
+    counts: YearProgramCountRow[]
+  ) {
     const result = {}
 
     counts.forEach(({ year, masters_count, phd_count }) => {
@@ -206,8 +217,8 @@ export class ScholarshipMapper {
         result[year] = {}
       }
 
-      result[year]['MESTRADO'] = masters_count ? masters_count : 0
-      result[year]['DOUTORADO'] = phd_count ? phd_count : 0
+      result[year]['MESTRADO'] = toAggregateNumber(masters_count)
+      result[year]['DOUTORADO'] = toAggregateNumber(phd_count)
     })
 
     return result
@@ -239,8 +250,8 @@ export class ScholarshipMapper {
       const bucket = REPORT_BUCKET_BY_STATUS[row.status]
       if (!bucket) return
 
-      const masters = Number(row.masters_count) || 0
-      const phd = Number(row.phd_count) || 0
+      const masters = toAggregateNumber(row.masters_count)
+      const phd = toAggregateNumber(row.phd_count)
       const agency = reportFor(row.agency_name)
 
       agency[bucket].masters += masters
