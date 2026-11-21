@@ -223,9 +223,9 @@ describe('ScholarshipMapper.countOnGoingScholarshipsGroupingByAgencyForCourse', 
   it('quando há contagens de vários cursos e agências, indexa por curso e depois por agência', () => {
     const result =
       ScholarshipMapper.countOnGoingScholarshipsGroupingByAgencyForCourse([
-        { course_name: 'MESTRADO', agency_name: 'CAPES', count: 5 },
-        { course_name: 'MESTRADO', agency_name: 'CNPQ', count: 2 },
-        { course_name: 'DOUTORADO', agency_name: 'CAPES', count: 3 }
+        { course_name: 'MESTRADO', agency_name: 'CAPES', count: '5' },
+        { course_name: 'MESTRADO', agency_name: 'CNPQ', count: '2' },
+        { course_name: 'DOUTORADO', agency_name: 'CAPES', count: '3' }
       ])
 
     expect(result).toEqual({
@@ -243,8 +243,8 @@ describe('ScholarshipMapper.countOnGoingScholarshipsGroupingByAgencyForCourse', 
   it('quando a mesma agência aparece em dois cursos, não mistura as contagens', () => {
     const result =
       ScholarshipMapper.countOnGoingScholarshipsGroupingByAgencyForCourse([
-        { course_name: 'MESTRADO', agency_name: 'CAPES', count: 5 },
-        { course_name: 'DOUTORADO', agency_name: 'CAPES', count: 3 }
+        { course_name: 'MESTRADO', agency_name: 'CAPES', count: '5' },
+        { course_name: 'DOUTORADO', agency_name: 'CAPES', count: '3' }
       ])
 
     expect(result['MESTRADO']['CAPES'].count).toBe(5)
@@ -256,9 +256,9 @@ describe('ScholarshipMapper.countScholarshipsGroupingByStatusForAgency', () => {
   it('quando há contagens de vários status, agrupa por status debaixo do nome da agência', () => {
     const result = ScholarshipMapper.countScholarshipsGroupingByStatusForAgency(
       [
-        { status: 'ON_GOING', count: 8 },
-        { status: 'EXTENDED', count: 2 },
-        { status: 'FINISHED', count: 21 }
+        { status: 'ON_GOING', count: '8' },
+        { status: 'EXTENDED', count: '2' },
+        { status: 'FINISHED', count: '21' }
       ],
       'CAPES'
     )
@@ -275,8 +275,8 @@ describe('ScholarshipMapper.countScholarshipsGroupingByStatusForAgency', () => {
   it('quando a agência tem bolsas em andamento e prorrogadas, mantém os dois status separados', () => {
     const result = ScholarshipMapper.countScholarshipsGroupingByStatusForAgency(
       [
-        { status: 'ON_GOING', count: 8 },
-        { status: 'EXTENDED', count: 2 }
+        { status: 'ON_GOING', count: '8' },
+        { status: 'EXTENDED', count: '2' }
       ],
       'CNPQ'
     )
@@ -288,8 +288,8 @@ describe('ScholarshipMapper.countScholarshipsGroupingByStatusForAgency', () => {
 describe('ScholarshipMapper.countScholarshipsGroupingByCourseAndYear', () => {
   it('quando há bolsas em vários anos, indexa mestrado e doutorado por ano de início da bolsa', () => {
     const result = ScholarshipMapper.countScholarshipsGroupingByCourseAndYear([
-      { year: '2023', masters_count: 4, phd_count: 2 },
-      { year: '2024', masters_count: 6, phd_count: 3 }
+      { year: '2023', masters_count: '4', phd_count: '2' },
+      { year: '2024', masters_count: '6', phd_count: '3' }
     ])
 
     expect(result).toEqual({
@@ -305,12 +305,20 @@ describe('ScholarshipMapper.countScholarshipsGroupingByCourseAndYear', () => {
     'quando a soma de um dos programas vem vazia, zera o programa sem bolsa (%s)',
     (_, empty) => {
       const result = ScholarshipMapper.countScholarshipsGroupingByCourseAndYear(
-        [{ year: '2024', masters_count: 6, phd_count: empty }]
+        [{ year: '2024', masters_count: '6', phd_count: empty }]
       )
 
       expect(result['2024']).toEqual({ MESTRADO: 6, DOUTORADO: 0 })
     }
   )
+
+  it('quando a soma de um programa vem como "0", devolve o número 0 e não a string', () => {
+    const result = ScholarshipMapper.countScholarshipsGroupingByCourseAndYear([
+      { year: '2024', masters_count: '0', phd_count: '3' }
+    ])
+
+    expect(result['2024']).toEqual({ MESTRADO: 0, DOUTORADO: 3 })
+  })
 
   it('quando não há bolsa em nenhum ano, devolve objeto vazio', () => {
     expect(
