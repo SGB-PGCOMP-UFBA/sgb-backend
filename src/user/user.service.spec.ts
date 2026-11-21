@@ -176,6 +176,32 @@ describe('UserService', () => {
         service.findStudent(8, { userId: '1-ADMIN', role: 'ADMIN' })
       ).rejects.toBeInstanceOf(NotFoundException)
     })
+
+    it('o orientador consulta um orientando seu', async () => {
+      userRepository.findStudentWithEnrollments.mockResolvedValue(
+        makeStudent({
+          id: 8,
+          enrollments: [makeEnrollment({ student_id: 8, advisor_id: 10 })]
+        })
+      )
+
+      await expect(
+        service.findStudent(8, { userId: '10-ADVISOR', role: 'ADVISOR' })
+      ).resolves.toMatchObject({ id: 8 })
+    })
+
+    it('o orientador não consulta estudante de outro orientador', async () => {
+      userRepository.findStudentWithEnrollments.mockResolvedValue(
+        makeStudent({
+          id: 8,
+          enrollments: [makeEnrollment({ student_id: 8, advisor_id: 11 })]
+        })
+      )
+
+      await expect(
+        service.findStudent(8, { userId: '10-ADVISOR', role: 'ADVISOR' })
+      ).rejects.toBeInstanceOf(ForbiddenException)
+    })
   })
 
   describe('findStudentsByAdvisor', () => {

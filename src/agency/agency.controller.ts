@@ -7,6 +7,7 @@ import {
   Delete,
   Patch,
   HttpCode,
+  ParseIntPipe,
   HttpStatus,
   UseGuards
 } from '@nestjs/common'
@@ -44,6 +45,14 @@ export class AgencyController {
   async findAllForFilter() {
     const agencys = await this.agencyService.findAllForFilter()
     return agencys.map((agency) => AgencyMapper.forFilter(agency))
+  }
+
+  @Get(':id')
+  @Roles('ADMIN', 'ADVISOR_WITH_ADMIN_PRIVILEGES')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    const agency = await this.agencyService.findOneDetailed(id)
+    return AgencyMapper.detailed(agency)
   }
 
   @Patch(':id')

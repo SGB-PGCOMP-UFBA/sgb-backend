@@ -29,6 +29,22 @@ describe('AllocationService', () => {
     )
   })
 
+  describe('findOneDetailed', () => {
+    it('devolve a alocação com as bolsas carregadas', async () => {
+      const allocation = makeAllocation()
+      repository.findByIdWithScholarships.mockResolvedValue(allocation)
+
+      await expect(service.findOneDetailed(3)).resolves.toBe(allocation)
+      expect(repository.findByIdWithScholarships).toHaveBeenCalledWith(3)
+    })
+
+    it('quando a alocação não existe, lança NotFound', async () => {
+      await expect(service.findOneDetailed(3)).rejects.toBeInstanceOf(
+        NotFoundException
+      )
+    })
+  })
+
   describe('findOneByName', () => {
     it.each([[undefined], [null], ['']])(
       'quando o nome da alocação é vazio, recusa a busca sem consultar o banco (%s)',
